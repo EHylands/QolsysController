@@ -31,8 +31,11 @@ Store these files securely.
 
 ```bash
 git clone https://github.com/EHylands/QolsysController.git
-cd qolsyscontroller
+cd QolsysController
 pip install -r requirements.txt
+
+# Change panel_ip and plugin_in in main.py file
+python main.py
 ```
 
 ```bash
