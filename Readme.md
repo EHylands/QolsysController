@@ -348,8 +348,8 @@ Disarm the panel when partition is in entry_delay mode
 }
 ```
 #### command disarm_from_openlearn_sensor
-```
 Disarm the panel when partition is in exit_delay mode
+```
 {
         "eventName":"ipcCall",
         "ipcServiceName":"qinternalservice",
