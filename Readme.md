@@ -2,6 +2,16 @@
 
 A Python module that emulates a virtual IQ Remote device, enabling full **local control** of a Qolsys IQ Panel over MQTT — no cloud access required.
 
+## QolsysController Remote Plugin
+- ✅ Connects directly to the **Qolsys Panel's local MQTT server**
+- 🔐 Pairs using **Installer Code** (same as standard IQ Remote pairing)
+- 🔢 Supports **4-digit user codes**
+- 🔐 Allows **arming/disarming** of partitions and reading system status
+- 📡 Access to **sensor states** (e.g., door, window, motion)
+- 🌐 (Work in Progress) **Z-Wave device control**
+- 🧠 **Auto-detects secure arming** settings
+- ⚠️ Uses a **custom local user code database** — panel's internal user code verification is not yet supported
+
 ## ⚠️ Certificate Warning
 
 During pairing, the main panel issues **only one signed client certificate** per virtual IQ Remote. If any key files are lost or deleted, re-pairing may become impossible.
@@ -85,16 +95,6 @@ asyncio.run(main())
 ```
 
 Not affiliated with Qolsys or Johnson Controls. Use at your own risk.
-
-## QolsysController Remote Plugin
-- ✅ Connects directly to the **Qolsys Panel's local MQTT server**
-- 🔐 Pairs using **Installer Code** (same as standard IQ Remote pairing)
-- 🔢 Supports **4-digit user codes**
-- 🔐 Allows **arming/disarming** of partitions and reading system status
-- 📡 Access to **sensor states** (e.g., door, window, motion)
-- 🌐 (Work in Progress) **Z-Wave device control**
-- 🧠 **Auto-detects secure arming** settings
-- ⚠️ Uses a **custom local user code database** — panel's internal user code verification is not yet supported
 
 ## QolsysController Pairing Process
 - `plugin`: Python Plugin
