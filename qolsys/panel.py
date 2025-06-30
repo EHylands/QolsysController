@@ -2,6 +2,7 @@ import json
 import logging
 
 from qolsys.partition import QolsysPartition
+from qolsys.observable import QolsysObservable
 from qolsys.sensor import QolsysSensor
 from qolsys.zwave_device import QolsysZWaveDevice
 from qolsys.utils_mqtt import mqtt_arming_status_to_C4
@@ -11,7 +12,11 @@ LOGGER = logging.getLogger(__name__)
 class QolsysPanel():
     def __init__(self,settings_directory:str):
 
+        self._tampered = False
+        self._ac_on = False
+        
         self._users = []
+        
         self._settings_directory = settings_directory
 
         self._database = None
@@ -111,9 +116,9 @@ class QolsysPanel():
         for sensor_info in sensor_list:
 
             sensor_status = 'Closed'
-            if sensor_info['sensorstatus'] == 'Active':
+            if sensor_info['sensorstatus'] == 'Active' or sensor_info['sensorstatus'] == 'Open':
                 sensor_status = 'Open'
-            
+                        
             sensor = QolsysSensor(int(sensor_info['_id']),
                                   sensor_info['sensorname'],
                                   sensor_info['sensorgroup'],
