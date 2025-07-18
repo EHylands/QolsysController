@@ -86,6 +86,7 @@ Each zone contains the following data:
 | `latestdBm`|              | 
 | `averagedBm`|              | 
 | `time`|              | 
+| `zone_type`|              | 
 
 ## QolsysController Pairing Process
 - `plugin`: Python Plugin
