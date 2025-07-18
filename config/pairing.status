@@ -1,5 +1,6 @@
 {
-    "plugin_paired": false,
-    "random_mac": "",
-    "panel_mac": ""
+    "plugin_paired": true,
+    "random_mac": "f2:16:3e:08:81:a7",
+    "panel_mac": "3c:31:78:a0:fb:9f",
+    "panel_ip": "192.168.10.220"
 }

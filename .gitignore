@@ -1,3 +1,6 @@
 /.DS_Store
 /.venv
 /__pycache__
+.pyc
+build
+__pycache__
