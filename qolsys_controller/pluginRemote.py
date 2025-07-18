@@ -6,19 +6,19 @@ import random
 import ssl
 import uuid
 
-from qolsys.plugin import QolsysPlugin
-from qolsys.state import QolsysState
-from qolsys.mdns import QolsysMDNS
-from qolsys.pki import QolsysPKI
-from qolsys.panel import QolsysPanel
+from qolsys_controller.plugin import QolsysPlugin
+from qolsys_controller.state import QolsysState
+from qolsys_controller.mdns import QolsysMDNS
+from qolsys_controller.pki import QolsysPKI
+from qolsys_controller.panel import QolsysPanel
 
-from qolsys.event import *
-from qolsys.event_mqtt import *
-from qolsys.exceptions import UnknownQolsysEventException
-from qolsys.settings import QolsysSettings
+from qolsys_controller.event import *
+from qolsys_controller.event_mqtt import *
+from qolsys_controller.exceptions import UnknownQolsysEventException
+from qolsys_controller.settings import QolsysSettings
 
-from qolsys.utils_mqtt import fix_json_string
-from qolsys.utils_mqtt import generate_random_mac
+from qolsys_controller.utils_mqtt import fix_json_string
+from qolsys_controller.utils_mqtt import generate_random_mac
 
 LOGGER = logging.getLogger(__name__)
 

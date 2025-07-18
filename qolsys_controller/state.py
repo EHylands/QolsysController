@@ -1,10 +1,10 @@
 import logging
 
-from qolsys.observable import QolsysObservable
-from qolsys.partition import QolsysPartition
-from qolsys.zone import QolsysSensor
-from qolsys.zwave_dimmer import QolsysDimmer
-from qolsys.zwave_device import QolsysZWaveDevice
+from qolsys_controller.observable import QolsysObservable
+from qolsys_controller.partition import QolsysPartition
+from qolsys_controller.zone import QolsysSensor
+from qolsys_controller.zwave_dimmer import QolsysDimmer
+from qolsys_controller.zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 

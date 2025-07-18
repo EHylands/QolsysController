@@ -4,3 +4,8 @@
 .pyc
 build
 __pycache__
+*.key
+*.secure
+*.cer
+*.csr
+*.status

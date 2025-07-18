@@ -1,8 +1,8 @@
 import logging
 
-from qolsys.state import QolsysState
-from qolsys.panel import QolsysPanel
-from qolsys.settings import QolsysSettings
+from qolsys_controller.state import QolsysState
+from qolsys_controller.panel import QolsysPanel
+from qolsys_controller.settings import QolsysSettings
 
 LOGGER = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ import logging
 
 from datetime import datetime, timezone
 
-from qolsys.observable import QolsysObservable
+from qolsys_controller.observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 

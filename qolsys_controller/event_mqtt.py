@@ -1,7 +1,7 @@
 import logging
 
-from qolsys.event import QolsysEvent
-from qolsys.exceptions import UnableToParseEventException
+from qolsys_controller.event import QolsysEvent
+from qolsys_controller.exceptions import UnableToParseEventException
 
 LOGGER = logging.getLogger(__name__)
 

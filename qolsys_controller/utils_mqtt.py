@@ -3,7 +3,6 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
-
 def fix_json_string(json_string):
         def replace_escape(match):
             hex_value = match.group(1)
