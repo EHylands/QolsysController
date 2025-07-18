@@ -19,7 +19,6 @@ from qolsys.settings import QolsysSettings
 
 from qolsys.utils_mqtt import fix_json_string
 from qolsys.utils_mqtt import generate_random_mac
-from qolsys.utils_mqtt import c4_arming_status_to_mqtt
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +38,6 @@ class QolsysPluginRemote(QolsysPlugin):
         self._log_mqtt_messages = False
 
         # Qolsys Panel Infpormation
-        self._panel_ip = ''
         self.panel_mqtt_port = 8883
 
         #MQTT Client
@@ -62,13 +60,12 @@ class QolsysPluginRemote(QolsysPlugin):
     def check_user_code_on_disarm(self,check_user_code_on_disarm:bool):
         self._check_user_code_on_disarm = check_user_code_on_disarm
 
-    async def config(self, plugin_ip:str,panel_ip:str)->bool:
+    async def config(self, plugin_ip:str)->bool:
         
         LOGGER.debug(f'Configuring Plugin')
         super().config()
 
         self._plugin_ip = plugin_ip
-        self._panel_ip = panel_ip
 
         # Check if pairing data is available
         if not self.settings.read_settings():
@@ -104,7 +101,7 @@ class QolsysPluginRemote(QolsysPlugin):
         )
         
         LOGGER.debug(f'MQTT: Connecting ...')
-        async with aiomqtt.Client(hostname=self._panel_ip,
+        async with aiomqtt.Client(hostname=self.settings.panel_ip,
                                   port=self.panel_mqtt_port,
                                   tls_params=tls_params,
                                   tls_insecure=True,
@@ -113,8 +110,8 @@ class QolsysPluginRemote(QolsysPlugin):
             
             LOGGER.debug(f'MQTT: Client Connected')
             #await self.aiomqtt.subscribe("#")
-            #await self.aiomqtt.subscribe("iq2meid")
-            await self.aiomqtt.subscribe('PanelEvent',qos=2)
+            await self.aiomqtt.subscribe("iq2meid")
+            #await self.aiomqtt.subscribe('PanelEvent',qos=2)
             await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
             await self.aiomqtt.subscribe("mastermeid",qos=2)
 
@@ -129,104 +126,15 @@ class QolsysPluginRemote(QolsysPlugin):
             async for message in self.aiomqtt.messages:
                 
                 if self.log_mqtt_mesages:
+                    print(message.payload)
                     LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
 
-                if message.topic.matches("PanelEvent"):
-                    
-                    data = json.loads(message.payload)    
-                    event_type = data.get('event')
-                        
-                    if not event_type:
-                        raise UnknownQolsysEventException(f'Event type not found for event {data}')
 
-                    match event_type:
+                if message.topic.matches('mastermeid'):
+                    pass
+                    #print(message.payload)
 
-                        case 'ARMING':
-
-                            event = QolsysEventArming.from_json(data)
-
-                            partition = self.state.partition(event.partition_id)
-                            if partition is None:
-                                LOGGER.debug(f'Partition {event.partition_id} not found')
-                                return
-
-                            partition.status = event.arming_type
-
-                        case 'ALARM':
-
-                            event = QolsysEventAlarm.from_json(data)
-                            
-                            #LOGGER.debug(f'ARMING partition_id={event.partition_id} '
-                            #             f'status={event.arming_type}')
-
-                            partition = self.state.partition(event.partition_id)
-                            if partition is None:
-                                LOGGER.debug(f'Partition {event.partition_id} not found')
-                                return
-
-                            partition.status = event.alarm_type
-
-                        case 'ZONE_EVENT':
-                                
-                            zone_event_type = data.get('zone_event_type')
-                                
-                            if not zone_event_type:
-                                raise UnknownQolsysEventException(f'Zone Event type not found for event {data}')
-                        
-                            match(zone_event_type):
-                                    
-                                case 'ZONE_ACTIVE':
-                                    
-                                    event = QolsysEventZoneEventActive.from_json(data)
-
-                                    if event.zone.status.lower() == 'open':
-                                        self.state.zone_open(event.zone.id)
-                                    else:
-                                        self.state.zone_closed(event.zone.id)
-                            
-                                case 'ZONE_UPDATE':
-                                    event = QolsysEventZoneEventUpdate.from_json(data)
-                                    LOGGER.debug(f'UPDATE zone={event.zone}')
-
-                                    partition = self.state.partition(event.zone.partition_id)
-                                    if partition is None:
-                                        LOGGER.debug(f'Partition {event.zone.partition_id} not found')
-                                        return
-                                    
-                                    event.zone.partition = partition
-                                    self.state.zone_update(event.zone)
-
-                                case 'ZONE_ADD':
-                                    
-                                    event = QolsysEventZoneEventAdd.from_json(data)
-                                    LOGGER.debug(f'ADD zone={event.zone}')
-
-                                    partition = self.state.partition(event.zone.partition_id)
-                                    if partition is None:
-                                        LOGGER.debug(f'Partition {event.zone.partition_id} not found')
-                                        return
-                                    
-                                    event.zone.partition = partition
-                                    self.state.zone_add(event.zone)
-
-                                case 'ZONE_DELETE':
-                                    event = QolsysEventZoneEventDelete.from_json(data)
-                                    LOGGER.debug(f'DELETE zone={event.zone}')
-
-                                    partition = self.state.partition(event.zone.partition_id)
-                                    if partition is None:
-                                        LOGGER.debug(f'Partition {event.zone.partition_id} not found')
-                                        return
-                                    
-                                    event.zone.partition = partition
-                                    self.state.zone_delete(event)
-
-                                case _:
-                                    raise UnknownQolsysEventException(f'Zone Event type not found for event {data}')
-
-                        case _:
-                            raise UnknownQolsysEventException(f'Zone Event not found for event {data}')
-
+                
                 # Panel response to MQTT Commands
                 if message.topic.matches("response_" + self.settings.random_mac):
                     
@@ -238,13 +146,9 @@ class QolsysPluginRemote(QolsysPlugin):
                     match event:
 
                         case 'syncdatabase':
-                            
                             LOGGER.debug(f'MQTT: Updating State from syncdatabase')
                             event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
                             self.panel.load_database(event.database_frome_json(data))
-                            partitions = self.panel.get_partitions()
-                            self.state.update(partitions)
-                            
                             self.panel.dump()
                             self.state.dump()
 
@@ -265,6 +169,12 @@ class QolsysPluginRemote(QolsysPlugin):
 
                         case _:
                             LOGGER.debug(f'MQTT: unknow event {event}') 
+
+                if message.topic.matches('iq2meid'):
+                    data = message.payload.decode().replace("\\\\", "\\")
+                    data = fix_json_string(data)
+                    data = json.loads(message.payload.decode())
+                    self.panel.parse_iq2meid_message(data)
 
     async def start_initial_pairing(self)->bool:
        
@@ -339,7 +249,7 @@ class QolsysPluginRemote(QolsysPlugin):
         )
 
         LOGGER.debug(f'MQTT: Connecting ...')
-        async with aiomqtt.Client(hostname=self._panel_ip,
+        async with aiomqtt.Client(hostname=self.settings.panel_ip,
                                   port=self.panel_mqtt_port,
                                   tls_params=tls_params,
                                   tls_insecure=True,
@@ -384,10 +294,13 @@ class QolsysPluginRemote(QolsysPlugin):
                     
                     mac = request.decode()
 
+                    address, port = writer.get_extra_info('peername')                    
+                    LOGGER.debug(f'Panel Connected from: {address}')
                     LOGGER.debug(f'Receiving from Panel: {mac}')
                     
                     # Remove \x00 and \x01 from received string
                     self.settings.panel_mac = ''.join(char for char in mac if char.isprintable())
+                    self.settings.panel_ip = address
                     received_panel_mac = True
 
                     # Sending random_mac to panel
@@ -453,7 +366,6 @@ class QolsysPluginRemote(QolsysPlugin):
                         with open(self._pki.qolsys_cer_file_path, "w") as f:
                             f.write(certificates[0])
                             received_qolsys_cer = True
-
                             Continue = False
                             writer.close()
 
@@ -746,7 +658,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         arming_command ={
             "operation_name": 'ui_delay',
-            "panel_status": c4_arming_status_to_mqtt(partition.status),
+            "panel_status": partition.system_status,
             "userID":0,
             "partitionID":partition_id,
             "operation_source": 1,
@@ -793,15 +705,16 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug(f'MQTT: disarm command error - user_code error')
                 return False
 
+
         mqtt_disarm_command = ''
         
-        if partition.status == 'EXIT_DELAY':
+        if partition.system_status == 'ARM-AWAY-EXIT-DELAY' or partition.system_status == 'ARM-STAY-EXIT-DELAY' :
             mqtt_disarm_command = 'disarm_from_openlearn_sensor'
 
-        if partition.status == 'ALARM' or partition.status == 'FIRE' or partition.status == 'AUXILIARY' or partition.status == 'POLICE':
+        if partition.alarm_state  == 'ALARM':
             mqtt_disarm_command = 'disarm_from_emergency'
         
-        if partition.status == 'ARM_AWAY' or partition.status == 'ARM_STAY':
+        if partition.system_status == 'ARM-AWAY' or partition.system_status == 'ARM-STAY':
             await self.command_ui_delay(partition_id)
             mqtt_disarm_command = 'disarm_the_panel_from_entry_delay'
         
@@ -837,9 +750,59 @@ class QolsysPluginRemote(QolsysPlugin):
         
         await self.send_command(topic,payload)
 
+
+    async def command_zwave_switch_multi_level(self,node_id:int,level:int):
+
+        ipcRequest =[{
+                'dataType':'int', # Node ID
+                'dataValue':node_id
+            },
+            {
+                'dataType':'int',  # ?
+                'dataValue':0
+            },
+            {
+                'dataType':'byteArray',  # ZWAVE MULTILEVELSWITCH COMMAND
+                'dataValue':[38,1,level]
+            },
+            { 
+                'dataType':'int',  # ?
+                'dataValue':0
+            },
+            { 
+                'dataType':'int',  # ?
+                'dataValue':106
+            },
+            {
+                'dataType':'byteArray',
+                'dataValue':[0]
+            }
+        ]
+
+        topic = 'mastermeid'
+        eventName = 'ipcCall'
+        ipcServiceName = 'qzwaveservice'
+        ipcInterfaceName = 'android.os.IQZwaveService'
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = 'response_' + self.settings.random_mac
+
+        payload = {'eventName':eventName,
+                   'ipcServiceName' : ipcServiceName,
+                   'ipcInterfaceName' : ipcInterfaceName,
+                   'ipcTransactionID': ipcTransactionID,
+                   'ipcRequest': ipcRequest,
+                   'requestID':requestID,
+                   'responseTopic':responseTopic,
+                   'remoteMacAddress':remoteMacAddress}
+                
+        await self.send_command(topic,payload)
+
+
     async def command_arm(self,partition_id:int,arming_type:str,user_code:str='',exit_sounds:bool=False) -> bool:
         
-        LOGGER.debug(f'MQTT: Sending arm command: partition{partition_id}, arming_type:{arming_type}, secure_arm:{self.panel.get_secure_arming()}' )
+        LOGGER.debug(f'MQTT: Sending arm command: partition{partition_id}, arming_type:{arming_type}, secure_arm:{self.panel.SECURE_ARMING}' )
 
         user_id = 0
 
@@ -848,7 +811,7 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.debug(f'MQTT: arm command error - Unknow Partition')
             return False
         
-        if self.panel.get_secure_arming():
+        if self.panel.SECURE_ARMING == 'true':
             # Do local user code verification to arm if secure arming is enabled
             user_id = self.panel.check_user(user_code)
             if  user_id == -1:
@@ -857,10 +820,10 @@ class QolsysPluginRemote(QolsysPlugin):
 
         mqtt_arming_type = ''
         match arming_type:
-            case "ARM_STAY":
+            case "ARM-STAY":
                 mqtt_arming_type = 'ui_armstay'
 
-            case "ARM_AWAY":
+            case "ARM-AWAY":
                 mqtt_arming_type = 'ui_armaway'
 
             case _:

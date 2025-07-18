@@ -1,0 +1,1 @@
+from .controller import QolsysController as Controller

@@ -12,6 +12,7 @@ class QolsysSettings:
         self._plugin_paired = False
         self._random_mac = ''
         self._panel_mac = ''
+        self._panel_ip = ''
     
     @property 
     def plugin_paired(self):
@@ -41,6 +42,14 @@ class QolsysSettings:
     def panel_mac(self,panel_mac:str):
         self._panel_mac = panel_mac
 
+    @property
+    def panel_ip(self) -> str:
+        return self._panel_ip
+    
+    @panel_ip.setter
+    def panel_ip(self, panel_ip:str):
+        self._panel_ip = panel_ip
+
     def read_settings(self)->bool:
         try:
             with open(self._settings_directory + self._settings_file) as fd:
@@ -49,6 +58,7 @@ class QolsysSettings:
                     self._plugin_paired = json_data['plugin_paired']
                     self._panel_mac = json_data['panel_mac']
                     self._random_mac = json_data['random_mac']
+                    self._panel_ip = json_data['panel_ip']
 
                     LOGGER.debug(f'Found Pairing Data')
 
@@ -76,7 +86,8 @@ class QolsysSettings:
         data = {
             "plugin_paired": self.plugin_paired,
             "random_mac": self.random_mac,
-            "panel_mac": self._panel_mac
+            "panel_mac": self.panel_mac,
+            "panel_ip": self.panel_ip
         }
 
         try:

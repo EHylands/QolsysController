@@ -5,6 +5,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509 import load_pem_x509_csr
+
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from datetime import datetime, timedelta
@@ -17,9 +19,75 @@ class QolsysPKI():
         self._file_prefix = ''
         self._keys_directory = keys_directory
 
+        self._key = None
+        self._cer = None
+        self._csr = None
+        self._secure = None
+        self._qolsys = None
+
     def set_id(self,id:str):
         self._id = id
         self._file_prefix = id.replace(':','')
+
+    @property
+    def key(self):
+        return self._key
+    
+    @property
+    def cer(self):
+        return self._cer
+    
+    @property 
+    def csr(self):
+        return self._csr
+    
+    @property
+    def secure(self):
+        return self._secure
+    
+    @property
+    def qolsys(self):
+        return self._qolsys
+
+    def load_private_key(self,key:str) -> bool:
+        try:
+            self._key = serialization.load_pem_private_key(key.encode(),password=None)
+            return True
+        except ValueError:
+            LOGGER.debug(f'Private Key Value Error')
+            return False
+   
+    def load_certificate(self,cer:str) -> bool:
+        try:
+            self._cer = x509.load_pem_x509_certificate(cer.encode(),None)
+            return True
+        except ValueError:
+            LOGGER.debug(f'Certificate Value Error')
+            return False
+
+    def load_certificate_signing_request(self,csr:str) -> bool:
+        try:
+            self._csr = load_pem_x509_csr(csr.encode())
+            return True
+        except ValueError:
+            LOGGER.debug(f'Certificate Signing Request Value Error')
+            return False
+        
+    def load_qolsys_certificate(self,qolsys:str) -> bool:
+        try:
+            self._qolsys = x509.load_pem_x509_certificate(qolsys.encode(),None)
+            return True
+        except ValueError:
+            LOGGER.debug(f'Qolsys Certificate Value Error')
+            return False
+    
+    def load_signed_client_certificate(self,secure:str):
+        try:
+            self._secure = x509.load_pem_x509_certificate(secure.encode(),None)
+            return True
+        except ValueError:
+            LOGGER.debug(f'Client Signed Certificate Value Error')
+            return False
 
     def check_key_file(self)->bool:
         if os.path.exists(self._keys_directory + self._file_prefix + '.key'):

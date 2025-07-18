@@ -49,7 +49,13 @@ def c4_arming_status_to_mqtt(state:str):
                 case 'ARM_STAY':
                         return 'ARM-STAY'
                 
+                case 'ARM-STAY':
+                        return 'ARM-STAY'
+                
                 case 'ARM_AWAY':
+                        return 'ARM-AWAY'
+                
+                case 'ARM-AWAY':
                         return 'ARM-AWAY'
                 
                 case 'ALARM':

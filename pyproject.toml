@@ -1,0 +1,23 @@
+[project]
+name = "qolsys_controller"
+version = "0.0.1"
+authors = [
+  { name="Eric Hylands", email="" },
+]
+description = "A Python module that emulates a virtual IQ Remote device, enabling full local control of a Qolsys IQ Panel over MQTT"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Home Automation",
+]
+license = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/EHylands/QolsysController"
+Issues = "https://github.com/EHylands/QolsysController/issues"
+Repository = "https://github.com/EHylands/QolsysController.git"
+
+[build-system]
+requires = ["hatchling >= 1.27"]
+build-backend = "hatchling.build"

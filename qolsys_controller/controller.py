@@ -1,11 +1,11 @@
 import logging
 
-from qolsys.state import QolsysState
-from qolsys.panel import QolsysPanel
-from qolsys.plugin import QolsysPlugin
-from qolsys.pluginC4 import QolsysPluginC4
-from qolsys.pluginRemote import QolsysPluginRemote
-from qolsys.settings import QolsysSettings
+from qolsys_controller.state import QolsysState
+from qolsys_controller.panel import QolsysPanel
+from qolsys_controller.plugin import QolsysPlugin
+from qolsys_controller.pluginC4 import QolsysPluginC4
+from qolsys_controller.pluginRemote import QolsysPluginRemote
+from qolsys_controller.settings import QolsysSettings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class QolsysController():
         # QolsysController Information
         self.plugin = None
         self._state = QolsysState()
-        self._panel = QolsysPanel(settings_directory='./config/')
+        self._panel = QolsysPanel(settings_directory='./config/',state=self.state)
         self._settings = QolsysSettings(settings_directory='./config/',settings_file='pairing.status',)
 
     @property
