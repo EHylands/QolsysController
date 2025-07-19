@@ -215,7 +215,7 @@ class QolsysDB():
                        library_type:str,last_updated_date:str,node_battery_level_updated_time:str,basic_report_updated_time:str,switch_multilevel_report_updated_time:str,
                        multi_channel_details:str,rediscover_status:str,last_rediscover_time:str,neighbour_info:str,last_node_test_time:str,
                        endpoint:str,endpoint_details:str,device_wakeup_time:str,role_type:str,is_device_sleeping:str,counters_passed:str,counters_failed:str,group_id:str,
-                       command_classes_version:str,paired_status:str,device_dsk:str,endpoint_secure_cmd_cls:str,s2_security_keys:str,device_protocol:str,is_device_hidden:str):
+                       command_classes_version:str,paired_status:str,device_dsk:str,endpoint_secure_cmd_cls:str,s2_security_keys:str,device_protocol:str,is_device_hidden:str,ime_data:str):
         self.cursor.execute(f'''INSERT INTO {self.Table_ZwaveContentProvider} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
                             node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,basic_device_type,generic_device_type,
                             specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,library_type_version,protocol_version,
@@ -223,13 +223,13 @@ class QolsysDB():
                             library_type,last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,
                             multi_channel_details,rediscover_status,last_rediscover_time,neighbour_info,last_node_test_time,endpoint,endpoint_details,device_wakeup_time,
                             role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,paired_status,device_dsk,endpoint_secure_cmd_cls,
-                            s2_security_keys,device_protocol,is_device_hidden) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+                            s2_security_keys,device_protocol,is_device_hidden,ime_data) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
                             (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,
                             basic_device_type,generic_device_type,specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,
                             library_type_version,protocol_version,protocol_sub_version,application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,
                             library_type,last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,multi_channel_details,rediscover_status,last_rediscover_time,
                             neighbour_info,last_node_test_time,endpoint,endpoint_details,device_wakeup_time,role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,paired_status,
-                            device_dsk,endpoint_secure_cmd_cls,s2_security_keys,device_protocol,is_device_hidden))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                            device_dsk,endpoint_secure_cmd_cls,s2_security_keys,device_protocol,is_device_hidden,ime_data))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         self.db.commit()
 
     def add_zwave_history(self,_id:str,version:str,opr:str,partition_id:str,node_id:str,device_name:str,source:str,event:str,request:str,
@@ -577,7 +577,8 @@ class QolsysDB():
                                             u.get('endpoint_secure_command_class',''),
                                             u.get('s2_security_key',''),
                                             u.get('device_protocol',''),
-                                            u.get('id_device_hidden',''))
+                                            u.get('id_device_hidden',''),
+                                            u.get('ime_data',''))
                         
                 # ZDeviceHistoryContentProvider
                 case self.URI_ZDeviceHistoryContentProvider:
@@ -926,7 +927,8 @@ class QolsysDB():
                 endpoint_secure_cmd_cls TEXT,
                 s2_security_keys TEXT,
                 device_protocol TEXT,
-                is_device_hidden TEXT
+                is_device_hidden TEXT,
+                ime_data TEXT
             )
         ''')
 
