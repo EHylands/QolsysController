@@ -9,6 +9,5 @@ __pycache__
 *.cer
 *.csr
 *.qolsys
-*.status
-pairing.status
 .DS_Store
+
