@@ -83,7 +83,8 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug(f'Checking PKI')
         self._pki.set_id(self.settings.random_mac)
         if not(self._pki.check_qolsys_cer_file() and 
-               self._pki.check_secure_file()):
+               self._pki.check_secure_file() and
+               self._pki.check_key_file()):
             return False
         
         # Everything is configured
@@ -132,8 +133,6 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 if message.topic.matches('mastermeid'):
                     pass
-                    print(message.payload)
-
                 
                 # Panel response to MQTT Commands
                 if message.topic.matches("response_" + self.settings.random_mac):
