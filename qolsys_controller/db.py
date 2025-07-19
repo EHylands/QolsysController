@@ -563,6 +563,7 @@ class QolsysDB():
                                             u.get('last_rediscover_time',''),
                                             u.get('neighbour_info',''),
                                             u.get('last_node_test_time',''),
+                                            u.get('endpoint',''),
                                             u.get('endpoint_details',''),
                                             u.get('device_wakeup_time',''),
                                             u.get('role_type',''),
