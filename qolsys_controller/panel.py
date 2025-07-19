@@ -383,7 +383,8 @@ class QolsysPanel(QolsysObservable):
                                 if node != None and isinstance(node,QolsysDimmer):
                                     node.update(content_values)
 
-                            # Update ZwaveContentProviderx                            case self.db.URI_ZwaveContentProvider:
+                            # Update ZwaveContentProvider                          
+                            case self.db.URI_ZwaveContentProvider:
                                 self.db.update_table(self.db.Table_ZwaveContentProvider,selection,selection_argument,content_values)
 
                             # Update AutomationDeviceContentProvider
