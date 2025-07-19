@@ -14,6 +14,7 @@ class QolsysController():
 
         # QolsysController Information
         self.plugin = None
+        self._config_directory = config_directory
         self._state = QolsysState()
         self._panel = QolsysPanel(settings_directory=config_directory,state=self.state)
         self._settings = QolsysSettings(settings_directory=config_directory,settings_file='pairing.status',)
@@ -41,7 +42,7 @@ class QolsysController():
             
             case 'remote':
                 LOGGER.debug(f'Remote Plugin Selected')
-                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings)
+                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings,self._config_directory)
                 return
             
             case _:

@@ -24,11 +24,11 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPluginRemote(QolsysPlugin):
         
-    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings)-> None:
+    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings,config_directory:str)-> None:
         super().__init__(state,panel,settings)
         
         # PKI
-        self._keys_directory = 'keys/'
+        self._keys_directory = config_directory
         self._pki = QolsysPKI(keys_directory = self._keys_directory)
 
         # Plugin
