@@ -10,13 +10,13 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysController():
 
-    def __init__(self) -> None:
+    def __init__(self,config_directory:str) -> None:
 
         # QolsysController Information
         self.plugin = None
         self._state = QolsysState()
-        self._panel = QolsysPanel(settings_directory='./config/',state=self.state)
-        self._settings = QolsysSettings(settings_directory='./config/',settings_file='pairing.status',)
+        self._panel = QolsysPanel(settings_directory=config_directory,state=self.state)
+        self._settings = QolsysSettings(settings_directory=config_directory,settings_file='pairing.status',)
 
     @property
     def state(self):

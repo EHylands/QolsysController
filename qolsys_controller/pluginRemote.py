@@ -132,7 +132,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 if message.topic.matches('mastermeid'):
                     pass
-                    #print(message.payload)
+                    print(message.payload)
 
                 
                 # Panel response to MQTT Commands

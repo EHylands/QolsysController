@@ -33,7 +33,7 @@ class QolsysPanel(QolsysObservable):
                                 'TIMER_NORMAL_EXIT_DELAY','TIMER_LONG_ENTRY_DELAY','TIMER_LONG_EXIT_DELAY','ZWAVE_CONTROLLER',
                                 'ZWAVE_CARD','POLICE_PANIC_ENABLED','FIRE_PANIC_ENABLED','AUXILIARY_PANIC_ENABLED','NIGHTMODE_SETTINGS',
                                 'NIGHT_SETTINGS_STATE','PARTITIONS','SIX_DIGIT_USER_CODE','SHOW_SECURITY_SENSORS','SYSTEM_LOGGED_IN_USER',
-                                'PANEL_SCENES_SETTING','CONTROL_4','ZWAVE_FIRM_WARE_VERSION','FINAL_EXIT_DOOR_ARMING','NO_ARM_LOW_BATTERY' ]
+                                'PANEL_SCENES_SETTING','CONTROL_4','ZWAVE_FIRM_WARE_VERSION','FINAL_EXIT_DOOR_ARMING','NO_ARM_LOW_BATTERY','MAC_ADDRESS' ]
 
         self._PANEL_TAMPER_STATE = ''
         self._AC_STATUS = ''
@@ -70,8 +70,10 @@ class QolsysPanel(QolsysObservable):
         self._SIX_DIGIT_USER_CODE = ''
         self._SHOW_SECURITY_SENSORS = ''
         self._CONTROL_4 = ''
+        self._MAC_ADDRESS = ''
         
         self._users = []
+        self._unique_id = ''
         self._settings_directory = settings_directory
 
         # Loading user_code data from users.conf file
@@ -265,9 +267,20 @@ class QolsysPanel(QolsysObservable):
         return self._TIMER_LONG_ENTRY_DELAY
     
     @property
+    def  MAC_ADDRESS(self):
+        self._MAC_ADDRESS = self.db.get_setting_panel('MAC_ADDRESS')
+        return self._MAC_ADDRESS
+    
+    @property
+    def unique_id(self):
+        mac_address = self.MAC_ADDRESS
+        return mac_address.replace(':','')
+    
+    @property
     def TIMER_LONG_EXIT_DELAY(self):
         self._TIMER_LONG_EXIT_DELAY = self.db.get_setting_panel('TIMER_LONG_ENTRY_DELAY')
         return self._TIMER_LONG_EXIT_DELAY
+   
 
     def load_database(self,database:dict):
         self.db.load_db(database)
@@ -370,8 +383,7 @@ class QolsysPanel(QolsysObservable):
                                 if node != None and isinstance(node,QolsysDimmer):
                                     node.update(content_values)
 
-                            # Update ZwaveContentProvider
-                            case self.db.URI_ZwaveContentProvider:
+                            # Update ZwaveContentProviderx                            case self.db.URI_ZwaveContentProvider:
                                 self.db.update_table(self.db.Table_ZwaveContentProvider,selection,selection_argument,content_values)
 
                             # Update AutomationDeviceContentProvider
@@ -398,6 +410,7 @@ class QolsysPanel(QolsysObservable):
 
                             case _:
                                 print(f'iq2meid deleting unknow uri:{uri}')
+                                print(data)
 
                     case 'insert':
                         content_values = data.get('contentValues')
@@ -455,7 +468,8 @@ class QolsysPanel(QolsysObservable):
                                 print(data)
 
                     case _:
-                        print(f'iq2meid - Unknow dboperation: {dbOperation}')                
+                        print(f'iq2meid - Unknow dboperation: {dbOperation}') 
+                        print(data)               
 
     def check_user(self,user_code:str) -> int:
         for user in self._users:
@@ -471,6 +485,9 @@ class QolsysPanel(QolsysObservable):
         dimmers_list = self.db.get_dimmers()
 
         for device in devices_list:
+
+            device_added = False
+
             zwave_node_id = device.get('node_id','')
             # Check if z-wave device is a Dimmer
             for d in dimmers_list:
@@ -481,13 +498,15 @@ class QolsysPanel(QolsysObservable):
                     qolsys_dimmer = QolsysDimmer(d,device)
                     qolsys_dimmer.base_node_id = zwave_node_id
                     devices.append(qolsys_dimmer)
-                    continue
+                    device_added = True
+                    break
 
-                # Found a SmartOutlet
+            # Found a SmartOutlet
 
-                # Found a Thermostat
+            # Found a Thermostat
 
-                # No Specific z-wave device found, add a generic z-wave device
+            # No Specific z-wave device found, add a generic z-wave device
+            if not device_added:
                 qolsys_generic = QolsysGeneric()
                 devices.append(qolsys_generic)
 
@@ -581,6 +600,8 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug(f'*** Qolsys Panel Information ***')
         LOGGER.debug(f'Android Version: {self.ANDROID_VERSION}')
         LOGGER.debug(f'Hardware Version: {self.HARDWARE_VERSION}')
+        LOGGER.debug(f'MAC Address: {self.MAC_ADDRESS}')
+        LOGGER.debug(f'Unique ID: {self.unique_id}')
         LOGGER.debug(f'Panel Tamper State: {self.PANEL_TAMPER_STATE}')
         LOGGER.debug(f'AC Status: {self.AC_STATUS}')
         LOGGER.debug(f'Battery Status: {self.BATTERY_STATUS}')

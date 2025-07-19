@@ -43,12 +43,9 @@ Not affiliated with Qolsys or Johnson Controls. Use at your own risk.
 ## Qolsys IQ Remote and Qolsys inner component
 The Qolsys Main Panel maintains its internal state using an Android ContentProvider-based database.  When an IQ Remote is paired with the main panel, it downloads a full copy of the main panel’s database. Subsequent updates are sent from the main panel to the remote via MQTT messages on the `iq2meid` topic.
 
-Databases Created on IQ Remote
+Databases Created on IQ Remote.
 Each of these corresponds to a ContentProvider managing a specific domain:
 
-
-When and IQ Remote is paired with an Qolsys Main panel, it download a copy of the main database.  
-Afterward the main panel will push update to the IQ Remote in the form MQTT message updating database one the iq2meid topic (insert, delete, update ) to keep both devices in sync. 
 
 | Provider Name             | Description                  |
 |--------------------------|------------------------------|
