@@ -106,13 +106,7 @@ class QolsysPartition(QolsysObservable):
         LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status: {value}")
         prev_value = self._system_status
         self._system_status = value
-        self.notify(change=self.NOTIFY_UPDATE_SYSTEM_STATUS,partition_id=self.id,new_value=value,prev_value=prev_value)
-
-        # If the panel is disarmed, we can reset the failed disarm attempts
-        #if value == 'DISARM':
-        #    self.disarm_failed = 0
-
-        #self.alarm_type = None
+        self.notify()
 
     @system_status_changed_time.setter
     def system_status_changed_time(self,value):
@@ -120,7 +114,7 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status_changed_time: {value}")
             prev_value = self._system_status
             self._system_status_changed_time = value
-            self.notify(change=self.NOTIFY_UPDATE_SYSTEM_STATUS_CHANGED_TIME,partition_id=self.id,new_value=value,prev_value=prev_value)
+            self.notify()
 
     @alarm_state.setter
     def alarm_state(self,value):
@@ -132,7 +126,7 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - alarm_state: {value}")
             prev_value = self._alarm_sate
             self._alarm_sate = value
-            self.notify(change=self.NOTIFY_UPDATE_ALARM_STATE,partition_id=self.id,new_value=value,prev_value=prev_value)
+            self.notify()
 
     def append_alarm_type(self,value:str):
         if not value in self.ALARM_TYPE_ARRAY:
@@ -141,7 +135,7 @@ class QolsysPartition(QolsysObservable):
         
         prev_value = self._alarm_type
         self._alarm_type.append(value)
-        self.notify(change=self.NOTIFY_UPDATE_ALARM_TYPE,partition_id=self.id,new_value=self._alarm_type,prev_value=prev_value)
+        self.notify()
 
         for alarm in self._alarm_type:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - alarm_type: {alarm}")
@@ -156,7 +150,7 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - exit_sound: {value}")
             prev_value = self._exit_sounds
             self._exit_sounds = value
-            self.notify(change=self.NOTIFY_UPDATE_EXIT_SOUNDS,partition_id=self.id,new_value=value,prev_value=prev_value)
+            self.notify()
     
     @entry_delays.setter
     def entry_delays(self,value):
@@ -168,7 +162,25 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - entry_delays: {value}")
             prev_value = self._entry_delays
             self._entry_delays = value
-            self.notify(change=self.NOTIFY_UPDATE_ENTRY_DELAYS,partition_id=self.id,new_value=value,prev_value=prev_value)
+            self.notify()
+
+    def is_triggered(self) -> bool:
+        return self.alarm_state == 'Alarm'
+    
+    def is_disarmed(self) -> bool:
+        return self.system_status == 'DISARM' and self.alarm_state != 'Alarm'
+    
+    def is_arming(self) -> bool:
+        return self.system_status ==  'ARM-AWAY-EXIT-DELAY' or self.system_status ==  'ARM-STAY-EXIT-DELAY'
+    
+    def is_pending(self) -> bool:
+        return self.alarm_state == 'Delay'
+    
+    def is_armed_stay(self) -> bool:
+        return self.system_status == 'ARM-STAY'
+    
+    def is_armed_away(self) -> bool:
+        return self.system_status == 'ARM-AWAY'
 
     @disarm_failed.setter
     def disarm_failed(self, value):
@@ -178,7 +190,7 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition '{self.id}' ({self.name}) disarm failed updated to '{value}'")
             self._disarm_failed = new_value
 
-            self.notify(change=self.NOTIFY_UPDATE_ATTRIBUTES)
+            self.notify()
 
     def errored(self, error_type: str, error_description: str):
         self._last_error_type = error_type
@@ -189,7 +201,7 @@ class QolsysPartition(QolsysObservable):
         if error_type.upper() == 'DISARM_FAILED':
             self._disarm_failed += 1
 
-        self.notify(change=self.NOTIFY_UPDATE_ATTRIBUTES)
+        self.notify()
 
     def __str__(self):
         return (f"<QolsysPartition id={self.id} name={self.name} "

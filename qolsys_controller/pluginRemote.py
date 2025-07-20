@@ -152,9 +152,6 @@ class QolsysPluginRemote(QolsysPlugin):
                                     self.panel.dump()
                                     self.state.dump()
 
-                                    self.panel_ready = True
-                                    self.panel_ready_observer.notify(panel_ready=self.panel_ready)
-
                                 case 'timeSync':
                                     LOGGER.debug(f'MQTT: timeSync command response')
 
@@ -168,6 +165,8 @@ class QolsysPluginRemote(QolsysPlugin):
                                     LOGGER.debug(f'MQTT: ipcCall command response: {data.get('responseStatus')}') 
 
                                 case 'pair_status_request':
+                                    self.panel_ready = True
+                                    self.panel_ready_observer.notify(panel_ready=self.panel_ready)
                                     LOGGER.debug(f'MQTT: pair_status_request command response') 
 
                                 case _:

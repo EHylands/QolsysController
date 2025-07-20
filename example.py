@@ -58,7 +58,7 @@ async def main():
                     partition.unregister(state_partition_observer)
     
     # Partitions observers
-    def partitions_observer(self,change,partition_id,new_value,prev_value):
+    def partitions_observer():
         pass
         #print(f'Partition{partition_id} - {change} - {new_value}')
 
@@ -84,13 +84,13 @@ async def main():
     if not await ready:
         LOGGER.error('Error loading iq2meid database')
 
-    LOGGER.error('Qolsys Panel Ready for operation')
+    LOGGER.debug('Qolsys Panel Ready for operation')
 
     
 
     # Close Dimmer
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=0)
+    await asyncio.sleep(3)
+    await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
     # Open Dimmer
     #await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
