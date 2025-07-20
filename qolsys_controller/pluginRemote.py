@@ -90,7 +90,63 @@ class QolsysPluginRemote(QolsysPlugin):
         # Everything is configured
         return True
     
-    async def start_operation(self):
+    async def get_panel_unique_id(self) -> str:
+        tls_params = aiomqtt.TLSParameters(
+            ca_certs = self._pki.qolsys_cer_file_path,       
+            certfile = self._pki.secure_file_path,
+            keyfile = self._pki.key_file_path,
+            cert_reqs=ssl.CERT_REQUIRED,    
+            tls_version=ssl.PROTOCOL_TLSv1_2,  
+            ciphers='ALL:@SECLEVEL=0'
+        )
+        
+        LOGGER.debug(f'MQTT: Connecting ...')
+
+        while True:
+            try:
+                async with aiomqtt.Client(hostname=self.settings.panel_ip,
+                                  port=self.panel_mqtt_port,
+                                  tls_params=tls_params,
+                                  tls_insecure=True,
+                                  clean_session=True,
+                                  timeout=5,
+                                  identifier='QolsysController') as self.aiomqtt:
+            
+                    LOGGER.debug(f'MQTT: Client Connected')
+
+                    await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
+                    await self.command_connect()
+            
+                    async for message in self.aiomqtt.messages:
+                
+                        if self.log_mqtt_mesages:
+                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
+                
+                        # Panel response to MQTT Commands
+                        if message.topic.matches("response_" + self.settings.random_mac):
+                            data = message.payload.decode().replace("\\\\", "\\")
+                            data = fix_json_string(data)
+                            data = json.loads(data,strict=False)
+                            event = data.get('eventName')
+
+                            match event:
+
+                                case 'connect':
+                                    unique_id = data.get('master_mac','').replace(':','')
+                                    LOGGER.debug(f'MQTT: Panel Unique ID: {unique_id}')
+                                    return unique_id
+
+                                case _:
+                                    LOGGER.debug(f'MQTT: unknow event {event}') 
+
+            except aiomqtt.MqttError:
+                print(f"Connection lost; Reconnecting in {30} seconds ...")
+                await asyncio.sleep(30)
+
+    def start_operation(self):
+        asyncio.get_running_loop().create_task(self.start_operation_task())
+
+    async def start_operation_task(self):
 
         tls_params = aiomqtt.TLSParameters(
             ca_certs = self._pki.qolsys_cer_file_path,       
@@ -102,78 +158,82 @@ class QolsysPluginRemote(QolsysPlugin):
         )
         
         LOGGER.debug(f'MQTT: Connecting ...')
-        async with aiomqtt.Client(hostname=self.settings.panel_ip,
+        
+        while True:
+            try:                
+                async with aiomqtt.Client(hostname=self.settings.panel_ip,
                                   port=self.panel_mqtt_port,
                                   tls_params=tls_params,
                                   tls_insecure=True,
                                   clean_session=True,
+                                  timeout=5,
                                   identifier='QolsysController') as self.aiomqtt:
             
-            LOGGER.debug(f'MQTT: Client Connected')
-            #await self.aiomqtt.subscribe("#")
-            await self.aiomqtt.subscribe("iq2meid")
-            #await self.aiomqtt.subscribe('PanelEvent',qos=2)
-            await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
-            await self.aiomqtt.subscribe("mastermeid",qos=2)
+                    LOGGER.debug(f'MQTT: Client Connected')
+                    self.connected = True
+                    self.connected_observer.notify()
 
-            await self.command_connect()
-            await self.command_pingevent()
-            await self.command_timesync()
-            await self.command_sync_database()
-            await self.command_acstatus()
-            await self.command_dealer_logo()
-            await self.command_pair_status_request()
+                    await self.aiomqtt.subscribe("iq2meid")
+                    await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
+                    await self.aiomqtt.subscribe("mastermeid",qos=2)
+
+                    await self.command_connect()
+                    await self.command_pingevent()
+                    await self.command_timesync()
+                    await self.command_sync_database()
+                    await self.command_pair_status_request()
             
-            async for message in self.aiomqtt.messages:
+                    async for message in self.aiomqtt.messages:
                 
-                if self.log_mqtt_mesages:
-                    print(message.payload)
-                    LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
-
-
-                if message.topic.matches('mastermeid'):
-                    pass
+                        if self.log_mqtt_mesages:
+                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
                 
-                # Panel response to MQTT Commands
-                if message.topic.matches("response_" + self.settings.random_mac):
+                        # Panel response to MQTT Commands
+                        if message.topic.matches("response_" + self.settings.random_mac):
                     
-                    data = message.payload.decode().replace("\\\\", "\\")
-                    data = fix_json_string(data)
-                    data = json.loads(data,strict=False)
-                    event = data.get('eventName')
+                            data = message.payload.decode().replace("\\\\", "\\")
+                            data = fix_json_string(data)
+                            data = json.loads(data,strict=False)
+                            event = data.get('eventName')
 
-                    match event:
+                            match event:
 
-                        case 'syncdatabase':
-                            LOGGER.debug(f'MQTT: Updating State from syncdatabase')
-                            event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
-                            self.panel.load_database(event.database_frome_json(data))
-                            self.panel.dump()
-                            self.state.dump()
+                                case 'syncdatabase':
+                                    LOGGER.debug(f'MQTT: Updating State from syncdatabase')
+                                    event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
+                                    self.panel.load_database(event.database_frome_json(data))
+                                    self.panel.dump()
+                                    self.state.dump()
 
-                        case 'timeSync':
-                            LOGGER.debug(f'MQTT: timeSync command response')
+                                case 'timeSync':
+                                    LOGGER.debug(f'MQTT: timeSync command response')
 
-                        case 'pingevent':
-                            LOGGER.debug(f'MQTT: pingevent command response')
+                                case 'pingevent':
+                                    LOGGER.debug(f'MQTT: pingevent command response')
 
-                        case 'connect':
-                            LOGGER.debug(f'MQTT: connect command response') 
+                                case 'connect':
+                                    LOGGER.debug(f'MQTT: connect command response') 
 
-                        case 'ipcCall':
-                            LOGGER.debug(f'MQTT: ipcCall command response: {data.get('responseStatus')}') 
+                                case 'ipcCall':
+                                    LOGGER.debug(f'MQTT: ipcCall command response: {data.get('responseStatus')}') 
 
-                        case 'pair_status_request':
-                            LOGGER.debug(f'MQTT: pair_status_request command response') 
+                                case 'pair_status_request':
+                                    LOGGER.debug(f'MQTT: pair_status_request command response') 
 
-                        case _:
-                            LOGGER.debug(f'MQTT: unknow event {event}') 
+                                case _:
+                                    LOGGER.debug(f'MQTT: unknow event {event}') 
 
-                if message.topic.matches('iq2meid'):
-                    data = message.payload.decode().replace("\\\\", "\\")
-                    data = fix_json_string(data)
-                    data = json.loads(message.payload.decode())
-                    self.panel.parse_iq2meid_message(data)
+                        if message.topic.matches('iq2meid'):
+                            data = message.payload.decode().replace("\\\\", "\\")
+                            data = fix_json_string(data)
+                            data = json.loads(message.payload.decode())
+                            self.panel.parse_iq2meid_message(data)
+        
+            except aiomqtt.MqttError:
+                self.connected = False
+                self.connected_observer.notify()
+                print(f"Connection lost; Reconnecting in {30} seconds ...")
+                await asyncio.sleep(30)
 
     async def start_initial_pairing(self)->bool:
        

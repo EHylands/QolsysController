@@ -7,9 +7,6 @@ LOGGER = logging.getLogger(__name__)
 class QolsysDB():
 
     def __init__(self):
-        self._db = sqlite3.connect(":memory:")
-        self._cursor = self._db.cursor()
-
         self.Table_QolsysSettingsProvider = 'qolsyssettings'
         self.Table_SensorContentProvider = 'sensor'
         self.Table_StateContentProvider = 'state'
@@ -51,6 +48,8 @@ class QolsysDB():
         self.URI_SceneContentProvider = "content://com.qolsys.qolsysprovider.SceneContentProvider/scene"
         self.URI_ZDeviceHistoryContentProvider = "content://com.qolsys.qolsysprovider.ZDeviceHistoryContentProvider/zwave_history"
 
+        self._db = sqlite3.connect(":memory:")
+        self._cursor = self._db.cursor()
         self._create_db()
 
     @property
@@ -285,9 +284,56 @@ class QolsysDB():
                              end_time:str,read:str,mime_type:str):
         self.cursor.execute(f"INSERT INTO {self.Table_DashboardMessagesContentProvider} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type)) 
         self.db.commit()
-         
+
+    def clear_db(self):
+        self.cursor.execute(f'DELETE from {self.Table_AlarmedSensorProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_AutomationDeviceContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_DashboardMessagesContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_DimmerLightsContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_HeatMapContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_HistoryContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_MasterSlaveContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_PartitionContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_QolsysSettingsProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_SensorContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_StateContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_ThermostatsContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_ZDeviceHistoryContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_ZwaveContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_UserContentProvider}')
+        self.db.commit()
 
     def load_db(self,database:dict):
+
+        self.clear_db()
        
         if not database:
             LOGGER.error(f'Loading Database Error, No Data Provided')

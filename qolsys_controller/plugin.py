@@ -3,6 +3,7 @@ import logging
 from qolsys_controller.state import QolsysState
 from qolsys_controller.panel import QolsysPanel
 from qolsys_controller.settings import QolsysSettings
+from qolsys_controller.observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -12,6 +13,9 @@ class QolsysPlugin():
         self._state = state
         self._panel = panel
         self._settings = settings
+
+        self.connected = False
+        self.connected_observer = QolsysObservable()
 
     def config(self):
         pass

@@ -17,7 +17,7 @@ async def main():
     # Change to your plugin ip
     plugin_ip = '192.168.10.222'
 
-    remote = QolsysController(config_directory='./config')
+    remote = QolsysController(config_directory='./config/')
     
     # Select plugin
     remote.select_plugin('remote')
@@ -73,9 +73,8 @@ async def main():
     remote.state.state_zone_observer.register(state_zone_observer)
      
     # Start panel operation
-    task = loop.create_task(remote.plugin.start_operation())
-    background_tasks.add(task)
-    task.add_done_callback(background_tasks.remove)
+    unique_id = await remote.plugin.get_panel_unique_id()
+    remote.plugin.start_operation()
 
     # Close Dimmer
     #await asyncio.sleep(3)
