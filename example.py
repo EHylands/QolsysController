@@ -73,8 +73,20 @@ async def main():
     remote.state.state_zone_observer.register(state_zone_observer)
      
     # Start panel operation
-    unique_id = await remote.plugin.get_panel_unique_id()
+    ready: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
+
+    def panel_ready_callback(self,panel_ready:bool):
+        ready.set_result(panel_ready)
+
+    remote.plugin.panel_ready_observer.register(panel_ready_callback)
     remote.plugin.start_operation()
+
+    if not await ready:
+        LOGGER.error('Error loading iq2meid database')
+
+    LOGGER.error('Qolsys Panel Ready for operation')
+
+    
 
     # Close Dimmer
     #await asyncio.sleep(3)

@@ -90,59 +90,6 @@ class QolsysPluginRemote(QolsysPlugin):
         # Everything is configured
         return True
     
-    async def get_panel_unique_id(self) -> str:
-        tls_params = aiomqtt.TLSParameters(
-            ca_certs = self._pki.qolsys_cer_file_path,       
-            certfile = self._pki.secure_file_path,
-            keyfile = self._pki.key_file_path,
-            cert_reqs=ssl.CERT_REQUIRED,    
-            tls_version=ssl.PROTOCOL_TLSv1_2,  
-            ciphers='ALL:@SECLEVEL=0'
-        )
-        
-        LOGGER.debug(f'MQTT: Connecting ...')
-
-        while True:
-            try:
-                async with aiomqtt.Client(hostname=self.settings.panel_ip,
-                                  port=self.panel_mqtt_port,
-                                  tls_params=tls_params,
-                                  tls_insecure=True,
-                                  clean_session=True,
-                                  timeout=5,
-                                  identifier='QolsysController') as self.aiomqtt:
-            
-                    LOGGER.debug(f'MQTT: Client Connected')
-
-                    await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
-                    await self.command_connect()
-            
-                    async for message in self.aiomqtt.messages:
-                
-                        if self.log_mqtt_mesages:
-                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
-                
-                        # Panel response to MQTT Commands
-                        if message.topic.matches("response_" + self.settings.random_mac):
-                            data = message.payload.decode().replace("\\\\", "\\")
-                            data = fix_json_string(data)
-                            data = json.loads(data,strict=False)
-                            event = data.get('eventName')
-
-                            match event:
-
-                                case 'connect':
-                                    unique_id = data.get('master_mac','').replace(':','')
-                                    LOGGER.debug(f'MQTT: Panel Unique ID: {unique_id}')
-                                    return unique_id
-
-                                case _:
-                                    LOGGER.debug(f'MQTT: unknow event {event}') 
-
-            except aiomqtt.MqttError:
-                print(f"Connection lost; Reconnecting in {30} seconds ...")
-                await asyncio.sleep(30)
-
     def start_operation(self):
         asyncio.get_running_loop().create_task(self.start_operation_task())
 
@@ -205,6 +152,9 @@ class QolsysPluginRemote(QolsysPlugin):
                                     self.panel.dump()
                                     self.state.dump()
 
+                                    self.panel_ready = True
+                                    self.panel_ready_observer.notify(panel_ready=self.panel_ready)
+
                                 case 'timeSync':
                                     LOGGER.debug(f'MQTT: timeSync command response')
 
@@ -232,6 +182,10 @@ class QolsysPluginRemote(QolsysPlugin):
             except aiomqtt.MqttError:
                 self.connected = False
                 self.connected_observer.notify()
+
+                self.panel_ready = False
+                self.panel_ready_observer.notify(panel_ready=self.panel_ready)
+                
                 print(f"Connection lost; Reconnecting in {30} seconds ...")
                 await asyncio.sleep(30)
 
@@ -510,7 +464,6 @@ class QolsysPluginRemote(QolsysPlugin):
                     'responseTopic':responseTopic ,
                     'remoteMacAddess':remoteMacAddress
             }
-        #await self.aiomqtt.publish(topic=topic,payload='{"ipAddress":"192.168.10.214","macAddress":"cc:4b:73:86:5c:88","remoteClientID":"remoteClient_paho1749959228576000000","softwareVersion":"4.4.1","productType":"tab07_rk68","bssid":"24:5a:4c:6b:87:29","dhcpInfo":"{\\"ipaddress\\":\\"192.168.10.214\\",\\"gateway\\":\\"192.168.10.1\\",\\"netmask\\":\\"0.0.0.0\\",\\"dns1\\":\\"8.8.8.8\\",\\"dns2\\":\\"0.0.0.0\\",\\"dhcpServer\\":\\"192.168.10.1\\",\\"leaseDuration\\":\\"43200\\"}","eventName":"connect_v204","lastUpdateChecksum":"2132501716","dealerIconsCheckSum":"","remote_feature_support_version":"1","current_battery_status":"Normal","remote_panel_battery_status":3,"remote_panel_battery_health":2,"remote_panel_battery_level":100,"remote_panel_battery_present":true,"remote_panel_battery_percentage":100,"remote_panel_battery_scale":100,"remote_panel_battery_voltage":4082,"remote_panel_battery_technology":"","remote_panel_plugged":1,"remote_panel_battery_temperature":430,"requestID":"acdd579d-0da7-4ec7-98d7-6aa5ef745765","responseTopic":"response_cc:4b:73:86:5c:88","remoteMacAddress":"cc:4b:73:86:5c:88"}',qos=2)
 
         await self.send_command(topic,payload)
 
