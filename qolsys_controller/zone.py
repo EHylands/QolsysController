@@ -150,7 +150,7 @@ class QolsysSensor(QolsysObservable):
             prev_value = self._sensorstatus
             self._sensorstatus = value
             if self._NOTIFY_SENSORSTATUS:
-                self.notify(change=self.NOTIFY_UPDATE_SENSORSTATUS,zone_id=self.zone_id, prev_value=prev_value, new_value=value)
+                self.notify()
 
     @battery_status.setter
     def battery_status(self, value):
@@ -159,7 +159,7 @@ class QolsysSensor(QolsysObservable):
             prev_value = self.battery_status
             self.battery_status = value
             if self._NOTIFY_BATTERY_STATUS:
-                self.notify(change=self.NOTIFY_UPDATE_BATTERY_STATUS, prev_value=prev_value, new_value=value)
+                self.notify()
     
     @sensorname.setter
     def sensorname(self, value):
@@ -167,7 +167,7 @@ class QolsysSensor(QolsysObservable):
             prev_value = self.sensorname
             self.sensorname = value
             if self.NOTIFY_UPDATE_SENSORNAME:
-                self.notify(change=self.NOTIFY_UPDATE_SENSORNAME,zone_id=self.zone_id, prev_value=prev_value, new_value=value)
+                self.notify()
 
     @time.setter
     def time(self, value):
@@ -176,14 +176,14 @@ class QolsysSensor(QolsysObservable):
             prev_value = self._time
             self._time = value
             if self._NOTIFY_TIME:
-                self.notify(change=self.NOTIFY_UPDATE_TIME,zone_id=self.zone_id, prev_value=prev_value, new_value=value)
+                self.notify()
 
     @partition_id.setter
     def partition_id(self, value):
         if self.partition_id != value:
             prev_value = self.partition_id
             self.partition_id = value
-            self.notify(change=self.NOTIFY_UPDATE_PARTITION_ID,zone_id=self.zone_id, prev_value=prev_value, new_value=value)
+            self.notify()
 
     def __str__(self):
         return (f"<{type(self).__name__} id={self.zone_id} name={self.sensorname} "
