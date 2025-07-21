@@ -319,7 +319,7 @@ class QolsysPanel(QolsysObservable):
                                 # Update Panel Settings - Send notification if settings ha changed
                                 if name in self.settings_panel:
                                     if(new_value != old_value):
-                                        self.settings_panel_observer.notify(setting_panel_name=name ,old_value=old_value,new_value=new_value)
+                                        self.settings_panel_observer.notify()
 
                                 # Update Partition setting - Send notification if setting has changed
                                 if name in self.settings_partition:

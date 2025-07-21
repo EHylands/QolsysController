@@ -10,12 +10,6 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysSensor(QolsysObservable):
 
-    NOTIFY_UPDATE_SENSORSTATUS = 'update_sensorstatus'
-    NOTIFY_UPDATE_BATTERY_STATUS = 'update_battery_status'
-    NOTIFY_UPDATE_SENSORNAME = 'update_sensor_name'
-    NOTIFY_UPDATE_TIME = 'update_time'
-    NOTIFY_UPDATE_PARTITION_ID = 'update_partition_id'
-
     SENSOR_STATUS_ARRAY = ['Open', 'Closed', 'Active', 'Inactive','Activated','Idle','Unreachable','Tampered','Synchonizing']
 
     def __init__(self, sensor_id: str, sensorname: str, group: str, sensorstatus: str,
@@ -147,7 +141,6 @@ class QolsysSensor(QolsysObservable):
 
         if self._sensorstatus != value:
             LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - sensorstatus:{value}")
-            prev_value = self._sensorstatus
             self._sensorstatus = value
             if self._NOTIFY_SENSORSTATUS:
                 self.notify()
@@ -156,7 +149,6 @@ class QolsysSensor(QolsysObservable):
     def battery_status(self, value):
         if self.battery_status != value:
             LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - battery_status:{value}")
-            prev_value = self.battery_status
             self.battery_status = value
             if self._NOTIFY_BATTERY_STATUS:
                 self.notify()
@@ -173,7 +165,6 @@ class QolsysSensor(QolsysObservable):
     def time(self, value):
         if self._time != value:
             LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - time:{value}")
-            prev_value = self._time
             self._time = value
             if self._NOTIFY_TIME:
                 self.notify()
@@ -181,7 +172,6 @@ class QolsysSensor(QolsysObservable):
     @partition_id.setter
     def partition_id(self, value):
         if self.partition_id != value:
-            prev_value = self.partition_id
             self.partition_id = value
             self.notify()
 

@@ -8,14 +8,6 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPartition(QolsysObservable):
 
-    NOTIFY_UPDATE_ATTRIBUTES = 'update_attributes'
-    NOTIFY_UPDATE_SYSTEM_STATUS = 'update_system_status'
-    NOTIFY_UPDATE_SYSTEM_STATUS_CHANGED_TIME = 'update_system_status_changed_time'
-    NOTIFY_UPDATE_ALARM_STATE = 'update_alarm_state'
-    NOTIFY_UPDATE_ALARM_TYPE = 'update_alarm_type'
-    NOTIFY_UPDATE_EXIT_SOUNDS = 'update_exit_sounds'
-    NOTIFY_UPDATE_ENTRY_DELAYS = 'update_entry_delays'
-
     SYSTEM_STATUS_ARRAY = ['ARM-STAY','ARM-AWAY','DISARM','ARM-AWAY-EXIT-DELAY','ARM-STAY-EXIT-DELAY']
     ALARM_TYPE_ARRAY = ['Police Emergency','Fire Emergency','Auxiliary Emergency','Silent Auxiliary Emergency','Silent Police Emergency']
     ALARM_STATE_ARRAY =['None','Delay','Alarm']
@@ -104,7 +96,6 @@ class QolsysPartition(QolsysObservable):
 
         # if self._system_status != value: # Note
         LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status: {value}")
-        prev_value = self._system_status
         self._system_status = value
         self.notify()
 
@@ -112,7 +103,6 @@ class QolsysPartition(QolsysObservable):
     def system_status_changed_time(self,value):
         if self._system_status_changed_time != value:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status_changed_time: {value}")
-            prev_value = self._system_status
             self._system_status_changed_time = value
             self.notify()
 
@@ -124,7 +114,6 @@ class QolsysPartition(QolsysObservable):
 
         if self._alarm_sate != value:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - alarm_state: {value}")
-            prev_value = self._alarm_sate
             self._alarm_sate = value
             self.notify()
 
@@ -133,7 +122,6 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow alarm_type {value}")
             return
         
-        prev_value = self._alarm_type
         self._alarm_type.append(value)
         self.notify()
 
@@ -148,7 +136,6 @@ class QolsysPartition(QolsysObservable):
 
         if self._exit_sounds != value:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - exit_sound: {value}")
-            prev_value = self._exit_sounds
             self._exit_sounds = value
             self.notify()
     
@@ -160,7 +147,6 @@ class QolsysPartition(QolsysObservable):
 
         if self._entry_delays != value:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - entry_delays: {value}")
-            prev_value = self._entry_delays
             self._entry_delays = value
             self.notify()
 
