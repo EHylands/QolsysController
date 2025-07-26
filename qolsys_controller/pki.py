@@ -18,6 +18,7 @@ class QolsysPKI():
         self._id = ''
         self._file_prefix = ''
         self._keys_directory = keys_directory
+        self._subkeys_directory = ''
 
         self._key = None
         self._cer = None
@@ -27,7 +28,8 @@ class QolsysPKI():
 
     def set_id(self,id:str):
         self._id = id
-        self._file_prefix = id.replace(':','')
+        self._file_prefix = id.replace(':','').upper()
+        self._subkeys_directory = self._keys_directory + self._file_prefix + '/'
 
     @property
     def key(self):
@@ -90,8 +92,7 @@ class QolsysPKI():
             return False
 
     def check_key_file(self)->bool:
-        print(self._keys_directory + self._file_prefix + '.key')
-        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.key'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.key'):
             LOGGER.debug(f'Found KEY')
             return True
         else:
@@ -99,7 +100,9 @@ class QolsysPKI():
             return False
         
     def check_cer_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.cer'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.cer'):
+            print(self._subkeys_directory  + self._file_prefix + '.cer')
+
             LOGGER.debug('Found CER')
             return True
         else:
@@ -107,7 +110,7 @@ class QolsysPKI():
             return False
     
     def check_csr_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.csr'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.csr'):
             LOGGER.debug(f'Found CSR')
             return True
         else:
@@ -115,7 +118,7 @@ class QolsysPKI():
             return False
         
     def check_secure_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.secure'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.secure'):
             LOGGER.debug(f'Found Signed Client Certificate')
             return True
         else:
@@ -123,8 +126,7 @@ class QolsysPKI():
             return False
         
     def check_qolsys_cer_file(self)->bool:
-        print(self._keys_directory + self._file_prefix.upper() + '.qolsys')
-        if os.path.exists(self._keys_directory  + self._file_prefix.upper() + '.qolsys'):
+        if os.path.exists(self._subkeys_directory  + self._file_prefix + '.qolsys'):
             LOGGER.debug(f'Found Qolsys Certificate')
             return True
         else:
@@ -133,49 +135,57 @@ class QolsysPKI():
 
     @property
     def key_file_path(self):
-        return self._keys_directory + self._file_prefix.upper() + '.key'
+        return self._subkeys_directory + self._file_prefix + '.key'
     
     @property
     def csr_file_path(self):
-        return self._keys_directory + self._file_prefix.upper() + '.csr'
+        return self._subkeys_directory + self._file_prefix + '.csr'
     
     @property
     def cer_file_path(self):
-        return self._keys_directory + self._file_prefix.upper() + '.cer'
+        return self._subkeys_directory + self._file_prefix + '.cer'
     
     @property
     def secure_file_path(self):
-        return self._keys_directory + self._file_prefix.upper() + '.secure'
+        return self._subkeys_directory + self._file_prefix + '.secure'
     
     @property
     def qolsys_cer_file_path(self):
-        return self._keys_directory + self._file_prefix.upper() + '.qolsys'
+        return self._subkeys_directory + self._file_prefix + '.qolsys'
 
     def create(self,mac:str,key_size:int)->bool:
 
         self.set_id(mac)
 
+        # Check if directory exist 
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.key'):
+            LOGGER.error(f'Create Directory Colision')
+            return False
+
         # Check for private key colision
-        if os.path.exists(self._keys_directory + self._file_prefix + '.key'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.key'):
             LOGGER.error(f'Create KEY File Colision')
             return False
         
         # Check for CER file colision
-        if os.path.exists(self._keys_directory + self._file_prefix + '.cer'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.cer'):
             LOGGER.error(f'Create CER File Colision')
             return False
         
         # Check for CSR file colision
-        if os.path.exists(self._keys_directory + self._file_prefix + '.csr'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.csr'):
             LOGGER.error(f'Create CSR File Colision')
             return False
         
         # Check for CER file colision
-        if os.path.exists(self._keys_directory + self._file_prefix + '.secure'):
+        if os.path.exists(self._subkeys_directory + self._file_prefix + '.secure'):
             LOGGER.error(f'Create Signed Certificate File Colision')
             return False
 
         LOGGER.debug(f'Creating PKI (' + mac + ')')
+
+        LOGGER.debug(f'Creating PKI Directory')
+        os.makedirs(self._subkeys_directory)
 
         LOGGER.debug(f'Creating KEY')
         private_key = rsa.generate_private_key(public_exponent=65537, 
@@ -183,7 +193,7 @@ class QolsysPKI():
         private_pem = private_key.private_bytes(encoding=serialization.Encoding.PEM,
                                                 format=serialization.PrivateFormat.PKCS8,
                                                 encryption_algorithm=serialization.NoEncryption())
-        with open(self._keys_directory + self._file_prefix + '.key', "wb") as f:
+        with open(self._subkeys_directory + self._file_prefix + '.key', "wb") as f:
             f.write(private_pem)
         
         LOGGER.debug(f'Creating CER')
@@ -211,7 +221,7 @@ class QolsysPKI():
         ).sign(private_key, hashes.SHA256())
         cert_pem = cert.public_bytes(encoding=serialization.Encoding.PEM)
     
-        with open(self._keys_directory + self._file_prefix + '.cer' , "wb") as f:    
+        with open(self._subkeys_directory + self._file_prefix + '.cer' , "wb") as f:    
             f.write(cert_pem)
 
         LOGGER.debug(f'Creating CSR')
@@ -223,6 +233,6 @@ class QolsysPKI():
 
         # Save CSR to file
         csr_pem = csr.public_bytes(encoding=serialization.Encoding.PEM)
-        with open(self._keys_directory + self._file_prefix + '.csr', "wb") as f:
+        with open(self._subkeys_directory + self._file_prefix + '.csr', "wb") as f:
             f.write(csr_pem)
     

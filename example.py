@@ -22,6 +22,11 @@ async def main():
     # Select plugin
     remote.select_plugin('remote')
 
+    remote.plugin.settings.panel_ip = "192.168.10.220"
+    remote.plugin.settings.panel_mac = "3c:31:78:a0:fb:9f"
+    remote.plugin.settings.plugin_paired = True
+    remote.plugin.settings.random_mac = "f2:16:3e:08:81:a7"
+
     # Configure remote plugin
     if not await remote.plugin.config(plugin_ip=plugin_ip):
         LOGGER.debug(f'Error Configuring remote plugin')
@@ -85,8 +90,6 @@ async def main():
         LOGGER.error('Error loading iq2meid database')
 
     LOGGER.debug('Qolsys Panel Ready for operation')
-
-    
 
     # Close Dimmer
     await asyncio.sleep(3)

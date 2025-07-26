@@ -68,9 +68,13 @@ class QolsysPluginRemote(QolsysPlugin):
         self._plugin_ip = plugin_ip
 
         # Check if pairing data is available
-        if not self.settings.read_settings():
-            return False
-
+        #if not self.settings.read_settings():
+        #i    return False
+        if self.settings.plugin_paired:
+            LOGGER.debug(f'Panel is paired')
+        else:
+            LOGGER.debug(f'Panel not paired')
+        
         # Start paring process if plugin is not paired
         if not self.settings.plugin_paired:
             if not await self.start_initial_pairing():
@@ -197,7 +201,7 @@ class QolsysPluginRemote(QolsysPlugin):
             self._pki.create(self.settings.random_mac,key_size=2048)
 
             # Save random_mac to pairing status file
-            self.settings.save_settings()
+            # self.settings.save_settings()
 
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
@@ -280,7 +284,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Plugin will appear in IQ Remote page with inactive status
                 # Mark pairing as complete
                     self.settings.plugin_paired = True
-                    self.settings.save_settings()
+                    #self.settings.save_settings()
 
                     LOGGER.debug(f'Plugin Pairing Completed ')
                     return True

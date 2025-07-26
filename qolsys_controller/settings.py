@@ -17,7 +17,7 @@ class QolsysSettings:
     @property 
     def plugin_paired(self):
         return self._plugin_paired
-    
+        
     @plugin_paired.setter
     def plugin_paired(self, plugin_paired:bool):
         self._plugin_paired = plugin_paired
