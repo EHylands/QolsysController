@@ -28,7 +28,7 @@ class QolsysPluginRemote(QolsysPlugin):
         super().__init__(state,panel,settings)
         
         # PKI
-        self._keys_directory = config_directory
+        self._keys_directory = config_directory +'pki/'
         self._pki = QolsysPKI(keys_directory = self._keys_directory)
 
         # Plugin

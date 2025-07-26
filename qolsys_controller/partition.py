@@ -113,9 +113,13 @@ class QolsysPartition(QolsysObservable):
             return
 
         if self._alarm_sate != value:
+            prev_value = self._alarm_state
             LOGGER.debug(f"Partition{self._id} ({self._name}) - alarm_state: {value}")
             self._alarm_sate = value
-            self.notify()
+
+            # Only notify when None -> Delay and None -> Alarm
+            if prev_value != 'Delay':
+                self.notify()
 
     def append_alarm_type(self,value:str):
         if not value in self.ALARM_TYPE_ARRAY:
