@@ -94,6 +94,54 @@ class QolsysPluginRemote(QolsysPlugin):
         # Everything is configured
         return True
     
+    def test_operation(self):
+        asyncio.get_running_loop().create_task(self.test_operation())
+
+
+    async def test_operation_task(self) -> bool:
+        tls_params = aiomqtt.TLSParameters(
+            ca_certs = self._pki.qolsys_cer_file_path,       
+            certfile = self._pki.secure_file_path,
+            keyfile = self._pki.key_file_path,
+            cert_reqs=ssl.CERT_REQUIRED,    
+            tls_version=ssl.PROTOCOL_TLSv1_2,  
+            ciphers='ALL:@SECLEVEL=0'
+        )
+         
+        LOGGER.debug(f'MQTT: Connecting ...')
+        while True:
+            try:                
+                async with aiomqtt.Client(hostname=self.settings.panel_ip,
+                                port=self.panel_mqtt_port,
+                                tls_params=tls_params,
+                                tls_insecure=True,
+                                clean_session=True,
+                                timeout=30,
+                                identifier='QolsysController') as self.aiomqtt:
+            
+                    LOGGER.debug(f'MQTT: Client Connected')
+
+                    await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
+                    await self.command_connect()
+
+                    async for message in self.aiomqtt.messages:
+                        if self.log_mqtt_mesages:
+                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
+
+                        # Panel response to MQTT Commands
+                        if message.topic.matches("response_" + self.settings.random_mac):
+
+                            data = message.payload.decode().replace("\\\\", "\\")
+                            data = fix_json_string(data)
+                            data = json.loads(data,strict=False)
+                            event = data.get('eventName')
+
+                            if event == 'connect':
+                                return True
+                            
+            except aiomqtt.MqttError:
+                return False
+    
     def start_operation(self):
         asyncio.get_running_loop().create_task(self.start_operation_task())
 
@@ -117,7 +165,7 @@ class QolsysPluginRemote(QolsysPlugin):
                                   tls_params=tls_params,
                                   tls_insecure=True,
                                   clean_session=True,
-                                  timeout=5,
+                                  timeout=30,
                                   identifier='QolsysController') as self.aiomqtt:
             
                     LOGGER.debug(f'MQTT: Client Connected')

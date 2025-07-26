@@ -92,6 +92,7 @@ class QolsysPKI():
             return False
 
     def check_key_file(self)->bool:
+        LOGGER.debug(self._subkeys_directory + self._file_prefix + ".key")
         if os.path.exists(self._subkeys_directory + self._file_prefix + '.key'):
             LOGGER.debug(f'Found KEY')
             return True
@@ -126,6 +127,7 @@ class QolsysPKI():
             return False
         
     def check_qolsys_cer_file(self)->bool:
+        LOGGER.debug(self._subkeys_directory + self._file_prefix + ".qolsys")
         if os.path.exists(self._subkeys_directory  + self._file_prefix + '.qolsys'):
             LOGGER.debug(f'Found Qolsys Certificate')
             return True
