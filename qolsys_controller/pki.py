@@ -91,7 +91,7 @@ class QolsysPKI():
 
     def check_key_file(self)->bool:
         print(self._keys_directory + self._file_prefix + '.key')
-        if os.path.exists(self._keys_directory + self._file_prefix + '.key'):
+        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.key'):
             LOGGER.debug(f'Found KEY')
             return True
         else:
@@ -99,7 +99,7 @@ class QolsysPKI():
             return False
         
     def check_cer_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix + '.cer'):
+        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.cer'):
             LOGGER.debug('Found CER')
             return True
         else:
@@ -107,7 +107,7 @@ class QolsysPKI():
             return False
     
     def check_csr_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix + '.csr'):
+        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.csr'):
             LOGGER.debug(f'Found CSR')
             return True
         else:
@@ -115,7 +115,7 @@ class QolsysPKI():
             return False
         
     def check_secure_file(self)->bool:
-        if os.path.exists(self._keys_directory + self._file_prefix + '.secure'):
+        if os.path.exists(self._keys_directory + self._file_prefix.upper() + '.secure'):
             LOGGER.debug(f'Found Signed Client Certificate')
             return True
         else:
@@ -123,7 +123,8 @@ class QolsysPKI():
             return False
         
     def check_qolsys_cer_file(self)->bool:
-        if os.path.exists(self._keys_directory  + self._file_prefix + '.qolsys'):
+        print(self._keys_directory + self._file_prefix.upper() + '.key')
+        if os.path.exists(self._keys_directory  + self._file_prefix.upper() + '.qolsys'):
             LOGGER.debug(f'Found Qolsys Certificate')
             return True
         else:
