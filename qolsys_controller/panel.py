@@ -76,6 +76,9 @@ class QolsysPanel(QolsysObservable):
         self._unique_id = ''
         self._settings_directory = settings_directory
 
+        self._imei = ''
+        self._product_type = ''
+
         # Loading user_code data from users.conf file
         try:
             with open(self._settings_directory + 'users.conf') as fd:
@@ -271,6 +274,10 @@ class QolsysPanel(QolsysObservable):
         self._MAC_ADDRESS = self.db.get_setting_panel('MAC_ADDRESS')
         return self._MAC_ADDRESS
     
+    @MAC_ADDRESS.setter
+    def MAC_ADDRESS(self, value):
+        self._MAC_ADDRESS = value
+    
     @property
     def unique_id(self):
         mac_address = self.MAC_ADDRESS
@@ -280,7 +287,22 @@ class QolsysPanel(QolsysObservable):
     def TIMER_LONG_EXIT_DELAY(self):
         self._TIMER_LONG_EXIT_DELAY = self.db.get_setting_panel('TIMER_LONG_ENTRY_DELAY')
         return self._TIMER_LONG_EXIT_DELAY
-   
+    
+    @property
+    def imei(self):
+        return self._imei
+    
+    @imei.setter
+    def imei(self,value):
+        self._imei = value
+
+    @property
+    def product_type(self):
+        return self._product_type
+    
+    @product_type.setter
+    def product_type(self,value):
+        self._product_type = value
 
     def load_database(self,database:dict):
         self.db.load_db(database)

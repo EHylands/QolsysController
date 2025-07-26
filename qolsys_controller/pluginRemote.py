@@ -97,7 +97,6 @@ class QolsysPluginRemote(QolsysPlugin):
     def test_operation(self):
         asyncio.get_running_loop().create_task(self.test_operation())
 
-
     async def test_operation_task(self) -> bool:
         tls_params = aiomqtt.TLSParameters(
             ca_certs = self._pki.qolsys_cer_file_path,       
@@ -137,6 +136,9 @@ class QolsysPluginRemote(QolsysPlugin):
                             event = data.get('eventName')
 
                             if event == 'connect':
+                                self.panel.MAC_ADDRESS = data.get('master_mac','')
+                                self.panel.imei = data.get('master_imei','')
+                                self.panel.product_type = data.get('primary_product_type','')
                                 return True
                             
             except aiomqtt.MqttError:
@@ -212,6 +214,9 @@ class QolsysPluginRemote(QolsysPlugin):
 
                                 case 'connect':
                                     LOGGER.debug(f'MQTT: connect command response') 
+                                    self.panel.MAC_ADDRESS = data.get('master_mac','')
+                                    self.panel.imei = data.get('master_imei','')
+                                    self.panel.product_type = data.get('primary_product_type','')
 
                                 case 'ipcCall':
                                     LOGGER.debug(f'MQTT: ipcCall command response: {data.get('responseStatus')}') 
