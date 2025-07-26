@@ -123,7 +123,7 @@ class QolsysPKI():
             return False
         
     def check_qolsys_cer_file(self)->bool:
-        print(self._keys_directory + self._file_prefix.upper() + '.key')
+        print(self._keys_directory + self._file_prefix.upper() + '.qolsys')
         if os.path.exists(self._keys_directory  + self._file_prefix.upper() + '.qolsys'):
             LOGGER.debug(f'Found Qolsys Certificate')
             return True
@@ -133,23 +133,23 @@ class QolsysPKI():
 
     @property
     def key_file_path(self):
-        return self._keys_directory + self._file_prefix + '.key'
+        return self._keys_directory + self._file_prefix.upper() + '.key'
     
     @property
     def csr_file_path(self):
-        return self._keys_directory + self._file_prefix + '.csr'
+        return self._keys_directory + self._file_prefix.upper() + '.csr'
     
     @property
     def cer_file_path(self):
-        return self._keys_directory + self._file_prefix + '.cer'
+        return self._keys_directory + self._file_prefix.upper() + '.cer'
     
     @property
     def secure_file_path(self):
-        return self._keys_directory + self._file_prefix + '.secure'
+        return self._keys_directory + self._file_prefix.upper() + '.secure'
     
     @property
     def qolsys_cer_file_path(self):
-        return self._keys_directory + self._file_prefix + '.qolsys'
+        return self._keys_directory + self._file_prefix.upper() + '.qolsys'
 
     def create(self,mac:str,key_size:int)->bool:
 
