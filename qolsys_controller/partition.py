@@ -32,7 +32,7 @@ class QolsysPartition(QolsysObservable):
         self._system_status_changed_time:str = system_status_changed_time
         self._exit_sounds:str = exit_sounds
         self._entry_delays:str = entry_delays
-        self._alarm_sate:str = alarm_state
+        self._alarm_state:str = alarm_state
         self._alarm_type:list[str] = alarm_type
     
         self._last_error_type = None
@@ -58,7 +58,7 @@ class QolsysPartition(QolsysObservable):
 
     @property
     def alarm_state(self) -> str:
-        return self._alarm_sate
+        return self._alarm_state
 
     @property
     def alarm_type(self) -> list[str]:
@@ -112,7 +112,7 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow alarm_state {value}")
             return
 
-        if self._alarm_sate != value:
+        if self._alarm_state != value:
             prev_value = self._alarm_state
             LOGGER.debug(f"Partition{self._id} ({self._name}) - alarm_state: {value}")
             self._alarm_state = value
