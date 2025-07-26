@@ -90,8 +90,8 @@ class QolsysPKI():
             return False
 
     def check_key_file(self)->bool:
+        print(self._keys_directory + self._file_prefix + '.key')
         if os.path.exists(self._keys_directory + self._file_prefix + '.key'):
-            print(self._keys_directory + self._file_prefix + '.key')
             LOGGER.debug(f'Found KEY')
             return True
         else:
