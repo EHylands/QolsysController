@@ -95,7 +95,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return True
     
     def test_operation(self):
-        asyncio.get_running_loop().create_task(self.test_operation())
+        asyncio.get_running_loop().create_task(self.test_operation_task())
 
     async def test_operation_task(self) -> bool:
         tls_params = aiomqtt.TLSParameters(
