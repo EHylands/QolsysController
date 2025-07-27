@@ -122,6 +122,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                     await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
                     await self.command_connect()
+                    await self.command_sync_database()
 
                     async for message in self.aiomqtt.messages:
                         if self.log_mqtt_mesages:
