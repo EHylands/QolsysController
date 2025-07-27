@@ -363,49 +363,6 @@ class QolsysPanel(QolsysObservable):
                                     if old_value != new_value:
                                         self.settings_panel_observer.notify()
                                         
-                                    #match name:
-                                    #    case 'PANEL_TAMPER_STATE': self.PANEL_TAMPER_STATE = value
-                                    #    case 'AC_STATUS' : self.AC_STATUS = value
-                                    #    case 'BATTERY_STATUS' : self.BATTERY_STATUS = value
-                                    #    case 'FAIL_TO_COMMUNICATE' : self.FAIL_TO_COMMUNICATE = value
-                                    #    case 'SECURE_ARMING' : self.SECURE_ARMING = value
-                                    #    case 'AUTO_BYPASS' : self.AUTO_BYPASS = value
-                                    #    case 'AUTO_STAY' : self.AUTO_STAY = value
-                                    #    case 'AUTO_ARM_STAY' : self.AUTO_ARM_STAY = value
-                                    #    case 'AUTO_EXIT_EXTENSION': self.AUTO_EXIT_EXTENSION = value
-                                    #    case 'FINAL_EXIT_DOOR_ARMING': self.FINAL_EXIT_DOOR_ARMING = value
-                                    #    case 'NO_ARM_LOW_BATTERY' : self.NO_ARM_LOW_BATTERY = value
-                                    #    case 'TEMPFORMAT' : self.TEMPFORMAT = value
-                                    #    case 'LANGUAGE' : self.LANGUAGE = value
-                                    #    case 'COUNTRY' : self.COUNTRY = value
-                                    #    case 'SYSTEM_TIME' : self.SYSTEM_TIME = value
-                                    #    case 'GSM_CONNECTION_STATUS' : self.GSM_CONNECTION_STATUS = value
-                                    #    case 'GSM_SIGNAL_STRENGTH' : self.GSM_SIGNAL_STRENGTH = value
-                                    #    case 'ANDROID_VERSION' : self.ANDROID_VERSION = value
-                                    #    case 'HARDWARE_VERSION' : self.HARDWARE_VERSION = value
-                                    #    case 'TIMER_NORMAL_ENTRY_DELAY' : self.TIMER_NORMAL_ENTRY_DELAY = value
-                                    #    case 'TIMER_NORMAL_EXIT_DELAY' : self.TIMER_NORMAL_EXIT_DELAY = value
-                                    #    case 'TIMER_LONG_ENTRY_DELAY' : self.TIMER_LONG_ENTRY_DELAY = value
-                                    #    case 'TIMER_LONG_EXIT_DELAY' : self.TIMER_LONG_EXIT_DELAY = value
-                                    #    case 'ZWAVE_CONTROLLER' : self.ZWAVE_CONTROLLER = value
-                                    #    case 'ZWAVE_CARD' : self.ZWAVE_CARD = value
-                                    #    case 'POLICE_PANIC_ENABLED' : self.POLICE_PANIC_ENABLED = value
-                                    #    case 'FIRE_PANIC_ENABLED' : self.FIRE_PANIC_ENABLED = value
-                                    #    case 'AUXILIARY_PANIC_ENABLED' : self.AUXILIARY_PANIC_ENABLED = value
-                                    #    case 'NIGHTMODE_SETTINGS': self.NIGHTMODE_SETTINGS = value
-                                    #    case 'NIGHT_SETTINGS_STATE' : self.NIGHT_SETTINGS_STATE = value
-                                    #    case 'PARTITIONS' : self.PARTITIONS = value
-                                    #    case 'SIX_DIGIT_USER_CODE' : self.SIX_DIGIT_USER_CODE = value
-                                    #    case 'SHOW_SECURITY_SENSORS' : self.SHOW_SECURITY_SENSORS = value
-                                    #    case 'SYSTEM_LOGGED_IN_USER' : self.SYSTEM_LOGGED_IN_USER = value
-                                    #    case 'PANEL_SCENES_SETTING' : self.PANEL_SCENES_SETTING = value
-                                    #    case 'CONTROL_4' : self.CONTROL_4 = value
-                                    #    case 'ZWAVE_FIRM_WARE_VERSION' : self.ZWAVE_FIRM_WARE_VERSION = value
-                                    #    case 'FINAL_EXIT_DOOR_ARMING' : self.FINAL_EXIT_DOOR_ARMING = value
-                                    #    case 'NO_ARM_LOW_BATTERY' : self. NO_ARM_LOW_BATTERY = value
-                                    #    case 'MAC_ADDRESS' : self.MAC_ADDRESS = value
-                                    #    case _: pass
-
                                 # Update Partition setting - Send notification if setting has changed
                                 if name in self.settings_partition:
                                     partition_id = content_values.get('partition_id','')
@@ -490,6 +447,11 @@ class QolsysPanel(QolsysObservable):
                                 self.db.delete_table(self.db.Table_AlarmedSensorProvider,selection,selection_argument)
 
                                 # Update partition alarm state
+                                # Panel sends selection='partion=' and selection_argument=[0]
+                                # For the moment, will resort to updating all panel partition alarm state
+                                for partition in self._state.partitions:
+                                    alarm_type = self.db.get_alarm_type(str(partition.id))
+                                    partition.alarm_type = alarm_type
 
                             case self.db.URI_HistoryContentProvider:
                                 self.db.delete_table(self.db.Table_HistoryContentProvider,selection,selection_argument)

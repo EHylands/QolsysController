@@ -94,7 +94,7 @@ class QolsysPluginRemote(QolsysPlugin):
         # Everything is configured
         return True
     
-    def test_operation(self):
+    async def test_operation(self):
         asyncio.get_running_loop().create_task(self.test_operation_task())
 
     async def test_operation_task(self) -> bool:
@@ -219,7 +219,6 @@ class QolsysPluginRemote(QolsysPlugin):
 
                                 case 'connect':
                                     LOGGER.debug(f'MQTT: connect command response') 
-                                    self.panel.MAC_ADDRESS = data.get('master_mac','')
                                     self.panel.imei = data.get('master_imei','')
                                     self.panel.product_type = data.get('primary_product_type','')
 
