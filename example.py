@@ -37,8 +37,8 @@ async def main():
     remote.plugin.log_mqtt_mesages = False # Enable for MQTT debug purposes
 
     # Settings_panel observer
-    def settings_panel_observer(self,setting_panel_name ,old_value,new_value):
-        print(f'Panel Setting Update:{setting_panel_name} - {new_value}')
+    def settings_panel_observer(self):
+        print('Panel Setting Update')
 
     # state zone observer
     def state_zone_observer(self,change:str,zone:QolsysSensor):
@@ -63,14 +63,13 @@ async def main():
                     partition.unregister(state_partition_observer)
     
     # Partitions observers
-    def partitions_observer():
+    def partitions_observer(self):
         pass
         #print(f'Partition{partition_id} - {change} - {new_value}')
 
     # Zones observers
-    def zones_observer(self,change,zone_id,new_value,prev_value):
-        pass
-        #print(f'Zone{zone_id} - {change} - {new_value}')
+    def zones_observer(self):
+        print('Zone Update')
 
     # Register observers
     remote.panel.settings_panel_observer.register(settings_panel_observer)

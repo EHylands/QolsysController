@@ -136,11 +136,15 @@ class QolsysPluginRemote(QolsysPlugin):
                             event = data.get('eventName')
 
                             if event == 'connect':
-                                self.panel.MAC_ADDRESS = data.get('master_mac','')
                                 self.panel.imei = data.get('master_imei','')
                                 self.panel.product_type = data.get('primary_product_type','')
-                                return True
                             
+                            if event == 'syncdatabase':
+                                    LOGGER.debug(f'MQTT: Updating State from syncdatabase')
+                                    event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
+                                    self.panel.load_database(event.database_frome_json(data))
+                                    return True
+
             except aiomqtt.MqttError:
                 return False
     
