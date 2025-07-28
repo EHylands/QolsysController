@@ -158,7 +158,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 return False
     
     def start_operation(self):
-        asyncio.get_running_loop().create_task(self.start_operation_task())
+        asyncio.create_task(self.start_operation_task())
 
     async def start_operation_task(self):
 
