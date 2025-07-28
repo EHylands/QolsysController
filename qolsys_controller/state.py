@@ -53,7 +53,7 @@ class QolsysState(QolsysObservable):
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
         dimmers = []
-        for device in self.zwave_devices():
+        for device in self.zwave_devices:
             if isinstance(device,QolsysDimmer):
                 dimmers.append(device)
         
