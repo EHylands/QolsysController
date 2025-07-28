@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from datetime import datetime
@@ -81,6 +82,7 @@ class QolsysPanel(QolsysObservable):
         self._imei = ''
         self._product_type = ''
 
+    def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file
         try:
             with open(self._settings_directory + 'users.conf') as fd:
@@ -91,12 +93,14 @@ class QolsysPanel(QolsysObservable):
 
                 except json.JSONDecodeError as e:
                     LOGGER.error(f'users.conf file json error: {e}"')
-                    return
+                    return False
                     
         except FileNotFoundError:
             LOGGER.error(f'users.conf file not found')
-            return
-    
+            return False
+        
+        return True
+        
     @property
     def db(self):
         return self._db
@@ -471,11 +475,12 @@ class QolsysPanel(QolsysObservable):
 
                             # AlarmedSensorProvider
                             case self.db.URI_AlarmedSensorProvider:
+
                                 partition_id = content_values.get('partition_id','')
                                 self.db.add_alarmed_sensor(content_values.get('_id',''),
                                                     content_values.get('partition_id',''),
                                                     content_values.get('silenced',''),
-                                                    content_values.get('zonde_id',''),
+                                                    content_values.get('zone_id',''),
                                                     content_values.get('sgroup',''),
                                                     content_values.get('action',''),
                                                     content_values.get('time_out',''),

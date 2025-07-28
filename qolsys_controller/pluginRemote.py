@@ -42,6 +42,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         #MQTT Client
         self.aiomqtt = None
+        self._mqtt_timeout = 30
         self._command_list = list()
 
     @property
@@ -60,10 +61,17 @@ class QolsysPluginRemote(QolsysPlugin):
     def check_user_code_on_disarm(self,check_user_code_on_disarm:bool):
         self._check_user_code_on_disarm = check_user_code_on_disarm
 
-    async def config(self, plugin_ip:str)->bool:
+    async def config(self,plugin_ip:str) -> bool:
+        return await asyncio.create_task(self.config_task(plugin_ip))
+    
+    async def config_task(self, plugin_ip:str) -> bool:
         
         LOGGER.debug(f'Configuring Plugin')
         super().config()
+
+        # Read user file
+        if not self.panel.read_users_file():
+            return False
 
         self._plugin_ip = plugin_ip
 
@@ -172,7 +180,7 @@ class QolsysPluginRemote(QolsysPlugin):
                                   tls_params=tls_params,
                                   tls_insecure=True,
                                   clean_session=True,
-                                  timeout=30,
+                                  timeout=self._mqtt_timeout,
                                   identifier='QolsysController') as self.aiomqtt:
             
                     LOGGER.debug(f'MQTT: Client Connected')
@@ -181,7 +189,10 @@ class QolsysPluginRemote(QolsysPlugin):
 
                     await self.aiomqtt.subscribe("iq2meid")
                     await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
-                    await self.aiomqtt.subscribe("mastermeid",qos=2)
+
+                    # Only log mastermeid traffic for debug purposes
+                    if self.log_mqtt_mesages:
+                        await self.aiomqtt.subscribe("mastermeid",qos=2)
 
                     await self.command_connect()
                     await self.command_pingevent()
@@ -246,8 +257,8 @@ class QolsysPluginRemote(QolsysPlugin):
                 self.panel_ready = False
                 self.panel_ready_observer.notify(panel_ready=self.panel_ready)
                 
-                print(f"Connection lost; Reconnecting in {30} seconds ...")
-                await asyncio.sleep(30)
+                LOGGER.debug(f"Connection lost: Reconnecting in {self._mqtt_timeout} seconds ...")
+                await asyncio.sleep(self._mqtt_timeout)
 
     async def start_initial_pairing(self)->bool:
        

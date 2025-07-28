@@ -41,31 +41,16 @@ async def main():
         print('Panel Setting Update')
 
     # state zone observer
-    def state_zone_observer(self,change:str,zone:QolsysSensor):
-        match change:
-             case remote.state.NOTIFY_ZONE_ADD:
-                zone = remote.state.zone(zone.zone_id)
-                if zone != None:
-                    print(f'Main - Zone Added - Zone{zone.zone_id} ({zone.sensorname})')
-                    zone.register(zones_observer)
+    def state_zone_observer():
+       print('State Zone Update')
 
     # state partition observer
     def state_partition_observer(self,change:str,partition:QolsysPartition):
-        match change:
-            case remote.state.NOTIFY_PARTITION_ADD:
-                if partition != None:
-                    print(f'Main - Partition Added - Partition{partition.id} ({partition.name})')
-                    partition.register(partitions_observer)
-
-            case remote.state.NOTIFY_PARTITION_DELETE:
-                if partition != None:
-                    print(f'Main - Partition Deleted - Partition{partition.id} ({partition.name})')
-                    partition.unregister(state_partition_observer)
+        print('State Partition Update')
     
     # Partitions observers
     def partitions_observer(self):
-        pass
-        #print(f'Partition{partition_id} - {change} - {new_value}')
+        print('Partition Update')
 
     # Zones observers
     def zones_observer(self):
@@ -73,14 +58,15 @@ async def main():
 
     # Register observers
     remote.panel.settings_panel_observer.register(settings_panel_observer)
-    remote.state.state_partition_observer.register(state_partition_observer)
-    remote.state.state_zone_observer.register(state_zone_observer)
+    #remote.state.state_partition_observer.register(state_partition_observer)
+    #remote.state.state_zone_observer.register(state_zone_observer)
      
     # Start panel operation
     ready: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
 
     def panel_ready_callback(self,panel_ready:bool):
         ready.set_result(panel_ready)
+        remote.plugin.panel_ready_observer.unregister(panel_ready_callback)
 
     remote.plugin.panel_ready_observer.register(panel_ready_callback)
     remote.plugin.start_operation()

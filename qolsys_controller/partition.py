@@ -127,6 +127,11 @@ class QolsysPartition(QolsysObservable):
         self.notify()
     
     def append_alarm_type(self,value:str):
+
+        if value == '':
+            # Default value, panel doesnt send alarm type when user fails to enter disarm code
+            value = 'Police Emergency' 
+
         if not value in self.ALARM_TYPE_ARRAY:
             LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow alarm_type {value}")
             return
