@@ -52,7 +52,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             LOGGER.debug(f"Dimmer{self._node_id} ({self.dimmer_name}) - level: {value}")
             prev_value = self._dimmer_level
             self._dimmer_level = value
-            self.notify(change=self.NOTIFY_UPDATE_DIMMER_LEVEL,node_id=self._node_id, prev_value=prev_value, new_value=value)
+            self.notify()
 
     @dimmer_status.setter
     def dimmer_status(self,value):
@@ -60,7 +60,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             LOGGER.debug(f"Dimmer{self._node_id} ({self.dimmer_name}) - status: {value}")
             prev_value = self._dimmer_status
             self._dimmer_status = value
-            self.notify(change=self.NOTIFY_UPDATE_DIMMER_STATUS,node_id=self._node_id, prev_value=prev_value, new_value=value)
+            self.notify()
     
     @dimmer_name.setter
     def dimmer_name(self,value):
@@ -68,7 +68,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             LOGGER.debug(f"Dimmer{self._node_id} ({self.dimmer_name}) - name: {value}")
             prev_value = self._dimmer_name
             self._dimmer_name = value
-            self.notify(change=self.NOTIFY_UPDATE_DIMMER_NAME,node_id=self._node_id, prev_value=prev_value, new_value=value)
+            self.notify()
 
     def update(self,content_values:dict):
           # Check if we are updating same zoneid        
