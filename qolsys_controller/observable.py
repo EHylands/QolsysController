@@ -19,7 +19,7 @@ class QolsysObservable:
         self._observers.remove(observer)
 
     def notify(self,**payload):
-        #LOGGER.debug(f"Notifying {self} observers with: {payload}")
+        LOGGER.debug(f"Notifying {self} observers with: {payload}")
         if self._batch_update_active:
             self._batch_update_change_detected = True
         else:
