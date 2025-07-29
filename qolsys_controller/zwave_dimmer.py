@@ -77,6 +77,9 @@ class QolsysDimmer(QolsysZWaveDevice):
             LOGGER.error(f"Updating Dimmer '{self._node_id}' ({self.dimmer_name}) with dimmer '{node_id_update}' (different id)")
             return
         
+        # Only send 1 notify event for all changes
+        self.start_batch_update()
+
         # Update status
         if 'status' in content_values:
             self.dimmer_status = content_values.get('status')
@@ -88,4 +91,6 @@ class QolsysDimmer(QolsysZWaveDevice):
         # Update dimmer_name
         if 'dimmer_name' in content_values:
             self.dimmer_name = content_values.get('dimmer_name')
+
+        self.end_batch_update()
 
