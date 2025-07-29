@@ -78,7 +78,7 @@ async def main():
 
     # Close Dimmer
     await asyncio.sleep(3)
-    await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
+    await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=0)
 
     # Open Dimmer
     #await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)

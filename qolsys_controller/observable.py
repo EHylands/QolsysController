@@ -23,6 +23,7 @@ class QolsysObservable:
         if self._batch_update_active:
             self._batch_update_change_detected = True
         else:
+            LOGGER.debug('notify')
             for observer in self._observers:
                 observer(self,**payload)
 
