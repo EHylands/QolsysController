@@ -15,7 +15,7 @@ class QolsysSensor(QolsysObservable):
     def __init__(self, sensor_id: str, sensorname: str, group: str, sensorstatus: str,
                  sensorstate: str, zone_id: int, zone_type: int,
                  zone_physical_type: int, zone_alarm_type: int,
-                 partition_id: int,battery_status: str) -> None:
+                 partition_id: int,battery_status: str,sensortype:str) -> None:
         super().__init__()
 
         self._id = sensor_id
@@ -23,6 +23,7 @@ class QolsysSensor(QolsysObservable):
         self._group = group
         self._sensorstatus = sensorstatus
         self._sensorstate = sensorstate
+        self._sensortype = sensortype
         self._zone_id = zone_id
         self._zone_type = zone_type
         self._zone_physical_type = zone_physical_type
@@ -105,6 +106,10 @@ class QolsysSensor(QolsysObservable):
     @property
     def sensorstate(self):
         return self._sensorstate
+    
+    @property
+    def sensortype(self):
+        return self._sensortype
 
     @property
     def zone_id(self):
@@ -156,8 +161,7 @@ class QolsysSensor(QolsysObservable):
     @sensorname.setter
     def sensorname(self, value):
         if self.sensorname != value:
-            prev_value = self.sensorname
-            self.sensorname = value
+            self._sensorname = value
             if self.NOTIFY_UPDATE_SENSORNAME:
                 self.notify()
 
@@ -168,6 +172,11 @@ class QolsysSensor(QolsysObservable):
             self._time = value
             if self._NOTIFY_TIME:
                 self.notify()
+
+    @sensortype.setter
+    def sensortype(self,value):
+        if self._sensortype != value:
+            self._sensortype = value
 
     @partition_id.setter
     def partition_id(self, value):

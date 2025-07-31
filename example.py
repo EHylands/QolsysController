@@ -77,8 +77,8 @@ async def main():
     LOGGER.debug('Qolsys Panel Ready for operation')
 
     # Close Dimmer
-    await asyncio.sleep(3)
-    await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=0)
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=0)
 
     # Open Dimmer
     #await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
@@ -92,8 +92,8 @@ async def main():
     #await remote.plugin.command_disarm(partition_id=0,user_code='1111')
 
     # ARM_AWAY
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_arm(partition_id=0,arming_type='ARM_AWAY',user_code='1111', exit_sounds=False)
+    await asyncio.sleep(3)
+    await remote.plugin.command_arm(partition_id=0,arming_type='ARM-AWAY',user_code='1111', exit_sounds=False)
 
     # DISARM
     #await asyncio.sleep(65)

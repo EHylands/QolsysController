@@ -460,6 +460,9 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_HistoryContentProvider:
                                 self.db.delete_table(self.db.Table_HistoryContentProvider,selection,selection_argument)
 
+                            case self.db.URI_ZDeviceHistoryContentProvider:
+                                self.db.delete_table(self.db.Table_ZDeviceHistoryContentProvider,selection,selection_argument)
+
                             case _:
                                 print(f'iq2meid deleting unknow uri:{uri}')
                                 print(data)
@@ -582,7 +585,8 @@ class QolsysPanel(QolsysObservable):
                                   int(zone_info['zone_physical_type']),
                                   int(zone_info['zone_alarm_type']),
                                   int(zone_info['partition_id']),
-                                  zone_info['battery_status'])
+                                  zone_info['battery_status'],
+                                  zone_info['sensortype'])
             zones.append(zone)
 
         return zones
