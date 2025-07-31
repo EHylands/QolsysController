@@ -10,12 +10,12 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysSensor(QolsysObservable):
 
-    SENSOR_STATUS_ARRAY = ['Open', 'Closed', 'Active', 'Inactive','Activated','Idle','Unreachable','Tampered','Synchonizing']
+    SENSOR_STATUS_ARRAY = ['Open', 'Closed', 'Active', 'Inactive','Activated','Idle','Unreachable','Tampered','Synchonizing','connected']
 
     def __init__(self, sensor_id: str, sensorname: str, group: str, sensorstatus: str,
                  sensorstate: str, zone_id: int, zone_type: int,
                  zone_physical_type: int, zone_alarm_type: int,
-                 partition_id: int,battery_status: str,sensortype:str) -> None:
+                 partition_id: int,battery_status: str,sensortype:str,latestdBm:str,averagedBm:str) -> None:
         super().__init__()
 
         self._id = sensor_id
@@ -31,8 +31,8 @@ class QolsysSensor(QolsysObservable):
         self._partition_id = partition_id
         self._battery_status = battery_status
         self._sensortts = ''
-        self._latestdBm = ''
-        self._averagedBm = ''
+        self._latestdBm = latestdBm
+        self._averagedBm = averagedBm
         self._current_capability = ''
         self._zone_rf_sensor = ''
         self._zone_supervised = ''
@@ -86,6 +86,10 @@ class QolsysSensor(QolsysObservable):
         # Update partition_id
         if 'partition_id' in contentValues:
             self._partition_id = contentValues.get('partition_id')
+
+        # Update lastestdBm
+        if 'lastestdBm' in contentValues:
+            self.latestdBm = contentValues.get('latestdBm')
         
     @property
     def sensorname(self):
@@ -138,6 +142,26 @@ class QolsysSensor(QolsysObservable):
     @property
     def partition_id(self):
         return self._partition_id
+    
+    @property
+    def latestdBm(self):
+        return self._latestdBm
+    
+    @property  
+    def averagedBm(self):
+        return self._averagedBm
+    
+    @averagedBm.setter
+    def averagedBm(self,value):
+        if self._averagedBm != value:
+            self._averagedBm = value
+            self.notify()
+    
+    @latestdBm.setter
+    def latestdBm(self,value):
+        if self._latestdBm != value:
+            self.latestdBm = value
+            self.notify()
 
     @sensorstatus.setter
     def sensorstatus(self, value):

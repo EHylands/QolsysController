@@ -395,8 +395,8 @@ class QolsysDB():
                                             signal_source =s.get('signal_source',''),
                                             powerg_manufacture_id = s.get('powerg_manufacture_id',''),
                                             parent_node = s.get('parent_node',''),
-                                            latestdBm = s.get('latestdBm',''),
-                                            averagedBm = s.get('averagedBm',''),
+                                            latestdBm = s.get('latestdBm','0'),
+                                            averagedBm = s.get('averagedBm','0'),
                                             serial_number = s.get('serial_number',''),
                                             extras= s.get('extras',''))
 

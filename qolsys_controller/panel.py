@@ -586,7 +586,9 @@ class QolsysPanel(QolsysObservable):
                                   int(zone_info['zone_alarm_type']),
                                   int(zone_info['partition_id']),
                                   zone_info['battery_status'],
-                                  zone_info['sensortype'])
+                                  zone_info['sensortype'],
+                                  zone_info['latestdBm'],
+                                  zone_info['averagedBm'])
             zones.append(zone)
 
         return zones
