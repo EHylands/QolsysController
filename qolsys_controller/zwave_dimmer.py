@@ -70,6 +70,9 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_name = value
             self.notify()
 
+    def is_on(self) -> bool:
+        return self.dimmer_status == 'On'
+
     def update(self,content_values:dict):
           # Check if we are updating same zoneid        
         node_id_update = content_values.get('node_id','')

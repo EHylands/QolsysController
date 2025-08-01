@@ -34,7 +34,7 @@ class QolsysPanel(QolsysObservable):
                                 'TIMER_NORMAL_EXIT_DELAY','TIMER_LONG_ENTRY_DELAY','TIMER_LONG_EXIT_DELAY','ZWAVE_CONTROLLER',
                                 'ZWAVE_CARD','POLICE_PANIC_ENABLED','FIRE_PANIC_ENABLED','AUXILIARY_PANIC_ENABLED','NIGHTMODE_SETTINGS',
                                 'NIGHT_SETTINGS_STATE','PARTITIONS','SIX_DIGIT_USER_CODE','SHOW_SECURITY_SENSORS','SYSTEM_LOGGED_IN_USER',
-                                'PANEL_SCENES_SETTING','CONTROL_4','ZWAVE_FIRM_WARE_VERSION','FINAL_EXIT_DOOR_ARMING','NO_ARM_LOW_BATTERY','MAC_ADDRESS' ]
+                                'PANEL_SCENES_SETTING','CONTROL_4','ZWAVE_FIRM_WARE_VERSION','FINAL_EXIT_DOOR_ARMING','NO_ARM_LOW_BATTERY','MAC_ADDRESS','LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N' ]
 
         self._PANEL_TAMPER_STATE = ''
         self._AC_STATUS = ''
@@ -74,6 +74,7 @@ class QolsysPanel(QolsysObservable):
         self._MAC_ADDRESS = ''
         self._SYSTEM_LOGGED_IN_USER = ''
         self._PANEL_SCENES_SETTING = ''
+        self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = ''
         
         self._users = []
         self._unique_id = ''
@@ -293,6 +294,11 @@ class QolsysPanel(QolsysObservable):
     def TIMER_LONG_EXIT_DELAY(self):
         self._TIMER_LONG_EXIT_DELAY = self.db.get_setting_panel('TIMER_LONG_ENTRY_DELAY')
         return self._TIMER_LONG_EXIT_DELAY
+    
+    @property
+    def LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N(self):
+        self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = self.db.get_setting_panel('LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N')
+        return self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N
     
     @property
     def imei(self):
