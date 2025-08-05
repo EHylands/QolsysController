@@ -34,7 +34,8 @@ class QolsysPartition(QolsysObservable):
         self._entry_delays:str = entry_delays
         self._alarm_state:str = alarm_state
         self._alarm_type:list[str] = alarm_type
-        self._arming_exit_sounds = True
+        self._command_exit_sounds = True
+        self._command_arm_stay_instant = True
 
     @property
     def id(self) -> int:
@@ -65,29 +66,17 @@ class QolsysPartition(QolsysObservable):
         return self._exit_sounds
     
     @property
-    def arming_exit_sounds(self) -> bool:
+    def command_exit_sounds(self) -> bool:
         return self._arming_exit_sounds
+    
+    @property   
+    def command_arm_stay_instant(self) -> bool:
+        return self._command_arm_stay_instant
     
     @property
     def entry_delays(self) -> str:
         return self._entry_delays
     
-    @property
-    def last_error_type(self):
-        return self._last_error_type
-
-    @property
-    def last_error_desc(self):
-        return self._last_error_desc
-
-    @property
-    def last_error_at(self):
-        return self._last_error_at
-
-    @property
-    def disarm_failed(self):
-        return self._disarm_failed
-
     @system_status.setter
     def system_status(self, value):
         if not value in self.SYSTEM_STATUS_ARRAY:
@@ -153,10 +142,16 @@ class QolsysPartition(QolsysObservable):
             self._exit_sounds = value
             self.notify()
     
-    @arming_exit_sounds.setter
-    def arming_exit_sounds(self,value):
+    @command_exit_sounds.setter
+    def command_exit_sounds(self,value):
         if self._arming_exit_sounds != value:
             self._arming_exit_sounds = value
+            self.notify()
+
+    @command_arm_stay_instant.setter
+    def command_arm_stay_instant(self,value):
+        if self._command_arm_stay_instant != value:
+            self._command_arm_stay_instant = value
             self.notify()
     
     @entry_delays.setter
