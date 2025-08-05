@@ -144,8 +144,8 @@ class QolsysPartition(QolsysObservable):
     
     @command_exit_sounds.setter
     def command_exit_sounds(self,value):
-        if self._arming_exit_sounds != value:
-            self._arming_exit_sounds = value
+        if self._command_exit_sounds != value:
+            self._command_exit_sounds = value
             self.notify()
 
     @command_arm_stay_instant.setter
