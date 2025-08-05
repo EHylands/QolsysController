@@ -155,7 +155,9 @@ class QolsysPartition(QolsysObservable):
     
     @arming_exit_sounds.setter
     def arming_exit_sounds(self,value):
-        self._arming_exit_sounds = value
+        if self._arming_exit_sounds != value:
+            self._arming_exit_sounds = value
+            self.notify()
     
     @entry_delays.setter
     def entry_delays(self,value):

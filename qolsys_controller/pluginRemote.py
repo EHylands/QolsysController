@@ -233,8 +233,6 @@ class QolsysPluginRemote(QolsysPlugin):
                                     LOGGER.debug(f'MQTT: connect command response') 
                                     self.panel.imei = data.get('master_imei','')
                                     self.panel.product_type = data.get('primary_product_type','')
-                                    print(data)
-
 
                                 case 'ipcCall':
                                     LOGGER.debug(f'MQTT: ipcCall command response: {data.get('responseStatus')}') 
