@@ -34,11 +34,7 @@ class QolsysPartition(QolsysObservable):
         self._entry_delays:str = entry_delays
         self._alarm_state:str = alarm_state
         self._alarm_type:list[str] = alarm_type
-    
-        self._last_error_type = None
-        self._last_error_desc = None
-        self._last_error_at = None
-        self._disarm_failed = 0
+        self._arming_exit_sounds = True
 
     @property
     def id(self) -> int:
@@ -67,6 +63,10 @@ class QolsysPartition(QolsysObservable):
     @property
     def exit_sounds(self) -> str:
         return self._exit_sounds
+    
+    @property
+    def arming_exit_sounds(self) -> bool:
+        return self._arming_exit_sounds
     
     @property
     def entry_delays(self) -> str:
@@ -153,6 +153,10 @@ class QolsysPartition(QolsysObservable):
             self._exit_sounds = value
             self.notify()
     
+    @arming_exit_sounds.setter
+    def arming_exit_sounds(self,value):
+        self._arming_exit_sounds = value
+    
     @entry_delays.setter
     def entry_delays(self,value):
         if not value in self.ENTRY_DELAYS_ARRAY:
@@ -181,27 +185,6 @@ class QolsysPartition(QolsysObservable):
     
     def is_armed_away(self) -> bool:
         return self.system_status == 'ARM-AWAY'
-
-    @disarm_failed.setter
-    def disarm_failed(self, value):
-        new_value = int(value)
-
-        if self._disarm_failed != new_value:
-            LOGGER.debug(f"Partition '{self.id}' ({self.name}) disarm failed updated to '{value}'")
-            self._disarm_failed = new_value
-
-            self.notify()
-
-    def errored(self, error_type: str, error_description: str):
-        self._last_error_type = error_type
-        self._last_error_desc = error_description
-        self._last_error_at = datetime.now(timezone.utc).isoformat()
-
-        # If this is a failed disarm attempt, let's increase the counter
-        if error_type.upper() == 'DISARM_FAILED':
-            self._disarm_failed += 1
-
-        self.notify()
 
     def __str__(self):
         return (f"<QolsysPartition id={self.id} name={self.name} "
