@@ -67,7 +67,7 @@ class QolsysPartition(QolsysObservable):
     
     @property
     def command_exit_sounds(self) -> bool:
-        return self._arming_exit_sounds
+        return self._command_exit_sounds
     
     @property   
     def command_arm_stay_instant(self) -> bool:
