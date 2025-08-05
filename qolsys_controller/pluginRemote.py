@@ -924,7 +924,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "userID":user_id,
             "partitionID":partition_id,
             "exitSoundValue":  exitSoundValue,
-            "entryDelayValue": "ON",
+            "entryDelayValue": "OFF",
             "multiplePartitionsSelected" : False,
             "instant_arming": instant_arm,
             "final_exit_arming_selected" : False,
