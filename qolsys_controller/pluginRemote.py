@@ -773,7 +773,7 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic,payload)
 
 
-    async def command_disarm(self,partition_id:int,user_code:str='') -> bool:
+    async def command_disarm(self,partition_id:int,user_code:str='',exit_sounds:bool=True) -> bool:
         LOGGER.debug(f'MQTT: Sending disarm command - check_user_code:{self.check_user_code_on_disarm}')
 
         partition = self.state.partition(partition_id)
@@ -807,7 +807,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "userID":user_id,
             "partitionID":partition_id,
             "operation_source": 1,
-            'disarm_exit_sounds': True,
+            'disarm_exit_sounds': exit_sounds,
             "macAddress" : self.settings.random_mac
         }
     
@@ -884,7 +884,7 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic,payload)
 
 
-    async def command_arm(self,partition_id:int,arming_type:str,user_code:str='',exit_sounds:bool=False) -> bool:
+    async def command_arm(self,partition_id:int,arming_type:str,user_code:str='',exit_sounds:bool=False,instant_arm:bool=False) -> bool:
         
         LOGGER.debug(f'MQTT: Sending arm command: partition{partition_id}, arming_type:{arming_type}, secure_arm:{self.panel.SECURE_ARMING}' )
 
@@ -926,7 +926,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "exitSoundValue":  exitSoundValue,
             "entryDelayValue": "ON",
             "multiplePartitionsSelected" : False,
-            "instant_arming": True,
+            "instant_arming": instant_arm,
             "final_exit_arming_selected" : False,
             "manually_selected_zones": "[]",
             "operation_source": 1,
