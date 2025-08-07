@@ -107,8 +107,11 @@ class QolsysPartition(QolsysObservable):
             self._alarm_state = value
 
             # Only notify when None -> Delay and None -> Alarm
-            if prev_value != 'Delay':
-                self.notify()
+            if self.system_status == 'ARM-AWAY-EXIT-DELAY' or self.system_status == 'ARM-STAY-EXIT-DELAY':
+                if prev_value == 'Delay' and value == 'None':
+                    return
+            
+            self.notify()
    
     @alarm_type.setter
     def alarm_type(self,value:list[str]):
@@ -175,7 +178,11 @@ class QolsysPartition(QolsysObservable):
         return self.system_status ==  'ARM-AWAY-EXIT-DELAY' or self.system_status ==  'ARM-STAY-EXIT-DELAY'
     
     def is_pending(self) -> bool:
-        return self.alarm_state == 'Delay'
+        if self.alarm_type == 'ARM-AWAY' or self.alarm_type == 'ARM-STAY':
+            if self.alarm_state == 'Delay':
+                return True
+            
+        return False
     
     def is_armed_stay(self) -> bool:
         return self.system_status == 'ARM-STAY'

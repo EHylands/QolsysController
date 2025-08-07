@@ -26,6 +26,10 @@ class QolsysPKI():
         self._secure = None
         self._qolsys = None
 
+    @property
+    def id(self) -> str:
+        return self._id
+
     def set_id(self,id:str):
         self._id = id
         self._file_prefix = id.replace(':','').upper()

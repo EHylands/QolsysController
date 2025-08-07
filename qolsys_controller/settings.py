@@ -50,6 +50,14 @@ class QolsysSettings:
     def panel_ip(self, panel_ip:str):
         self._panel_ip = panel_ip
 
+    def check_panel_ip(self) -> bool:
+        if self._panel_ip == '':
+            LOGGER.debug(f'Invalid Panel IP')
+            return False
+        else:
+            LOGGER.debug(f'Found Panel IP')
+            return True
+
     def read_settings(self)->bool:
         try:
             with open(self._settings_directory + self._settings_file) as fd:

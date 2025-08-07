@@ -64,39 +64,52 @@ class QolsysPluginRemote(QolsysPlugin):
     async def config(self,plugin_ip:str) -> bool:
         return await asyncio.create_task(self.config_task(plugin_ip))
     
+    def is_paired(self) -> bool:
+        # Check if plugin is paired:
+        # 1- random_mac set
+        # 2- KEY file present
+        # 3- Signed certificate file present
+        # 4- Qolsys certificate present
+        # 5- Qolsys Panel IP present
+        if (self._pki.id != '' and
+            self._pki.check_key_file() and
+            self._pki.check_secure_file() and
+            self._pki.check_qolsys_cer_file() and
+            self.settings.check_panel_ip()):
+            return True
+        
+        return False
+
     async def config_task(self, plugin_ip:str) -> bool:
         
         LOGGER.debug(f'Configuring Plugin')
         super().config()
 
-        # Read user file
+        # Read user file for access code
         if not self.panel.read_users_file():
             return False
 
         self._plugin_ip = plugin_ip
+        self._pki.set_id(self.settings.random_mac)
 
-        # Check if pairing data is available
-        #if not self.settings.read_settings():
-        #i    return False
-        if self.settings.plugin_paired:
+        # Check if plugin is paired
+        if self.is_paired():
             LOGGER.debug(f'Panel is paired')
+
         else:
             LOGGER.debug(f'Panel not paired')
-        
-        # Start paring process if plugin is not paired
-        if not self.settings.plugin_paired:
             if not await self.start_initial_pairing():
                 LOGGER.debug(f'Error Pairing with Panel')
-                return False
+                return False       
 
         LOGGER.debug(f'Starting Plugin Operation')
         
         # Check for valid PKI
         LOGGER.debug(f'Checking PKI')
         self._pki.set_id(self.settings.random_mac)
-        if not(self._pki.check_qolsys_cer_file() and 
-               self._pki.check_secure_file() and
-               self._pki.check_key_file()):
+        if not(self._pki.check_key_file() and
+                self._pki.check_secure_file() and
+                self._pki.check_qolsys_cer_file()):
             return False
         
         # Everything is configured
@@ -123,7 +136,7 @@ class QolsysPluginRemote(QolsysPlugin):
                                 tls_params=tls_params,
                                 tls_insecure=True,
                                 clean_session=True,
-                                timeout=30,
+                                timeout=self._mqtt_timeout,
                                 identifier='QolsysController') as self.aiomqtt:
             
                     LOGGER.debug(f'MQTT: Client Connected')
@@ -196,6 +209,8 @@ class QolsysPluginRemote(QolsysPlugin):
                         await self.aiomqtt.subscribe("mastermeid",qos=2)
 
                     await self.command_connect()
+                    await self.command_pairing_request()
+
                     await self.command_pingevent()
                     await self.command_timesync()
                     await self.command_sync_database()
@@ -269,9 +284,6 @@ class QolsysPluginRemote(QolsysPlugin):
             self.settings.random_mac = generate_random_mac()
             self._pki.create(self.settings.random_mac,key_size=2048)
 
-            # Save random_mac to pairing status file
-            # self.settings.save_settings()
-
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
         LOGGER.debug(f'Checking PKI')
@@ -311,15 +323,15 @@ class QolsysPluginRemote(QolsysPlugin):
                 except asyncio.CancelledError:
 
                     LOGGER.debug(f'Stoping Certificate Exchange Server')
-                
+
                     LOGGER.debug(f'Stoping mDNS Service Discovery')
                     await mdns_server.stop_mdns()
 
-                    if not self._pki.check_secure_file():
-                        LOGGER.error(f'MQTT Pairing Error')
-                        return False
-
         LOGGER.debug(f'Sending MQTT Pairing Request to Panel')
+
+        if not (self._pki.check_key_file() and self._pki.check_secure_file() and self._pki.check_qolsys_cer_file()):
+            LOGGER.error(f'MQTT Certificates Error')
+            return False
 
         # We have client sgined certificate at this point
         # Connect to Panel MQTT to send pairing command
@@ -353,8 +365,6 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Plugin will appear in IQ Remote page with inactive status
                 # Mark pairing as complete
                     self.settings.plugin_paired = True
-                    #self.settings.save_settings()
-
                     LOGGER.debug(f'Plugin Pairing Completed ')
                     return True
                 
@@ -366,21 +376,28 @@ class QolsysPluginRemote(QolsysPlugin):
         received_signed_client_certificate = False
         received_qolsys_cer = False
 
+        signed_certificate_data = ''
+        qolsys_certificate_data = ''
+
+        LOGGER.debug('test2')
+
+
         try:
             Continue = True
             while Continue:
 
-                request = (await reader.read(6144))
-
+                
                 # Plugin is receiving panel_mac from panel
                 if(received_panel_mac == False and
                    received_signed_client_certificate == False and
                    received_qolsys_cer == False):
                     
+                    LOGGER.debug('test')
+                    request = (await reader.read(2048))
                     mac = request.decode()
 
                     address, port = writer.get_extra_info('peername')                    
-                    LOGGER.debug(f'Panel Connected from: {address}')
+                    LOGGER.debug(f'Panel Connected from: {address}:{port}')
                     LOGGER.debug(f'Receiving from Panel: {mac}')
                     
                     # Remove \x00 and \x01 from received string
@@ -392,67 +409,56 @@ class QolsysPluginRemote(QolsysPlugin):
                     message = b'\x00\x11' + self.settings.random_mac.encode()
                     LOGGER.debug(f'Sending to Panel: {message.decode()}')
                     writer.write(message)
-                    writer.write(b'sent')
                     await writer.drain()
 
                     #Sending CSR File to panel
                     with open(self._pki.csr_file_path, "rb") as file:
                         content = file.read()
                         LOGGER.debug(f'Sending to Panel: [CSR File Content]')
-                        writer.write(content)
+                        writer.write(content)  
+                        writer.write(b'sent')
                         await writer.drain()
 
                     continue
                
+                # Read signed certificate data 
                 if(received_panel_mac == True and
                    received_signed_client_certificate == False and
                    received_qolsys_cer == False):
                     
-                    certificates = [item for item in request.decode().split('sent') if item]
+                    request = (await reader.readline())
+                    signed_certificate_data += request.decode()
 
-                    # Saving signed client certificate
-                    LOGGER.debug(f'Receiving from Panel: {len(certificates)} certificate')
-
-                    if len(certificates) <= 2:
+                    if 'sent' in request.decode():
+                        certificates = [item for item in signed_certificate_data.split('sent') if item]
                         LOGGER.debug(f'Saving [Signed Client Certificate]')
-                        if(len(certificates) > 0):
-                            with open(self._pki.secure_file_path, "wb") as f:
-                                f.write(certificates[0].encode())
-                                received_signed_client_certificate = True
+                        with open(self._pki.secure_file_path, "wb") as f:
+                            f.write(certificates[0].encode())
+                            received_signed_client_certificate = True
                     
-                    if len(certificates) > 1:
-                        # Saving Qolsys self signed certificate
-                        LOGGER.debug(f'Saving [Qolsys Certificate]')
-                        with open(self._pki.qolsys_cer_file_path, "w") as f:
-                            f.write(certificates[1])
-                            received_qolsys_cer = True
+                        if len(certificates) > 1:
+                            qolsys_certificate_data += certificates[1]
 
-                    # Check if all data has been received   
-                    if(received_panel_mac == True and
-                        received_signed_client_certificate == True and
-                        received_qolsys_cer == True):
-                            Continue = False
-                            writer.close()
-
-                    continue
-
-                # Sometime, panel will send signed client certificate and qolsys certificate in 2 packets
+                # Read qolsys certificate data 
                 if(received_panel_mac == True and
                    received_signed_client_certificate == True and
                    received_qolsys_cer == False):
+                    
+                    request = (await reader.readline())
+                    qolsys_certificate_data += request.decode()
 
-                    certificates = [item for item in request.decode().split('sent') if item]
+                    if 'sent' in request.decode():
+                        Continue = False
+                        certificates = [item for item in qolsys_certificate_data.split('sent') if item]
 
-                    LOGGER.debug(f'Receiving from Panel: {len(certificates)} certificate')
-
-                    if len(certificates) == 1:
-                        # Saving Qolsys self signed certificate
                         LOGGER.debug(f'Saving [Qolsys Certificate]')
                         with open(self._pki.qolsys_cer_file_path, "w") as f:
                             f.write(certificates[0])
                             received_qolsys_cer = True
                             Continue = False
                             writer.close()
+
+                    continue
 
         except asyncio.CancelledError:
             LOGGER.error(f'Key Exchange Server asyncio CancelledError')
