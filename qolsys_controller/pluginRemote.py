@@ -12,10 +12,6 @@ from qolsys_controller.state import QolsysState
 from qolsys_controller.mdns import QolsysMDNS
 from qolsys_controller.pki import QolsysPKI
 from qolsys_controller.panel import QolsysPanel
-
-#from qolsys_controller.event import *
-#from qolsys_controller.event_mqtt import *
-from qolsys_controller.exceptions import UnknownQolsysEventException
 from qolsys_controller.settings import QolsysSettings
 
 from qolsys_controller.utils_mqtt import fix_json_string
@@ -170,8 +166,7 @@ class QolsysPluginRemote(QolsysPlugin):
                             
                             if event == 'syncdatabase':
                                     LOGGER.debug(f'MQTT: Updating State from syncdatabase')
-                                    event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
-                                    self.panel.load_database(event.database_frome_json(data))
+                                    self.panel.load_database(data.get('fulldbdata'))
                                     return True
 
             except aiomqtt.MqttError:
@@ -240,7 +235,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                                 case 'syncdatabase':
                                     LOGGER.debug(f'MQTT: Updating State from syncdatabase')
-                                    self.panel.load_database(data.get('fulldbdata')  )
+                                    self.panel.load_database(data.get('fulldbdata'))
                                     self.panel.dump()
                                     self.state.dump()
 
