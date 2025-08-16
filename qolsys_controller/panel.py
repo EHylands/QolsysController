@@ -432,7 +432,7 @@ class QolsysPanel(QolsysObservable):
                                 node_id =  content_values.get('node_id','')
                                 node = self._state.zwave_device(int(node_id))
                                 if node != None and isinstance(node,QolsysDimmer):
-                                    node.update(content_values)
+                                    node.update_dimmer(content_values)
 
                             # Update ZwaveContentProvider                          
                             case self.db.URI_ZwaveContentProvider:
