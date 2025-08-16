@@ -6,7 +6,7 @@ import os
 
 from qolsys_controller.controller import QolsysController
 from qolsys_controller.partition import QolsysPartition
-from qolsys_controller.zone import QolsysSensor
+from qolsys_controller.zone import QolsysZone
 
 logging.basicConfig(level=logging.DEBUG,format='%(levelname)s - %(module)s: %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -14,25 +14,26 @@ LOGGER = logging.getLogger(__name__)
 async def main():
 
     # Change to your plugin ip
-    plugin_ip = '*** your plugin ip ***'
+    plugin_ip = '192.168.10.226'
 
     remote = QolsysController(config_directory='./config/')
     
     # Select plugin
     remote.select_plugin('remote')
 
-    remote.plugin.settings.panel_ip = '*** your panel ip ***'
-    remote.plugin.settings.random_mac = '*** your remote mac ***' # Example: F2:16:3E:33:ED:20
+    remote.plugin.settings.panel_ip =  '192.168.10.220'
+    remote.plugin.settings.random_mac = '' # Example: F2:16:3E:33:ED:20
+
+    # Additionnal remote plugin config
+    remote.plugin.check_user_code_on_disarm = True # Check user code in user.conf file
+    remote.plugin.log_mqtt_mesages = False # Enable for MQTT debug purposes
+    remote.plugin._auto_discover_pki = True
 
     # Configure remote plugin
     if not await remote.plugin.config(plugin_ip=plugin_ip):
         LOGGER.debug(f'Error Configuring remote plugin')
         return
-    
-    # Additionnal remote plugin config
-    remote.plugin.check_user_code_on_disarm = True # Check user code in user.conf file
-    remote.plugin.log_mqtt_mesages = False # Enable for MQTT debug purposes
-     
+         
     # Start panel operation
     ready: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
 
@@ -55,7 +56,7 @@ async def main():
     # await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
     # ARM_STAY
-    await asyncio.sleep(3)
+    #await asyncio.sleep(3)
     #await remote.plugin.command_arm(partition_id=0,
     #                                arming_type='ARM-STAY',
     #                                user_code='1111', 
@@ -63,12 +64,12 @@ async def main():
     #                                instant_arm=True)
    
     # DISARM
-    await asyncio.sleep(3)
-    await remote.plugin.command_disarm(partition_id=0,
-                                       user_code='1111')
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_disarm(partition_id=0,
+    #                                   user_code='1111')
 
     # ARM_AWAY
-    await asyncio.sleep(3)
+    #await asyncio.sleep(3)
     #await remote.plugin.command_arm(partition_id=0,
     ##                                arming_type='ARM-AWAY',
     #                                user_code='1111', 

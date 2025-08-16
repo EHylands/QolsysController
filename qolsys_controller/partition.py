@@ -77,16 +77,67 @@ class QolsysPartition(QolsysObservable):
     def entry_delays(self) -> str:
         return self._entry_delays
     
+    def to_dict(self) -> dict:
+        return {
+            'partition_id': self.id,
+            'name':self.name,
+            'system_status':self.system_status,
+            'system_status_changed_time' : self.system_status_changed_time,
+            'exit_sounds':self.exit_sounds,
+            'entry_delays':self.entry_delays,
+            'alarm_type':self.alarm_type,
+            'alarm_state':self.alarm_state
+        }
+    
+    def update(self,values:dict):
+        # Check if we are updating same partition_id
+        partition_id_update = values.get('partition_id','')
+        if int(partition_id_update) != int(self._id):
+            LOGGER.error(f"Updating Partition '{self._id}' ({self._name}) with Partition '{partition_id_update}' (different id)")
+            return
+        
+        self.start_batch_update()
+        
+        # Update Partition Name
+        if 'name' in values:
+            self.name = values.get('name')
+
+        # Update system_status
+        if 'system_status' in values:
+            self.system_status = values.get('system_status')
+
+        # Update system_status_changed_time
+        if 'system_status_changed_time' in values:
+            self.system_status_changed_time = values.get('system_status_changed_time')
+
+        # Update exit_sounds
+        if 'exit_sounds' in values:
+            self.exit_sounds = values.get('exit_sounds')
+
+        # Update entry_delays
+        if 'entry_delays' in values:
+            self.entry_delays = values.get('entry_delays')
+
+        # Update alarm_type
+        if 'alarm_type' in values:
+            self.alarm_type = values.get('alarm_type')
+
+        # Update alarm_state 
+        if 'alarm_state' in values:
+            self.alarm_state  = values.get('alarm_state')
+
+        self.end_batch_update()
+    
     @system_status.setter
     def system_status(self, value):
         if not value in self.SYSTEM_STATUS_ARRAY:
-            LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow system_status {value}")
+            LOGGER.error(f"Partition{self._id} ({self._name}) - Unknow system_status {value}")
             return
 
-        # if self._system_status != value: # Note
-        LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status: {value}")
-        self._system_status = value
-        self.notify()
+        if self._system_status != value: # Note
+            LOGGER.debug(f"Partition{self._id} ({self._name}) - system_status: {value}")
+            self._system_status = value
+            self.notify()
 
     @system_status_changed_time.setter
     def system_status_changed_time(self,value):
@@ -117,6 +168,13 @@ class QolsysPartition(QolsysObservable):
     def alarm_type(self,value:list[str]):
         self._alarm_type = value
         self.notify()
+
+    @name.setter
+    def name(self,value):
+         if self._name != value:
+            LOGGER.debug(f"Partition{self._id} ({self._name}) - name: {value}")
+            self._name = value
+            self.notify()
     
     def append_alarm_type(self,value:str):
 
@@ -178,12 +236,8 @@ class QolsysPartition(QolsysObservable):
         return self.system_status ==  'ARM-AWAY-EXIT-DELAY' or self.system_status ==  'ARM-STAY-EXIT-DELAY'
     
     def is_pending(self) -> bool:
-        if self.alarm_type == 'ARM-AWAY' or self.alarm_type == 'ARM-STAY':
-            if self.alarm_state == 'Delay':
-                return True
-            
         return False
-    
+        
     def is_armed_stay(self) -> bool:
         return self.system_status == 'ARM-STAY'
     

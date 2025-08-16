@@ -5,6 +5,7 @@ import json
 import random
 import ssl
 import uuid
+import logging
 
 from qolsys_controller.plugin import QolsysPlugin
 from qolsys_controller.state import QolsysState
@@ -12,8 +13,8 @@ from qolsys_controller.mdns import QolsysMDNS
 from qolsys_controller.pki import QolsysPKI
 from qolsys_controller.panel import QolsysPanel
 
-from qolsys_controller.event import *
-from qolsys_controller.event_mqtt import *
+#from qolsys_controller.event import *
+#from qolsys_controller.event_mqtt import *
 from qolsys_controller.exceptions import UnknownQolsysEventException
 from qolsys_controller.settings import QolsysSettings
 
@@ -30,6 +31,7 @@ class QolsysPluginRemote(QolsysPlugin):
         # PKI
         self._keys_directory = config_directory +'pki/'
         self._pki = QolsysPKI(keys_directory = self._keys_directory)
+        self._auto_discover_pki = True
 
         # Plugin
         self._plugin_ip = ''
@@ -90,8 +92,13 @@ class QolsysPluginRemote(QolsysPlugin):
             return False
 
         self._plugin_ip = plugin_ip
-        self._pki.set_id(self.settings.random_mac)
 
+        if self._auto_discover_pki:
+            if self._pki.auto_discover_pki():
+                self.settings.random_mac = self._pki.id
+        else:
+            self._pki.set_id(self.settings.random_mac)
+                
         # Check if plugin is paired
         if self.is_paired():
             LOGGER.debug(f'Panel is paired')
@@ -233,8 +240,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                                 case 'syncdatabase':
                                     LOGGER.debug(f'MQTT: Updating State from syncdatabase')
-                                    event = QolsysEventSyncDB(request_id=data['requestID'],raw_event=data)
-                                    self.panel.load_database(event.database_frome_json(data))
+                                    self.panel.load_database(data.get('fulldbdata')  )
                                     self.panel.dump()
                                     self.state.dump()
 

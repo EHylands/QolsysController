@@ -22,6 +22,7 @@ class QolsysDB():
         self.Table_DimmerLightsContentProvider = 'dimmerlight'
         self.Table_ZDeviceHistoryContentProvider = 'zwave_history'
         self.Table_AutomationDeviceContentProvider = 'automation'
+        self.Table_IQRemoteSettingsContentProvider = 'iqremotesettings'
 
         self.URI_AutomationDeviceContentProvider = 'content://com.qolsys.qolsysprovider.AutomationDeviceContentProvider/automation'
         self.URI_HistoryContentProvider = "content://com.qolsys.qolsysprovider.HistoryContentProvider/history"
@@ -42,7 +43,7 @@ class QolsysDB():
         self.URI_MasterSlaveContentProvider = "content://com.qolsys.qolsysprovider.MasterSlaveContentProvider/master_slave"
         self.URI_DashboardMessagesContentProvider = "content://com.qolsys.qolsysprovider.DashboardMessagesContentProvider/dashboard_msgs"
         self.URI_VirtualDeviceContentProvider = "content://com.qolsys.qolsysprovider.VirtualDeviceContentProvider/virtual_device"
-        self.URI_IQRemoteSettingsContentProvider = "IQRemoteSettingsContentProvider/iqremotesettings"
+        self.URI_IQRemoteSettingsContentProvider = "content://com.qolsys.qolsysprovider.IQRemoteSettingsContentProvider"
         self.URI_DoorLocksContentProvider = "content://com.qolsys.qolsysprovider.DoorLocksContentProvider/doorlock"
         self.URI_SmartSocketsContentProvider = "content://com.qolsys.qolsysprovider.SmartSocketsContentProvider/smartsocket"
         self.URI_SceneContentProvider = "content://com.qolsys.qolsysprovider.SceneContentProvider/scene"
@@ -185,6 +186,10 @@ class QolsysDB():
             type.append(row[0])
 
         return type
+
+    def add_state(self,_id:str,version:str,opr:str,partition_id:str,name:str,value:str,extraparams:str):
+        self.cursor.execute(f"INSERT INTO {self.Table_StateContentProvider} (_id,version,opr,partition_id,name,value,extraparams) VALUES (?,?,?,?,?,?,?)",(_id,version,opr,partition_id,name,value,extraparams))
+        self.db.commit() 
      
     def add_partition(self,_id:str,version:str,opr:str,partition_id:str,name:str,devices:str):
         self.cursor.execute(f"INSERT INTO {self.Table_PartitionContentProvider} (_id,version,opr,partition_id,name,devices) VALUES (?,?,?,?,?,?)",(_id,version,opr,partition_id,name,devices))
@@ -280,6 +285,10 @@ class QolsysDB():
         self.cursor.execute(f"INSERT INTO {self.Table_MasterSlaveContentProvider} (_id,version,opr,partition_id,zone_id,ip_address,mac_address,device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,zone_id,ip_address,mac_address,device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology)) 
         self.db.commit()
 
+    def add_iqremotesettings(self,_id:str,version:str,opr:str,partition_id:str,zone_id:str,mac_address:str,name:str,value:str):
+        self.cursor.execute(f"INSERT INTO {self.Table_IQRemoteSettingsContentProvider} (_id,version,opr,partition_id,zone_id,mac_address,name,value) VALUES (?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,zone_id,mac_address,name,value)) 
+        self.db.commit()
+
     def add_dashboard_msg(self,_id:str,version:str,opr:str,partition_id:str,msg_id:str,title:str,description:str,received_time:str,start_time:str,
                              end_time:str,read:str,mime_type:str):
         self.cursor.execute(f"INSERT INTO {self.Table_DashboardMessagesContentProvider} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type)) 
@@ -331,10 +340,16 @@ class QolsysDB():
         self.cursor.execute(f'DELETE from {self.Table_UserContentProvider}')
         self.db.commit()
 
+        self.cursor.execute(f'DELETE from {self.Table_IQRemoteSettingsContentProvider}')
+        self.db.commit()
+
+        self.cursor.execute(f'DELETE from {self.Table_DimmerLightsContentProvider}')
+        self.db.commit()
+
     def load_db(self,database:dict):
 
         self.clear_db()
-       
+               
         if not database:
             LOGGER.error(f'Loading Database Error, No Data Provided')
 
@@ -399,7 +414,7 @@ class QolsysDB():
                                             averagedBm = s.get('averagedBm','0'),
                                             serial_number = s.get('serial_number',''),
                                             extras= s.get('extras',''))
-
+                        
                 # StateContentProvider
                 case self.URI_StateContentProvider:
                     for s in uri.get('resultSet'):
@@ -482,7 +497,15 @@ class QolsysDB():
                                             device_id = u.get('device_id',''))
 
                 case self.URI_IQRemoteSettingsContentProvider:
-                    continue
+                    for u in uri.get('resultSet'):
+                        self.add_iqremotesettings(_id = u.get('_id'),
+                                                  version= u.get('version',''),
+                                                  opr= u.get('opr',''),
+                                                  partition_id= u.get('partition_id',''),
+                                                  zone_id= u.get('zone_id',''),
+                                                  mac_address= u.get('mac_address',''),
+                                                  name= u.get('name',''),
+                                                  value= u.get('value',''))
 
                 case self.URI_SceneContentProvider:
                     continue
@@ -893,7 +916,8 @@ class QolsysDB():
                 name TEXT,
                 bssid TEXT,
                 dhcpInfo TEXT,
-                topology TEXT
+                topology TEXT,
+                reboot_reason TEXT
             )
         ''')
 
@@ -1051,7 +1075,29 @@ class QolsysDB():
             )
         ''')
 
+        #Create automation table
+        self.cursor.execute('''
+            CREATE TABLE iqremotesettings (
+                _id TEXT PRIMARY KEY,
+                version TEXT,
+                opr TEXT,
+                partition_id TEXT,
+                zone_id TEXT,
+                mac_address TEXT,
+                name TEXT,
+                value TEXT
+            )
+        ''')
+
         self.db.commit()
+
+    def db_show_sensors(self):
+        print('\n')
+        t = PrettyTable(['zoneid','partition_id', 'sensorname','sensorgroup','sensorstatus','lastestdBm','battery_status','time'])
+        self.cursor.execute(f"SELECT zoneid,partition_id, sensorname, sensorgroup, sensorstatus, latestdBm, battery_status, time FROM {self.Table_SensorContentProvider} ORDER BY zoneid")
+        t.add_rows(self.cursor.fetchall())
+        print("Content of 'SensorContentProvider' table:")
+        print(t)
 
     def db_show(self):
         print('\n')
@@ -1059,13 +1105,6 @@ class QolsysDB():
         self.cursor.execute(f"SELECT partition_id,name FROM {self.Table_PartitionContentProvider}")
         t.add_rows(self.cursor.fetchall())
         print("Content of 'PartitionContentProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['zoneid','partition_id', 'sensorname','sensorgroup','sensorstatus','lastestdBm','battery_status','time'])
-        self.cursor.execute(f"SELECT zoneid,partition_id, sensorname, sensorgroup, sensorstatus, latestdBm, battery_status, time FROM {self.Table_SensorContentProvider} ORDER BY zoneid")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'SensorContentProvider' table:")
         print(t)
 
         print('\n')

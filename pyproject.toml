@@ -4,7 +4,7 @@ version = "0.0.1"
 authors = [
   { name="Eric Hylands", email="" },
 ]
-description = "A Python module that emulates a virtual IQ Remote device, enabling full local control of a Qolsys IQ Panel over MQTT"
+description = "A Python module that emulates a virtual IQ Remote device, enabling full local control of a Qolsys IQ Panel"
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [

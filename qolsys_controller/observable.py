@@ -11,15 +11,12 @@ class QolsysObservable:
         self._batch_update_change_detected = False
 
     def register(self, observer: Callable[[], None]) -> None:
-        #LOGGER.debug(f"Registering {repr(observer)} to {self} updates")
         self._observers.append(observer)
 
     def unregister(self, observer: Callable[[], None]) -> None:
-        #LOGGER.debug(f"Unregistering {repr(observer)} from {self} updates")
         self._observers.remove(observer)
 
     def notify(self,**payload):
-        #LOGGER.debug(f"Notifying {self} observers with: {payload}")
         if self._batch_update_active:
             self._batch_update_change_detected = True
         else:

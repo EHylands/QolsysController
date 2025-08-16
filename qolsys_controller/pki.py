@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -33,6 +34,7 @@ class QolsysPKI():
     def set_id(self,id:str):
         self._id = id
         self._file_prefix = id.replace(':','').upper()
+        LOGGER.debug(f'Using PKI: {self._file_prefix}')
         self._subkeys_directory = self._keys_directory + self._file_prefix + '/'
 
     @property
@@ -54,6 +56,20 @@ class QolsysPKI():
     @property
     def qolsys(self):
         return self._qolsys
+    
+
+    def auto_discover_pki(self) -> bool:
+        pattern = r'^[A-F0-9]{12}$'
+
+        LOGGER.debug(f'Auto Discovery Enabled')
+        with os.scandir(self._keys_directory) as entries:
+            for entry in entries:
+                if entry.is_dir():
+                    if re.fullmatch(pattern, entry.name):
+                        self.set_id(entry.name)
+                        return True
+                    
+        return False
 
     def load_private_key(self,key:str) -> bool:
         try:

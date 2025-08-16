@@ -1,13 +1,12 @@
-import asyncio
 import json
 import logging
 from datetime import datetime
+import time
 
 from qolsys_controller.partition import QolsysPartition
-from qolsys_controller.zone import QolsysSensor
+from qolsys_controller.zone import QolsysZone
 from qolsys_controller.state import QolsysState
 from qolsys_controller.observable import QolsysObservable
-from qolsys_controller.zone import QolsysSensor
 from qolsys_controller.zwave_device import QolsysZWaveDevice
 from qolsys_controller.db import QolsysDB
 from qolsys_controller.zwave_dimmer import QolsysDimmer
@@ -336,9 +335,9 @@ class QolsysPanel(QolsysObservable):
 
     def load_database(self,database:dict):
         self.db.load_db(database)
-        partitions = self.get_partitions()
-        zones = self.get_zones()
-        zwave_devices = self.get_zwave_devices()
+        partitions = self.get_partitions_from_db()
+        zones = self.get_zones_from_db()
+        zwave_devices = self.get_zwave_devices_from_db()
         self._state.load_data(partitions,zones,zwave_devices)
 
     # Parse panel update to database
@@ -419,9 +418,9 @@ class QolsysPanel(QolsysObservable):
 
                             # Update PartitionContentProvider
                             case self.db.URI_PartitionContentProvider:
-                                self.db.update_table(self.db.Table_PartitionContentProvider,selection,selection_argument,content_values)
+                                self.db.update_table(self.db.Table_PartitionContentProvider,selection,selection_argument,content_values) 
                                 print(f'iq2meid: partition{ selection_argument} updated')
-                                # Update Partition Status
+                                # Update Partition
 
                             # Update HistoryContentProvider
                             case self.db.URI_HistoryContentProvider:
@@ -453,6 +452,16 @@ class QolsysPanel(QolsysObservable):
 
                         match uri:
 
+                            case self.db.URI_SensorContentProvider:
+                                self.db.delete_table(self.db.Table_SensorContentProvider,selection,selection_argument)
+                                # Notify delete zone
+
+                            case self.db.URI_MasterSlaveContentProvider:
+                                self.db.delete_table(self.db.Table_MasterSlaveContentProvider,selection,selection_argument)
+
+                            case self.db.URI_IQRemoteSettingsContentProvider:
+                                self.db.delete_table(self.db.Table_IQRemoteSettingsContentProvider,selection,selection_argument)
+
                             case self.db.URI_AlarmedSensorProvider:
                                 self.db.delete_table(self.db.Table_AlarmedSensorProvider,selection,selection_argument)
 
@@ -478,6 +487,32 @@ class QolsysPanel(QolsysObservable):
                     
                         match uri:
 
+                            #stateContentProvider
+                            case self.db.URI_StateContentProvider:
+                                self.db.add_state(content_values.get('_id'),
+                                                  content_values.get('version',''),
+                                                  content_values.get('opr',''),
+                                                  content_values.get('partition_id',''),
+                                                  content_values.get('name',''),
+                                                  content_values.get('value',''),
+                                                  content_values.get('extraparams',''))
+
+                            # UserContentProvider
+                            case self.db.URI_UserContentProvider:
+                                self.db.add_user(content_values.get('_id'),
+                                                 content_values.get('version',''),
+                                                 content_values.get('opr',''),
+                                                 content_values.get('partition_id',''),
+                                                 content_values.get('username',''),
+                                                 content_values.get('userPin',''),
+                                                 content_values.get('expirydate',''),
+                                                 content_values.get('usertype',''),
+                                                 content_values.get('userid',''),
+                                                 content_values.get('lastname',''),
+                                                 content_values.get('check_in',''),
+                                                 content_values.get('hash_user',''))
+                                              
+
                             # HistoryContentProvider
                             case self.db.URI_HistoryContentProvider:
                                 self.db.add_history(content_values.get('_id'),content_values.get('version',''),content_values.get('opr',''),content_values.get('partition_id',''),content_values.get('device',''),content_values.get('event',''),content_values.get('time',''),content_values.get('ack',''),content_values.get('type',''),content_values.get('feature1',''),content_values.get('device_id',''))
@@ -502,9 +537,28 @@ class QolsysPanel(QolsysObservable):
                                 if partition != None:
                                     partition.append_alarm_type(content_values.get('sgroup',''))
 
+                            # IQRemoteSettingsProvider
+                            case self.db.URI_IQRemoteSettingsContentProvider:
+                                self.db.add_iqremotesettings(_id = content_values.get('_id'),
+                                                  version= content_values.get('version',''),
+                                                  opr= content_values.get('opr',''),
+                                                  partition_id= content_values.get('partition_id',''),
+                                                  zone_id= content_values.get('zone_id',''),
+                                                  mac_address= content_values.get('mac_address',''),
+                                                  name= content_values.get('name',''),
+                                                  value= content_values.get('value',''))
+
                             # HeatMapContentProvider
                             case self.db.URI_HeatMapContentProvider:
-                                self.db.add_heat_map(content_values.get('_id'),content_values.get('version',''),content_values.get('opr',''),content_values.get('partition_id',''),content_values.get('user_id',''),content_values.get('fragment_id',''),content_values.get('element_id',''),content_values.get('count',''),content_values.get('time_stamp',''))
+                                self.db.add_heat_map(content_values.get('_id'),
+                                                     content_values.get('version',''),
+                                                     content_values.get('opr',''),
+                                                     content_values.get('partition_id',''),
+                                                     content_values.get('user_id',''),
+                                                     content_values.get('fragment_id',''),
+                                                     content_values.get('element_id',''),
+                                                     content_values.get('count',''),
+                                                     content_values.get('time_stamp',''))
                             
                             # ZDeviceHistoryContentProvider
                             case self.db.URI_ZDeviceHistoryContentProvider:
@@ -541,7 +595,7 @@ class QolsysPanel(QolsysObservable):
         # No valid user code found
         return -1
     
-    def get_zwave_devices(self):
+    def get_zwave_devices_from_db(self):
         devices = []
         devices_list = self.db.get_zwave_devices()
         dimmers_list = self.db.get_dimmers()
@@ -558,7 +612,6 @@ class QolsysPanel(QolsysObservable):
                 # Found a Dimmer
                 if zwave_node_id == dimmer_node_id:
                     qolsys_dimmer = QolsysDimmer(d,device)
-                    qolsys_dimmer.base_node_id = zwave_node_id
                     devices.append(qolsys_dimmer)
                     device_added = True
                     break
@@ -567,6 +620,10 @@ class QolsysPanel(QolsysObservable):
 
             # Found a Thermostat
 
+            # Found Lock
+
+            # Found Garage Door Openner
+
             # No Specific z-wave device found, add a generic z-wave device
             if not device_added:
                 qolsys_generic = QolsysGeneric()
@@ -574,14 +631,13 @@ class QolsysPanel(QolsysObservable):
 
         return devices
     
-    def get_zones(self):
+    def get_zones_from_db(self):
         zones = []
         zones_list = self.db.get_zones()
         
          # Create sensors array
-        #zones_list = sorted(zones_list, key=lambda d: d['zoneid'])
         for zone_info in zones_list:
-            zone = QolsysSensor(int(zone_info['_id']),
+            zone = QolsysZone(int(zone_info['_id']),
                                   zone_info['sensorname'],
                                   zone_info['sensorgroup'],
                                   zone_info['sensorstatus'],
@@ -594,15 +650,15 @@ class QolsysPanel(QolsysObservable):
                                   zone_info['battery_status'],
                                   zone_info['sensortype'],
                                   zone_info['latestdBm'],
-                                  zone_info['averagedBm'])
+                                  zone_info['averagedBm'],
+                                  zone_info['time'])
             zones.append(zone)
 
         return zones
 
-    def get_partitions(self):
+    def get_partitions_from_db(self):
 
         partitions = []
-        zwave_list = []
 
         partition_list = self.db.get_partitions()
 
@@ -628,36 +684,6 @@ class QolsysPanel(QolsysObservable):
                                         exit_sounds)
             
             partitions.append(partition)
-       
-        # Create Z-Wave device array
-        zwave_list = sorted(zwave_list, key=lambda d: d['node_id'])
-        for zwave_info in zwave_list:
-            device = QolsysZWaveDevice(int(zwave_info['_id']),
-                                       int(zwave_info['node_id']),
-                                       zwave_info['node_name'],
-                                       zwave_info['node_type'],
-                                       zwave_info['node_status'],
-                                       int(zwave_info['partition_id']),
-                                       zwave_info['node_secure_cmd_cls'],
-                                       zwave_info['node_battery_level'],
-                                       zwave_info['node_battery_level_value'],
-                                       zwave_info['is_node_listening_node'],
-                                       zwave_info['basic_report_value'],
-                                       zwave_info['switch_multilevel_report_value'],
-                                       int(zwave_info['basic_device_type']),
-                                       int(zwave_info['generic_device_type']),
-                                       int(zwave_info['specific_device_type']),
-                                       zwave_info['num_secure_command_class'],
-                                       zwave_info['secure_command_class'],
-                                       zwave_info['manufacture_id'],
-                                       zwave_info['product_type'],
-                                       zwave_info['device_protocol'],
-                                       zwave_info['paired_status'],
-                                       zwave_info['is_device_sleeping'],
-                                       zwave_info['is_device_hidden'],
-                                       zwave_info['last_updated_date'],
-                                       [],
-            )
 
         return partitions
 

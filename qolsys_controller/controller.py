@@ -17,7 +17,7 @@ class QolsysController():
         self._config_directory = config_directory
         self._state = QolsysState()
         self._panel = QolsysPanel(settings_directory=config_directory,state=self.state)
-        self._settings = QolsysSettings(settings_directory=config_directory,settings_file='pairing.status',)
+        self._settings = QolsysSettings()
 
     @property
     def state(self):
