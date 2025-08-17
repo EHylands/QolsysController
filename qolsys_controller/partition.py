@@ -66,16 +66,16 @@ class QolsysPartition(QolsysObservable):
         return self._exit_sounds
     
     @property
+    def entry_delays(self) -> str:
+        return self._entry_delays
+    
+    @property
     def command_exit_sounds(self) -> bool:
         return self._command_exit_sounds
     
     @property   
     def command_arm_stay_instant(self) -> bool:
         return self._command_arm_stay_instant
-    
-    @property
-    def entry_delays(self) -> str:
-        return self._entry_delays
     
     def to_dict(self) -> dict:
         return {
@@ -203,6 +203,17 @@ class QolsysPartition(QolsysObservable):
             self._exit_sounds = value
             self.notify()
     
+    @entry_delays.setter
+    def entry_delays(self,value):
+        if not value in self.ENTRY_DELAYS_ARRAY:
+            LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow entry_delays {value}")
+            return
+
+        if self._entry_delays != value:
+            LOGGER.debug(f"Partition{self._id} ({self._name}) - entry_delays: {value}")
+            self._entry_delays = value
+            self.notify()
+
     @command_exit_sounds.setter
     def command_exit_sounds(self,value):
         if self._command_exit_sounds != value:
@@ -213,17 +224,6 @@ class QolsysPartition(QolsysObservable):
     def command_arm_stay_instant(self,value):
         if self._command_arm_stay_instant != value:
             self._command_arm_stay_instant = value
-            self.notify()
-    
-    @entry_delays.setter
-    def entry_delays(self,value):
-        if not value in self.ENTRY_DELAYS_ARRAY:
-            LOGGER.debug(f"Partition{self._id} ({self._name}) - Unknow entry_delays {value}")
-            return
-
-        if self._entry_delays != value:
-            LOGGER.debug(f"Partition{self._id} ({self._name}) - entry_delays: {value}")
-            self._entry_delays = value
             self.notify()
 
     def is_triggered(self) -> bool:

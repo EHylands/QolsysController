@@ -251,6 +251,8 @@ class QolsysState(QolsysObservable):
                         LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - paired_status: {zwave._paired_status}")
                         LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - node_status: {zwave._node_status}")
                         LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - battery_level: {zwave._node_battery_level}")
+                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - battery_level_value: {zwave._node_battery_level_value}")
+
 
 
 

@@ -109,9 +109,6 @@ class QolsysZone(QolsysObservable):
         if 'averagedBm' in contentValues:
             self.averagedBm = contentValues.get('averagedBm')
 
-        #if '_id' in contentValues:
-        #    self._id = contentValues.get('id')
-
         if 'group' in contentValues:
             self._group = contentValues.get('group')
 
@@ -250,7 +247,7 @@ class QolsysZone(QolsysObservable):
             LOGGER.debug(f"Sensor{self.zone_id} ({self._sensorname}) - Unknow sensorstatus {value}")
 
         if self._sensorstatus != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - sensorstatus:{value}")
+            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - sensorstatus: {value}")
             self._sensorstatus = value
             if self._NOTIFY_SENSORSTATUS:
                 self.notify()
@@ -258,7 +255,7 @@ class QolsysZone(QolsysObservable):
     @battery_status.setter
     def battery_status(self, value):
         if self._battery_status != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - battery_status:{value}")
+            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - battery_status: {value}")
             self._battery_status = value
             if self._NOTIFY_BATTERY_STATUS:
                 self.notify()
@@ -272,7 +269,7 @@ class QolsysZone(QolsysObservable):
     @time.setter
     def time(self, value):
         if self._time != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - time:{value}")
+            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - time: {value}")
             self._time = value
             if self._NOTIFY_TIME:
                 self.notify()
