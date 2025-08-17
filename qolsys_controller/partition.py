@@ -216,15 +216,13 @@ class QolsysPartition(QolsysObservable):
 
     @command_exit_sounds.setter
     def command_exit_sounds(self,value):
-        if self._command_exit_sounds != value:
-            self._command_exit_sounds = value
-            self.notify()
+        self._command_exit_sounds = value
+        self.notify()
 
     @command_arm_stay_instant.setter
     def command_arm_stay_instant(self,value):
-        if self._command_arm_stay_instant != value:
-            self._command_arm_stay_instant = value
-            self.notify()
+        self._command_arm_stay_instant = value
+        self.notify()
 
     def is_triggered(self) -> bool:
         return self.alarm_state == 'Alarm'
