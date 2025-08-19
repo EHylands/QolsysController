@@ -39,7 +39,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |----------------------|----------------------------------|---------------|
 | **Generic Z-Wave**   | Read Battery Level               | ✅ Supported |
 |                      | Read Pairing Status              | ✅ Supported |
-|                      | Read Pairing Status              | ✅ Supported |
+|                      | Read Node Status                 | ✅ Supported |
 |                      | Control Generic Z-Wave Devices   | 🔄 TBD       |
 
 
