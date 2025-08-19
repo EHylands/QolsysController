@@ -1,26 +1,24 @@
 import logging
 
 from qolsys_controller.observable import QolsysObservable
-from qolsys_controller.partition import QolsysPartition
 
 LOGGER = logging.getLogger(__name__)
 
 class QolsysZone(QolsysObservable):
 
-    ZONE_STATUS_ARRAY = ['Open', 'Closed', 'Active', 'Inactive','Activated','Idle','Unreachable','Tampered','Synchonizing','connected']
-    ZONE_GROUP_ARRAY = ['Door_Window','Motion','Panel Motion','GlassBreak','Panel Glass Break','Bluetooth','SmokeDetector',
-                        'CODetector','Water','Freeze','Heat','Tilt','Keypad','Auxiliary Pendant','Siren','KeyFob','Temperature',
-                        'TakeoverModule','Translator','Doorbell','Shock']
+    ZONE_STATUS_ARRAY = ["Open", "Closed", "Active", "Inactive","Activated","Idle","Unreachable","Tampered","Synchonizing","connected"]
+    ZONE_GROUP_ARRAY = ["Door_Window","Motion","Panel Motion","GlassBreak","Panel Glass Break","Bluetooth","SmokeDetector",
+                        "CODetector","Water","Freeze","Heat","Tilt","Keypad","Auxiliary Pendant","Siren","KeyFob","Temperature",
+                        "TakeoverModule","Translator","Doorbell","Shock"]
 
-
-    def __init__(self, sensor_id: str, 
-                 sensorname: str, 
-                 group: str, 
+    def __init__(self, sensor_id: str,
+                 sensorname: str,
+                 group: str,
                  sensorstatus: str,
-                 sensorstate: str, 
-                 zone_id: int, 
+                 sensorstate: str,
+                 zone_id: int,
                  zone_type: int,
-                 zone_physical_type: int, 
+                 zone_physical_type: int,
                  zone_alarm_type: int,
                  partition_id: int,
                  battery_status: str,
@@ -28,7 +26,7 @@ class QolsysZone(QolsysObservable):
                  latestdBm:str,
                  averagedBm:str,
                  time:str) -> None:
-    
+
     #def __init__(self,data:dict):
         super().__init__()
 
@@ -44,20 +42,20 @@ class QolsysZone(QolsysObservable):
         self._zone_alarm_type = zone_alarm_type
         self._partition_id = partition_id
         self._battery_status = battery_status
-        self._sensortts = ''
+        self._sensortts = ""
         self._latestdBm = latestdBm
         self._averagedBm = averagedBm
-        self._current_capability = ''
-        self._zone_rf_sensor = ''
-        self._zone_supervised = ''
-        self._zone_reporting_enabled = ''
-        self._zone_two_way_voice_enabled = ''
-        self._signal_source = ''
-        self._serial_number = ''
-        self._chimetype = ''
-        self._frame_count = ''
-        self._frame_type = ''
-        self._allowdisarming = ''
+        self._current_capability = ""
+        self._zone_rf_sensor = ""
+        self._zone_supervised = ""
+        self._zone_reporting_enabled = ""
+        self._zone_two_way_voice_enabled = ""
+        self._signal_source = ""
+        self._serial_number = ""
+        self._chimetype = ""
+        self._frame_count = ""
+        self._frame_type = ""
+        self._allowdisarming = ""
         self._time = time
 
         self._NOTIFY_SENSORSTATUS = True
@@ -66,183 +64,177 @@ class QolsysZone(QolsysObservable):
         self._NOTIFY_PARTITION_ID = True
         self._NOTIFY_TIME = False
 
-        #self.update(data)
-        
-    def update(self,contentValues:dict):
+    def update(self,data:dict) -> None:
 
         # Object creation
-        if self.zone_id == '':
-            self._zone_id = contentValues.get('zoneid')
+        if self.zone_id == "":
+            self._zone_id = data.get("zoneid")
 
-        zone_id_update = contentValues.get('zoneid','')
+        zone_id_update = data.get("zoneid","")
         if int(zone_id_update) != int(self._zone_id):
            LOGGER.error(f"Updating zone '{self._zone_id}' ({self.sensorname}) with sensor '{zone_id_update}' (different id)")
            return
-        
+
         self.start_batch_update()
 
          # Update sensor_name
-        if 'sensorname' in contentValues:
-            self.sensorname = contentValues.get('sensorname')
-        
+        if "sensorname" in data:
+            self.sensorname = data.get("sensorname")
+
         # Update sensorsatus
-        if 'sensorstatus' in contentValues:
-            self.sensorstatus = contentValues.get('sensorstatus')
+        if "sensorstatus" in data:
+            self.sensorstatus = data.get("sensorstatus")
 
         # Update battery_status
-        if 'battery_status' in contentValues:
-            self.battery_status = contentValues.get('battery_status')
+        if "battery_status" in data:
+            self.battery_status = data.get("battery_status")
 
         # Update time
-        if 'time' in contentValues:
-            self.time = contentValues.get('time')
+        if "time" in data:
+            self.time = data.get("time")
 
         # Update partition_id
-        if 'partition_id' in contentValues:
-            self._partition_id = contentValues.get('partition_id')
+        if "partition_id" in data:
+            self._partition_id = data.get("partition_id")
 
         # Update lastestdBm
-        if 'lastestdBm' in contentValues:
-            self.latestdBm = contentValues.get('latestdBm')
+        if "lastestdBm" in data:
+            self.latestdBm = data.get("latestdBm")
 
         # Update averagedBm
-        if 'averagedBm' in contentValues:
-            self.averagedBm = contentValues.get('averagedBm')
+        if "averagedBm" in data:
+            self.averagedBm = data.get("averagedBm")
 
-        if 'group' in contentValues:
-            self._group = contentValues.get('group')
+        if "group" in data:
+            self._group = data.get("group")
 
-        if 'sensorstate' in contentValues:
-            self._sensorstate = contentValues.get('sensorstate')
+        if "sensorstate" in data:
+            self._sensorstate = data.get("sensorstate")
 
-        if 'sensortype' in contentValues:
-            self.sensortype = contentValues.get('sensortype')
+        if "sensortype" in data:
+            self.sensortype = data.get("sensortype")
 
-        if 'zone_type' in contentValues:
-            self._zone_type = contentValues.get('zone_type')
+        if "zone_type" in data:
+            self._zone_type = data.get("zone_type")
 
-        if 'zone_physical_type' in contentValues:
-            self._zone_physical_type = contentValues.get('zone_physical_type')
+        if "zone_physical_type" in data:
+            self._zone_physical_type = data.get("zone_physical_type")
 
-        if 'zone_alarm_type' in contentValues:
-            self._zone_alarm_type = contentValues.get('zone_alarm_type')
+        if "zone_alarm_type" in data:
+            self._zone_alarm_type = data.get("zone_alarm_type")
 
-        if 'sensorttss' in contentValues:
-            self._sensortts = contentValues.get('sensortts')
+        if "sensorttss" in data:
+            self._sensortts = data.get("sensortts")
 
-        if 'current_capability' in contentValues:
-            self._current_capability = contentValues.get('current_capability')
+        if "current_capability" in data:
+            self._current_capability = data.get("current_capability")
 
-        if 'zone_rf_sensor' in contentValues:
-            self._zone_rf_sensor = contentValues.get('zone_rf_sensor')
+        if "zone_rf_sensor" in data:
+            self._zone_rf_sensor = data.get("zone_rf_sensor")
 
-        if 'zone_supervised' in contentValues:
-            self._zone_supervised = contentValues.get('zone_supervised')
+        if "zone_supervised" in data:
+            self._zone_supervised = data.get("zone_supervised")
 
-        if 'zone_reporting_enabled' in contentValues:
-            self._zone_reporting_enabled = contentValues.get('zone_reporting_enabled')
+        if "zone_reporting_enabled" in data:
+            self._zone_reporting_enabled = data.get("zone_reporting_enabled")
 
-        if 'zone_two_way_voice_enabled' in contentValues:
-            self._zone_two_way_voice_enabled = contentValues.get('zone_two_way_voice_enabled')
+        if "zone_two_way_voice_enabled" in data:
+            self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled")
 
-        if 'signal_source' in contentValues:
-            self._signal_source = contentValues.get('signal_source')
+        if "signal_source" in data:
+            self._signal_source = data.get("signal_source")
 
-        if 'serial_number' in contentValues:
-            self._serial_number = contentValues.get('serial_number')
-        
-        if 'chimetype' in contentValues:
-            self._chimetype = contentValues.get('chimetype')
+        if "serial_number" in data:
+            self._serial_number = data.get("serial_number")
 
-        if 'frame_count' in contentValues:
-            self._frame_count = contentValues.get('frame_count')
-        
-        if 'frame_type' in contentValues:
-            self._frame_type = contentValues.get('frame_type')
+        if "chimetype" in data:
+            self._chimetype = data.get("chimetype")
 
-        if 'allowdisarming' in contentValues:
-            self._allowdisarming = contentValues.get('allowdisarming')
+        if "frame_count" in data:
+            self._frame_count = data.get("frame_count")
+
+        if "frame_type" in data:
+            self._frame_type = data.get("frame_type")
+
+        if "allowdisarming" in data:
+            self._allowdisarming = data.get("allowdisarming")
 
         self.end_batch_update()
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
-       
+
     @property
-    def sensorname(self):
+    def sensorname(self) -> str:
         return self._sensorname
 
     @property
-    def group(self):
+    def group(self) -> str:
         return self._group
 
     @property
-    def sensorstatus(self):
+    def sensorstatus(self) -> str:
         return self._sensorstatus
-    
+
     @property
-    def battery_status(self):
+    def battery_status(self) -> str:
         return self._battery_status
 
     @property
-    def sensorstate(self):
+    def sensorstate(self) -> str:
         return self._sensorstate
-    
+
     @property
-    def sensortype(self):
+    def sensortype(self) -> str:
         return self._sensortype
 
     @property
-    def zone_id(self):
+    def zone_id(self) -> str:
         return self._zone_id
 
     @property
-    def zone_type(self):
+    def zone_type(self) -> str:
         return self._zone_type
 
     @property
-    def zone_physical_type(self):
+    def zone_physical_type(self) -> str:
         return self._zone_physical_type
 
     @property
-    def zone_alarm_type(self):
+    def zone_alarm_type(self) -> str:
         return self._zone_alarm_type
 
     @property
-    def partition_id(self):
+    def partition_id(self) -> str:
         return self._partition_id
-    
-    @property 
-    def time(self):
+
+    @property
+    def time(self) -> str:
         return self._time
-    
+
     @property
-    def partition_id(self):
-        return self._partition_id
-    
-    @property
-    def latestdBm(self):
+    def latestdBm(self)  -> str:
         return self._latestdBm
-    
-    @property  
-    def averagedBm(self):
+
+    @property
+    def averagedBm(self) -> str:
         return self._averagedBm
-    
+
     @averagedBm.setter
-    def averagedBm(self,value):
+    def averagedBm(self,value:str) -> None:
         if self._averagedBm != value:
             self._averagedBm = value
             self.notify()
-    
+
     @latestdBm.setter
-    def latestdBm(self,value):
+    def latestdBm(self,value:str) -> None:
         if self._latestdBm != value:
             self.latestdBm = value
             self.notify()
 
     @sensorstatus.setter
-    def sensorstatus(self, value):
+    def sensorstatus(self, value:str) -> None:
         if value not in self.ZONE_STATUS_ARRAY:
             LOGGER.debug(f"Sensor{self.zone_id} ({self._sensorname}) - Unknow sensorstatus {value}")
 
@@ -253,21 +245,21 @@ class QolsysZone(QolsysObservable):
                 self.notify()
 
     @battery_status.setter
-    def battery_status(self, value):
+    def battery_status(self, value:str) -> None:
         if self._battery_status != value:
             LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - battery_status: {value}")
             self._battery_status = value
             if self._NOTIFY_BATTERY_STATUS:
                 self.notify()
-    
+
     @sensorname.setter
-    def sensorname(self, value):
+    def sensorname(self, value:str) -> None:
         if self.sensorname != value:
             self._sensorname = value
             self.notify()
 
     @time.setter
-    def time(self, value):
+    def time(self, value:str) -> None:
         if self._time != value:
             LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - time: {value}")
             self._time = value
@@ -275,52 +267,43 @@ class QolsysZone(QolsysObservable):
                 self.notify()
 
     @sensortype.setter
-    def sensortype(self,value):
+    def sensortype(self,value:str) -> None:
         if self._sensortype != value:
             self._sensortype = value
 
     @partition_id.setter
-    def partition_id(self, value):
+    def partition_id(self, value:str) -> None:
         if self.partition_id != value:
             self.partition_id = value
-            self.notify()   
+            self.notify()
 
     def to_dict(self) -> dict:
         return {
-            '_id': self.id,
-            'sensor_name': self.sensorname,
-            'group': self.group,
-            'sensorstatus': self.sensorstatus,
-            'sensorstate': self.sensorstate,
-            'sensortype': self.sensortype,
-            'zoneid': self.zone_id,
-            'zone_type': self.zone_type,
-            'zone_physical_type': self.zone_physical_type,
-            'zone_alarm_type': self.zone_alarm_type,
-            'partition_id': self.partition_id,
-            'battery_status': self.battery_status,
-            'sensortts': self._sensortts,
-            'latestdBm': self.latestdBm,
-            'averagedBm': self.averagedBm,
-            'current_capability': self._current_capability,
-            'zone_rf_sensor': self._zone_rf_sensor,
-            'zone_supervised': self._zone_supervised,
-            'zone_reporting_enabled': self._zone_reporting_enabled,
-            'zone_two_way_voice_enabled': self._zone_two_way_voice_enabled,
-            'signal_source': self._signal_source,
-            'serial_number': self._serial_number,
-            'chimetype': self._chimetype,
-            'frame_count': self._frame_count, 
-            'frame_type': self._frame_type,
-            'allowdisarming': self._allowdisarming,
-            'time': self.time
+            "_id": self.id,
+            "sensor_name": self.sensorname,
+            "group": self.group,
+            "sensorstatus": self.sensorstatus,
+            "sensorstate": self.sensorstate,
+            "sensortype": self.sensortype,
+            "zoneid": self.zone_id,
+            "zone_type": self.zone_type,
+            "zone_physical_type": self.zone_physical_type,
+            "zone_alarm_type": self.zone_alarm_type,
+            "partition_id": self.partition_id,
+            "battery_status": self.battery_status,
+            "sensortts": self._sensortts,
+            "latestdBm": self.latestdBm,
+            "averagedBm": self.averagedBm,
+            "current_capability": self._current_capability,
+            "zone_rf_sensor": self._zone_rf_sensor,
+            "zone_supervised": self._zone_supervised,
+            "zone_reporting_enabled": self._zone_reporting_enabled,
+            "zone_two_way_voice_enabled": self._zone_two_way_voice_enabled,
+            "signal_source": self._signal_source,
+            "serial_number": self._serial_number,
+            "chimetype": self._chimetype,
+            "frame_count": self._frame_count,
+            "frame_type": self._frame_type,
+            "allowdisarming": self._allowdisarming,
+            "time": self.time,
         }
-
-    def __str__(self):
-        return (f"<{type(self).__name__} id={self.zone_id} name={self.sensorname} "
-                f"group={self.group} status={self.sensorstatus} "
-                f"state={self.sensorstate} zone_id={self.zone_id} "
-                f"zone_type={self.zone_type} "
-                f"zone_physical_type={self.zone_physical_type} "
-                f"zone_alarm_type={self.zone_alarm_type} "
-                f"partition_id={self.partition_id}>")

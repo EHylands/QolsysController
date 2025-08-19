@@ -1,1 +1,1 @@
-from .controller import QolsysController as qolsys_controller
+from .controller import QolsysController as qolsys_controller  # noqa: F401

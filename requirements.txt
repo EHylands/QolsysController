@@ -1,9 +1,3 @@
 aiomqtt==2.4.0
-cffi==1.17.1
-cryptography==45.0.3
-ifaddr==0.2.0
-paho-mqtt==2.1.0
-pycparser==2.22
-websockets==15.0.1
+cryptography==45.0.6
 zeroconf==0.147.0
-prettytable==3.16

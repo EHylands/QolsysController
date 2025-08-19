@@ -1,6 +1,6 @@
 [project]
 name = "qolsys_controller"
-version = "0.0.1"
+version = "0.0.1-beta.1"
 authors = [
   { name="Eric Hylands", email="" },
 ]
@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Home Automation",
+    "License :: OSI Approved :: MIT License",
 ]
 license = "MIT"
 
@@ -24,3 +25,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["qolsys_controller/"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ['ALL']
+ignore = ["E501","S608","S311","S104","D100","D101", "D102","D107","N802","N806","PERF401"]
+

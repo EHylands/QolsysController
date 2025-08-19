@@ -3,21 +3,23 @@ import logging
 from qolsys_controller.observable import QolsysObservable
 from qolsys_controller.partition import QolsysPartition
 from qolsys_controller.zone import QolsysZone
-from qolsys_controller.zwave_dimmer import QolsysDimmer
 from qolsys_controller.zwave_device import QolsysZWaveDevice
+from qolsys_controller.zwave_dimmer import QolsysDimmer
+from qolsys_controller.zwave_generic import QolsysGeneric
+from qolsys_controller.zwave_lock import QolsysLock
+from qolsys_controller.zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
 class QolsysState(QolsysObservable):
-    NOTIFY_PARTITION_ADD = 'partition_add'
-    NOTIFY_PARTITION_DELETE = 'partition_delete'
-    NOTIFY_ZONE_ADD = 'zone_add'
-    NOTIFY_ZONE_DELETE = 'zone_delete'
-    
-    NOTIFY_UPDATE_ERROR = 'update_error'
-    NOTIFY_UPDATE_PARTITIONS = 'update_partitions'
+    NOTIFY_PARTITION_ADD = "partition_add"
+    NOTIFY_PARTITION_DELETE = "partition_delete"
+    NOTIFY_ZONE_ADD = "zone_add"
+    NOTIFY_ZONE_DELETE = "zone_delete"
+    NOTIFY_UPDATE_ERROR = "update_error"
+    NOTIFY_UPDATE_PARTITIONS = "update_partitions"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self._last_exception = None
@@ -30,39 +32,26 @@ class QolsysState(QolsysObservable):
         self.state_zone_observer = QolsysObservable()
 
     @property
-    def last_exception(self):
-        return self._last_exception
-
-    @last_exception.setter
-    def last_exception(self, value):
-        prev_value = self._last_exception
-        self._last_exception = value
-
-        self.notify(change=self.NOTIFY_UPDATE_ERROR,
-                    prev_value=prev_value,
-                    new_value=value)
-
-    @property
     def partitions(self):
         return self._partitions.values()
-    
+
     @property
     def zwave_devices(self):
         return self._zwave_devices
-    
+
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
         dimmers = []
         for device in self.zwave_devices:
             if isinstance(device,QolsysDimmer):
                 dimmers.append(device)
-        
+
         return dimmers
 
-    def partition(self, partition_id:int):
+    def partition(self, partition_id:int) -> QolsysPartition:
         return self._partitions.get(partition_id)
-    
-    def zwave_device(self,node_id:int):
+
+    def zwave_device(self,node_id:int) -> QolsysZWaveDevice:
         for zwave_device in self.zwave_devices:
             if int(zwave_device.node_id) == node_id:
                 return zwave_device
@@ -72,68 +61,68 @@ class QolsysState(QolsysObservable):
     @property
     def zones(self):
         return self._zones.values()
-        
-    def zone(self,zone_id:int):
+
+    def zone(self,zone_id:int) -> QolsysZone:
         return self._zones.get(zone_id)
 
-    def partition_add(self,new_partition:QolsysPartition):
+    def partition_add(self,new_partition:QolsysPartition) -> None:
         for partition in self.partitions:
             if partition.id == new_partition.id:
-                LOGGER.debug(f"Adding Partition to State, Partition{new_partition.id} ({partition.name}) - Allready in Partitions List")
+                LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List",new_partition.id,partition.name)
                 return
 
         self._partitions[int(new_partition.id)] = new_partition
         self.state_partition_observer.notify(change = self.NOTIFY_PARTITION_ADD, partition = new_partition)
 
-    def partition_delete(self,partition_id:int):
+    def partition_delete(self,partition_id:int) -> None:
         partition = self.partitions[partition_id]
 
         if partition is None:
-            LOGGER.debug(f'Deleting Partition from State, Partition{partition.id} not found')
+            LOGGER.debug("Deleting Partition from State, Partition%s not found",partition.id)
             return
 
         self._partitions.remove(partition)
         self.state_partition_observer.notify(change = self.NOTIFY_PARTITION_DELETE, partition = partition)
 
-    def zone_add(self, new_zone):
+    def zone_add(self, new_zone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
-                LOGGER.debug(f"Adding Zone to State, zone{new_zone.zone_id} ({self._sensorname}) - Allready in Zone List")
+                LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List",new_zone.zone_id,self.sensorname)
                 return
-            
+
         self._zones[int(new_zone.zone_id)] = new_zone
         self.state_zone_observer.notify(change=self.NOTIFY_ZONE_ADD,zone=new_zone)
 
-    def zone_delete(self,zone_id:int):
+    def zone_delete(self,zone_id:int) -> None:
         zone = self.zones[zone_id]
 
         if zone is None:
-            LOGGER.debug(f'Deleting Zone from State, Zone{zone_id} not found')
+            LOGGER.debug("Deleting Zone from State, Zone%s not found",zone_id)
             return
 
         self._zones.remove(zone)
         self.state_zone_observer.notify(change=self.NOTIFY_PARTITION_DELETE,zone=zone)
 
-    def zwave_add(self, new_zwave):
+    def zwave_add(self, new_zwave:QolsysZWaveDevice) -> None:
         for zwave_device in self.zwave_devices:
             if new_zwave.node_id == zwave_device.node_id:
-                LOGGER.debug(f"Adding ZWave to State, ZWave{new_zwave.node_id} ({zwave_device._node_name}) - Allready in ZWave List")
+                LOGGER.debug("Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List",new_zwave.node_id,zwave_device.node_name)
                 return
-            
-        self._zwave_devices.append(new_zwave)
-        #self.state_zone_observer.notify()
 
-    def zwave_delete(self,node_id:int):        
+        self._zwave_devices.append(new_zwave)
+        #self.state_zone_observer.notify()  # noqa: ERA001
+
+    def zwave_delete(self,node_id:int) -> None:
         zwave = self.zwave_device(node_id)
 
         if zwave is None:
-            LOGGER.debug(f'Deleting ZWave from State, ZWave{node_id} not found')
+            LOGGER.debug("Deleting ZWave from State, ZWave%s not found",node_id)
             return
 
         self._zwave_devices.remove(zwave)
-        #self.state_zone_observer.notify(change=self.NOTIFY_PARTITION_DELETE,zone=zone)
+        #self.state_zone_observer.notify(change=self.NOTIFY_PARTITION_DELETE,zone=zone)  # noqa: ERA001
 
-    def load_data(self,db_partitions:list[QolsysPartition],db_zones:list[QolsysZone],db_zwaves:list[QolsysZWaveDevice]):
+    def sync_data(self,db_partitions:list[QolsysPartition],db_zones:list[QolsysZone],db_zwaves:list[QolsysZWaveDevice]) -> None:
 
         db_partition_list = []
         for db_partition in db_partitions:
@@ -159,25 +148,24 @@ class QolsysState(QolsysObservable):
         for state_zwave in self.zwave_devices:
             state_zwave_list.append(state_zwave.node_id)
 
-
         # Update existing partitions
         for state_partition in self.partitions:
             if state_partition.id in db_partition_list:
                 for db_partition in db_partitions:
                     if state_partition.id == db_partition.id:
-                        LOGGER.debug(f'load_data - update Partition{state_partition.id}')
+                        LOGGER.debug("sync_data - update Partition%s",state_partition.id)
                         state_partition.update(db_partition.to_dict())
-              
+
         # Delete partitions
         for state_partition in self.partitions:
             if state_partition.id not in db_partition_list:
-                LOGGER.debug(f'load_data - delete Partition{state_partition.id}')
+                LOGGER.debug("sync_data - delete Partition%s",state_partition.id)
                 self.partition_delete(int(state_partition.id))
-            
+
         # Add new partition
         for db_partition in db_partitions:
             if db_partition.id not in state_partition_list:
-                LOGGER.debug(f'load_data - add Partition{db_partition.id}')
+                LOGGER.debug("sync_data - add Partition%s",db_partition.id)
                 self.partition_add(db_partition)
 
         # Update existing zones
@@ -185,19 +173,19 @@ class QolsysState(QolsysObservable):
             if state_zone.zone_id in db_zone_list:
                 for db_zone in db_zones:
                     if state_zone.zone_id == db_zone.zone_id:
-                        LOGGER.debug(f'load_data - update Zone{state_zone.zone_id}')
+                        LOGGER.debug("sync_data - update Zone%s",state_zone.zone_id)
                         state_zone.update(db_zone.to_dict())
 
         # Delete zones
         for state_zone in self.zones:
             if state_zone.zone_id not in db_zone_list:
-                LOGGER.debug(f'load_data - delete Zone{state_zone.zone_id}')
+                LOGGER.debug("sync_data - delete Zone%s",state_zone.zone_id)
                 self.zone_delete(int(state_zone.zone_id))
-            
+
         # Add new zone
         for db_zone in db_zones:
             if db_zone.zone_id not in state_zone_list:
-                LOGGER.debug(f'load_data - add Zone{db_zone.zone_id}')
+                LOGGER.debug("sync_data - add Zone%s",db_zone.zone_id)
                 self.zone_add(db_zone)
 
         # Update existing ZWave devices
@@ -205,54 +193,105 @@ class QolsysState(QolsysObservable):
             if state_zwave.node_id in db_zwave_list:
                 for db_zwave in db_zwaves:
                     if state_zwave.node_id == db_zwave.node_id:
-                        LOGGER.debug(f'load_data - update ZWave{state_zwave.node_id}')
+                        LOGGER.debug(f"sync_data - update ZWave{state_zwave.node_id}")
 
+                        # Update Dimmer
                         if isinstance(state_zwave, QolsysDimmer) and isinstance(db_zwave,QolsysDimmer):
                             state_zwave.update_base(db_zwave.to_dict_base())
                             state_zwave.update_dimmer(db_zwave.to_dict_dimmer())
                             break
 
+                        # Update Thermostat
+                        if isinstance(state_zwave,QolsysThermostat) and isinstance(db_zwave,QolsysThermostat):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            state_zwave.update_thermostat(db_zwave.to_dict_base())
+                            break
+
+                        # Update Lock
+                        if isinstance(state_zwave,QolsysLock) and isinstance(db_zwave,QolsysLock):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            state_zwave.update_lock(db_zwave.to_dict_base())
+                            break
+
+                        # Generic Z-Wave Device
+                        if isinstance(state_zwave,QolsysGeneric) and isinstance(db_zwave,QolsysGeneric):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            break
+
                         # zwave node_id has changed of node_type, delete and add again
-                        #self.zwave_delete(int(state_zwave.node_id))
-                        #self.zwave_add(db_zwave)
+                        # self.zwave_delete(int(state_zwave.node_id))  # noqa: ERA001
+                        # self.zwave_add(db_zwave)  # noqa: ERA001
 
         # Add new zwave device
         for db_zwave in db_zwaves:
             if db_zwave.node_id not in state_zwave_list:
-                LOGGER.debug(f'load_data - add ZWave{db_zwave.node_id}')
+                LOGGER.debug("sync_data - add ZWave%s",db_zwave.node_id)
                 self.zwave_add(db_zwave)
 
         # Delete zwave device
         for state_zwave in self.zwave_devices:
             if state_zwave.node_id not in db_zwave_list:
-                LOGGER.debug(f'load_data - delete ZWave{state_zwave.none_id}')
+                LOGGER.debug("sync_data - delete ZWave%s",state_zwave.none_id)
                 self.zwave_delete(int(state_zwave.node_id))
-        
-    def dump(self):
-        LOGGER.debug(f'*** Information ***')
 
-        for partition in self.partitions:  
-            LOGGER.debug(f"Partition{partition._id} ({partition._name}) - system_status: {partition.system_status}")
-            LOGGER.debug(f"Partition{partition._id} ({partition._name}) - system_status_changed_time: {partition.system_status_changed_time}")
-            LOGGER.debug(f"Partition{partition._id} ({partition._name}) - alarm_state: {partition.alarm_state}")
-            LOGGER.debug(f"Partition{partition._id} ({partition._name}) - exit_sounds: {partition.exit_sounds}")
-            LOGGER.debug(f"Partition{partition._id} ({partition._name}) - entry_delays: {partition.entry_delays}")
+    def dump(self) -> None:
+        LOGGER.debug("*** Information ***")
 
-            for type in partition.alarm_type:
-                LOGGER.debug(f"Partition{partition._id} ({partition._name}) - alarm_type: {type}")
+        for partition in self.partitions:
+            pid = partition._id
+            name = partition._name
+            LOGGER.debug("Partition%s (%s) - system_status: %s",pid,name,partition.system_status)
+            LOGGER.debug("Partition%s (%s) - system_status_changed_time: %s",pid,name,partition.system_status_changed_time)
+            LOGGER.debug("Partition%s (%s) - alarm_state: %s",pid,name,partition.alarm_state)
+            LOGGER.debug("Partition%s (%s) - exit_sounds: %s",pid,name,partition.exit_sounds)
+            LOGGER.debug("Partition%s (%s) - entry_delays: %s",pid,name,partition.entry_delays)
+
+            for alarm_type in partition.alarm_type:
+                LOGGER.debug("Partition%s (%s) - alarm_type: %s",pid,name,alarm_type)
 
         for zone in self.zones:
-            LOGGER.debug(f"Zone{zone.zone_id} ({zone._sensorname}) - {zone._sensorstatus}")
+            zid = zone.zone_id
+            name = zone.sensorname
+            LOGGER.debug("Zone%s (%s) - status: %s",zid,name,zone.sensorstatus)
+            LOGGER.debug("Zone%s (%s) - battery_status: %s",zid,name,zone.battery_status)
+            LOGGER.debug("Zone%s (%s) - latestdBm: %s",zid,name,zone.latestdBm)
+            LOGGER.debug("Zone%s (%s) - averagedBm: %s",zid,name,zone.averagedBm)
 
         for zwave in self.zwave_devices:
             if isinstance(zwave,QolsysDimmer):
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - status: {zwave._dimmer_status} ")
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - level: {zwave._dimmer_level}")
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - paired_status: {zwave._paired_status}")
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - node_status: {zwave._node_status}")
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - battery_level: {zwave._node_battery_level}")
-                        LOGGER.debug(f"ZWaveDimmer{zwave._node_id} ({zwave._dimmer_name}) - battery_level_value: {zwave._node_battery_level_value}")
+                nid = zwave.node_id
+                name = zwave.dimmer_name
+                LOGGER.debug("Dimmer%s (%s) - status: %s",nid,name,zwave.dimmer_status)
+                LOGGER.debug("Dimmer%s (%s) - level: %s",nid,name,zwave.dimmer_level)
+                LOGGER.debug("Dimmer%s (%s) - paired_status: %s",nid,name,zwave.paired_status)
+                LOGGER.debug("Dimmer%s (%s) - node_status: %s",nid,name,zwave.node_status)
+                LOGGER.debug("Dimmer%s (%s) - battery_level: %s",nid,name,zwave.node_battery_level)
+                LOGGER.debug("Dimmer%s (%s) - battery_level_value: %s",nid,name,zwave.node_battery_level_value)
+                continue
 
+            if isinstance(zwave, QolsysThermostat):
+                zid = zwave.thermostat_node_id
+                name = zwave.thermostat_name
+                LOGGER.debug("Thermostat%s (%s) - current_temp: %s",zid,name,zwave.thermostat_current_temp)
+                LOGGER.debug("Thermostat%s (%s) - mode: %s",zid,name,zwave.thermostat_mode)
+                LOGGER.debug("Thermostat%s (%s) - fan_mode: %s",zid,name,zwave.thermostat_fan_mode)
+                LOGGER.debug("Thermostat%s (%s) - target_temp: %s",zid,name,zwave.thermostat_target_temp)
+                LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s",zid,name,zwave.thermostat_target_cool_temp)
+                LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s",zid,name,zwave.thermostat_target_heat_temp)
+                LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s",zid,name,zwave.thermostat_set_point_mode)
+                continue
 
+            if isinstance(zwave, QolsysLock):
+                zid = zwave.lock_node_id
+                name = zwave.lock_name
+                LOGGER.debug("Lock%s (%s) - current_temp: %s",zid,name,zwave.lock_status)
+                continue
 
-
+            if isinstance(zwave, QolsysGeneric):
+                zid = zwave.node_id
+                name = zwave.node_name
+                LOGGER.debug("Generic%s (%s) - node_type: %s",zid,name,zwave.node_type)
+                LOGGER.debug("Generic%s (%s) - status: %s",zid,name,zwave.node_status)
+                LOGGER.debug("Generic%s (%s) - battery_level: %s",zid,name,zwave.node_battery_level)
+                LOGGER.debug("Generic%s (%s) - battery_level_vale: %s",zid,name,zwave.node_battery_level_value)
+                continue

@@ -1,30 +1,30 @@
 import logging
 import sqlite3
-from prettytable import PrettyTable
 
 LOGGER = logging.getLogger(__name__)
 
-class QolsysDB():
+class QolsysDB:
 
-    def __init__(self):
-        self.Table_QolsysSettingsProvider = 'qolsyssettings'
-        self.Table_SensorContentProvider = 'sensor'
-        self.Table_StateContentProvider = 'state'
-        self.Table_UserContentProvider = 'user'
-        self.Table_HeatMapContentProvider = 'heat_map'
-        self.Table_AlarmedSensorProvider = 'alarmedsensor'
-        self.Table_HistoryContentProvider = 'history'
-        self.Table_MasterSlaveContentProvider = 'master_slave'
-        self.Table_DashboardMessagesContentProvider = 'dashboard_msgs'
-        self.Table_PartitionContentProvider = 'partition'
-        self.Table_ThermostatsContentProvider = 'thermostat'
-        self.Table_ZwaveContentProvider = 'zwave_node'
-        self.Table_DimmerLightsContentProvider = 'dimmerlight'
-        self.Table_ZDeviceHistoryContentProvider = 'zwave_history'
-        self.Table_AutomationDeviceContentProvider = 'automation'
-        self.Table_IQRemoteSettingsContentProvider = 'iqremotesettings'
+    def __init__(self) -> None:
+        self.Table_QolsysSettingsProvider = "qolsyssettings"
+        self.Table_SensorContentProvider = "sensor"
+        self.Table_StateContentProvider = "state"
+        self.Table_UserContentProvider = "user"
+        self.Table_HeatMapContentProvider = "heat_map"
+        self.Table_AlarmedSensorProvider = "alarmedsensor"
+        self.Table_HistoryContentProvider = "history"
+        self.Table_MasterSlaveContentProvider = "master_slave"
+        self.Table_DashboardMessagesContentProvider = "dashboard_msgs"
+        self.Table_PartitionContentProvider = "partition"
+        self.Table_ThermostatsContentProvider = "thermostat"
+        self.Table_ZwaveContentProvider = "zwave_node"
+        self.Table_DimmerLightsContentProvider = "dimmerlight"
+        self.Table_ZDeviceHistoryContentProvider = "zwave_history"
+        self.Table_AutomationDeviceContentProvider = "automation"
+        self.Table_IQRemoteSettingsContentProvider = "iqremotesettings"
+        self.Table_DoorLocksContentProvider = "doorlock"
 
-        self.URI_AutomationDeviceContentProvider = 'content://com.qolsys.qolsysprovider.AutomationDeviceContentProvider/automation'
+        self.URI_AutomationDeviceContentProvider = "content://com.qolsys.qolsysprovider.AutomationDeviceContentProvider/automation"
         self.URI_HistoryContentProvider = "content://com.qolsys.qolsysprovider.HistoryContentProvider/history"
         self.URI_SettingsProvider = "content://com.qolsys.qolsysprovider.QolsysSettingsProvider/qolsyssettings"
         self.URI_PartitionContentProvider = "content://com.qolsys.qolsysprovider.PartitionContentProvider/partition"
@@ -43,7 +43,7 @@ class QolsysDB():
         self.URI_MasterSlaveContentProvider = "content://com.qolsys.qolsysprovider.MasterSlaveContentProvider/master_slave"
         self.URI_DashboardMessagesContentProvider = "content://com.qolsys.qolsysprovider.DashboardMessagesContentProvider/dashboard_msgs"
         self.URI_VirtualDeviceContentProvider = "content://com.qolsys.qolsysprovider.VirtualDeviceContentProvider/virtual_device"
-        self.URI_IQRemoteSettingsContentProvider = "content://com.qolsys.qolsysprovider.IQRemoteSettingsContentProvider"
+        self.URI_IQRemoteSettingsContentProvider = "content://com.qolsys.qolsysprovider.IQRemoteSettingsContentProvider/iqremotesettings"
         self.URI_DoorLocksContentProvider = "content://com.qolsys.qolsysprovider.DoorLocksContentProvider/doorlock"
         self.URI_SmartSocketsContentProvider = "content://com.qolsys.qolsysprovider.SmartSocketsContentProvider/smartsocket"
         self.URI_SceneContentProvider = "content://com.qolsys.qolsysprovider.SceneContentProvider/scene"
@@ -56,28 +56,26 @@ class QolsysDB():
     @property
     def db(self):
         return self._db
-    
+
     @property
     def cursor(self):
         return self._cursor
-    
-    def delete_table(self,table:str,selection:str,selection_argument:str):
-        
+
+    def delete_table(self,table:str,selection:str,selection_argument:str) -> None:
         # Selection Argument
-        selection_argument = selection_argument.replace('[','')
-        selection_argument = selection_argument.replace(']','')
-        selection_argument = selection_argument.split(',')
+        selection_argument = selection_argument.replace("[","")
+        selection_argument = selection_argument.replace("]","")
+        selection_argument = selection_argument.split(",")
 
         # Replace '?' in selection string with selectio_argument
         for i in selection_argument:
-            selection = selection.replace('?',f'\'{i}\'',1)
+            selection = selection.replace("?",f"'{i}'",1)
 
-        query = f'''DELETE FROM {table} WHERE {selection}'''
+        query = f"DELETE FROM {table} WHERE {selection}"
         self.cursor.execute(query)
         self.db.commit()
 
-    def update_table(self,table:str,selection:str,selection_argument:str,new_value:str):
-
+    def update_table(self,table:str,selection:str,selection_argument:str,new_value:str) -> None:
         # Panel is sending query parameter for db update in text string
         # Have not found a way to make it work with parametrized query yet
         # Using f string concat for moment ...
@@ -85,444 +83,652 @@ class QolsysDB():
         # New Values to update in table
         db_value = []
         for key, value in new_value.items():
-            db_value.append(f'{key}=\'{value}\'')
+            db_value.append(f"{key}=\'{value}\'")
         db_value = ",".join(db_value)
 
         # Selection Argument
-        selection_argument = selection_argument.replace('[','')
-        selection_argument = selection_argument.replace(']','')
-        selection_argument = selection_argument.split(',')
-        
+        selection_argument = selection_argument.replace("[","")
+        selection_argument = selection_argument.replace("]","")
+        selection_argument = selection_argument.split(",")
+
         for i in selection_argument:
-            selection = selection.replace('?',f'\'{i}\'',1)
+            selection = selection.replace("?",f"\'{i}\'",1)
 
          # Final query
-        query = f'''UPDATE {table} SET {db_value} WHERE {selection}'''
+        query = f"UPDATE {table} SET {db_value} WHERE {selection}"
 
         self.cursor.execute(query)
         self.db.commit()
 
-    def get_partitions(self):
-        self.cursor.execute(f"SELECT * FROM {self.Table_PartitionContentProvider} ORDER BY partition_id" ) 
+    def get_partitions(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_PartitionContentProvider} ORDER BY partition_id" )
         self.db.commit()
 
         partitions = []
         columns = [description[0] for description in self.cursor.description]
         for row in  self.cursor.fetchall():
-            row_dict = dict(zip(columns, row))
+            row_dict = dict(zip(columns, row, strict=True))
             partitions.append(row_dict)
-           
+
         return partitions
-    
-    def get_zwave_devices(self):
-        self.cursor.execute(f"SELECT * FROM {self.Table_ZwaveContentProvider} ORDER BY node_id" ) 
+
+    def get_zwave_devices(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_ZwaveContentProvider} ORDER BY node_id" )
         self.db.commit()
 
         devices = []
         columns = [description[0] for description in self.cursor.description]
         for row in  self.cursor.fetchall():
-            row_dict = dict(zip(columns, row))
+            row_dict = dict(zip(columns, row, strict=True))
             devices.append(row_dict)
-           
+
         return devices
 
-    def get_dimmers(self):
-        self.cursor.execute(f"SELECT * FROM {self.Table_DimmerLightsContentProvider} ORDER BY node_id" ) 
+    def get_locks(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_DoorLocksContentProvider} ORDER BY node_id" )
+        self.db.commit()
+
+        locks = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in  self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            locks.append(row_dict)
+
+        return locks
+
+    def get_thermostats(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_ThermostatsContentProvider} ORDER BY node_id" )
+        self.db.commit()
+
+        thermostats = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in  self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            thermostats.append(row_dict)
+
+        return thermostats
+
+    def get_dimmers(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_DimmerLightsContentProvider} ORDER BY node_id" )
         self.db.commit()
 
         dimmers = []
         columns = [description[0] for description in self.cursor.description]
         for row in  self.cursor.fetchall():
-            row_dict = dict(zip(columns, row))
+            row_dict = dict(zip(columns, row, strict=True))
             dimmers.append(row_dict)
-           
+
         return dimmers
 
-    def get_zones(self):
-        self.cursor.execute(f"SELECT * FROM {self.Table_SensorContentProvider} ORDER BY zoneid" ) 
+    def get_zones(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.Table_SensorContentProvider} ORDER BY zoneid" )
         self.db.commit()
 
         zones = []
         columns = [description[0] for description in self.cursor.description]
         for row in  self.cursor.fetchall():
-            row_dict = dict(zip(columns, row))
+            row_dict = dict(zip(columns, row, strict=True))
             zones.append(row_dict)
-           
+
         return zones
-    
+
     def get_setting_panel(self,setting:str):
-        self.cursor.execute(f"SELECT value FROM {self.Table_QolsysSettingsProvider} WHERE name = ? and partition_id  = ? ", (setting,'0'))      
+        self.cursor.execute(f"SELECT value FROM {self.Table_QolsysSettingsProvider} WHERE name = ? and partition_id  = ? ", (setting,"0"))
         row = self.cursor.fetchone()
-        
-        if row == None:
-            LOGGER.error(f'{setting} value not found')
+
+        if row is None:
+            LOGGER.error("%s value not found",setting)
 
         return row[0]
-    
+
     def get_setting_partition(self,setting:str,partition_id:str):
-        self.cursor.execute(f"SELECT value FROM {self.Table_QolsysSettingsProvider} WHERE name = ? and partition_id  = ? ", (setting,partition_id))      
+        self.cursor.execute(f"SELECT value FROM {self.Table_QolsysSettingsProvider} WHERE name = ? and partition_id  = ? ", (setting,partition_id))
         row = self.cursor.fetchone()
-        
-        if row == None:
-            LOGGER.error(f'{setting} value not found')
+
+        if row is None:
+            LOGGER.error("%s value not found",setting)
 
         return row[0]
-    
+
     def get_state_partition(self,state:str,partition_id:str):
-        self.cursor.execute(f"SELECT value FROM {self.Table_StateContentProvider} WHERE name = ? and partition_id  = ? ", (state,partition_id))      
+        self.cursor.execute(f"SELECT value FROM {self.Table_StateContentProvider} WHERE name = ? and partition_id  = ? ", (state,partition_id))
         row = self.cursor.fetchone()
-        
-        if row == None:
-            LOGGER.error(f'{state} value not found')
+
+        if row is None:
+            LOGGER.error("%s value not found",state)
 
         return row[0]
-    
+
     def get_alarm_type(self,partition_id:str) -> list[str]:
-        type = []
-        self.cursor.execute(f"SELECT sgroup FROM {self.Table_AlarmedSensorProvider} WHERE partition_id  = ? ", (partition_id)) 
+        alarm_type = []
+        self.cursor.execute(f"SELECT sgroup FROM {self.Table_AlarmedSensorProvider} WHERE partition_id  = ? ", (partition_id))
         rows = self.cursor.fetchall()
 
         for row in rows:
-            type.append(row[0])
+            alarm_type.append(row[0])
 
-        return type
+        return alarm_type
 
-    def add_state(self,_id:str,version:str,opr:str,partition_id:str,name:str,value:str,extraparams:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_StateContentProvider} (_id,version,opr,partition_id,name,value,extraparams) VALUES (?,?,?,?,?,?,?)",(_id,version,opr,partition_id,name,value,extraparams))
-        self.db.commit() 
-     
-    def add_partition(self,_id:str,version:str,opr:str,partition_id:str,name:str,devices:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_PartitionContentProvider} (_id,version,opr,partition_id,name,devices) VALUES (?,?,?,?,?,?)",(_id,version,opr,partition_id,name,devices))
+    def add_state(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_StateContentProvider} (_id,version,opr,partition_id,name,value,extraparams) VALUES (?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("name",""),
+            data.get("value"),
+            data.get("extraparams","")))
+
         self.db.commit()
 
-    def add_setting(self,_id:str,version:str,opr:str,partition_id:str,name:str,value:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_QolsysSettingsProvider} (_id,version,opr,partition_id,name,value) VALUES (?,?,?,?,?,?)",(_id,version,opr,partition_id,name,value))
+    def add_partition(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_PartitionContentProvider} (_id,version,opr,partition_id,name,devices) VALUES (?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("name",""),
+            data.get("devices","")))
+
         self.db.commit()
 
-    def add_sensor(self,_id:str,version:str,opr:str,partition_id:str,sensorid:str,sensortype:str,sensorname:str,sensorgroup:str,chimetype:str,sensorstatus:str,time:str,
-                      sensorstate:str,sensortts:str,zoneid:str,frame_id:str,zone_alarm_type:str,zone_equipment_code:str,zone_physical_type:str,zone_type:str,zone_rf_sensor:str,
-                      zone_supervised:str,zone_two_way_voice_enabled:str,zone_reporting_enabled:str,battery_status:str,created_date:str,created_by:str,updated_date:str,updated_by:str,
-                      frame_count:str,frame_type:str,current_capability:str,shortID:str,diag_24hr:str,allowdisarming:str,device_capability:str,sub_type:str,signal_source:str,
-                      powerg_manufacture_id:str,parent_node:str,latestdBm:str,averagedBm:str,serial_number:str,extras:str,ac_status:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_SensorContentProvider} (_id,version,opr,partition_id,sensorid,sensortype,sensorname,sensorgroup,chimetype,sensorstatus,time,sensorstate,sensortts,zoneid,frame_id,zone_alarm_type,zone_equipment_code,zone_physical_type,zone_type,zone_rf_sensor,zone_supervised,zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,latestdBm,averagedBm,serial_number,extras,ac_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,sensorid,sensortype,sensorname,sensorgroup,chimetype,sensorstatus,time,sensorstate,sensortts,zoneid,frame_id,zone_alarm_type,zone_equipment_code,zone_physical_type,zone_type,zone_rf_sensor,zone_supervised,zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,latestdBm,averagedBm,serial_number,extras,ac_status))
+    def add_setting(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_QolsysSettingsProvider} (_id,version,opr,partition_id,name,value) VALUES (?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("name",""),
+            data.get("value","")))
+
         self.db.commit()
 
-    def add_state(self,_id:str,version:str,opr:str,partition_id:str,name:str,value:str,extraparams:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_StateContentProvider} (_id,version,opr,partition_id,name,value,extraparams) VALUES (?,?,?,?,?,?,?)",(_id,version,opr,partition_id,name,value,extraparams))
+    def add_sensor(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_SensorContentProvider} (_id,version,opr,partition_id,sensorid,sensortype,sensorname,sensorgroup,chimetype,sensorstatus,time,sensorstate,sensortts,zoneid,frame_id,zone_alarm_type,zone_equipment_code,zone_physical_type,zone_type,zone_rf_sensor,zone_supervised,zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,latestdBm,averagedBm,serial_number,extras,ac_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("sensorid",""),
+            data.get("sensortype",""),
+            data.get("sensorname",""),
+            data.get("sensorgroup",""),
+            data.get("chimetype",""),
+            data.get("sensorstatus",""),
+            data.get("time",""),
+            data.get("sensorstate",""),
+            data.get("sensortts",""),
+            data.get("zoneid",""),
+            data.get("frame_id",""),
+            data.get("zone_alarm_type",""),
+            data.get("zone_equipment_code",""),
+            data.get("zone_physical_type",""),
+            data.get("zone_type",""),
+            data.get("zone_rf_sensor",""),
+            data.get("zone_supervised",""),
+            data.get("zone_two_way_voice_enabled",""),
+            data.get("zone_reporting_enabled",""),
+            data.get("battery_status",""),
+            data.get("created_date",""),
+            data.get("created_by",""),
+            data.get("updated_date",""),
+            data.get("updated_by",""),
+            data.get("frame_count",""),
+            data.get("frame_type",""),
+            data.get("current_capability",""),
+            data.get("shortID",""),
+            data.get("diag_24hr",""),
+            data.get("allowdisarming",""),
+            data.get("device_capability",""),
+            data.get("sub_type",""),
+            data.get("signal_source",""),
+            data.get("powerg_manufacture_id",""),
+            data.get("parent_node",""),
+            data.get("latestdBm",""),
+            data.get("averagedBm",""),
+            data.get("serial_number",""),
+            data.get("extras",""),
+            data.get("ac_status","")))
+
         self.db.commit()
 
-    def add_zwave_node(self,_id:str,version:str,opr:str,partition_id:str,node_id:str,node_name:str,node_type:str,node_status:str,node_secure_cmd_cls:str,
-                       node_battery_level:str,node_battery_level_value:str,is_node_listening_node:str,basic_report_value:str,switch_multilevel_report_value:str,
-                       basic_device_type:str,generic_device_type:str,specific_device_type:str,num_secure_command_class:str,secure_command_class:str,
-                       manufacture_id:str, product_type:str,product_id:str,library_type_version:str,protocol_version:str,protocol_sub_version:str,
-                       application_version:str,application_sub_version:str,capability:str,command_class_list:str,lenof_command_class_list:str,security:str,
-                       library_type:str,last_updated_date:str,node_battery_level_updated_time:str,basic_report_updated_time:str,switch_multilevel_report_updated_time:str,
-                       multi_channel_details:str,rediscover_status:str,last_rediscover_time:str,neighbour_info:str,last_node_test_time:str,
-                       endpoint:str,endpoint_details:str,device_wakeup_time:str,role_type:str,is_device_sleeping:str,counters_passed:str,counters_failed:str,group_id:str,
-                       command_classes_version:str,paired_status:str,device_dsk:str,endpoint_secure_cmd_cls:str,s2_security_keys:str,device_protocol:str,is_device_hidden:str,ime_data:str):
-        self.cursor.execute(f'''INSERT INTO {self.Table_ZwaveContentProvider} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
+    def add_zwave_node(self,data:dict) -> None:
+        self.cursor.execute(f"""INSERT INTO {self.Table_ZwaveContentProvider} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
                             node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,basic_device_type,generic_device_type,
                             specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,library_type_version,protocol_version,
                             protocol_sub_version,application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,
                             library_type,last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,
                             multi_channel_details,rediscover_status,last_rediscover_time,neighbour_info,last_node_test_time,endpoint,endpoint_details,device_wakeup_time,
                             role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,paired_status,device_dsk,endpoint_secure_cmd_cls,
-                            s2_security_keys,device_protocol,is_device_hidden,ime_data) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                            (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,
-                            basic_device_type,generic_device_type,specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,
-                            library_type_version,protocol_version,protocol_sub_version,application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,
-                            library_type,last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,multi_channel_details,rediscover_status,last_rediscover_time,
-                            neighbour_info,last_node_test_time,endpoint,endpoint_details,device_wakeup_time,role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,paired_status,
-                            device_dsk,endpoint_secure_cmd_cls,s2_security_keys,device_protocol,is_device_hidden,ime_data))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                            s2_security_keys,device_protocol,is_device_hidden,ime_data) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",(
+                            data.get("_id"),
+                            data.get("version",""),
+                            data.get("opr",""),
+                            data.get("partition_id",""),
+                            data.get("node_id",""),
+                            data.get("node_name",""),
+                            data.get("node_type",""),
+                            data.get("node_status",""),
+                            data.get("node_secure_cmd_cls",""),
+                            data.get("node_battery_level",""),
+                            data.get("node_battery_level_value",""),
+                            data.get("is_node_listening_node",""),
+                            data.get("basic_report_value",""),
+                            data.get("switch_multilevel_report_value",""),
+                            data.get("basic_device_type",""),
+                            data.get("generic_device_type",""),
+                            data.get("specific_device_type",""),
+                            data.get("num_secure_command_class",""),
+                            data.get("secure_command_class",""),
+                            data.get("manufacture_id",""),
+                            data.get("product_type",""),
+                            data.get("product_id",""),
+                            data.get("library_type_version",""),
+                            data.get("protocol_version",""),
+                            data.get("protocol_sub_version",""),
+                            data.get("application_version",""),
+                            data.get("application_sub_version",""),
+                            data.get("capability",""),
+                            data.get("command_class_list",""),
+                            data.get("lenof_command_class_list",""),
+                            data.get("security",""),
+                            data.get("library_type",""),
+                            data.get("last_updated_date",""),
+                            data.get("node_battery_level_updated_time",""),
+                            data.get("basic_report_updated_time",""),
+                            data.get("switch_multilevel_report_updated_time",""),
+                            data.get("multi_channel_details",""),
+                            data.get("rediscover_status",""),
+                            data.get("last_rediscover_time",""),
+                            data.get("neighbour_info",""),
+                            data.get("last_node_test_time",""),
+                            data.get("endpoint",""),
+                            data.get("endpoint_details",""),
+                            data.get("device_wakeup_time",""),
+                            data.get("role_type",""),
+                            data.get("is_device_sleeping",""),
+                            data.get("counters_passed",""),
+                            data.get("counters_failed",""),
+                            data.get("group_id",""),
+                            data.get("command_classes_version",""),
+                            data.get("paired_status",""),
+                            data.get("device_dsk",""),
+                            data.get("endpoint_secure_cmd_cls",""),
+                            data.get("s2_security_keys",""),
+                            data.get("device_protocol",""),
+                            data.get("is_device_hidden",""),
+                            data.get("ime_data","")))
+
         self.db.commit()
 
-    def add_zwave_history(self,_id:str,version:str,opr:str,partition_id:str,node_id:str,device_name:str,source:str,event:str,request:str,
-                          response:str,created_date:str,updated_date:str,last_updated_by:str,field_type:str,ack:str,protocol:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_ZDeviceHistoryContentProvider} (_id,version,opr,partition_id,node_id,device_name,source,event,request,response,created_date,updated_date,last_updated_by,field_type,ack,protocol) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,node_id,device_name,source,event,request,response,created_date,updated_date,last_updated_by,field_type,ack,protocol))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-        self.db.commit()  
+    def add_zwave_history(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_ZDeviceHistoryContentProvider} (_id,version,opr,partition_id,node_id,device_name,source,event,request,response,created_date,updated_date,last_updated_by,field_type,ack,protocol) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("node_id",""),
+            data.get("device_name",""),
+            data.get("source",""),
+            data.get("event",""),
+            data.get("request",""),
+            data.get("response",""),
+            data.get("created_date",""),
+            data.get("updated_date",""),
+            data.get("last_updated_by",""),
+            data.get("field_type",""),
+            data.get("ack",""),
+            data.get("protocol","")))
 
-    def add_automation(self,_id:str,virtual_node_id:str,version:str,opr:str,partition_id:str,end_point:str,extras:str,is_autolocking_enabled:str,
-                       device_type:str,endpoint_secure_cmd_classes:str,automation_id:str,device_name:str,protocol:str, node_battery_level_value:str,
-                        state:str,last_updated_date:str,manufacturer_id:str,endpoint_cmd_classes:str,device_id:str,nodeid_cmd_classes:str,
-                         is_device_hidden:str,nodeid_secure_cmd_classes:str,created_date:str,status:str) : 
-        self.cursor.execute(f"INSERT INTO {self.Table_AutomationDeviceContentProvider} (_id,virtual_node_id,version,opr,partition_id,end_point,extras,is_autolocking_enabled,device_type,endpoint_secure_cmd_classes,automation_id,device_name,protocol,node_battery_level_value,state,last_updated_date,manufacturer_id,endpoint_cmd_classes,device_id,nodeid_cmd_classes,is_device_hidden,nodeid_secure_cmd_classes,created_date,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,virtual_node_id,version,opr,partition_id,end_point,extras,is_autolocking_enabled,device_type,endpoint_secure_cmd_classes,automation_id,device_name,protocol,node_battery_level_value,state,last_updated_date,manufacturer_id,endpoint_cmd_classes,device_id,nodeid_cmd_classes,is_device_hidden,nodeid_secure_cmd_classes,created_date,status))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-        self.db.commit()  
-
-    def add_dimmer_light(self,_id:str,version:str,opr:str,partition_id:str,dimmer_name:str,status:str,node_id:str,level:str,
-                         created_by:str,created_date:str,updated_by:str,last_updated_date:str,endpoint:str,power_details:str,paired_status:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_DimmerLightsContentProvider} (_id,version,opr,partition_id,dimmer_name,status,node_id,level,created_by,created_date,updated_by,last_updated_date,endpoint,power_details,paired_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,dimmer_name,status,node_id,level,created_by,created_date,updated_by,last_updated_date,endpoint,power_details,paired_status))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-        self.db.commit()                     
-                       
-    def add_thermostat(self,_id:str,version:str,opr:str,partition_id:str,thermostat_id:str,thermostat_name:str,current_temp:str,
-                          target_cool_temp:str,target_heat_temp:str,target_temp:str,power_usage:str,thermostat_mode:str,
-                          thermostat_mode_bitmask:str,fan_mode:str,fan_mode_bitmask:str,set_point_mode:str,set_point_mode_bitmask:str,
-                          node_id:str,created_by:str,created_date:str,updated_by:str,last_updated_date:str,thermostat_mode_updated_time:str,
-                          fan_mode_updated_time:str,set_point_mode_updated_time:str,target_cool_temp_updated_time:str,
-                          target_heat_temp_updated_time:str,current_temp_updated_time:str,device_temp_unit:str,endpoint:str,paired_status:str,
-                          configuration_parameter:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_ThermostatsContentProvider} (_id,version,opr,partition_id,thermostat_id,thermostat_name,current_temp,target_cool_temp,target_heat_temp,target_temp,power_usage,thermostat_mode,thermostat_mode_bitmask,fan_mode,fan_mode_bitmask,set_point_mode,set_point_mode_bitmask,node_id,created_by,created_date,updated_by,last_updated_date,thermostat_mode_updated_time,fan_mode_updated_time,set_point_mode_updated_time,target_cool_temp_updated_time,target_heat_temp_updated_time,current_temp_updated_time,device_temp_unit,endpoint,paired_status,configuration_parameter) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,thermostat_id,thermostat_name,current_temp,target_cool_temp,target_heat_temp,target_temp,power_usage,thermostat_mode,thermostat_mode_bitmask,fan_mode,fan_mode_bitmask,set_point_mode,set_point_mode_bitmask,node_id,created_by,created_date,updated_by,last_updated_date,thermostat_mode_updated_time,fan_mode_updated_time,set_point_mode_updated_time,target_cool_temp_updated_time,target_heat_temp_updated_time,current_temp_updated_time,device_temp_unit,endpoint,paired_status,configuration_parameter))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         self.db.commit()
 
-    def add_user(self,_id:str,version:str,opr:str,partition_id:str,username:str,userPin:str,expirydate:str,usertype:str,userid:str,lastname:str,check_in:str,hash_user:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_UserContentProvider} (_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user)) 
+    def add_automation(self,data:dict) -> None :
+        self.cursor.execute(f"INSERT INTO {self.Table_AutomationDeviceContentProvider} (_id,virtual_node_id,version,opr,partition_id,end_point,extras,is_autolocking_enabled,device_type,endpoint_secure_cmd_classes,automation_id,device_name,protocol,node_battery_level_value,state,last_updated_date,manufacturer_id,endpoint_cmd_classes,device_id,nodeid_cmd_classes,is_device_hidden,nodeid_secure_cmd_classes,created_date,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("virtual_node_id",""),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("end_point",""),
+            data.get("extras",""),
+            data.get("is_autolocking_enabled",""),
+            data.get("device_type",""),
+            data.get("endpoint_secure_cmd_classes",""),
+            data.get("automation_id",""),
+            data.get("device_name",""),
+            data.get("protocol",""),
+            data.get("node_battery_level_value",""),
+            data.get("state",""),
+            data.get("last_updated_date",""),
+            data.get("manufacturer_id",""),
+            data.get("endpoint_cmd_classes",""),
+            data.get("device_id",""),
+            data.get("nodeid_cmd_classes",""),
+            data.get("is_device_hidden",""),
+            data.get("nodeid_secure_cmd_classes",""),
+            data.get("created_date",""),
+            data.get("status","")))
+
         self.db.commit()
 
-    def add_history(self,_id:str,version:str,opr:str,partition_id:str,device:str,events:str,time:str,ack:str,type:str,feature1:str,device_id:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_HistoryContentProvider} (_id,version,opr,partition_id,device,events,time,ack,type,feature1,device_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,device,events,time,ack,type,feature1,device_id)) 
+    def add_dimmer_light(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_DimmerLightsContentProvider} (_id,version,opr,partition_id,dimmer_name,status,node_id,level,created_by,created_date,updated_by,last_updated_date,endpoint,power_details,paired_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+                            data.get("_id"),
+                            data.get("version",""),
+                            data.get("opr",""),
+                            data.get("partition_id",""),
+                            data.get("dimmer_name",""),
+                            data.get("status",""),
+                            data.get("node_id",""),
+                            data.get("level",""),
+                            data.get("created_by",""),
+                            data.get("created_date",""),
+                            data.get("updated_by",""),
+                            data.get("last_updated_date",""),
+                            data.get("endpoint",""),
+                            data.get("power_details",""),
+                            data.get("paired_status","")))
+
         self.db.commit()
 
-    def add_heat_map(self,_id:str,version:str,opr:str,partition_id:str,userid:str,fragment_id:str,element_id:str,count:str,time_stamp:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_HeatMapContentProvider} (_id,version,opr,partition_id,userid,fragment_id,element_id,count,time_stamp) VALUES (?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,userid,fragment_id,element_id,count,time_stamp)) 
+    def add_doorlock(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_DoorLocksContentProvider} (_id,version,opr,partition_id,doorlock_name,status,node_id,remote_arming,keyfob_arming,panel_arming,created_by,created_date,updated_by,last_updated_date,endpoint,paired_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("doorlock_name",""),
+            data.get("status",""),
+            data.get("node_id",""),
+            data.get("remote_arming",""),
+            data.get("keyfob_arming",""),
+            data.get("panel_arming",""),
+            data.get("created_by",""),
+            data.get("created_date",""),
+            data.get("updated_by",""),
+            data.get("last_updated_date",""),
+            data.get("endpoint",""),
+            data.get("paired_status","")))
+
         self.db.commit()
 
-    def add_alarmed_sensor(self,_id:str,partition_id:str,silenced:str,zone_id:str,sgroup:str,action:str,timed_out:str,type:str,priority:str,aseb_type:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_AlarmedSensorProvider} (_id,partition_id,silenced,zone_id,sgroup,action,timed_out,type,priority,aseb_type) VALUES (?,?,?,?,?,?,?,?,?,?)",(_id,partition_id,silenced,zone_id,sgroup,action,timed_out,type,priority,aseb_type)) 
+    def add_thermostat(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_ThermostatsContentProvider} (_id,version,opr,partition_id,thermostat_id,thermostat_name,current_temp,target_cool_temp,target_heat_temp,target_temp,power_usage,thermostat_mode,thermostat_mode_bitmask,fan_mode,fan_mode_bitmask,set_point_mode,set_point_mode_bitmask,node_id,created_by,created_date,updated_by,last_updated_date,thermostat_mode_updated_time,fan_mode_updated_time,set_point_mode_updated_time,target_cool_temp_updated_time,target_heat_temp_updated_time,current_temp_updated_time,device_temp_unit,endpoint,paired_status,configuration_parameter) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("thermostat_id",""),
+            data.get("thermostat_name",""),
+            data.get("current_temp",""),
+            data.get("target_cool_temp",""),
+            data.get("target_heat_temp",""),
+            data.get("target_temp",""),
+            data.get("power_usage",""),
+            data.get("thermostat_mode",""),
+            data.get("thermostat_mode_bitmask,fan_mode",""),
+            data.get("fan_mode_bitmask,set_point_mode",""),
+            data.get("set_point_mode_bitmask",""),
+            data.get("node_id",""),
+            data.get("created_by",""),
+            data.get("created_date",""),
+            data.get("updated_by",""),
+            data.get("last_updated_date",""),
+            data.get("thermostat_mode_updated_time",""),
+            data.get("fan_mode_updated_time",""),
+            data.get("set_point_mode_updated_time",""),
+            data.get("target_cool_temp_updated_time",""),
+            data.get("target_heat_temp_updated_time",""),
+            data.get("current_temp_updated_time",""),
+            data.get("device_temp_unit",""),
+            data.get("endpoint",""),
+            data.get("paired_status",""),
+            data.get("configuration_parameter","")))
+
         self.db.commit()
 
-    def add_master_slave(self,_id:str,version:str,opr:str,partition_id:str,zone_id:str,ip_address:str,mac_address:str,device_type:str,
-                            created_by:str,created_date:str,updated_by:str,last_updated_date:str,status:str,device_name:str,last_updated_iq_remote_checksum:str,
-                            software_version:str,upgrade_status:str,name:str,bssid:str,dhcpInfo:str,topology:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_MasterSlaveContentProvider} (_id,version,opr,partition_id,zone_id,ip_address,mac_address,device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,zone_id,ip_address,mac_address,device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology)) 
+    def add_user(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_UserContentProvider} (_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("username",""),
+            data.get("userPin",""),
+            data.get("expirydate",""),
+            data.get("usertype",""),
+            data.get("userid",""),
+            data.get("lastname",""),
+            data.get("check_in",""),
+            data.get("hash_user","")))
+
         self.db.commit()
 
-    def add_iqremotesettings(self,_id:str,version:str,opr:str,partition_id:str,zone_id:str,mac_address:str,name:str,value:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_IQRemoteSettingsContentProvider} (_id,version,opr,partition_id,zone_id,mac_address,name,value) VALUES (?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,zone_id,mac_address,name,value)) 
+    def add_history(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_HistoryContentProvider} (_id,version,opr,partition_id,device,events,time,ack,type,feature1,device_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("device",""),
+            data.get("events",""),
+            data.get("time",""),
+            data.get("ack",""),
+            data.get("type",""),
+            data.get("feature1",""),
+            data.get("device_id","")))
+
         self.db.commit()
 
-    def add_dashboard_msg(self,_id:str,version:str,opr:str,partition_id:str,msg_id:str,title:str,description:str,received_time:str,start_time:str,
-                             end_time:str,read:str,mime_type:str):
-        self.cursor.execute(f"INSERT INTO {self.Table_DashboardMessagesContentProvider} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type)) 
+    def add_heat_map(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_HeatMapContentProvider} (_id,version,opr,partition_id,userid,fragment_id,element_id,count,time_stamp) VALUES (?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("userid",""),
+            data.get("fragment_id",""),
+            data.get("element_id",""),
+            data.get("count",""),
+            data.get("time_stamp","")))
+
         self.db.commit()
 
-    def clear_db(self):
-        self.cursor.execute(f'DELETE from {self.Table_AlarmedSensorProvider}')
+    def add_alarmed_sensor(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_AlarmedSensorProvider} (_id,partition_id,silenced,zone_id,sgroup,action,timed_out,type,priority,aseb_type) VALUES (?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("partition_id",""),
+            data.get("silenced",""),
+            data.get("zone_id",""),
+            data.get("sgroup",""),
+            data.get("action",""),
+            data.get("timed_out",""),
+            data.get("type",""),
+            data.get("priority",""),
+            data.get("aseb_type","")))
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_AutomationDeviceContentProvider}')
+    def add_master_slave(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_MasterSlaveContentProvider} (_id,version,opr,partition_id,zone_id,ip_address,mac_address,device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("zone_id",""),
+            data.get("ip_address",""),
+            data.get("mac_address",""),
+            data.get("device_type",""),
+            data.get("created_by",""),
+            data.get("created_date",""),
+            data.get("updated_by",""),
+            data.get("last_updated_date",""),
+            data.get("status",""),
+            data.get("device_name",""),
+            data.get("last_updated_iq_remote_checksum",""),
+            data.get("software_version",""),
+            data.get("upgrade_status",""),
+            data.get("name",""),
+            data.get("bssid",""),
+            data.get("dhcpInfo",""),
+            data.get("topology","")))
+
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_DashboardMessagesContentProvider}')
+    def add_iqremotesettings(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_IQRemoteSettingsContentProvider} (_id,version,opr,partition_id,zone_id,mac_address,name,value) VALUES (?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version",""),
+            data.get("opr",""),
+            data.get("partition_id",""),
+            data.get("zone_id",""),
+            data.get("mac_address",""),
+            data.get("name",""),
+            data.get("value","")))
+
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_DimmerLightsContentProvider}')
+    def add_dashboard_msg(self,data:dict) -> None:
+        self.cursor.execute(f"INSERT INTO {self.Table_DashboardMessagesContentProvider} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(
+            data.get("_id"),
+            data.get("version"),
+            data.get("opr"),
+            data.get("partition_id"),
+            data.get("msg_id"),
+            data.get("title"),
+            data.get("description"),
+            data.get("received_time"),
+            data.get("start_time"),
+            data.get("end_time"),
+            data.get("read"),
+            data.get("mime_type")))
+
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_HeatMapContentProvider}')
+    def clear_db(self) -> None:
+        self.cursor.execute(f"DELETE from {self.Table_AlarmedSensorProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_HistoryContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_AutomationDeviceContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_MasterSlaveContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_DashboardMessagesContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_PartitionContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_DimmerLightsContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_QolsysSettingsProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_HeatMapContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_SensorContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_HistoryContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_StateContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_MasterSlaveContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_ThermostatsContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_PartitionContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_ZDeviceHistoryContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_QolsysSettingsProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_ZwaveContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_SensorContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_UserContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_StateContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_IQRemoteSettingsContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_ThermostatsContentProvider}")
         self.db.commit()
 
-        self.cursor.execute(f'DELETE from {self.Table_DimmerLightsContentProvider}')
+        self.cursor.execute(f"DELETE from {self.Table_ZDeviceHistoryContentProvider}")
         self.db.commit()
 
-    def load_db(self,database:dict):
+        self.cursor.execute(f"DELETE from {self.Table_ZwaveContentProvider}")
+        self.db.commit()
+
+        self.cursor.execute(f"DELETE from {self.Table_UserContentProvider}")
+        self.db.commit()
+
+        self.cursor.execute(f"DELETE from {self.Table_IQRemoteSettingsContentProvider}")
+        self.db.commit()
+
+        self.cursor.execute(f"DELETE from {self.Table_DimmerLightsContentProvider}")
+        self.db.commit()
+
+    def load_db(self,database:dict) -> None:
 
         self.clear_db()
-               
+
         if not database:
-            LOGGER.error(f'Loading Database Error, No Data Provided')
+            LOGGER.error("Loading Database Error, No Data Provided")
 
         for uri in database:
-            
-            match uri.get('uri'):
+
+            match uri.get("uri"):
 
                 # PartitionContentProvider
                 case self.URI_PartitionContentProvider:
-                    for p in uri.get('resultSet'):
-                        self.add_partition(_id = p.get('_id'),
-                                              version = p.get('version',''),
-                                              opr = p.get('opr',''),
-                                              partition_id = p.get('partition_id',''),
-                                              name = p.get('name',''),
-                                              devices = p.get('devices',''))
+                    for u in uri.get("resultSet"):
+                        self.add_partition(data=u)
 
                 # SensorContentProvider
                 case self.URI_SensorContentProvider:
-                    for s in uri.get('resultSet'):
-                        self.add_sensor(_id = s.get('_id'),
-                                            version = s.get('version',''),
-                                            opr = s.get('opr',''),
-                                            partition_id = s.get('partition_id',''),
-                                            sensorid = s.get('sensorid',''),
-                                            sensortype = s.get('sensortype',''),
-                                            sensorname = s.get('sensorname',''),
-                                            ac_status = s.get('ac_status',''),
-                                            sensorgroup = s.get('sensorgroup',''),
-                                            chimetype = s.get('chimetype',''),
-                                            sensorstatus = s.get('sensorstatus',''),
-                                            time = s.get('time',''),
-                                            sensorstate = s.get('sensorstate',''),
-                                            sensortts = s.get('sensortts',''),
-                                            zoneid = s.get('zoneid',''),
-                                            frame_id = s.get('frame_id',''),
-                                            zone_alarm_type = s.get('zone_alarm_type',''),
-                                            zone_equipment_code = s.get('zone_equipment_code',''),
-                                            zone_physical_type = s.get('zone_physical_type',''),
-                                            zone_type = s.get('zone_type',''),
-                                            zone_rf_sensor = s.get('zone_rf_sensor',''),
-                                            zone_supervised = s.get('zone_supervised',''),
-                                            zone_two_way_voice_enabled = s.get('zone_two_way_voice_enabled',''),
-                                            zone_reporting_enabled= s.get('zone_reporting_enabled',''),
-                                            battery_status = s.get('battery_status',''),
-                                            created_date = s.get('created_date',''),
-                                            created_by = s.get('created_by',''),
-                                            updated_date = s.get('updated_date',''),
-                                            updated_by = s.get('updated_by',''),
-                                            frame_count = s.get('frame_count',''),
-                                            frame_type = s.get('frame_type',''),
-                                            current_capability = s.get('current_capability',''),
-                                            shortID = s.get('shortID',''),
-                                            diag_24hr = s.get('diag_24hr',''),
-                                            allowdisarming = s.get('allowdisarming',''),
-                                            device_capability = s.get('device_capability',''),
-                                            sub_type = s.get('sub_type',''),
-                                            signal_source =s.get('signal_source',''),
-                                            powerg_manufacture_id = s.get('powerg_manufacture_id',''),
-                                            parent_node = s.get('parent_node',''),
-                                            latestdBm = s.get('latestdBm','0'),
-                                            averagedBm = s.get('averagedBm','0'),
-                                            serial_number = s.get('serial_number',''),
-                                            extras= s.get('extras',''))
-                        
+                    for u in uri.get("resultSet"):
+                        self.add_sensor(data=u)
+
                 # StateContentProvider
                 case self.URI_StateContentProvider:
-                    for s in uri.get('resultSet'):
-                        self.add_state(_id=s.get('_id'),
-                                          version = s.get('version',''),
-                                          opr = s.get('opr',''),
-                                          partition_id = s.get('partition_id',''),
-                                          name = s.get('name',''),
-                                          value = s.get('value',''),
-                                          extraparams = s.get('extraparams',''))
+                    for u in uri.get("resultSet"):
+                        self.add_state(data=u)
+
                 # AlarmedSensorProvider
                 case self.URI_AlarmedSensorProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_alarmed_sensor(u.get('_id',''),
-                                                    u.get('partition_id',''),
-                                                    u.get('silenced',''),
-                                                    u.get('zonde_id',''),
-                                                    u.get('sgroup',''),
-                                                    u.get('action',''),
-                                                    u.get('time_out',''),
-                                                    u.get('type',''),
-                                                    u.get('priority',''),
-                                                    u.get('aseb_type',''))
-                        
+                    for u in uri.get("resultSet"):
+                        self.add_alarmed_sensor(data=u)
+
                 # DashboardMessagesContentProvider
                 case self.URI_DashboardMessagesContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_dashboard_msg(u.get('_id'),u.get('version',''),u.get('opr',''),u.get('partition_id',''),u.get('msg_id',''),u.get('title',''),u.get('description',''),u.get('received_time',''),u.get('start_time',''),u.get('end_time',''),u.get('read',''),u.get('mime_type',''))
+                    for u in uri.get("resultSet"):
+                        self.add_dashboard_msg(data=u)
 
                 # DimmerLightsContentProvider
                 case self.URI_DimmerLightsContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_dimmer_light(u.get('_id'),
-                                              u.get('version',''),
-                                              u.get('opr',''),
-                                              u.get('partition_id',''),
-                                              u.get('dimmer_name',''),
-                                              u.get('status',''),
-                                              u.get('node_id',''),
-                                              u.get('level',''),
-                                              u.get('created_by',''),
-                                              u.get('created_date',''),
-                                              u.get('updated_by',''),
-                                              u.get('last_updated_date',''),
-                                              u.get('endpoint',''),
-                                              u.get('power_details',''),
-                                              u.get('paired_status',''))
+                    for u in uri.get("resultSet"):
+                        self.add_dimmer_light(data=u)
 
+                # DoorLock Content Proviver
                 case self.URI_DoorLocksContentProvider:
-                    continue
+                    for u in uri.get("resultSet"):
+                        self.add_doorlock(data=u)
 
                 case self.URI_EUEventContentProvider:
                     continue
 
                 case self.URI_HeatMapContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_heat_map(u.get('_id',''),
-                                             u.get('version',''),
-                                             u.get('opr',''),
-                                             u.get('partition_id',''),
-                                             u.get('userid',''),
-                                             u.get('fragment_id',''),
-                                             u.get('element_id',''),
-                                             u.get('count',''),
-                                             u.get('time_stamp',''))
-                                    
-                # HistoryContentProvider                
+                    for u in uri.get("resultSet"):
+                        self.add_heat_map(data=u)
+
+                # HistoryContentProvider
                 case self.URI_HistoryContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_history(_id = u.get('_id'),
-                                            version = u.get('version',''),
-                                            opr = u.get('opr',''),
-                                            partition_id = u.get('partition_id',''),
-                                            device = u.get('device',''),
-                                            events = u.get('events',''),
-                                            time = u.get('time',''),
-                                            ack = u.get('ack',''),
-                                            type = u.get('type',''),
-                                            feature1 = u.get('feature1',''),
-                                            device_id = u.get('device_id',''))
+                    for u in uri.get("resultSet"):
+                        self.add_history(data=u)
 
                 case self.URI_IQRemoteSettingsContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_iqremotesettings(_id = u.get('_id'),
-                                                  version= u.get('version',''),
-                                                  opr= u.get('opr',''),
-                                                  partition_id= u.get('partition_id',''),
-                                                  zone_id= u.get('zone_id',''),
-                                                  mac_address= u.get('mac_address',''),
-                                                  name= u.get('name',''),
-                                                  value= u.get('value',''))
+                    for u in uri.get("resultSet"):
+                        self.add_iqremotesettings(data=u)
 
                 case self.URI_SceneContentProvider:
                     continue
 
                 case self.URI_MasterSlaveContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_master_slave(u.get('_id'),u.get('version',''),u.get('opr',''),u.get('partition_id',''),u.get('zone_id',''),u.get('ip_address',''),u.get('mac_address',''),u.get('device_type',''),u.get('created_by',''),u.get('created_date',''),u.get('updated_by',''),u.get('last_upgraded_date',''),u.get('status',''),u.get('device_name',''),u.get('last_updated_iq_remote_checksum',''),u.get('software_version',''),u.get('upgraded_status',''),u.get('name',''),u.get('bssid',''),u.get('dhcpInfo',''),u.get('topology',''))
+                    for u in uri.get("resultSet"):
+                        self.add_master_slave(data=u)
 
                 # SettingsProvider
                 case self.URI_SettingsProvider:
-                    for s in uri.get('resultSet'):
-                        self.add_setting(_id = s.get('_id'),
-                                            version = s.get('version',''),
-                                            opr = s.get('opr',''),
-                                            partition_id = s.get('partition_id',''),
-                                            name = s.get('name',''),
-                                            value = s.get('value',''))
+                    for u in uri.get("resultSet"):
+                        self.add_setting(data = u)
 
                 case self.URI_SmartSocketsContentProvider:
                     continue
@@ -532,178 +738,42 @@ class QolsysDB():
 
                 # ThermostatsContentProvider
                 case self.URI_ThermostatsContentProvider:
-                    for t in uri.get('resultSet'):
-                        self.add_thermostat( _id = t.get('_id',''),
-                                                version= t.get('version',''),
-                                                opr = t.get('opr',''),
-                                                partition_id = t.get('partition_id',''),
-                                                thermostat_id = t.get('thermostat_id',''),
-                                                thermostat_name = t.get('thermostat_name',''),
-                                                current_temp = t.get('current_temp',''),
-                                                target_cool_temp = t.get('target_cool_temp',''),
-                                                target_heat_temp = t.get('target_heat_temp',''),
-                                                target_temp = t.get('target_temp',''),
-                                                power_usage = t.get('power_usage',''),
-                                                thermostat_mode = t.get('thermostat_mode',''),
-                                                thermostat_mode_bitmask = t.get('thermostat_mode_bitmask',''),
-                                                fan_mode = t.get('fan_mode',''),
-                                                fan_mode_bitmask = t.get('fan_mode_bitmask',''),
-                                                set_point_mode = t.get('set_point_mode',''),
-                                                set_point_mode_bitmask = t.get('set_point_mode_bitmask',''),
-                                                node_id = t.get('node_id',''),
-                                                created_by = t.get('created_by',''),
-                                                created_date = t.get('created_date',''),
-                                                updated_by = t.get('updated_by',''),
-                                                last_updated_date = t.get('last_update_date',''),
-                                                thermostat_mode_updated_time = t.get('thermostat_mode_updated_time',''),
-                                                fan_mode_updated_time = t.get('fan_mode_updated_time',''),
-                                                set_point_mode_updated_time = t.get('set_point_mode_updated_time',''),
-                                                target_cool_temp_updated_time = t.get('target_cool_temp_updated_time',''),
-                                                target_heat_temp_updated_time = t.get('target_heat_temp_updated_time',''),
-                                                current_temp_updated_time = t.get('current_temp_updated_time',''),
-                                                device_temp_unit = t.get('device_temp_unit',''),
-                                                endpoint = t.get('endpoint',''),
-                                                paired_status = t.get('paired_status',''),
-                                                configuration_parameter = t.get('configuration_parameter',''))
+                    for u in uri.get("resultSet"):
+                        self.add_thermostat(data=u)
 
                 case self.URI_TroubleConditionsContentProvider:
                     continue
-                
+
                 # UserContentProvider
                 case self.URI_UserContentProvider:
-                    for u in  uri.get('resultSet'):
-                        self.add_user(_id = u.get('_id',''),
-                                         version = u.get('version',''),
-                                         opr = u.get('opr',''),
-                                         partition_id = u.get('partition_id',''),
-                                         username = u.get('username',''),
-                                         userPin = u.get('userPin',''),
-                                         expirydate = u.get('expirydate',''),
-                                         usertype = u.get('usertype',''),
-                                         userid = u.get('userid',''),
-                                         lastname = u.get('lastname',''),
-                                         check_in = u.get('check_in',''),
-                                         hash_user = u.get('hash_user',''))
+                    for u in  uri.get("resultSet"):
+                        self.add_user(data=u)
 
                 case self.URI_VirtualDeviceContentProvider:
                     continue
 
                 # ZwaveContentProvider
                 case self.URI_ZwaveContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_zwave_node(u.get('_id'),
-                                            u.get('version',''),
-                                            u.get('opr',''),
-                                            u.get('parition_id',''),
-                                            u.get('node_id',''),
-                                            u.get('node_name',''),
-                                            u.get('node_type',''),
-                                            u.get('node_status',''),
-                                            u.get('node_secure_cmd_cls',''),
-                                            u.get('node_battery_level',''),
-                                            u.get('node_battery_level_value',''),
-                                            u.get('is_node_listenning_node',''),
-                                            u.get('basic_report_value',''),
-                                            u.get('switch_multilevel_report_value',''),
-                                            u.get('basic_device_type',''),
-                                            u.get('generic_device_type',''),
-                                            u.get('specific_device_type',''),
-                                            u.get('num_secure_command_class',''),
-                                            u.get('secure_command_class',''),
-                                            u.get('manifacture_id',''),
-                                            u.get('product_type',''),
-                                            u.get('product_id',''),
-                                            u.get('library_type_version',''),
-                                            u.get('protocol_version',''),
-                                            u.get('protocol_sub_version',''),
-                                            u.get('application_version',''),
-                                            u.get('application_sub_version',''),
-                                            u.get('capability',''),
-                                            u.get('command_class_list',''),
-                                            u.get('lenof_command_class_list',''),
-                                            u.get('security',''),
-                                            u.get('library_type',''),
-                                            u.get('last_updated_date',''),
-                                            u.get('node_battery_level_updated_time',''),
-                                            u.get('basic_report_updated_time',''),
-                                            u.get('switch_multilevel_report_updated_time',''),
-                                            u.get('multi_channel_details',''),
-                                            u.get('rediscover_status',''),
-                                            u.get('last_rediscover_time',''),
-                                            u.get('neighbour_info',''),
-                                            u.get('last_node_test_time',''),
-                                            u.get('endpoint',''),
-                                            u.get('endpoint_details',''),
-                                            u.get('device_wakeup_time',''),
-                                            u.get('role_type',''),
-                                            u.get('is_sleeping_device',''),
-                                            u.get('counter_passed',''),
-                                            u.get('counter_failed',''),
-                                            u.get('group_id',''),
-                                            u.get('command_class_version',''),
-                                            u.get('paired_status',''),
-                                            u.get('device_dsk',''),
-                                            u.get('endpoint_secure_command_class',''),
-                                            u.get('s2_security_key',''),
-                                            u.get('device_protocol',''),
-                                            u.get('id_device_hidden',''),
-                                            u.get('ime_data',''))
-                        
+                    for u in uri.get("resultSet"):
+                        self.add_zwave_node(data=u)
+
                 # ZDeviceHistoryContentProvider
                 case self.URI_ZDeviceHistoryContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_zwave_history(u.get('_id'),
-                                               u.get('version',''),
-                                               u.get('opr',''),
-                                               u.get('partition_id',''),
-                                               u.get('node_id',''),
-                                               u.get('device_name',''),
-                                               u.get('source',''),
-                                               u.get('event',''),
-                                               u.get('request',''),
-                                               u.get('response',''),
-                                               u.get('created_date',''),
-                                               u.get('updated_date',''),
-                                               u.get('last_updated_by',''),
-                                               u.get('field_type',''),
-                                               u.get('ack',''),
-                                               u.get('protocol',''))
-                        
+                    for u in uri.get("resultSet"):
+                        self.add_zwave_history(data=u)
+
                 #AutomationDeviceContentProvider
                 case self.URI_AutomationDeviceContentProvider:
-                    for u in uri.get('resultSet'):
-                        self.add_automation(u.get('_id'),
-                                            u.get('virtual_node_id',''),
-                                            u.get('version',''),
-                                            u.get('opr',''),
-                                            u.get('partition_id',''),
-                                            u.get('end_point',''),
-                                            u.get('extra',''),
-                                            u.get('is_autolocking_enabled',''),
-                                            u.get('device_type',''),
-                                            u.get('endpoint_secure_cmd_classes',''),
-                                            u.get('automation_id',''),
-                                            u.get('device_name',''),
-                                            u.get('protocol',''),
-                                            u.get('node_battery_level_value',''),
-                                            u.get('state',''),
-                                            u.get('last_updated_date',''),
-                                            u.get('manufacturer_id',''),
-                                            u.get('endpoint_cmd_classes',''),
-                                            u.get('device_id',''),
-                                            u.get('nodeid_cmd_classes',''),
-                                            u.get('is_device_hidden',''),
-                                            u.get('nodeid_cmd_classes',''),
-                                            u.get('created_date',''),
-                                            u.get('status',''))
+                    for u in uri.get("resultSet"):
+                        self.add_automation(data=u)
                 case _:
                     pass
-                    #LOGGER.debug(f'Unknown URI in IQ2MEID Database: {uri.get('uri')}')
+                    #LOGGER.debug(f'Unknown URI in IQ2MEID Database: {uri.get('uri')}')  # noqa: ERA001
 
-    def _create_db(self):
-        
+    def _create_db(self) -> None:
+
         #Create PartitionContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE partition (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -712,10 +782,10 @@ class QolsysDB():
                 name TEXT,
                 devices TEXT
             )
-        ''')
+        """)
 
         # Create SensorContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE sensor (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -760,12 +830,12 @@ class QolsysDB():
                 latestdBm TEXT,
                 averagedBm TEXT,
                 serial_number TEXT,
-                extras TEXT                   
+                extras TEXT
             )
-        ''')
+        """)
 
         #Create QolsysSettingsProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE qolsyssettings (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -774,10 +844,10 @@ class QolsysDB():
                 name TEXT,
                 value TEXT
             )
-        ''')
+        """)
 
         #Create StateContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE state (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -787,10 +857,10 @@ class QolsysDB():
                 value TEXT,
                 extraparams TEXT
             )
-        ''')
+        """)
 
         #Create ThermostatsContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE thermostat (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -821,49 +891,49 @@ class QolsysDB():
                 target_heat_temp_updated_time TEXT,
                 current_temp_updated_time TEXT,
                 device_temp_unit TEXT,
-                endpoint TEXT,                               
+                endpoint TEXT,
                 paired_status TEXT,
-                configuration_parameter TEXT                                        
+                configuration_parameter TEXT
             )
-        ''')
+        """)
 
         #Create UserContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE user (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
                 opr TEXT,
                 partition_id TEXT,
                 username TEXT,
-                userPin TEXT,  
+                userPin TEXT,
                 expirydate TEXT,
                 usertype TEXT,
                 userid TEXT,
                 lastname TEXT,
                 check_in TEXT,
-                hash_user TEXT    
+                hash_user TEXT
             )
-        ''')
+        """)
 
         #Create HistoryContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE history (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
                 opr TEXT,
                 partition_id TEXT,
                 device TEXT,
-                events TEXT,  
+                events TEXT,
                 time TEXT,
                 ack TEXT,
                 type TEXT,
                 feature1 TEXT,
                 device_id TEXT
             )
-        ''')
+        """)
 
         #Create HeatMapContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE heat_map (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -875,10 +945,10 @@ class QolsysDB():
                 count TEXT,
                 time_stamp TEXT
             )
-        ''')
+        """)
 
         #Create AlarmedSensorProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE alarmedsensor (
                 _id TEXT PRIMARY KEY,
                 partition_id TEXT,
@@ -891,10 +961,10 @@ class QolsysDB():
                 priority TEXT,
                 aseb_type TEXT
             )
-        ''')
+        """)
 
         #Create MasterSlaveContentProvider table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE master_slave (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -910,8 +980,8 @@ class QolsysDB():
                 last_updated_date TEXT,
                 status TEXT,
                 device_name TEXT,
-                last_updated_iq_remote_checksum TEXT, 
-                software_version TEXT,   
+                last_updated_iq_remote_checksum TEXT,
+                software_version TEXT,
                 upgrade_status TEXT,
                 name TEXT,
                 bssid TEXT,
@@ -919,10 +989,10 @@ class QolsysDB():
                 topology TEXT,
                 reboot_reason TEXT
             )
-        ''')
+        """)
 
         #Create dashboard_msgs table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE dashboard_msgs (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -937,10 +1007,10 @@ class QolsysDB():
                 read TEXT,
                 mime_type TEXT
             )
-        ''')
+        """)
 
         #Create zwave_node table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE zwave_node (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -953,7 +1023,7 @@ class QolsysDB():
                 node_secure_cmd_cls TEXT,
                 node_battery_level TEXT,
                 node_battery_level_value TEXT,
-                is_node_listening_node TEXT,             
+                is_node_listening_node TEXT,
                 basic_report_value TEXT,
                 switch_multilevel_report_value TEXT,
                 basic_device_type TEXT,
@@ -970,11 +1040,11 @@ class QolsysDB():
                 application_version TEXT,
                 application_sub_version TEXT,
                 capability TEXT,
-                command_class_list TEXT,        
+                command_class_list TEXT,
                 lenof_command_class_list TEXT,
                 security TEXT,
                 library_type TEXT,
-                last_updated_date TEXT,       
+                last_updated_date TEXT,
                 node_battery_level_updated_time TEXT,
                 basic_report_updated_time TEXT,
                 switch_multilevel_report_updated_time TEXT,
@@ -983,7 +1053,7 @@ class QolsysDB():
                 last_rediscover_time TEXT,
                 neighbour_info TEXT,
                 last_node_test_time TEXT,
-                endpoint TEXT,          
+                endpoint TEXT,
                 endpoint_details TEXT,
                 device_wakeup_time TEXT,
                 role_type TEXT,
@@ -1000,10 +1070,10 @@ class QolsysDB():
                 is_device_hidden TEXT,
                 ime_data TEXT
             )
-        ''')
+        """)
 
         #Create dimmerlight table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE dimmerlight (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -1021,10 +1091,10 @@ class QolsysDB():
                 power_details TEXT,
                 paired_status TEXT
             )
-        ''')
+        """)
 
         #Create zwave_history table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE zwave_history (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -1043,10 +1113,10 @@ class QolsysDB():
                 ack TEXT,
                 protocol TEXT
             )
-        ''')
+        """)
 
         #Create automation table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE automation (
                 _id TEXT PRIMARY KEY,
                 virtual_node_id TEXT,
@@ -1073,10 +1143,10 @@ class QolsysDB():
                 created_date TEXT,
                 status TEXT
             )
-        ''')
+        """)
 
         #Create automation table
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE iqremotesettings (
                 _id TEXT PRIMARY KEY,
                 version TEXT,
@@ -1087,91 +1157,28 @@ class QolsysDB():
                 name TEXT,
                 value TEXT
             )
-        ''')
+        """)
+
+        #Create doorlock table
+        self.cursor.execute("""
+            CREATE TABLE doorlock (
+                _id TEXT PRIMARY KEY,
+                version TEXT,
+                opr TEXT,
+                partition_id TEXT,
+                doorlock_name TEXT,
+                status TEXT,
+                node_id TEXT,
+                created_by TEXT,
+                created_date TEXT,
+                updated_by TEXT,
+                last_updated_date TEXT,
+                remote_arming TEXT,
+                keyfob_arming TEXT,
+                panel_arming TEXT,
+                endpoint TEXT,
+                paired_status TEXT
+            )
+        """)
 
         self.db.commit()
-
-    def db_show_sensors(self):
-        print('\n')
-        t = PrettyTable(['zoneid','partition_id', 'sensorname','sensorgroup','sensorstatus','lastestdBm','battery_status','time'])
-        self.cursor.execute(f"SELECT zoneid,partition_id, sensorname, sensorgroup, sensorstatus, latestdBm, battery_status, time FROM {self.Table_SensorContentProvider} ORDER BY zoneid")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'SensorContentProvider' table:")
-        print(t)
-
-    def db_show(self):
-        print('\n')
-        t = PrettyTable(['partition_id', 'name'])
-        self.cursor.execute(f"SELECT partition_id,name FROM {self.Table_PartitionContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'PartitionContentProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['userid','partition_id', 'username','lastname','userPin'])
-        self.cursor.execute(f"SELECT userid,partition_id,username,lastname,userPin FROM {self.Table_UserContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'UserContentProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['_id', 'name', 'partition_id', 'value'])
-        self.cursor.execute(f"SELECT _id,name,partition_id,value FROM {self.Table_QolsysSettingsProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'QolsysSettingsProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['_id', 'partition_id','name', 'value'])
-        self.cursor.execute(f"SELECT _id,partition_id,name,value FROM {self.Table_StateContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'StateContentProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['thermostat_id','partition_id', 'thermostat_name','current_temp'])
-        self.cursor.execute(f"SELECT thermostat_id,partition_id,thermostat_name,current_temp FROM {self.Table_ThermostatsContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'ThermostatsContentProvider' table:")
-        print(t)
-
-        print('\n')
-        t = PrettyTable(['_id','partition_id','device', 'events','type', 'device_id'])
-        self.cursor.execute(f"SELECT _id,partition_id,device,events,type, device_id FROM {self.Table_HistoryContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'HistoryContentProvider' table:")
-        print(t)
-
-        print('\n')
-        
-        t = PrettyTable(['_id','partition_id','fragment_id', 'element_id'])
-        self.cursor.execute(f"SELECT _id,partition_id,fragment_id,element_id FROM {self.Table_HeatMapContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'HeatMapContentProvider' table:")
-        print(t)
-        
-        t = PrettyTable(['_id','partition_id','zone_id', 'sgroup','priority','action','type'])
-        self.cursor.execute(f"SELECT _id,partition_id,zone_id,sgroup,priority,action,type FROM {self.Table_AlarmedSensorProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'AlarmedSensorProvider' table:")
-        print(t)
-
-        t = PrettyTable(['_id','partition_id','zone_id', 'name','mac_address'])
-        self.cursor.execute(f"SELECT _id,partition_id,zone_id,name,mac_address FROM {self.Table_MasterSlaveContentProvider}")
-        t.add_rows(self.cursor.fetchall())
-        print("Content of 'master_slave' table:")
-        print(t)
-
-        print('\n')
-
-
-
-
-
-
-            
-
-
-    
-
-
