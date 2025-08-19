@@ -154,7 +154,10 @@ class QolsysState(QolsysObservable):
                 for db_partition in db_partitions:
                     if state_partition.id == db_partition.id:
                         LOGGER.debug("sync_data - update Partition%s",state_partition.id)
-                        state_partition.update(db_partition.to_dict())
+                        state_partition.update_partition(db_partition.to_dict_partition())
+                        state_partition.update_settings(db_partition.to_dict_settings())
+                        state_partition.alarm_type = db_partition.alarm_type
+                        state_partition.alarm_state = db_partition.alarm_state
 
         # Delete partitions
         for state_partition in self.partitions:

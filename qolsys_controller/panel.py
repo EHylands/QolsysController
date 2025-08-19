@@ -675,56 +675,35 @@ class QolsysPanel(QolsysObservable):
 
     def get_zones_from_db(self) -> list[QolsysZone]:
         zones = []
-        zones_list = self.db.get_zones()
+        zones_list:list[dict] = self.db.get_zones()
 
          # Create sensors array
         for zone_info in zones_list:
-            zone = QolsysZone(int(zone_info["_id"]),
-                                  zone_info["sensorname"],
-                                  zone_info["sensorgroup"],
-                                  zone_info["sensorstatus"],
-                                  zone_info["sensorstate"],
-                                  int(zone_info["zoneid"]),
-                                  int(zone_info["zone_type"]),
-                                  int(zone_info["zone_physical_type"]),
-                                  int(zone_info["zone_alarm_type"]),
-                                  int(zone_info["partition_id"]),
-                                  zone_info["battery_status"],
-                                  zone_info["sensortype"],
-                                  zone_info["latestdBm"],
-                                  zone_info["averagedBm"],
-                                  zone_info["time"])
-            zones.append(zone)
+            zones.append(QolsysZone(zone_info))
 
         return zones
 
     def get_partitions_from_db(self) -> list[QolsysPartition]:
 
         partitions = []
-
         partition_list:list[dict] = self.db.get_partitions()
 
         # Create partitions array
-        for partition_info in partition_list:
+        for partition_dict in partition_list:
 
-            partition_id = partition_info["partition_id"]
-            name = partition_info["name"]
-            system_status = self.db.get_setting_partition("SYSTEM_STATUS",partition_id)
-            system_status_changed_time = self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME",partition_id)
-            exit_sounds = self.db.get_setting_partition("EXIT_SOUNDS",partition_id)
-            entry_delays = self.db.get_setting_partition("ENTRY_DELAYS",partition_id)
+            partition_id = partition_dict["partition_id"]
+
+            settings_dict = {
+                "system_status": self.db.get_setting_partition("SYSTEM_STATUS",partition_id),
+                "system_status_changed_time": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME",partition_id),
+                "exit_sounds": self.db.get_setting_partition("EXIT_SOUNDS",partition_id),
+                "entry_delays":  self.db.get_setting_partition("ENTRY_DELAYS",partition_id),
+            }
+
             alarm_type = self.db.get_alarm_type(partition_id)
             alarm_state = self.db.get_state_partition("ALARM_STATE",partition_id)
 
-            partition = QolsysPartition(int(partition_id),
-                                        name,
-                                        system_status,
-                                        system_status_changed_time,
-                                        alarm_state,
-                                        alarm_type,
-                                        entry_delays,
-                                        exit_sounds)
-
+            partition = QolsysPartition(partition_dict,settings_dict,alarm_state,alarm_type)
             partitions.append(partition)
 
         return partitions

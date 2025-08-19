@@ -212,20 +212,20 @@ class QolsysPKI:
             x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "SanJose"),
             x509.NameAttribute(NameOID.LOCALITY_NAME, ""),
             x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Qolsys Inc."),
-            x509.NameAttribute(NameOID.COMMON_NAME, "www.qolsys.com ")
+            x509.NameAttribute(NameOID.COMMON_NAME, "www.qolsys.com "),
 ]       )
         cert = x509.CertificateBuilder().subject_name(
-            subject
+            subject,
         ).issuer_name(
-            issuer
+            issuer,
         ).public_key(
-            private_key.public_key()
+            private_key.public_key(),
         ).serial_number(
-            x509.random_serial_number()
+            x509.random_serial_number(),
         ).not_valid_before(
-            datetime.utcnow()
+            datetime.utcnow(),
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.utcnow() + timedelta(days=365),
         ).add_extension(
             x509.BasicConstraints(ca=False, path_length=None), critical=True,
         ).sign(private_key, hashes.SHA256())

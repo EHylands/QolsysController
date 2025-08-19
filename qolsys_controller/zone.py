@@ -6,57 +6,59 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysZone(QolsysObservable):
 
-    ZONE_STATUS_ARRAY = ["Open", "Closed", "Active", "Inactive","Activated","Idle","Unreachable","Tampered","Synchonizing","connected"]
-    ZONE_GROUP_ARRAY = ["Door_Window","Motion","Panel Motion","GlassBreak","Panel Glass Break","Bluetooth","SmokeDetector",
+    ZONE_STATUS_ARRAY = ["Open", "Closed", "Active", "Inactive","Activated","Idle","Unreachable","Tampered","Synchonizing","connected"]  # noqa: RUF012
+    ZONE_GROUP_ARRAY = ["Door_Window","Motion","Panel Motion","GlassBreak","Panel Glass Break","Bluetooth","SmokeDetector",  # noqa: RUF012
                         "CODetector","Water","Freeze","Heat","Tilt","Keypad","Auxiliary Pendant","Siren","KeyFob","Temperature",
                         "TakeoverModule","Translator","Doorbell","Shock"]
 
-    def __init__(self, sensor_id: str,
-                 sensorname: str,
-                 group: str,
-                 sensorstatus: str,
-                 sensorstate: str,
-                 zone_id: int,
-                 zone_type: int,
-                 zone_physical_type: int,
-                 zone_alarm_type: int,
-                 partition_id: int,
-                 battery_status: str,
-                 sensortype:str,
-                 latestdBm:str,
-                 averagedBm:str,
-                 time:str) -> None:
-
-    #def __init__(self,data:dict):
+    def __init__(self, data:dict) -> None:
         super().__init__()
 
-        self._id =  sensor_id
-        self._sensorname =  sensorname
-        self._group =  group
-        self._sensorstatus = sensorstatus
-        self._sensorstate = sensorstate
-        self._sensortype = sensortype
-        self._zone_id = zone_id
-        self._zone_type = zone_type
-        self._zone_physical_type = zone_physical_type
-        self._zone_alarm_type = zone_alarm_type
-        self._partition_id = partition_id
-        self._battery_status = battery_status
-        self._sensortts = ""
-        self._latestdBm = latestdBm
-        self._averagedBm = averagedBm
-        self._current_capability = ""
-        self._zone_rf_sensor = ""
-        self._zone_supervised = ""
-        self._zone_reporting_enabled = ""
-        self._zone_two_way_voice_enabled = ""
-        self._signal_source = ""
-        self._serial_number = ""
-        self._chimetype = ""
-        self._frame_count = ""
-        self._frame_type = ""
-        self._allowdisarming = ""
-        self._time = time
+        self._id = data.get("_id","")
+        self._sensor_id = data.get("sensorid","")
+        self._sensorname =  data.get("sensorname","")
+        self._group =  data.get("sensorgroup","")
+        self._sensorstatus = data.get("sensorstatus","")
+        self._battery_status = data.get("battery_status","")
+        self._latestdBm = data.get("latestdBm","")
+        self._averagedBm = data.get("averagedBm","")
+
+        self._sensorstate = data.get("sensorstate","")
+        self._sensortype = data.get("sensortype","")
+        self._zone_id = data.get("zoneid","")
+        self._zone_type = data.get("zone_type","")
+        self._zone_physical_type = data.get("zone_physical_type","")
+        self._zone_alarm_type = data.get("zone_alarm_type","")
+        self._partition_id = data.get("partition_id","")
+        self._sensortts = data.get("sensortts","")
+        self._current_capability = data.get("current_capability","")
+        self._zone_rf_sensor = data.get("zone_rf_sensor","")
+        self._zone_supervised = data.get("zone_supervised","")
+        self._zone_reporting_enabled = data.get("zone_reporting_enabled","")
+        self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled","")
+        self._signal_source = data.get("signal_source","")
+        self._serial_number = data.get("serial_number","")
+        self._chimetype = data.get("chimetype","")
+        self._frame_count = data.get("frame_count","")
+        self._frame_type = data.get("frame_type","")
+        self._frame_id = data.get("frame_id","")
+        self._allowdisarming = data.get("allowdisarming","")
+        self._time = data.get("time","")
+        self._version = data.get("version","")
+        self._opr = data.get("opr","")
+        self._zone_equipement_code = data.get("zone_equipment_code","")
+        self._created_date = data.get("created_date","")
+        self._created_by = data.get("created_by","")
+        self._updated_by = data.get("updated_by","")
+        self._updated_date = data.get("updated_date","")
+        self._shortID = data.get("shortID","")
+        self._diag_24hr = data.get("diag_24hr","")
+        self._device_capability = data.get("device_capability","")
+        self._sub_type = data.get("sub_type","")
+        self._powerg_manufacture_id = data.get("powerg_manufacture_id","")
+        self._parent_node = data.get("parent_node","")
+        self._extras = data.get("extras","")
+        self._ac_status = data.get("ac_status","")
 
         self._NOTIFY_SENSORSTATUS = True
         self._NOTIFY_BATTERY_STATUS = True
@@ -280,7 +282,8 @@ class QolsysZone(QolsysObservable):
     def to_dict(self) -> dict:
         return {
             "_id": self.id,
-            "sensor_name": self.sensorname,
+            "sensorid": self._sensor_id,
+            "sensorname": self.sensorname,
             "group": self.group,
             "sensorstatus": self.sensorstatus,
             "sensorstate": self.sensorstate,
@@ -304,6 +307,22 @@ class QolsysZone(QolsysObservable):
             "chimetype": self._chimetype,
             "frame_count": self._frame_count,
             "frame_type": self._frame_type,
+            "frame_id": self._frame_id,
             "allowdisarming": self._allowdisarming,
             "time": self.time,
+            "version": self._version,
+            "opr": self._opr,
+            "zone_equipment_code": self._zone_equipement_code,
+            "created_date": self._created_date,
+            "created_by": self._created_by,
+            "updated_by": self._updated_by,
+            "updated_date": self._updated_date,
+            "shortID": self._shortID,
+            "diag_24hr": self._diag_24hr,
+            "device_capability": self._device_capability,
+            "sub_type": self._sub_type,
+            "powerg_manufacture_id": self._powerg_manufacture_id,
+            "parent_node": self._parent_node,
+            "extras": self._extras,
+            "ac_status": self._ac_status,
         }
