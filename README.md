@@ -9,7 +9,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 - ⚠️ Uses a **custom local usercode database** — panel's internal user code verification process is not yet supported
 
 ### Supported Features Milestones
-
+<div align="center">
 | Device               | Feature                          | Status        |
 |----------------------|----------------------------------|---------------|
 | **Panel**            | Diagnostics sensors              | ✅ Supported  |
@@ -41,7 +41,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                      | Read pairing status              | ✅ Supported |
 |                      | Read pairing status              | ✅ Supported |
 |                      | Control generic Z-Wave devices   | 🔄 TBD       |
-
+</div>
 
 ## ⚠️ Certificate Warning
 
