@@ -10,6 +10,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 
 ### Supported Features Milestones
 <div align="center">
+
 | Device               | Feature                          | Status        |
 |----------------------|----------------------------------|---------------|
 | **Panel**            | Diagnostics sensors              | ✅ Supported  |
@@ -41,6 +42,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                      | Read pairing status              | ✅ Supported |
 |                      | Read pairing status              | ✅ Supported |
 |                      | Control generic Z-Wave devices   | 🔄 TBD       |
+
 </div>
 
 ## ⚠️ Certificate Warning
