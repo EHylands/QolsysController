@@ -20,27 +20,27 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                      | Alarm state and type             | ✅ Supported            |
 |----------------------|----------------------------------|---------------|
 | **Zones**            | Sensor Status                    | ✅ Supported            |
-|                      | Tamper state                     | ✅Supported             |
-|                      | Battery level                    | ✅ Supported            |
-|                      | Signal level                     | ✅ Supported            |
+|                      | Tamper State                     | ✅Supported             |
+|                      | Battery Level                    | ✅ Supported            |
+|                      | Signal Level                     | ✅ Supported            |
 |----------------------|----------------------------------|---------------|
-| **Dimmer**           | Read light status and level      | ✅ Supported            |
-|                      | Set light statys and level       | ✅  Supported           |
+| **Dimmers**           | Read Light Status and Level      | ✅ Supported            |
+|                      | Set Lights Status and Level       | ✅  Supported           |
 |----------------------|----------------------------------|---------------|
-| **Door Lock**        | Read Lock state                  | ✅ Supported            |
-|                      | Set Lock state                   | 🛠️ WIP        |
+| **Door Locks**        | Read Lock State                  | ✅ Supported            |
+|                      | Set Lock State                   | 🛠️ WIP        |
 |----------------------|----------------------------------|---------------|
-| **Thermostat**       | Read Thermostat state            | ✅ Supported            |
-|                      | Set  Thermostat state            | 🛠️ WIP        |
+| **Thermostats**       | Read Thermostat State            | ✅ Supported            |
+|                      | Set  Thermostat State            | 🛠️ WIP        |
 |----------------------|----------------------------------|---------------|
-| **Garage Door**      | All                              | 🛠️ WIP        |
+| **Garage Doors**      | All                              | 🛠️ WIP        |
 |----------------------|----------------------------------|---------------|
-| **Outlet**           | All                              | 🛠️ WIP        |
+| **Outlets**           | All                              | 🛠️ WIP        |
 |----------------------|----------------------------------|---------------|
-| **Generic Z-Wave**   | Read battery level               | ✅ Supported |
-|                      | Read pairing status              | ✅ Supported |
-|                      | Read pairing status              | ✅ Supported |
-|                      | Control generic Z-Wave devices   | 🔄 TBD       |
+| **Generic Z-Wave**   | Read Battery Level               | ✅ Supported |
+|                      | Read Pairing Status              | ✅ Supported |
+|                      | Read Pairing Status              | ✅ Supported |
+|                      | Control Generic Z-Wave Devices   | 🔄 TBD       |
 
 
 ## ⚠️ Certificate Warning
