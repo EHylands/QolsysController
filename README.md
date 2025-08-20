@@ -18,6 +18,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                      | Set Exit sounds                  | ✅            |
 |                      | Home Instant arming              | ✅            |
 |                      | Alarm state and type             | ✅            |
+|                      | Disarm pictures             | 🛠️ WIP            |
 |---|---|---|
 | **Zones**            | Sensor Status                    | ✅            |
 |                      | Tamper State                     | ✅             |
