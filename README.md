@@ -11,35 +11,35 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 ### Supported Features Milestones
 
 | Device               | Feature                          | Status        |
-|----------------------|----------------------------------|---------------|
-| **Panel**            | Diagnostics sensors              | ✅ Supported  |
-|----------------------|----------------------------------|---------------|
-| **Partitions**       | Arming status                    | ✅ Supported |
-|                      | Set Exit sounds                  | ✅ Supported            |
-|                      | Home Instant arming              | ✅ Supported            |
-|                      | Alarm state and type             | ✅ Supported            |
-|----------------------|----------------------------------|---------------|
-| **Zones**            | Sensor Status                    | ✅ Supported            |
-|                      | Tamper State                     | ✅Supported             |
-|                      | Battery Level                    | ✅ Supported            |
-|                      | Signal Level                     | ✅ Supported            |
-|----------------------|----------------------------------|---------------|
-| **Dimmers**           | Read Light Status and Level      | ✅ Supported            |
-|                      | Set Lights Status and Level       | ✅  Supported           |
-|----------------------|----------------------------------|---------------|
-| **Door Locks**        | Read Lock State                  | ✅ Supported            |
+|-------------------|-------------------------------|---------------|
+| **Panel**            | Diagnostics sensors              | ✅  |
+|-------------------|-------------------------------|---------------|
+| **Partitions**       | Arming status                    | ✅ |
+|                      | Set Exit sounds                  | ✅            |
+|                      | Home Instant arming              | ✅            |
+|                      | Alarm state and type             | ✅            |
+|-------------------|-------------------------------|---------------|
+| **Zones**            | Sensor Status                    | ✅            |
+|                      | Tamper State                     | ✅             |
+|                      | Battery Level                    | ✅            |
+|                      | Signal Level                     | ✅            |
+|-------------------|-------------------------------|---------------|
+| **Dimmers**           | Read Light Status and Level      | ✅            |
+|                      | Set Lights Status and Level       | ✅           |
+|-------------------|-------------------------------|---------------|
+| **Door Locks**        | Read Lock State                  | ✅            |
 |                      | Set Lock State                   | 🛠️ WIP        |
-|----------------------|----------------------------------|---------------|
-| **Thermostats**       | Read Thermostat State            | ✅ Supported            |
+|-------------------|-------------------------------|---------------|
+| **Thermostats**       | Read Thermostat State            | ✅            |
 |                      | Set  Thermostat State            | 🛠️ WIP        |
-|----------------------|----------------------------------|---------------|
+|-------------------|-------------------------------|---------------|
 | **Garage Doors**      | All                              | 🛠️ WIP        |
-|----------------------|----------------------------------|---------------|
+|-------------------|-------------------------------|---------------|
 | **Outlets**           | All                              | 🛠️ WIP        |
-|----------------------|----------------------------------|---------------|
-| **Generic Z-Wave**   | Read Battery Level               | ✅ Supported |
-|                      | Read Pairing Status              | ✅ Supported |
-|                      | Read Node Status                 | ✅ Supported |
+|-------------------|-------------------------------|---------------|
+| **Generic Z-Wave**   | Read Battery Level               | ✅ |
+|                      | Read Pairing Status              | ✅ |
+|                      | Read Node Status                 | ✅ |
 |                      | Control Generic Z-Wave Devices   | 🔄 TBD       |
 
 
