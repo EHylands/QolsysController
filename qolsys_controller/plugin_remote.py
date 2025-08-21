@@ -787,7 +787,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         await self.send_command(topic,payload)
 
-    async def command_disarm(self,partition_id:int,user_code:str='',exit_sounds:bool=True) -> bool:
+    async def command_disarm(self,partition_id:int,user_code:str="",exit_sounds:bool=True) -> bool:
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s",self.check_user_code_on_disarm)
 
         partition = self.state.partition(partition_id)
@@ -803,8 +803,12 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return False
 
+        exitSoundValue = "ON"
+        if not exit_sounds:
+             exitSoundValue = "OFF"
 
-        mqtt_disarm_command = ''
+
+        mqtt_disarm_command = ""
 
         if partition.system_status in {"ARM-AWAY-EXIT-DELAY", "ARM-STAY-EXIT-DELAY"} :
             mqtt_disarm_command = "disarm_from_openlearn_sensor"
@@ -821,8 +825,8 @@ class QolsysPluginRemote(QolsysPlugin):
             "userID":user_id,
             "partitionID":partition_id,
             "operation_source": 1,
-            "disarm_exit_sounds": exit_sounds,
-            "macAddress" : self.settings.random_mac
+            "disarm_exit_sounds": exitSoundValue,
+            "macAddress" : self.settings.random_mac,
         }
 
         topic = "mastermeid"
@@ -878,7 +882,7 @@ class QolsysPluginRemote(QolsysPlugin):
             },
         ]
 
-        topic = 'mastermeid'
+        topic = "mastermeid"
         eventName = "ipcCall"
         ipcServiceName = "qzwaveservice"
         ipcInterfaceName = "android.os.IQZwaveService"
@@ -904,8 +908,6 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug(f'MQTT: Sending arm command: partition{partition_id}, arming_type:{arming_type}, secure_arm:{self.panel.SECURE_ARMING}' )
 
         user_id = 0
-
-        
 
         partition = self.state.partition(partition_id)
         if not partition:
