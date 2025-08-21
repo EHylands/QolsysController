@@ -45,6 +45,15 @@ class QolsysState(QolsysObservable):
 
         return dimmers
 
+    @property
+    def zwave_locks(self) -> list[QolsysLock]:
+        locks = []
+        for device in self.zwave_devices:
+            if isinstance(device,QolsysLock):
+                locks.append(device)
+
+        return locks
+
     def partition(self, partition_id:int) -> QolsysPartition:
         for partition in self.partitions:
             if int(partition.id) == partition_id:
