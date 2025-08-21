@@ -12,32 +12,29 @@ from qolsys_controller.zwave_thermostat import QolsysThermostat
 LOGGER = logging.getLogger(__name__)
 
 class QolsysState(QolsysObservable):
-    NOTIFY_PARTITION_ADD = "partition_add"
-    NOTIFY_PARTITION_DELETE = "partition_delete"
-    NOTIFY_ZONE_ADD = "zone_add"
-    NOTIFY_ZONE_DELETE = "zone_delete"
-    NOTIFY_UPDATE_ERROR = "update_error"
-    NOTIFY_UPDATE_PARTITIONS = "update_partitions"
 
     def __init__(self) -> None:
         super().__init__()
 
-        self._last_exception = None
-
-        self._partitions = {}
-        self._zones = {}
+        self._partitions = []
+        self._zones = []
         self._zwave_devices = []
 
         self.state_partition_observer = QolsysObservable()
         self.state_zone_observer = QolsysObservable()
+        self.state_zwave_observer = QolsysObservable()
 
     @property
-    def partitions(self):
-        return self._partitions.values()
+    def partitions(self) -> list[QolsysPartition]:
+        return self._partitions
 
     @property
-    def zwave_devices(self):
+    def zwave_devices(self) -> list[QolsysZWaveDevice]:
         return self._zwave_devices
+
+    @property
+    def zones(self) -> list[QolsysZone]:
+        return self._zones
 
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
@@ -49,7 +46,11 @@ class QolsysState(QolsysObservable):
         return dimmers
 
     def partition(self, partition_id:int) -> QolsysPartition:
-        return self._partitions.get(partition_id)
+        for partition in self.partitions:
+            if int(partition.id) == partition_id:
+                return partition
+
+        return None
 
     def zwave_device(self,node_id:int) -> QolsysZWaveDevice:
         for zwave_device in self.zwave_devices:
@@ -58,12 +59,12 @@ class QolsysState(QolsysObservable):
 
         return None
 
-    @property
-    def zones(self):
-        return self._zones.values()
-
     def zone(self,zone_id:int) -> QolsysZone:
-        return self._zones.get(zone_id)
+        for zone in self.zones:
+            if int(zone.zone_id) == zone_id:
+                return zone
+
+        return None
 
     def partition_add(self,new_partition:QolsysPartition) -> None:
         for partition in self.partitions:
@@ -71,37 +72,37 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List",new_partition.id,partition.name)
                 return
 
-        self._partitions[int(new_partition.id)] = new_partition
-        self.state_partition_observer.notify(change = self.NOTIFY_PARTITION_ADD, partition = new_partition)
+        self.partitions.append(new_partition)
+        self.state_partition_observer.notify()
 
     def partition_delete(self,partition_id:int) -> None:
-        partition = self.partitions[partition_id]
+        partition = self.partitions(partition_id)
 
         if partition is None:
             LOGGER.debug("Deleting Partition from State, Partition%s not found",partition.id)
             return
 
-        self._partitions.remove(partition)
-        self.state_partition_observer.notify(change = self.NOTIFY_PARTITION_DELETE, partition = partition)
+        self.partitions.remove(partition)
+        self.state_partition_observer.notify()
 
-    def zone_add(self, new_zone) -> None:
+    def zone_add(self, new_zone:QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
                 LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List",new_zone.zone_id,self.sensorname)
                 return
 
-        self._zones[int(new_zone.zone_id)] = new_zone
-        self.state_zone_observer.notify(change=self.NOTIFY_ZONE_ADD,zone=new_zone)
+        self.zones.append(new_zone)
+        self.state_zone_observer.notify()
 
     def zone_delete(self,zone_id:int) -> None:
-        zone = self.zones[zone_id]
+        zone = self.zones(zone_id)
 
         if zone is None:
             LOGGER.debug("Deleting Zone from State, Zone%s not found",zone_id)
             return
 
-        self._zones.remove(zone)
-        self.state_zone_observer.notify(change=self.NOTIFY_PARTITION_DELETE,zone=zone)
+        self.zones.remove(zone)
+        self.state_zone_observer.notify()
 
     def zwave_add(self, new_zwave:QolsysZWaveDevice) -> None:
         for zwave_device in self.zwave_devices:
@@ -110,7 +111,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self._zwave_devices.append(new_zwave)
-        #self.state_zone_observer.notify()  # noqa: ERA001
+        self.state_zwave_observer.notify()
 
     def zwave_delete(self,node_id:int) -> None:
         zwave = self.zwave_device(node_id)
@@ -120,25 +121,9 @@ class QolsysState(QolsysObservable):
             return
 
         self._zwave_devices.remove(zwave)
-        #self.state_zone_observer.notify(change=self.NOTIFY_PARTITION_DELETE,zone=zone)  # noqa: ERA001
+        self.state_zwave_observer.notify()
 
-    def sync_data(self,db_partitions:list[QolsysPartition],db_zones:list[QolsysZone],db_zwaves:list[QolsysZWaveDevice]) -> None:
-
-        db_partition_list = []
-        for db_partition in db_partitions:
-            db_partition_list.append(db_partition.id)
-
-        state_partition_list = []
-        for state_partition in self.partitions:
-            state_partition_list.append(state_partition.id)
-
-        db_zone_list = []
-        for db_zone in db_zones:
-            db_zone_list.append(db_zone.zone_id)
-
-        state_zone_list = []
-        for state_zone in self.zones:
-            state_zone_list.append(state_zone.zone_id)
+    def sync_zwave_devices_data(self,db_zwaves:list[QolsysZWaveDevice]) -> None:  # noqa: C901, PLR0912
 
         db_zwave_list = []
         for db_zwave in db_zwaves:
@@ -148,55 +133,12 @@ class QolsysState(QolsysObservable):
         for state_zwave in self.zwave_devices:
             state_zwave_list.append(state_zwave.node_id)
 
-        # Update existing partitions
-        for state_partition in self.partitions:
-            if state_partition.id in db_partition_list:
-                for db_partition in db_partitions:
-                    if state_partition.id == db_partition.id:
-                        LOGGER.debug("sync_data - update Partition%s",state_partition.id)
-                        state_partition.update_partition(db_partition.to_dict_partition())
-                        state_partition.update_settings(db_partition.to_dict_settings())
-                        state_partition.alarm_type = db_partition.alarm_type
-                        state_partition.alarm_state = db_partition.alarm_state
-
-        # Delete partitions
-        for state_partition in self.partitions:
-            if state_partition.id not in db_partition_list:
-                LOGGER.debug("sync_data - delete Partition%s",state_partition.id)
-                self.partition_delete(int(state_partition.id))
-
-        # Add new partition
-        for db_partition in db_partitions:
-            if db_partition.id not in state_partition_list:
-                LOGGER.debug("sync_data - add Partition%s",db_partition.id)
-                self.partition_add(db_partition)
-
-        # Update existing zones
-        for state_zone in self.zones:
-            if state_zone.zone_id in db_zone_list:
-                for db_zone in db_zones:
-                    if state_zone.zone_id == db_zone.zone_id:
-                        LOGGER.debug("sync_data - update Zone%s",state_zone.zone_id)
-                        state_zone.update(db_zone.to_dict())
-
-        # Delete zones
-        for state_zone in self.zones:
-            if state_zone.zone_id not in db_zone_list:
-                LOGGER.debug("sync_data - delete Zone%s",state_zone.zone_id)
-                self.zone_delete(int(state_zone.zone_id))
-
-        # Add new zone
-        for db_zone in db_zones:
-            if db_zone.zone_id not in state_zone_list:
-                LOGGER.debug("sync_data - add Zone%s",db_zone.zone_id)
-                self.zone_add(db_zone)
-
         # Update existing ZWave devices
         for state_zwave in self.zwave_devices:
             if state_zwave.node_id in db_zwave_list:
                 for db_zwave in db_zwaves:
                     if state_zwave.node_id == db_zwave.node_id:
-                        LOGGER.debug(f"sync_data - update ZWave{state_zwave.node_id}")
+                        LOGGER.debug("sync_data - update ZWave%s",state_zwave.node_id)
 
                         # Update Dimmer
                         if isinstance(state_zwave, QolsysDimmer) and isinstance(db_zwave,QolsysDimmer):
@@ -237,12 +179,73 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - delete ZWave%s",state_zwave.none_id)
                 self.zwave_delete(int(state_zwave.node_id))
 
+    def sync_zones_data(self, db_zones:list[QolsysZone]) -> None:  # noqa: C901
+        db_zone_list = []
+        for db_zone in db_zones:
+            db_zone_list.append(db_zone.zone_id)
+
+        state_zone_list = []
+        for state_zone in self.zones:
+            state_zone_list.append(state_zone.zone_id)
+
+        # Update existing zones
+        for state_zone in self.zones:
+            if state_zone.zone_id in db_zone_list:
+                for db_zone in db_zones:
+                    if state_zone.zone_id == db_zone.zone_id:
+                        LOGGER.debug("sync_data - update Zone%s",state_zone.zone_id)
+                        state_zone.update(db_zone.to_dict())
+
+        # Delete zones
+        for state_zone in self.zones:
+            if state_zone.zone_id not in db_zone_list:
+                LOGGER.debug("sync_data - delete Zone%s",state_zone.zone_id)
+                self.zone_delete(int(state_zone.zone_id))
+
+        # Add new zone
+        for db_zone in db_zones:
+            if db_zone.zone_id not in state_zone_list:
+                LOGGER.debug("sync_data - add Zone%s",db_zone.zone_id)
+                self.zone_add(db_zone)
+
+    def sync_partitions_data(self,db_partitions:list[QolsysPartition]) -> None:  # noqa: C901
+        db_partition_list = []
+        for db_partition in db_partitions:
+            db_partition_list.append(db_partition.id)
+
+        state_partition_list = []
+        for state_partition in self.partitions:
+            state_partition_list.append(state_partition.id)
+
+         # Update existing partitions
+        for state_partition in self.partitions:
+            if state_partition.id in db_partition_list:
+                for db_partition in db_partitions:
+                    if state_partition.id == db_partition.id:
+                        LOGGER.debug("sync_data - update Partition%s",state_partition.id)
+                        state_partition.update_partition(db_partition.to_dict_partition())
+                        state_partition.update_settings(db_partition.to_dict_settings())
+                        state_partition.alarm_type = db_partition.alarm_type
+                        state_partition.alarm_state = db_partition.alarm_state
+
+        # Delete partitions
+        for state_partition in self.partitions:
+            if state_partition.id not in db_partition_list:
+                LOGGER.debug("sync_data - delete Partition%s",state_partition.id)
+                self.partition_delete(int(state_partition.id))
+
+        # Add new partition
+        for db_partition in db_partitions:
+            if db_partition.id not in state_partition_list:
+                LOGGER.debug("sync_data - add Partition%s",db_partition.id)
+                self.partition_add(db_partition)
+
     def dump(self) -> None:
         LOGGER.debug("*** Information ***")
 
         for partition in self.partitions:
-            pid = partition._id
-            name = partition._name
+            pid = partition.id
+            name = partition.name
             LOGGER.debug("Partition%s (%s) - system_status: %s",pid,name,partition.system_status)
             LOGGER.debug("Partition%s (%s) - system_status_changed_time: %s",pid,name,partition.system_status_changed_time)
             LOGGER.debug("Partition%s (%s) - alarm_state: %s",pid,name,partition.alarm_state)

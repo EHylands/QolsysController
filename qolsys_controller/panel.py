@@ -332,10 +332,9 @@ class QolsysPanel(QolsysObservable):
 
     def load_database(self,database:dict) -> None:
         self.db.load_db(database)
-        partitions = self.get_partitions_from_db()
-        zones = self.get_zones_from_db()
-        zwave_devices = self.get_zwave_devices_from_db()
-        self._state.sync_data(partitions,zones,zwave_devices)
+        self._state.sync_partitions_data(self.get_partitions_from_db())
+        self._state.sync_zones_data(self.get_zones_from_db())
+        self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
     # Parse panel update to database
     def parse_iq2meid_message(self,data:dict) -> bool:
@@ -374,15 +373,16 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id","")
                                     partition = self._state.partition(int(partition_id))
                                     if partition is not None:
-                                        match name:
-                                            case "SYSTEM_STATUS":
-                                                partition.system_status = new_value
-                                            case "SYSTEM_STATUS_CHANGED_TIME":
-                                                partition.system_status_changed_time = new_value
-                                            case "EXIT_SOUNDS":
-                                                partition.exit_sounds = new_value
-                                            case "ENTRY_DELAYS":
-                                                partition.entry_delays = new_value
+                                        partition.update_settings(data=content_values)
+                                        #match name:
+                                        #    case "SYSTEM_STATUS":
+                                        #        partition.system_status = new_value
+                                        #    case "SYSTEM_STATUS_CHANGED_TIME":
+                                        #        partition.system_status_changed_time = new_value
+                                        #    case "EXIT_SOUNDS":
+                                        #        partition.exit_sounds = new_value
+                                        #    case "ENTRY_DELAYS":
+                                        #        partition.entry_delays = new_value
 
                             # Update Sensor
                             case self.db.URI_SensorContentProvider:
@@ -409,23 +409,30 @@ class QolsysPanel(QolsysObservable):
                             # Update heat_map
                             case self.db.URI_HeatMapContentProvider:
                                 self.db.update_table(self.db.Table_HeatMapContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             # Update master_slave
                             case self.db.URI_MasterSlaveContentProvider:
                                 self.db.update_table(self.db.Table_MasterSlaveContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             # Update dashboard_msgs
                             case self.db.URI_DashboardMessagesContentProvider:
                                 self.db.update_table(self.db.Table_DashboardMessagesContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             # Update PartitionContentProvider
                             case self.db.URI_PartitionContentProvider:
                                 self.db.update_table(self.db.Table_PartitionContentProvider,selection,selection_argument,content_values)
-                                # Update Partition
+                                partition_id = content_values.get("partition_id","")
+                                partition = self._state.partition(int(partition_id))
+                                if partition is not None:
+                                    partition.update_partition(content_values)
 
-                            # Update HistoryContentProvider
+                            # Update History Content Provider
                             case self.db.URI_HistoryContentProvider:
                                 self.db.update_table(self.db.Table_HistoryContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             # Update DimmerLightsContentProvider
                             case self.db.URI_DimmerLightsContentProvider:
@@ -446,10 +453,15 @@ class QolsysPanel(QolsysObservable):
                             # Update ZwaveContentProvider
                             case self.db.URI_ZwaveContentProvider:
                                 self.db.update_table(self.db.Table_ZwaveContentProvider,selection,selection_argument,content_values)
+                                node_id =  content_values.get("node_id","")
+                                node = self._state.zwave_device(int(node_id))
+                                if node is not None:
+                                    node.update_base(content_values)
 
                             # Update AutomationDeviceContentProvider
                             case self.db.URI_AutomationDeviceContentProvider:
                                 self.db.update_table(self.db.Table_AutomationDeviceContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             # Update Alarmed Sensor Content Provider
                             case self.db.URI_AlarmedSensorProvider:
@@ -458,6 +470,7 @@ class QolsysPanel(QolsysObservable):
                             # Update IQ Remote Settings Content Provider
                             case self.db.URI_IQRemoteSettingsContentProvider:
                                 self.db.update_table(self.db.Table_IQRemoteSettingsContentProvider,selection,selection_argument,content_values)
+                                # No action needed
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s",uri)
@@ -471,56 +484,64 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.URI_SensorContentProvider:
                                 self.db.delete_table(self.db.Table_SensorContentProvider,selection,selection_argument)
+                                self._state.sync_zones_data(self.get_zones_from_db())
                                 # Notify delete zone
 
                             case self.db.URI_IQRemoteSettingsContentProvider:
                                 self.db.delete_table(self.db.Table_IQRemoteSettingsContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_StateContentProvider:
                                 self.db.delete_table(self.db.Table_StateContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_MasterSlaveContentProvider:
                                 self.db.delete_table(self.db.Table_MasterSlaveContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_SettingsProvider:
                                 self.db.delete_table(self.db.Table_QolsysSettingsProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_AlarmedSensorProvider:
                                 self.db.delete_table(self.db.Table_AlarmedSensorProvider,selection,selection_argument)
-
-                                # Update partition alarm state
-                                # Panel sends selection='partion=' and selection_argument=[0]
-                                # For the moment, will resort to updating all panel partition alarm state
-                                for partition in self._state.partitions:
-                                    alarm_type = self.db.get_alarm_type(str(partition.id))
-                                    partition.alarm_type = alarm_type
+                                self._state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.URI_HistoryContentProvider:
                                 self.db.delete_table(self.db.Table_HistoryContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_ZDeviceHistoryContentProvider:
                                 self.db.delete_table(self.db.Table_ZDeviceHistoryContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_DoorLocksContentProvider:
                                 self.db.delete_table(self.db.Table_DoorLocksContentProvider,selection,selection_argument)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.URI_DimmerLightsContentProvider:
                                 self.db.delete_table(self.db.Table_DimmerLightsContentProvider,selection,selection_argument)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.URI_ZwaveContentProvider:
                                 self.db.delete_table(self.db.Table_ZwaveContentProvider,selection,selection_argument)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.URI_AutomationDeviceContentProvider:
                                 self.db.delete_table(self.db.Table_AutomationDeviceContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_PartitionContentProvider:
                                 self.db.delete_table(self.db.Table_PartitionContentProvider,selection,selection_argument)
+                                self._state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.URI_UserContentProvider:
                                 self.db.delete_table(self.db.Table_UserContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case self.db.URI_DashboardMessagesContentProvider:
                                 self.db.delete_table(self.db.Table_DashboardMessagesContentProvider,selection,selection_argument)
+                                # No action needed
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknow uri:%s",uri)
@@ -534,46 +555,57 @@ class QolsysPanel(QolsysObservable):
                             # Inser State Content Provider
                             case self.db.URI_StateContentProvider:
                                 self.db.add_state(data=content_values)
+                                # No action needed
 
                             # Inser Partition Content Provider
                             case self.db.URI_PartitionContentProvider:
                                 self.db.add_partition(data=content_values)
+                                self._state.sync_partitions_data(self.get_partitions_from_db())
 
                             # Insert Settings Content Provider
                             case self.db.URI_SettingsProvider:
                                 self.db.add_setting(data=content_values)
+                                # No action needed
 
                             # UserContentProvider
                             case self.db.URI_UserContentProvider:
                                 self.db.add_user(data=content_values)
+                                # No action needed
 
                             # MasterSlave Content Provider
                             case self.db.URI_MasterSlaveContentProvider:
                                 self.db.add_master_slave(data=content_values)
+                                # No action needed
 
                             # Automation Content Provider
                             case self.db.URI_AutomationDeviceContentProvider:
                                 self.db.add_automation(content_values)
+                                # No action needed
 
                             # Sensor Content Provider
                             case self.db.URI_SensorContentProvider:
                                 self.db.add_sensor(data=content_values)
+                                self._state.sync_zones_data(self.get_zones_from_db())
 
-                            # ZWave Content Provider
+                            # Door Lock Content Provider
                             case self.db.URI_DoorLocksContentProvider:
                                 self.db.add_doorlock(data=content_values)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # Dimmer Content Provider
                             case self.db.URI_DimmerLightsContentProvider:
                                 self.db.add_dimmer_light(data=content_values)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             #ZWave Node Content Provider
                             case self.db.URI_ZwaveContentProvider:
                                 self.db.add_zwave_node(data=content_values)
+                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # HistoryContentProvider
                             case self.db.URI_HistoryContentProvider:
                                 self.db.add_history(data=content_values)
+                                # No action needed
 
                             # AlarmedSensorProvider
                             case self.db.URI_AlarmedSensorProvider:
@@ -588,18 +620,24 @@ class QolsysPanel(QolsysObservable):
                             # IQRemoteSettingsProvider
                             case self.db.URI_IQRemoteSettingsContentProvider:
                                 self.db.add_iqremotesettings(data=content_values)
+                                # No action needed
 
                             # HeatMapContentProvider
                             case self.db.URI_HeatMapContentProvider:
                                 self.db.add_heat_map(data=content_values)
+                                # No action needed
 
                             # ZDeviceHistoryContentProvider
                             case self.db.URI_ZDeviceHistoryContentProvider:
                                 self.db.add_zwave_history(data=content_values)
+                                # No action needed
+
 
                             # Dashboard Message Content Provider
                             case self.db.URI_DashboardMessagesContentProvider:
                                 self.db.add_dashboard_msg(data=content_values)
+                                # No action needed
+
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s",uri)
