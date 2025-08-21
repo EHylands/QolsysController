@@ -803,11 +803,6 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return False
 
-        exitSoundValue = "ON"
-        if not exit_sounds:
-             exitSoundValue = "OFF"
-
-
         mqtt_disarm_command = ""
 
         if partition.system_status in {"ARM-AWAY-EXIT-DELAY", "ARM-STAY-EXIT-DELAY"} :
@@ -825,7 +820,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "userID":user_id,
             "partitionID":partition_id,
             "operation_source": 1,
-            "disarm_exit_sounds": exitSoundValue,
+            "disarm_exit_sounds": exit_sounds,
             "macAddress" : self.settings.random_mac,
         }
 
