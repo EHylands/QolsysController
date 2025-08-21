@@ -22,10 +22,10 @@ class QolsysPartition(QolsysObservable):
         self._devices = partition_dict.get("devices")
 
         # Partition Settings (qolsyssettings table)
-        self._system_status:str = settings_dict.get("system_status","")
-        self._system_status_changed_time:str = settings_dict.get("system_status_changed_time","")
-        self._exit_sounds:str = settings_dict.get("exit_sounds","")
-        self._entry_delays:str = settings_dict.get("entry_delays","")
+        self._system_status:str = settings_dict.get("SYSTEM_STATUS","")
+        self._system_status_changed_time:str = settings_dict.get("SYSTEM_STATUS_CHANGED_TIME","")
+        self._exit_sounds:str = settings_dict.get("EXIT_SOUNDS","")
+        self._entry_delays:str = settings_dict.get("ENTRY_DELAYS","")
 
         # Alarm State (state table)
         self._alarm_state:str = alarm_state
@@ -138,6 +138,19 @@ class QolsysPartition(QolsysObservable):
             self._name = value
             self.notify()
 
+    def delete_alarm_type(self,old_alarm_type:str) -> None:
+
+        if old_alarm_type not in self.ALARM_TYPE_ARRAY:
+                LOGGER.debug("Partition%s (%s) - Unknow alarm_type %s",self._id,self._name,old_alarm_type)
+                return
+
+        if old_alarm_type not in self.alarm_type:
+            LOGGER.debug("Partition%s (%s) - alarm_type not active %s",self._id,self._name,old_alarm_type)
+            return
+
+        self._alarm_type.remove(old_alarm_type)
+        self.notify()
+
     def append_alarm_type(self,new_alarm_type:list[str]) -> None:
 
         data_changed = False
@@ -148,6 +161,7 @@ class QolsysPartition(QolsysObservable):
             if new_type == "":
                 # Default value, panel doesnt send alarm type when user fails to enter disarm code
                 new_type = "Police Emergency"
+
 
             if new_type not in self.ALARM_TYPE_ARRAY:
                 LOGGER.debug("Partition%s (%s) - Unknow alarm_type %s",self._id,self._name,new_type)
@@ -163,8 +177,6 @@ class QolsysPartition(QolsysObservable):
         if data_changed:
             for alarm in self.alarm_type:
                 LOGGER.debug("Partition%s (%s) - alarm_type: %s",self._id,self._name,alarm)
-
-            self.notify()
 
     @exit_sounds.setter
     def exit_sounds(self,value:str) -> None:
@@ -225,19 +237,19 @@ class QolsysPartition(QolsysObservable):
 
         # Update system_status
         if "SYSTEM_STATUS" in data:
-            self.system_status = data.get("system_status")
+            self.system_status = data.get("SYSTEM_STATUS")
 
         # Update system_status_changed_time
         if "SYSTEM_STATUS_CHANGED_TIME" in data:
-            self.system_status_changed_time = data.get("system_status_changed_time")
+            self.system_status_changed_time = data.get("SYSTEM_STATUS_CHANGED_TIME")
 
         # Update exit_sounds
         if "EXIT_SOUNDS" in data:
-            self.exit_sounds = data.get("exit_sounds")
+            self.exit_sounds = data.get("EXIT_SOUNDS")
 
         # Update entry_delays
         if "ENTRY_DELAYS" in data:
-            self.entry_delays = data.get("entry_delays")
+            self.entry_delays = data.get("ENTRY_DELAYS")
 
         self.end_batch_update()
 
@@ -250,10 +262,10 @@ class QolsysPartition(QolsysObservable):
 
     def to_dict_settings(self) -> dict:
         return {
-            "system_status":self.system_status,
-            "system_status_changed_time" : self.system_status_changed_time,
-            "exit_sounds":self.exit_sounds,
-            "entry_delays":self.entry_delays,
+            "SYSTEM_STATUS":self.system_status,
+            "SYSTEM_STATUS_CHANGED_TIME" : self.system_status_changed_time,
+            "EXIT_SOUNDS":self.exit_sounds,
+            "ENTRY_DELAYS":self.entry_delays,
         }
 
     def is_triggered(self) -> bool:

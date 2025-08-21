@@ -373,7 +373,15 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id","")
                                     partition = self._state.partition(int(partition_id))
                                     if partition is not None:
-                                        partition.update_settings(data=content_values)
+                                       match name:
+                                            case "SYSTEM_STATUS":
+                                                partition.system_status = new_value
+                                            case "SYSTEM_STATUS_CHANGED_TIME":
+                                                partition.system_status_changed_time = new_value
+                                            case "EXIT_SOUNDS":
+                                                partition.exit_sounds = new_value
+                                            case "ENTRY_DELAYS":
+                                                partition.entry_delays = new_value
 
                             # Update Sensor
                             case self.db.URI_SensorContentProvider:
@@ -606,7 +614,7 @@ class QolsysPanel(QolsysObservable):
 
                                 partition = self._state.partition(int(partition_id))
                                 if partition is not None:
-                                    partition.append_alarm_type(content_values.get("sgroup",""))
+                                    partition.append_alarm_type([content_values.get("sgroup","")])
 
                             # IQRemoteSettingsProvider
                             case self.db.URI_IQRemoteSettingsContentProvider:
@@ -723,10 +731,10 @@ class QolsysPanel(QolsysObservable):
             partition_id = partition_dict["partition_id"]
 
             settings_dict = {
-                "system_status": self.db.get_setting_partition("SYSTEM_STATUS",partition_id),
-                "system_status_changed_time": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME",partition_id),
-                "exit_sounds": self.db.get_setting_partition("EXIT_SOUNDS",partition_id),
-                "entry_delays":  self.db.get_setting_partition("ENTRY_DELAYS",partition_id),
+                "SYSTEM_STATUS": self.db.get_setting_partition("SYSTEM_STATUS",partition_id),
+                "SYSTEM_STATUS_CHANGED_TIME": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME",partition_id),
+                "EXIT_SOUNDS": self.db.get_setting_partition("EXIT_SOUNDS",partition_id),
+                "ENTRY_DELAYS":  self.db.get_setting_partition("ENTRY_DELAYS",partition_id),
             }
 
             alarm_type = self.db.get_alarm_type(partition_id)
