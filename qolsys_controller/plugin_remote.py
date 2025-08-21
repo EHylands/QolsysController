@@ -217,7 +217,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     await self.command_connect()
                     await self.command_pairing_request()
 
-                    #await self.command_pingevent()  # noqa: ERA001
+                    await self.command_pingevent()
                     #await self.command_timesync()  # noqa: ERA001
                     await self.command_sync_database()
                     await self.command_pair_status_request()
