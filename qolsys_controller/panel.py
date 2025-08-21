@@ -373,17 +373,7 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id","")
                                     partition = self._state.partition(int(partition_id))
                                     if partition is not None:
-                                        print(content_values)
                                         partition.update_settings(data=content_values)
-                                        #match name:
-                                        #    case "SYSTEM_STATUS":
-                                        #        partition.system_status = new_value
-                                        #    case "SYSTEM_STATUS_CHANGED_TIME":
-                                        #        partition.system_status_changed_time = new_value
-                                        #    case "EXIT_SOUNDS":
-                                        #        partition.exit_sounds = new_value
-                                        #    case "ENTRY_DELAYS":
-                                        #        partition.entry_delays = new_value
 
                             # Update Sensor
                             case self.db.URI_SensorContentProvider:

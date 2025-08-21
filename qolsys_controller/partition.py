@@ -224,19 +224,19 @@ class QolsysPartition(QolsysObservable):
         self.start_batch_update()
 
         # Update system_status
-        if "system_status" in data:
+        if "SYSTEM_STATUS" in data:
             self.system_status = data.get("system_status")
 
         # Update system_status_changed_time
-        if "system_status_changed_time" in data:
+        if "SYSTEM_STATUS_CHANGED_TIME" in data:
             self.system_status_changed_time = data.get("system_status_changed_time")
 
         # Update exit_sounds
-        if "exit_sounds" in data:
+        if "EXIT_SOUNDS" in data:
             self.exit_sounds = data.get("exit_sounds")
 
         # Update entry_delays
-        if "entry_delays" in data:
+        if "ENTRY_DELAYS" in data:
             self.entry_delays = data.get("entry_delays")
 
         self.end_batch_update()
