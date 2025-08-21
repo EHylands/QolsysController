@@ -54,6 +54,15 @@ class QolsysState(QolsysObservable):
 
         return locks
 
+    @property
+    def zwave_thermostats(self) -> list[QolsysThermostat]:
+        thermostats = []
+        for device in self.zwave_devices:
+            if isinstance(device,QolsysThermostat):
+                thermostats.append(device)
+
+        return thermostats
+
     def partition(self, partition_id:int) -> QolsysPartition:
         for partition in self.partitions:
             if int(partition.id) == partition_id:
