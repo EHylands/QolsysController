@@ -373,6 +373,7 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id","")
                                     partition = self._state.partition(int(partition_id))
                                     if partition is not None:
+                                        print(content_values)
                                         partition.update_settings(data=content_values)
                                         #match name:
                                         #    case "SYSTEM_STATUS":

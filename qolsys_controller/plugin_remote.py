@@ -905,6 +905,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
         user_id = 0
 
+        
+
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
