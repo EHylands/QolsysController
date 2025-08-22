@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from qolsys_controller.db import QolsysDB
 from qolsys_controller.observable import QolsysObservable
@@ -86,9 +87,10 @@ class QolsysPanel(QolsysObservable):
     def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file
         try:
-            with open(self._settings_directory + "users.conf") as fd:
+            path = Path(self._settings_directory + "users.conf")
+            with path.open("r", encoding="utf-8") as file:
                 try:
-                    users = json.load(fd)
+                    users = json.load(file)
                     for user in users:
                         self._users.append(user)
 

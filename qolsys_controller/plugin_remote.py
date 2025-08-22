@@ -29,7 +29,6 @@ class QolsysPluginRemote(QolsysPlugin):
         self._auto_discover_pki = True
 
         # Plugin
-        self._plugin_ip = ""
         self.certificate_exchange_server = None
         self._check_user_code_on_disarm = True
         self._log_mqtt_messages = False
@@ -80,7 +79,8 @@ class QolsysPluginRemote(QolsysPlugin):
             self._pki.check_key_file() and
             self._pki.check_secure_file() and
             self._pki.check_qolsys_cer_file() and
-            self.settings.check_panel_ip()):
+            self.settings.check_panel_ip() and
+            self.settings.check_plugin_ip()):
             return True
 
         return False
@@ -94,11 +94,11 @@ class QolsysPluginRemote(QolsysPlugin):
         if not self.panel.read_users_file():
             return False
 
-        self._plugin_ip = plugin_ip
+        self.settings.plugin_ip = plugin_ip
 
         if self._auto_discover_pki:
             if self._pki.auto_discover_pki():
-                self.settings.random_mac = self._pki.id
+                self.settings.random_mac = self._pki.formatted_id()
         else:
             self._pki.set_id(self.settings.random_mac)
 
@@ -312,8 +312,8 @@ class QolsysPluginRemote(QolsysPlugin):
             pairing_port = random.randint(50000, 55000)
 
             # Start Pairing mDNS Brodcast
-            LOGGER.debug('Starting mDNS Service Discovery:' + str(self._plugin_ip + ':' + str(pairing_port)))
-            mdns_server = QolsysMDNS(self._plugin_ip,pairing_port)
+            LOGGER.debug('Starting mDNS Service Discovery:' + str(self.settings.plugin_ip + ':' + str(pairing_port)))
+            mdns_server = QolsysMDNS(self.settings.plugin_ip,pairing_port)
             await mdns_server.start_mdns()
 
             # Start Key Exchange Server
@@ -321,7 +321,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.load_cert_chain(certfile = self._pki.cer_file_path, keyfile = self._pki.key_file_path)
-            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,self._plugin_ip, pairing_port,ssl=context)
+            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,self.settings.plugin_ip, pairing_port,ssl=context)
 
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
@@ -485,7 +485,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Sending connect command")
 
         topic = "mastermeid"
-        ipAddress = self._plugin_ip
+        ipAddress = self.settings.plugin_ip
         eventName = "connect_v204"
         macAddress = self.settings.random_mac
         remoteClientID = "QolsysController"
@@ -556,7 +556,7 @@ class QolsysPluginRemote(QolsysPlugin):
         eventName = "pingevent"
         macAddress = self.settings.random_mac
         remote_panel_status = "Active"
-        ipAddress = self._plugin_ip
+        ipAddress = self.settings.plugin_ip
         current_battery_status = "Normal"
         remote_panel_battery_percentage = 100
         remote_panel_battery_temperature = 430
@@ -709,7 +709,7 @@ class QolsysPluginRemote(QolsysPlugin):
         topic = "mastermeid"
         eventName = "connect_v204"
         pairing_request = True
-        ipAddress = self._plugin_ip
+        ipAddress = self.settings.plugin_ip
         macAddress = self.settings.random_mac
         remoteClientID = "QolsysController"
         softwareVersion = "4.4.1"
