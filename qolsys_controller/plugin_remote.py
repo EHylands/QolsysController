@@ -66,8 +66,8 @@ class QolsysPluginRemote(QolsysPlugin):
     def auto_discover_pki(self,value:bool) -> None:
         self._auto_discover_pki = value
 
-    async def config(self,plugin_ip:str) -> bool:
-        return await asyncio.create_task(self.config_task(plugin_ip))
+    async def config(self,plugin_ip:str,start_pairing:bool) -> bool:  # noqa: FBT001
+        return await asyncio.create_task(self.config_task(plugin_ip,start_pairing))
 
     def is_paired(self) -> bool:
         # Check if plugin is paired:
@@ -85,7 +85,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         return False
 
-    async def config_task(self, plugin_ip:str) -> bool:
+    async def config_task(self, plugin_ip:str,start_pairing:bool) -> bool:  # noqa: FBT001
 
         LOGGER.debug("Configuring Plugin")
         super().config()
@@ -108,6 +108,11 @@ class QolsysPluginRemote(QolsysPlugin):
 
         else:
             LOGGER.debug("Panel not paired")
+
+            if not start_pairing:
+                LOGGER.debug("Aborting pairing.")
+                return False
+
             if not await self.start_initial_pairing():
                 LOGGER.debug("Error Pairing with Panel")
                 return False
