@@ -304,7 +304,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Starting Pairing Process")
 
         # If we dont allready have client signed certificate, start the pairing server
-        if not self._pki.check_secure_file():
+        if not self._pki.check_secure_file() or not self.settings.check_panel_ip() or not self.settings.check_plugin_ip():
 
             # High Level Random Pairing Port
             pairing_port = random.randint(50000, 55000)
