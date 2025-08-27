@@ -113,7 +113,7 @@ class QolsysState(QolsysObservable):
         self.state_zone_observer.notify()
 
     def zone_delete(self,zone_id:int) -> None:
-        zone = self.zones(zone_id)
+        zone = self.zone(zone_id)
 
         if zone is None:
             LOGGER.debug("Deleting Zone from State, Zone%s not found",zone_id)
