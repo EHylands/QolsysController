@@ -67,6 +67,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def config(self,start_pairing:bool) -> bool:  # noqa: FBT001
         return await asyncio.create_task(self.config_task(start_pairing))
+        #loop = asyncio.get_running_loop()
+        #return await loop.run_in_executor(None,self.config_task,start_pairing)
 
     def is_paired(self) -> bool:
         # Check if plugin is paired:
@@ -91,7 +93,8 @@ class QolsysPluginRemote(QolsysPlugin):
         super().config()
 
         # Read user file for access code
-        if not self.panel.read_users_file():
+        loop = asyncio.get_running_loop()
+        if not loop.run_in_executor(None,self.panel.read_users_file):
             return False
 
         if self._auto_discover_pki:
