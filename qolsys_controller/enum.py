@@ -32,7 +32,7 @@ class ZoneStatus(StrEnum):
     SYNCHONIZING = "Synchonizing"
     CONNECTED = "connected"
 
-class ZoneGroup(StrEnum):
+class ZoneSensorType(StrEnum):
     DOOR_WINDOW = "Door_Window"
     MOTION = "Motion"
     PANEL_MOTION = "Panel Motion"

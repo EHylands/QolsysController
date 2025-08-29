@@ -1,6 +1,6 @@
 import logging
 
-from qolsys_controller.enum import ZoneGroup, ZoneStatus
+from qolsys_controller.enum import ZoneSensorType, ZoneStatus
 from qolsys_controller.observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
@@ -13,17 +13,17 @@ class QolsysZone(QolsysObservable):
         self._zone_id = data.get("zoneid","")
         self._sensorname =  data.get("sensorname","")
         self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus",""))
-        self._group =  ZoneGroup(data.get("sensorgroup",""))
+        self._sensortype = ZoneSensorType(data.get("sensortype",""))
         self._battery_status = data.get("battery_status","")
         self._averagedBm = data.get("averagedBm","")
         self._latestdBm = data.get("latestdBm","")
         self._ac_status = data.get("ac_status","")
 
         self._id = data.get("_id","")
+        self._group =  data.get("sensorgroup","")
+        self._zone_type = data.get("zone_type","")
         self._sensor_id = data.get("sensorid","")
         self._sensorstate = data.get("sensorstate","")
-        self._sensortype = data.get("sensortype","")
-        self._zone_type = data.get("zone_type","")
         self._zone_physical_type = data.get("zone_physical_type","")
         self._zone_alarm_type = data.get("zone_alarm_type","")
         self._partition_id = data.get("partition_id","")
@@ -94,13 +94,13 @@ class QolsysZone(QolsysObservable):
             self.averagedBm = data.get("averagedBm")
 
         if "group" in data:
-            self._group = ZoneGroup(data.get("group"))
+            self._group = data.get("group")
 
         if "sensorstate" in data:
             self._sensorstate = data.get("sensorstate")
 
         if "sensortype" in data:
-            self.sensortype = data.get("sensortype")
+            self.sensortype = ZoneSensorType(data.get("sensortype"))
 
         if "zone_type" in data:
             self._zone_type = data.get("zone_type")
@@ -158,7 +158,7 @@ class QolsysZone(QolsysObservable):
         return self._sensorname
 
     @property
-    def group(self) -> ZoneGroup:
+    def group(self) -> str:
         return self._group
 
     @property
@@ -174,7 +174,7 @@ class QolsysZone(QolsysObservable):
         return self._sensorstate
 
     @property
-    def sensortype(self) -> str:
+    def sensortype(self) -> ZoneSensorType:
         return self._sensortype
 
     @property
@@ -249,12 +249,13 @@ class QolsysZone(QolsysObservable):
             self.notify()
 
     @sensortype.setter
-    def sensortype(self,value:str) -> None:
+    def sensortype(self,value:ZoneSensorType) -> None:
         if self._sensortype != value:
             self._sensortype = value
+            self.notify()
 
     @group.setter
-    def group(self,new_value:ZoneGroup) -> None:
+    def group(self,new_value:str) -> None:
         if self._group != new_value:
             self._group = new_value
             self.notify()
@@ -273,7 +274,7 @@ class QolsysZone(QolsysObservable):
             "group": self.group,
             "sensorstatus": self.sensorstatus.value,
             "sensorstate": self.sensorstate,
-            "sensortype": self.sensortype,
+            "sensortype": self.sensortype.value,
             "zoneid": self.zone_id,
             "zone_type": self.zone_type,
             "zone_physical_type": self.zone_physical_type,
