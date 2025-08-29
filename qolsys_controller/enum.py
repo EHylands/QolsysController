@@ -40,6 +40,7 @@ class ZoneSensorType(StrEnum):
     PANEL_GLASS_BREAK = "Panel Glass Break"
     BLUETOOTH = "Bluetooth"
     SMOKE_DETECTOR = "SmokeDetector"
+    SMOKE_M = "Smoke_M"
     CO_DETECTOR = "CODetector"
     WATER = "Water"
     FREEZE = "Freeze"
