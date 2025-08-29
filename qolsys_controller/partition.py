@@ -25,7 +25,6 @@ class QolsysPartition(QolsysObservable):
 
         # Partition Settings (qolsyssettings table)
         self._system_status:PartitionSystemStatus = PartitionSystemStatus(settings_dict.get("SYSTEM_STATUS",""))
-
         self._system_status_changed_time:str = settings_dict.get("SYSTEM_STATUS_CHANGED_TIME","")
         self._exit_sounds:str = settings_dict.get("EXIT_SOUNDS","")
         self._entry_delays:str = settings_dict.get("ENTRY_DELAYS","")
@@ -81,17 +80,10 @@ class QolsysPartition(QolsysObservable):
         return self._command_arm_stay_instant
 
     @system_status.setter
-    def system_status(self, new_value:str) -> None:
-
-        try:
-            status = PartitionSystemStatus(new_value)
-        except ValueError:
-            LOGGER.exception("Partition%s (%s) - Unknow system_status: %s",self.id,self.name,new_value)
-            return
- 
-        if self._system_status != status.value:
-            LOGGER.debug("Partition%s (%s) - system_status: %s",self.id,self.name,status.value)
-            self._system_status = status
+    def system_status(self, new_value:PartitionSystemStatus) -> None:
+        if self._system_status != new_value:
+            LOGGER.debug("Partition%s (%s) - system_status: %s",self.id,self.name,new_value)
+            self._system_status = new_value
             self.notify()
 
     @system_status_changed_time.setter
@@ -113,12 +105,6 @@ class QolsysPartition(QolsysObservable):
         if self._alarm_state != state:
             LOGGER.debug("Partition%s (%s) - alarm_state: %s",self.id,self.name,new_value)
             self._alarm_state = state
-
-            # Only notify when None -> Delay and None -> Alarm
-            #if self.system_status in {"ARM-AWAY-EXIT-DELAY", "ARM-STAY-EXIT-DELAY"}:
-            #    if prev_value == 'Delay' and value == 'None':
-            #        return
-
             self.notify()
 
     @alarm_type_array.setter
@@ -145,48 +131,6 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug("Partition%s (%s) - name: %s",self._id,self._name,value)
             self._name = value
             self.notify()
-
-    def delete_alarm_type(self,old_alarm_type:str) -> None:
-
-        if old_alarm_type not in self.ALARM_TYPE_ARRAY:
-                LOGGER.debug("Partition%s (%s) - Unknow alarm_type %s",self._id,self._name,old_alarm_type)
-                return
-
-        if old_alarm_type not in self.alarm_type:
-            LOGGER.debug("Partition%s (%s) - alarm_type not active %s",self._id,self._name,old_alarm_type)
-            return
-
-        self._alarm_type.remove(old_alarm_type)
-        self.notify()
-
-    def append_alarm_type_string(self,new_alarm_type_array:list[str]) -> None:
-
-        data_changed = False
-
-        for new_alarm_type in new_alarm_type_array:
-
-            alarm_string = new_alarm_type
-            if alarm_string == "":
-                # Default value, panel doesnt send alarm type when user fails to enter disarm code
-                alarm_string = "Police Emergency"
-
-            try:
-                alarm_state_enum  = PartitionAlarmState(alarm_string)
-            except ValueError:
-                LOGGER.exception("Partition%s (%s) - Unknow alarm_state: %s",self.id,self.name,alarm_string)
-                return
-
-            # Value already in array
-            if alarm_state_enum in self._alarm_type_array:
-                continue
-
-            self._alarm_type_array.append(alarm_state_enum )
-            data_changed = True
-
-        if data_changed:
-            self.notify()
-            for alarm in self.alarm_type:
-                LOGGER.debug("Partition%s (%s) - alarm_type: %s",self._id,self._name,alarm)
 
     def append_alarm_type(self,new_alarm_type_array:list[PartitionAlarmType]) -> None:
 
@@ -295,21 +239,3 @@ class QolsysPartition(QolsysObservable):
             "EXIT_SOUNDS":self.exit_sounds,
             "ENTRY_DELAYS":self.entry_delays,
         }
-
-    def is_triggered(self) -> bool:
-        return self.alarm_state == "Alarm"
-
-    def is_disarmed(self) -> bool:
-        return self.system_status == "DISARM" and self.alarm_state != "Alarm"
-
-    def is_arming(self) -> bool:
-        return self.system_status in {"ARM-AWAY-EXIT-DELAY", "ARM-STAY-EXIT-DELAY"}
-
-    def is_pending(self) -> bool:
-        return False
-
-    def is_armed_stay(self) -> bool:
-        return self.system_status == "ARM-STAY"
-
-    def is_armed_away(self) -> bool:
-        return self.system_status == "ARM-AWAY"

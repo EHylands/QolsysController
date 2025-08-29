@@ -38,17 +38,12 @@ class QolsysController:
 
             case "c4":
                 LOGGER.debug("C4 Plugin Selected")
-                self.plugin = QolsysPluginC4(self.state,
-                                             self.panel,
-                                             self.settings)
+                self.plugin = QolsysPluginC4(self.state,self.panel,self.settings)
                 return
 
             case "remote":
                 LOGGER.debug("Remote Plugin Selected")
-                self.plugin = QolsysPluginRemote(self.state,
-                                                 self.panel,
-                                                 self.settings,
-                                                 self._config_directory)
+                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings,self._config_directory)
                 return
 
             case _:

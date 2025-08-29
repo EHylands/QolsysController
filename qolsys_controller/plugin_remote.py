@@ -8,13 +8,13 @@ import uuid
 
 import aiomqtt
 
+from qolsys_controller.enum import PartitionAlarmState, PartitionSystemStatus
 from qolsys_controller.mdns import QolsysMDNS
 from qolsys_controller.panel import QolsysPanel
 from qolsys_controller.pki import QolsysPKI
 from qolsys_controller.plugin import QolsysPlugin
 from qolsys_controller.settings import QolsysSettings
 from qolsys_controller.state import QolsysState
-from qolsys_controller.enum import PartitionSystemStatus, PartitionAlarmState
 from qolsys_controller.utils_mqtt import fix_json_string, generate_random_mac
 
 LOGGER = logging.getLogger(__name__)

@@ -1,31 +1,28 @@
 import logging
 
+from qolsys_controller.enum import ZoneGroup, ZoneStatus
 from qolsys_controller.observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 
 class QolsysZone(QolsysObservable):
 
-    ZONE_STATUS_ARRAY = ["Open", "Closed", "Active", "Inactive","Activated","Idle","Unreachable","Tampered","Synchonizing","connected"]  # noqa: RUF012
-    ZONE_GROUP_ARRAY = ["Door_Window","Motion","Panel Motion","GlassBreak","Panel Glass Break","Bluetooth","SmokeDetector",  # noqa: RUF012
-                        "CODetector","Water","Freeze","Heat","Tilt","Keypad","Auxiliary Pendant","Siren","KeyFob","Temperature",
-                        "TakeoverModule","Translator","Doorbell","Shock"]
-
     def __init__(self, data:dict) -> None:
         super().__init__()
 
+        self._zone_id = data.get("zoneid","")
+        self._sensorname =  data.get("sensorname","")
+        self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus",""))
+        self._group =  ZoneGroup(data.get("sensorgroup",""))
+        self._battery_status = data.get("battery_status","")
+        self._averagedBm = data.get("averagedBm","")
+        self._latestdBm = data.get("latestdBm","")
+        self._ac_status = data.get("ac_status","")
+
         self._id = data.get("_id","")
         self._sensor_id = data.get("sensorid","")
-        self._sensorname =  data.get("sensorname","")
-        self._group =  data.get("sensorgroup","")
-        self._sensorstatus = data.get("sensorstatus","")
-        self._battery_status = data.get("battery_status","")
-        self._latestdBm = data.get("latestdBm","")
-        self._averagedBm = data.get("averagedBm","")
-
         self._sensorstate = data.get("sensorstate","")
         self._sensortype = data.get("sensortype","")
-        self._zone_id = data.get("zoneid","")
         self._zone_type = data.get("zone_type","")
         self._zone_physical_type = data.get("zone_physical_type","")
         self._zone_alarm_type = data.get("zone_alarm_type","")
@@ -58,23 +55,12 @@ class QolsysZone(QolsysObservable):
         self._powerg_manufacture_id = data.get("powerg_manufacture_id","")
         self._parent_node = data.get("parent_node","")
         self._extras = data.get("extras","")
-        self._ac_status = data.get("ac_status","")
-
-        self._NOTIFY_SENSORSTATUS = True
-        self._NOTIFY_BATTERY_STATUS = True
-        self._NOTIFY_SENSOR_NAME = True
-        self._NOTIFY_PARTITION_ID = True
-        self._NOTIFY_TIME = False
 
     def update(self,data:dict) -> None:
 
-        # Object creation
-        if self.zone_id == "":
-            self._zone_id = data.get("zoneid")
-
         zone_id_update = data.get("zoneid","")
-        if int(zone_id_update) != int(self._zone_id):
-           LOGGER.error(f"Updating zone '{self._zone_id}' ({self.sensorname}) with sensor '{zone_id_update}' (different id)")
+        if zone_id_update != self._zone_id:
+           LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)",self._zone_id,self.sensorname,zone_id_update)
            return
 
         self.start_batch_update()
@@ -85,7 +71,7 @@ class QolsysZone(QolsysObservable):
 
         # Update sensorsatus
         if "sensorstatus" in data:
-            self.sensorstatus = data.get("sensorstatus")
+            self.sensorstatus = ZoneStatus(data.get("sensorstatus"))
 
         # Update battery_status
         if "battery_status" in data:
@@ -108,7 +94,7 @@ class QolsysZone(QolsysObservable):
             self.averagedBm = data.get("averagedBm")
 
         if "group" in data:
-            self._group = data.get("group")
+            self._group = ZoneGroup(data.get("group"))
 
         if "sensorstate" in data:
             self._sensorstate = data.get("sensorstate")
@@ -172,11 +158,11 @@ class QolsysZone(QolsysObservable):
         return self._sensorname
 
     @property
-    def group(self) -> str:
+    def group(self) -> ZoneGroup:
         return self._group
 
     @property
-    def sensorstatus(self) -> str:
+    def sensorstatus(self) -> ZoneStatus:
         return self._sensorstatus
 
     @property
@@ -236,23 +222,18 @@ class QolsysZone(QolsysObservable):
             self.notify()
 
     @sensorstatus.setter
-    def sensorstatus(self, value:str) -> None:
-        if value not in self.ZONE_STATUS_ARRAY:
-            LOGGER.debug(f"Sensor{self.zone_id} ({self._sensorname}) - Unknow sensorstatus {value}")
-
-        if self._sensorstatus != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - sensorstatus: {value}")
-            self._sensorstatus = value
-            if self._NOTIFY_SENSORSTATUS:
-                self.notify()
+    def sensorstatus(self, new_value:ZoneStatus) -> None:
+        if self._sensorstatus != new_value:
+            LOGGER.debug("Zone%s (%s) - sensorstatus: %s",self._zone_id,self.sensorname,new_value)
+            self._sensorstatus = new_value
+            self.notify()
 
     @battery_status.setter
     def battery_status(self, value:str) -> None:
         if self._battery_status != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - battery_status: {value}")
+            LOGGER.debug("Zone%s (%s) - battery_status: %s",self.zone_id,self.sensorname,value)
             self._battery_status = value
-            if self._NOTIFY_BATTERY_STATUS:
-                self.notify()
+            self.notify()
 
     @sensorname.setter
     def sensorname(self, value:str) -> None:
@@ -263,15 +244,20 @@ class QolsysZone(QolsysObservable):
     @time.setter
     def time(self, value:str) -> None:
         if self._time != value:
-            LOGGER.debug(f"Zone{self._zone_id} ({self._sensorname}) - time: {value}")
+            LOGGER.debug("Zone%s (%s) - time: %s",self.zone_id,self.sensorname,value)
             self._time = value
-            if self._NOTIFY_TIME:
-                self.notify()
+            self.notify()
 
     @sensortype.setter
     def sensortype(self,value:str) -> None:
         if self._sensortype != value:
             self._sensortype = value
+
+    @group.setter
+    def group(self,new_value:ZoneGroup) -> None:
+        if self._group != new_value:
+            self._group = new_value
+            self.notify()
 
     @partition_id.setter
     def partition_id(self, value:str) -> None:
@@ -285,7 +271,7 @@ class QolsysZone(QolsysObservable):
             "sensorid": self._sensor_id,
             "sensorname": self.sensorname,
             "group": self.group,
-            "sensorstatus": self.sensorstatus,
+            "sensorstatus": self.sensorstatus.value,
             "sensorstate": self.sensorstate,
             "sensortype": self.sensortype,
             "zoneid": self.zone_id,
