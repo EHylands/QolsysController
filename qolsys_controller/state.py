@@ -243,7 +243,7 @@ class QolsysState(QolsysObservable):
                         LOGGER.debug("sync_data - update Partition%s",state_partition.id)
                         state_partition.update_partition(db_partition.to_dict_partition())
                         state_partition.update_settings(db_partition.to_dict_settings())
-                        state_partition.alarm_type = db_partition.alarm_type
+                        state_partition.alarm_type_array = db_partition.alarm_type_array
                         state_partition.alarm_state = db_partition.alarm_state
 
         # Delete partitions
@@ -267,11 +267,15 @@ class QolsysState(QolsysObservable):
             LOGGER.debug("Partition%s (%s) - system_status: %s",pid,name,partition.system_status)
             LOGGER.debug("Partition%s (%s) - system_status_changed_time: %s",pid,name,partition.system_status_changed_time)
             LOGGER.debug("Partition%s (%s) - alarm_state: %s",pid,name,partition.alarm_state)
+
+            if partition.alarm_type_array == []:
+                LOGGER.debug("Partition%s (%s) - alarm_type: %s",pid,name,"None")
+            else:
+                for alarm_type in partition.alarm_type_array:
+                    LOGGER.debug("Partition%s (%s) - alarm_type: %s",pid,name,alarm_type)
+
             LOGGER.debug("Partition%s (%s) - exit_sounds: %s",pid,name,partition.exit_sounds)
             LOGGER.debug("Partition%s (%s) - entry_delays: %s",pid,name,partition.entry_delays)
-
-            for alarm_type in partition.alarm_type:
-                LOGGER.debug("Partition%s (%s) - alarm_type: %s",pid,name,alarm_type)
 
         for zone in self.zones:
             zid = zone.zone_id
