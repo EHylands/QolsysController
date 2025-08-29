@@ -184,6 +184,7 @@ class QolsysPartition(QolsysObservable):
             data_changed = True
 
         if data_changed:
+            self.notify()
             for alarm in self.alarm_type:
                 LOGGER.debug("Partition%s (%s) - alarm_type: %s",self._id,self._name,alarm)
 
