@@ -14,6 +14,7 @@ from qolsys_controller.pki import QolsysPKI
 from qolsys_controller.plugin import QolsysPlugin
 from qolsys_controller.settings import QolsysSettings
 from qolsys_controller.state import QolsysState
+from qolsys_controller.enum import PartitionSystemStatus, PartitionAlarmState
 from qolsys_controller.utils_mqtt import fix_json_string, generate_random_mac
 
 LOGGER = logging.getLogger(__name__)
@@ -809,17 +810,16 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return False
 
-        mqtt_disarm_command = ""
+        def get_mqtt_disarm_command() -> str:
+            if partition.alarm_state  == PartitionAlarmState.ALARM:
+                return "disarm_from_emergency"
+            if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY, PartitionSystemStatus.ARM_STAY_EXIT_DELAY}:
+                return "disarm_from_openlearn_sensor"
+            if partition.system_status in {PartitionSystemStatus.ARM_AWAY, PartitionSystemStatus.ARM_STAY}:
+                return "disarm_the_panel_from_entry_delay"
+            return ""
 
-        if partition.system_status in {"ARM-AWAY-EXIT-DELAY", "ARM-STAY-EXIT-DELAY"} :
-            mqtt_disarm_command = "disarm_from_openlearn_sensor"
-
-        if partition.alarm_state  == "ALARM":
-            mqtt_disarm_command = "disarm_from_emergency"
-
-        if partition.system_status in {"ARM-AWAY", "ARM-STAY"}:
-            await self.command_ui_delay(partition_id)
-            mqtt_disarm_command = "disarm_the_panel_from_entry_delay"
+        mqtt_disarm_command = get_mqtt_disarm_command()
 
         disarm_command ={
             "operation_name": mqtt_disarm_command,
