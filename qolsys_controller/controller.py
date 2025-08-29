@@ -21,15 +21,15 @@ class QolsysController:
         self._settings = QolsysSettings()
 
     @property
-    def state(self) -> str:
+    def state(self) -> QolsysState:
         return self._state
 
     @property
-    def panel(self) -> str:
+    def panel(self) -> QolsysPanel:
         return self._panel
 
     @property
-    def settings(self) -> str:
+    def settings(self) -> QolsysSettings:
         return self._settings
 
     def select_plugin(self,plugin: str) -> None:

@@ -4,6 +4,11 @@ from datetime import datetime
 from pathlib import Path
 
 from qolsys_controller.db import QolsysDB
+from qolsys_controller.enum import (
+    PartitionAlarmState,
+    PartitionAlarmType,
+    PartitionSystemStatus,
+)
 from qolsys_controller.observable import QolsysObservable
 from qolsys_controller.partition import QolsysPartition
 from qolsys_controller.state import QolsysState
@@ -378,7 +383,7 @@ class QolsysPanel(QolsysObservable):
                                     if partition is not None:
                                        match name:
                                             case "SYSTEM_STATUS":
-                                                partition.system_status = new_value
+                                                partition.system_status = PartitionSystemStatus(new_value)
                                             case "SYSTEM_STATUS_CHANGED_TIME":
                                                 partition.system_status_changed_time = new_value
                                             case "EXIT_SOUNDS":
@@ -406,7 +411,7 @@ class QolsysPanel(QolsysObservable):
                                     if partition is not None:
                                         match name:
                                             case "ALARM_STATE":
-                                                partition.alarm_state = new_value
+                                                partition.alarm_state = PartitionAlarmState(new_value)
 
                             # Update heat_map
                             case self.db.URI_HeatMapContentProvider:
@@ -617,7 +622,7 @@ class QolsysPanel(QolsysObservable):
 
                                 partition = self._state.partition(int(partition_id))
                                 if partition is not None:
-                                    partition.append_alarm_type([content_values.get("sgroup","")])
+                                    partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup",""))])
 
                             # IQRemoteSettingsProvider
                             case self.db.URI_IQRemoteSettingsContentProvider:
@@ -740,8 +745,14 @@ class QolsysPanel(QolsysObservable):
                 "ENTRY_DELAYS":  self.db.get_setting_partition("ENTRY_DELAYS",partition_id),
             }
 
-            alarm_type = self.db.get_alarm_type(partition_id)
-            alarm_state = self.db.get_state_partition("ALARM_STATE",partition_id)
+            alarm_type = []
+            for alarm in self.db.get_alarm_type(partition_id):
+                if alarm == "":
+                    alarm_type.append(PartitionAlarmType("Police Emergency"))
+                else:
+                    alarm_type.append(PartitionAlarmType(alarm))
+
+            alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE",partition_id))
 
             partition = QolsysPartition(partition_dict,settings_dict,alarm_state,alarm_type)
             partitions.append(partition)
