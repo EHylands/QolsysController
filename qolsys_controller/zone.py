@@ -56,7 +56,7 @@ class QolsysZone(QolsysObservable):
         self._parent_node = data.get("parent_node","")
         self._extras = data.get("extras","")
 
-    def update(self,data:dict) -> None:
+    def update(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
         zone_id_update = data.get("zoneid","")
         if zone_id_update != self._zone_id:

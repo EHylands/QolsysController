@@ -656,7 +656,7 @@ class QolsysDB:
         self.cursor.execute(f"DELETE from {self.Table_DimmerLightsContentProvider}")
         self.db.commit()
 
-    def load_db(self,database:dict) -> None:
+    def load_db(self,database:dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
         self.clear_db()
 

@@ -145,7 +145,7 @@ class QolsysThermostat(QolsysZWaveDevice):
             self._thermostat_set_point_mode = value
             self.notify()
 
-    def update_thermostat(self,data:dict) -> None:
+    def update_thermostat(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id
         node_id_update = data.get("node_id","")
         if node_id_update != self.thermostat_node_id_node_id:

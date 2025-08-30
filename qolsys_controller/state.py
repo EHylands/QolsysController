@@ -20,9 +20,9 @@ class QolsysState(QolsysObservable):
         self._zones = []
         self._zwave_devices = []
 
-        self.state_partition_observer = QolsysObservable()
-        self.state_zone_observer = QolsysObservable()
-        self.state_zwave_observer = QolsysObservable()
+        self._state_partition_observer = QolsysObservable()
+        self._state_zone_observer = QolsysObservable()
+        self._state_zwave_observer = QolsysObservable()
 
     @property
     def partitions(self) -> list[QolsysPartition]:
@@ -63,37 +63,35 @@ class QolsysState(QolsysObservable):
 
         return thermostats
 
-    def partition(self, partition_id:int) -> QolsysPartition:
+    @property
+    def state_partition_observer(self) -> QolsysObservable:
+        return self._state_partition_observer
+
+    @property
+    def state_zone_observer(self) -> QolsysObservable:
+        return self._state_zone_observer
+
+    @property
+    def state_zwave_observer(self) -> QolsysObservable:
+        return self._state_zwave_observer
+
+    def partition(self, partition_id:str) -> QolsysPartition:
         for partition in self.partitions:
-            if int(partition.id) == partition_id:
+            if partition.id == partition_id:
                 return partition
-
-        return None
-
-    def zwave_device(self,node_id:int) -> QolsysZWaveDevice:
-        for zwave_device in self.zwave_devices:
-            if int(zwave_device.node_id) == node_id:
-                return zwave_device
-
-        return None
-
-    def zone(self,zone_id:int) -> QolsysZone:
-        for zone in self.zones:
-            if int(zone.zone_id) == zone_id:
-                return zone
 
         return None
 
     def partition_add(self,new_partition:QolsysPartition) -> None:
         for partition in self.partitions:
-            if partition.id == new_partition.id:
+            if new_partition.id == partition.id:
                 LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List",new_partition.id,partition.name)
                 return
 
         self.partitions.append(new_partition)
         self.state_partition_observer.notify()
 
-    def partition_delete(self,partition_id:int) -> None:
+    def partition_delete(self,partition_id:str) -> None:
         partition = self.partitions(partition_id)
 
         if partition is None:
@@ -102,6 +100,13 @@ class QolsysState(QolsysObservable):
 
         self.partitions.remove(partition)
         self.state_partition_observer.notify()
+
+    def zone(self,zone_id:str) -> QolsysZone:
+        for zone in self.zones:
+            if zone.zone_id == zone_id:
+                return zone
+
+        return None
 
     def zone_add(self, new_zone:QolsysZone) -> None:
         for zone in self.zones:
@@ -112,7 +117,7 @@ class QolsysState(QolsysObservable):
         self.zones.append(new_zone)
         self.state_zone_observer.notify()
 
-    def zone_delete(self,zone_id:int) -> None:
+    def zone_delete(self,zone_id:str) -> None:
         zone = self.zone(zone_id)
 
         if zone is None:
@@ -122,23 +127,30 @@ class QolsysState(QolsysObservable):
         self.zones.remove(zone)
         self.state_zone_observer.notify()
 
+    def zwave_device(self,node_id:str) -> QolsysZWaveDevice:
+        for zwave_device in self.zwave_devices:
+            if zwave_device.node_id == node_id:
+                return zwave_device
+
+        return None
+
     def zwave_add(self, new_zwave:QolsysZWaveDevice) -> None:
         for zwave_device in self.zwave_devices:
             if new_zwave.node_id == zwave_device.node_id:
                 LOGGER.debug("Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List",new_zwave.node_id,zwave_device.node_name)
                 return
 
-        self._zwave_devices.append(new_zwave)
+        self.zwave_devices.append(new_zwave)
         self.state_zwave_observer.notify()
 
-    def zwave_delete(self,node_id:int) -> None:
+    def zwave_delete(self,node_id:str) -> None:
         zwave = self.zwave_device(node_id)
 
         if zwave is None:
             LOGGER.debug("Deleting ZWave from State, ZWave%s not found",node_id)
             return
 
-        self._zwave_devices.remove(zwave)
+        self.zwave_devices.remove(zwave)
         self.state_zwave_observer.notify()
 
     def sync_zwave_devices_data(self,db_zwaves:list[QolsysZWaveDevice]) -> None:  # noqa: C901, PLR0912
@@ -258,7 +270,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - add Partition%s",db_partition.id)
                 self.partition_add(db_partition)
 
-    def dump(self) -> None:
+    def dump(self) -> None:  # noqa: PLR0915
         LOGGER.debug("*** Information ***")
 
         for partition in self.partitions:

@@ -25,7 +25,7 @@ class QolsysPluginRemote(QolsysPlugin):
         super().__init__(state,panel,settings)
 
         # PKI
-        self._keys_directory = config_directory +"pki/"
+        self._keys_directory = config_directory + "pki/"
         self._pki = QolsysPKI(keys_directory = self._keys_directory)
         self._auto_discover_pki = True
 
@@ -66,10 +66,8 @@ class QolsysPluginRemote(QolsysPlugin):
     def auto_discover_pki(self,value:bool) -> None:
         self._auto_discover_pki = value
 
-    async def config(self,start_pairing:bool) -> bool:  # noqa: FBT001
+    async def config(self,start_pairing:bool) -> bool:
         return await asyncio.create_task(self.config_task(start_pairing))
-        #loop = asyncio.get_running_loop()
-        #return await loop.run_in_executor(None,self.config_task,start_pairing)
 
     def is_paired(self) -> bool:
         # Check if plugin is paired:
@@ -78,15 +76,12 @@ class QolsysPluginRemote(QolsysPlugin):
         # 3- Signed certificate file present
         # 4- Qolsys certificate present
         # 5- Qolsys Panel IP present
-        if (self._pki.id != "" and
+        return (self._pki.id != "" and
             self._pki.check_key_file() and
             self._pki.check_secure_file() and
             self._pki.check_qolsys_cer_file() and
             self.settings.check_panel_ip() and
-            self.settings.check_plugin_ip()):
-            return True
-
-        return False
+            self.settings.check_plugin_ip())
 
     async def config_task(self,start_pairing:bool) -> bool:  # noqa: FBT001
 
@@ -121,19 +116,11 @@ class QolsysPluginRemote(QolsysPlugin):
 
         LOGGER.debug("Starting Plugin Operation")
 
-        # Check for valid PKI
-        LOGGER.debug("Checking PKI")
-        self._pki.set_id(self.settings.random_mac)
-        if not(self._pki.check_key_file() and
-                self._pki.check_secure_file() and
-                self._pki.check_qolsys_cer_file()):
-            return False
-
         # Everything is configured
         return True
 
-    async def test_operation(self) -> None:
-        asyncio.create_task(self.test_operation_task())
+    async def test_operation(self) -> bool:
+        return asyncio.create_task(self.test_operation_task())
 
     async def test_operation_task(self) -> bool:
         tls_params = aiomqtt.TLSParameters(
@@ -164,7 +151,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                     async for message in self.aiomqtt.messages:
                         if self.log_mqtt_mesages:
-                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
+                            LOGGER.debug(f"MQTT TOPIC: {message.topic}\n{message.payload.decode()}")
 
                         # Panel response to MQTT Commands
                         if message.topic.matches("response_" + self.settings.random_mac):
@@ -188,9 +175,13 @@ class QolsysPluginRemote(QolsysPlugin):
 
     def start_operation(self) -> None:
         asyncio.create_task(self.start_operation_task())
-        #task = asyncio.create_task(loop.run_in_executor(None,self.start_operation_task))
 
-    async def start_operation_task(self) -> None:
+    async def start_operation_task(self) -> None:  # noqa: C901, PLR0912, PLR0915
+
+        if not self.is_paired():
+            self.panel_ready = False
+            self.panel_ready_observer.notify(panel_ready=self.panel_ready)
+            return
 
         tls_params = aiomqtt.TLSParameters(
             ca_certs = self._pki.qolsys_cer_file_path,
@@ -232,7 +223,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     async for message in self.aiomqtt.messages:
 
                         if self.log_mqtt_mesages:
-                            LOGGER.debug(f'MQTT TOPIC: {message.topic}\n{message.payload.decode()}')
+                            LOGGER.debug(f"MQTT TOPIC: {message.topic}\n{message.payload.decode()}")
 
                         # Panel response to MQTT Commands
                         if message.topic.matches("response_" + self.settings.random_mac):
@@ -258,11 +249,11 @@ class QolsysPluginRemote(QolsysPlugin):
 
                                 case "connect":
                                     LOGGER.debug("MQTT: connect command response")
-                                    self.panel.imei = data.get("master_imei",'')
+                                    self.panel.imei = data.get("master_imei","")
                                     self.panel.product_type = data.get("primary_product_type","")
 
                                 case "ipcCall":
-                                    LOGGER.debug("MQTT: ipcCall command response: %s",data.get('responseStatus'))
+                                    LOGGER.debug("MQTT: ipcCall command response: %s",data.get("responseStatus"))
 
                                 case "pair_status_request":
                                     self.connected = True
@@ -314,7 +305,7 @@ class QolsysPluginRemote(QolsysPlugin):
             pairing_port = random.randint(50000, 55000)
 
             # Start Pairing mDNS Brodcast
-            LOGGER.debug('Starting mDNS Service Discovery:' + str(self.settings.plugin_ip + ':' + str(pairing_port)))
+            LOGGER.debug("Starting mDNS Service Discovery: %s:%s",self.settings.plugin_ip,str(pairing_port))
             mdns_server = QolsysMDNS(self.settings.plugin_ip,pairing_port)
             await mdns_server.start_mdns()
 
@@ -382,7 +373,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         return False
 
-    async def handle_key_exchange_client(self,reader, writer) -> None:
+    async def handle_key_exchange_client(self,reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
 
         received_panel_mac = False
         received_signed_client_certificate = False
@@ -403,17 +394,17 @@ class QolsysPluginRemote(QolsysPlugin):
                     mac = request.decode()
 
                     address, port = writer.get_extra_info("peername")
-                    LOGGER.debug(f'Panel Connected from: {address}:{port}')
-                    LOGGER.debug(f'Receiving from Panel: {mac}')
+                    LOGGER.debug("Panel Connected from: %s:%s",address,port)
+                    LOGGER.debug("Receiving from Panel: %s",mac)
 
                     # Remove \x00 and \x01 from received string
-                    self.settings.panel_mac = ''.join(char for char in mac if char.isprintable())
+                    self.settings.panel_mac = "".join(char for char in mac if char.isprintable())
                     self.settings.panel_ip = address
                     received_panel_mac = True
 
                     # Sending random_mac to panel
                     message = b"\x00\x11" + self.settings.random_mac.encode()
-                    LOGGER.debug(f'Sending to Panel: {message.decode()}')
+                    LOGGER.debug("Sending to Panel: %s",message.decode())
                     writer.write(message)
                     await writer.drain()
 
@@ -455,7 +446,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                     if "sent" in request.decode():
                         continue_pairing = False
-                        certificates = [item for item in qolsys_certificate_data.split('sent') if item]
+                        certificates = [item for item in qolsys_certificate_data.split("sent") if item]
 
                         LOGGER.debug("Saving [Qolsys Certificate]")
                         with open(self._pki.qolsys_cer_file_path, "w") as f:
@@ -469,8 +460,8 @@ class QolsysPluginRemote(QolsysPlugin):
         except asyncio.CancelledError:
             LOGGER.exception("Key Exchange Server asyncio CancelledError")
 
-        except Exception as e:
-            LOGGER.exception(f"Key Exchange Server error: {e}")
+        except Exception:
+            LOGGER.exception("Key Exchange Server error")
 
         finally:
             writer.close()
@@ -591,7 +582,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     "remote_panel_plugged" : remote_panel_plugged,
                     "requestID":requestID,
                     "responseTopic": responseTopic,
-                    "remoteMacAddess":remoteMacAddress
+                    "remoteMacAddess":remoteMacAddress,
         }
 
         await self.send_command(topic,payload)
@@ -610,7 +601,7 @@ class QolsysPluginRemote(QolsysPlugin):
                    "startTimestamp": startTimestamp,
                    "requestID":requestID,
                    "responseTopic":responseTopic,
-                   "remoteMacAddess":remoteMacAddress
+                   "remoteMacAddess":remoteMacAddress,
         }
 
         await self.send_command(topic,payload)
@@ -764,9 +755,9 @@ class QolsysPluginRemote(QolsysPlugin):
             "operation_name": "ui_delay",
             "panel_status": partition.system_status,
             "userID":0,
-            "partitionID": partition_id,
+            "partitionID": partition_id, # STR EXPECTED
             "operation_source": 1,
-            "macAddress" : self.settings.random_mac
+            "macAddress" : self.settings.random_mac,
         }
 
         topic = "mastermeid"
@@ -794,7 +785,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         await self.send_command(topic,payload)
 
-    async def command_disarm(self,partition_id:int,user_code:str="",exit_sounds:bool=True) -> bool:
+    async def command_disarm(self,partition_id:str,user_code:str="",exit_sounds:bool=True) -> bool:
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s",self.check_user_code_on_disarm)
 
         partition = self.state.partition(partition_id)
@@ -810,21 +801,22 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return False
 
-        def get_mqtt_disarm_command() -> str:
+        async def get_mqtt_disarm_command() -> str:
             if partition.alarm_state  == PartitionAlarmState.ALARM:
                 return "disarm_from_emergency"
             if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY, PartitionSystemStatus.ARM_STAY_EXIT_DELAY}:
                 return "disarm_from_openlearn_sensor"
             if partition.system_status in {PartitionSystemStatus.ARM_AWAY, PartitionSystemStatus.ARM_STAY}:
+                await self.command_ui_delay(partition_id)
                 return "disarm_the_panel_from_entry_delay"
             return ""
 
-        mqtt_disarm_command = get_mqtt_disarm_command()
+        mqtt_disarm_command = await get_mqtt_disarm_command()
 
         disarm_command ={
             "operation_name": mqtt_disarm_command,
             "userID":user_id,
-            "partitionID":partition_id,
+            "partitionID":int(partition_id), # INT EXPECTED
             "operation_source": 1,
             "disarm_exit_sounds": exit_sounds,
             "macAddress" : self.settings.random_mac,
@@ -904,9 +896,9 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic,payload)
 
 
-    async def command_arm(self,partition_id:int,arming_type:str,user_code:str="",exit_sounds:bool=False,instant_arm:bool=False) -> bool:
+    async def command_arm(self,partition_id:str,arming_type:str,user_code:str="",exit_sounds:bool=False,instant_arm:bool=False) -> bool:
 
-        LOGGER.debug(f'MQTT: Sending arm command: partition{partition_id}, arming_type:{arming_type}, secure_arm:{self.panel.SECURE_ARMING}' )
+        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",partition_id,arming_type,self.panel.SECURE_ARMING)
 
         user_id = 0
 
@@ -922,7 +914,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: arm command error - user_code error")
                 return False
 
-        mqtt_arming_type = ''
+        mqtt_arming_type = ""
         match arming_type:
             case "ARM-STAY":
                 mqtt_arming_type = "ui_armstay"
@@ -942,7 +934,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "operation_name": mqtt_arming_type,
             "bypass_zoneid_set": "[]",
             "userID":user_id,
-            "partitionID":partition_id,
+            "partitionID":int(partition_id),
             "exitSoundValue":  exitSoundValue,
             "entryDelayValue": "OFF",
             "multiplePartitionsSelected" : False,
@@ -950,7 +942,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "final_exit_arming_selected" : False,
             "manually_selected_zones": "[]",
             "operation_source": 1,
-            "macAddress" : self.settings.random_mac
+            "macAddress" : self.settings.random_mac,
         }
 
         topic = "mastermeid"

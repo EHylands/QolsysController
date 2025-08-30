@@ -6,18 +6,9 @@ class QolsysSettings:
 
     def __init__(self) -> None:
         self._plugin_ip = ""
-        self._plugin_paired = False
         self._random_mac = ""
         self._panel_mac = ""
         self._panel_ip = ""
-
-    @property
-    def plugin_paired(self) -> bool:
-        return self._plugin_paired
-
-    @plugin_paired.setter
-    def plugin_paired(self, plugin_paired:bool) -> None:
-        self._plugin_paired = plugin_paired
 
     @property
     def random_mac(self) -> str:

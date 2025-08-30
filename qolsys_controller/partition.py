@@ -11,8 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPartition(QolsysObservable):
 
-    EXIT_SOUNDS_ARRAY = ["ON","OFF"]
-    ENTRY_DELAYS_ARRAY = ["ON","OFF"]
+    EXIT_SOUNDS_ARRAY = ["ON","OFF"]  # noqa: RUF012
+    ENTRY_DELAYS_ARRAY = ["ON","OFF"]  # noqa: RUF012
 
     def __init__(self,partition_dict:dict,settings_dict:dict,alarm_state:PartitionAlarmState,alarm_type_array:list[PartitionAlarmType]) -> None:
 
@@ -94,17 +94,10 @@ class QolsysPartition(QolsysObservable):
             self.notify()
 
     @alarm_state.setter
-    def alarm_state(self,new_value:str) -> None:
-
-        try:
-            state = PartitionAlarmState(new_value)
-        except ValueError:
-            LOGGER.exception("Partition%s (%s) - Unknow alarm_state: %s",self.id,self.name,new_value)
-            return
-
-        if self._alarm_state != state:
+    def alarm_state(self,new_value:PartitionAlarmState) -> None:
+        if self._alarm_state != new_value:
             LOGGER.debug("Partition%s (%s) - alarm_state: %s",self.id,self.name,new_value)
-            self._alarm_state = state
+            self._alarm_state = new_value
             self.notify()
 
     @alarm_type_array.setter

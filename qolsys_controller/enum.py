@@ -56,4 +56,8 @@ class ZoneSensorType(StrEnum):
     DOORBELL = "Doorbell"
     SHOCK = "Shock"
 
+class ZWaveNodeStatus(StrEnum):
+     NORMAL = "Normal"
+     UNREACHABLE = "Unreachable"
+
 

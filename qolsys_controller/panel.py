@@ -99,8 +99,8 @@ class QolsysPanel(QolsysObservable):
                     for user in users:
                         self._users.append(user)
 
-                except json.JSONDecodeError as e:
-                    LOGGER.exception("users.conf file json error: %s",e)
+                except json.JSONDecodeError:
+                    LOGGER.exception("users.conf file json error")
                     return False
 
         except FileNotFoundError:
@@ -110,7 +110,7 @@ class QolsysPanel(QolsysObservable):
         return True
 
     @property
-    def db(self):
+    def db(self) -> QolsysDB:
         return self._db
 
     @property
@@ -344,7 +344,7 @@ class QolsysPanel(QolsysObservable):
         self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
     # Parse panel update to database
-    def parse_iq2meid_message(self,data:dict) -> bool:
+    def parse_iq2meid_message(self,data:dict) -> bool:  # noqa: C901, PLR0912, PLR0915
 
         eventName = data.get("eventName")
         dbOperation = data.get("dbOperation")
@@ -371,15 +371,14 @@ class QolsysPanel(QolsysObservable):
                                 self.db.update_table(self.db.Table_QolsysSettingsProvider,selection,selection_argument,content_values)
 
                                 # Update Panel Settings - Send notification if settings ha changed
-                                if name in self.settings_panel:
-                                    if old_value != new_value:
-                                        LOGGER.debug("Panel Setting - %s: %s",name,new_value)
-                                        self.settings_panel_observer.notify()
+                                if name in self.settings_panel and old_value != new_value:
+                                    LOGGER.debug("Panel Setting - %s: %s",name,new_value)
+                                    self.settings_panel_observer.notify()
 
                                 # Update Partition setting - Send notification if setting has changed
                                 if name in self.settings_partition:
                                     partition_id = content_values.get("partition_id","")
-                                    partition = self._state.partition(int(partition_id))
+                                    partition = self._state.partition(partition_id)
                                     if partition is not None:
                                        match name:
                                             case "SYSTEM_STATUS":
@@ -395,7 +394,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_SensorContentProvider:
                                 self.db.update_table(self.db.Table_SensorContentProvider,selection,selection_argument,content_values)
                                 zoneid =  content_values.get("zoneid","")
-                                zone = self._state.zone(int(zoneid))
+                                zone = self._state.zone(zoneid)
                                 if zone is not None:
                                     zone.update(content_values)
 
@@ -407,7 +406,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.update_table(self.db.Table_StateContentProvider,selection,selection_argument,content_values)
 
                                 if name in self.state_partition:
-                                    partition = self._state.partition(int(partition_id))
+                                    partition = self._state.partition(partition_id)
                                     if partition is not None:
                                         match name:
                                             case "ALARM_STATE":
@@ -432,7 +431,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_PartitionContentProvider:
                                 self.db.update_table(self.db.Table_PartitionContentProvider,selection,selection_argument,content_values)
                                 partition_id = content_values.get("partition_id","")
-                                partition = self._state.partition(int(partition_id))
+                                partition = self._state.partition(partition_id)
                                 if partition is not None:
                                     partition.update_partition(content_values)
 
@@ -445,7 +444,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_DimmerLightsContentProvider:
                                 self.db.update_table(self.db.Table_DimmerLightsContentProvider,selection,selection_argument,content_values)
                                 node_id =  content_values.get("node_id","")
-                                node = self._state.zwave_device(int(node_id))
+                                node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysDimmer):
                                     node.update_dimmer(content_values)
 
@@ -453,7 +452,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_DoorLocksContentProvider:
                                 self.db.update_table(self.db.Table_DoorLocksContentProvider,selection,selection_argument,content_values)
                                 node_id =  content_values.get("node_id","")
-                                node = self._state.zwave_device(int(node_id))
+                                node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysLock):
                                     node.update_lock(content_values)
 
@@ -461,7 +460,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.URI_ZwaveContentProvider:
                                 self.db.update_table(self.db.Table_ZwaveContentProvider,selection,selection_argument,content_values)
                                 node_id =  content_values.get("node_id","")
-                                node = self._state.zwave_device(int(node_id))
+                                node = self._state.zwave_device(node_id)
                                 if node is not None:
                                     node.update_base(content_values)
 
@@ -620,7 +619,7 @@ class QolsysPanel(QolsysObservable):
                                 partition_id = content_values.get("partition_id","")
                                 self.db.add_alarmed_sensor(data=content_values)
 
-                                partition = self._state.partition(int(partition_id))
+                                partition = self._state.partition(partition_id)
                                 if partition is not None:
                                     partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup",""))])
 
