@@ -11,8 +11,8 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPartition(QolsysObservable):
 
-    EXIT_SOUNDS_ARRAY = ["ON","OFF"]  # noqa: RUF012
-    ENTRY_DELAYS_ARRAY = ["ON","OFF"]  # noqa: RUF012
+    EXIT_SOUNDS_ARRAY = ["ON","OFF",""]  # noqa: RUF012
+    ENTRY_DELAYS_ARRAY = ["ON","OFF",""]  # noqa: RUF012
 
     def __init__(self,partition_dict:dict,settings_dict:dict,alarm_state:PartitionAlarmState,alarm_type_array:list[PartitionAlarmType]) -> None:
 

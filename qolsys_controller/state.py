@@ -92,10 +92,10 @@ class QolsysState(QolsysObservable):
         self.state_partition_observer.notify()
 
     def partition_delete(self,partition_id:str) -> None:
-        partition = self.partitions(partition_id)
+        partition = self.partition(partition_id)
 
         if partition is None:
-            LOGGER.debug("Deleting Partition from State, Partition%s not found",partition.id)
+            LOGGER.debug("Deleting Partition from State, Partition%s not found",partition_id)
             return
 
         self.partitions.remove(partition)
@@ -262,12 +262,12 @@ class QolsysState(QolsysObservable):
         for state_partition in self.partitions:
             if state_partition.id not in db_partition_list:
                 LOGGER.debug("sync_data - delete Partition%s",state_partition.id)
-                self.partition_delete(int(state_partition.id))
+                self.partition_delete(state_partition.id)
 
         # Add new partition
         for db_partition in db_partitions:
             if db_partition.id not in state_partition_list:
-                LOGGER.debug("sync_data - add Partition%s",db_partition.id)
+                LOGGER.debug("sync_data - Add Partition%s",db_partition.id)
                 self.partition_add(db_partition)
 
     def dump(self) -> None:  # noqa: PLR0915

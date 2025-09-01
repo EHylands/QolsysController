@@ -162,7 +162,7 @@ class QolsysPluginRemote(QolsysPlugin):
                             event = data.get("eventName")
 
                             if event == "connect":
-                                self.panel.imei = data.get("master_imei",'')
+                                self.panel.imei = data.get("master_imei","")
                                 self.panel.product_type = data.get("primary_product_type","")
 
                             if event == "syncdatabase":
