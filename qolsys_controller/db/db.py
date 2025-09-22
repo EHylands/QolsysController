@@ -274,7 +274,6 @@ class QolsysDB:
             return
 
         for uri in database:
-
             table = self.get_table(uri.get("uri"))
 
             if table is None:
@@ -282,7 +281,6 @@ class QolsysDB:
                 LOGGER.error("Loading Unknown databse URI")
                 LOGGER.error(uri)
                 continue
-
 
             for u in uri.get("resultSet"):
                 table.insert(data=u)

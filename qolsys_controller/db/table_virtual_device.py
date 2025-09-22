@@ -11,6 +11,7 @@ class QolsysTableVirtualDevice(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.VirtualDeviceContentProvider/virtual_device"
         self._table = "virtual_device"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

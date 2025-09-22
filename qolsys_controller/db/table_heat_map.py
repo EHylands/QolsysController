@@ -11,6 +11,7 @@ class QolsysTableHeatMap(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.HeatMapContentProvider/heat_map"
         self._table = "heat_map"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

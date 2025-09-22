@@ -11,6 +11,7 @@ class QolsysTableIqRouterUserDevice(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.IQRouterUserDeviceContentProvider/iqrouter_user_device_table"
         self._table = "iqrouter_user_device_table"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

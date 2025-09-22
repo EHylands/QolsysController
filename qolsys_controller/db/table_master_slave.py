@@ -11,6 +11,7 @@ class QolsysTableMasterSlave(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.MasterSlaveContentProvider/master_slave"
         self._table = "master_slave"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

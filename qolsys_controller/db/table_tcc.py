@@ -11,6 +11,7 @@ class QolsysTableTcc(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.TccContentProvider/tcc"
         self._table = "tcc"
+        self._abort_on_error = False
 
         self._columns = [
             "tableName",

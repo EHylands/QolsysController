@@ -11,6 +11,7 @@ class QolsysTableAlarmedSensor(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.AlarmedSensorProvider/alarmedsensor"
         self._table = "alarmedsensor"
+        self._abort_on_error = True
 
         self._columns = [
             "_id",

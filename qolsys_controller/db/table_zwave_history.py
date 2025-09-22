@@ -11,6 +11,7 @@ class QolsysTableZwaveHistory(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZDeviceHistoryContentProvider/zwave_history"
         self._table = "zwave_history"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

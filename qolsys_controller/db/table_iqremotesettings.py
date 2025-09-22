@@ -11,6 +11,7 @@ class QolsysTableIqRemoteSettings(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.IQRemoteSettingsContentProvider/iqremotesettings"
         self._table = "iqremotesettings"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

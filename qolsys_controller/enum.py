@@ -4,9 +4,11 @@ from enum import StrEnum
 class PartitionSystemStatus(StrEnum):
     ARM_STAY = "ARM-STAY"
     ARM_AWAY = "ARM-AWAY"
+    ARM_NIGHT = "ARM-NIGHT"
     DISARM = "DISARM"
     ARM_AWAY_EXIT_DELAY = "ARM-AWAY-EXIT-DELAY"
     ARM_STAY_EXIT_DELAY = "ARM-STAY-EXIT-DELAY"
+    ARM_NIGHT_EXIT_DELAY = "ARM-NIGHT-EXIT-DELAY"
     UNKNOWN = "UNKNOWN"
 
 class PartitionAlarmState(StrEnum):

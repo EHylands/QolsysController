@@ -11,6 +11,7 @@ class QolsysTableZwaveAssociationGroup(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZwaveAssociationGroupContentProvider/zwave_association_group"
         self._table = "zwave_association_group"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

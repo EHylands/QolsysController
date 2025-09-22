@@ -17,9 +17,6 @@ class QolsysPlugin:
         self.connected = False
         self.connected_observer = QolsysObservable()
 
-        self.panel_ready = False
-        self.panel_ready_observer = QolsysObservable()
-
     def config(self) -> None:
         pass
 

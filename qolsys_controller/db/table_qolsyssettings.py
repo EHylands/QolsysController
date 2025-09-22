@@ -11,6 +11,7 @@ class QolsysTableQolsysSettings(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.QolsysSettingsProvider/qolsyssettings"
         self._table = "qolsyssettings"
+        self._abort_on_error = True
 
         self._columns = [
             "_id",

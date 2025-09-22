@@ -11,6 +11,7 @@ class QolsysTableCountryLocale(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.CountryLocaleContentProvider/country_locale"
         self._table = "country_locale"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

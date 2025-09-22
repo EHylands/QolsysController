@@ -11,6 +11,7 @@ class QolsysTableEuEvent(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.EUEventContentProvider/eu_event"
         self._table = "eu_event"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

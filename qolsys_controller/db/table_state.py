@@ -11,6 +11,7 @@ class QolsysTableState(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.StateContentProvider/state"
         self._table = "state"
+        self._abort_on_error = True
 
         self._columns = [
             "_id",

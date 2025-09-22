@@ -11,6 +11,7 @@ class QolsysTableHistory(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.HistoryContentProvider/history"
         self._table = "history"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

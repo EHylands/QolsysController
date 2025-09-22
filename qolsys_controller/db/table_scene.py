@@ -11,6 +11,7 @@ class QolsysTableScene(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.SceneContentProvider/scene"
         self._table = "scene"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

@@ -11,6 +11,7 @@ class QolsysTableThermostat(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ThermostatsContentProvider/thermostat"
         self._table = "thermostat"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

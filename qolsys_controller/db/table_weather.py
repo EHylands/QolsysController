@@ -11,6 +11,7 @@ class QolsysTableWeather(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ForecastWeatherContentProvider/weather"
         self._table = "weather"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

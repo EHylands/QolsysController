@@ -11,6 +11,7 @@ class QolsysTableZwaveOther(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZwaveOtherDeviceContentProvider/zwave_other"
         self._table = "zwave_other"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",

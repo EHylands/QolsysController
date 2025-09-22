@@ -11,6 +11,7 @@ class QolsysTableTroubleConditions(QolsysTable):
         super().__init__(db,cursor)
         self._uri = "content://com.qolsys.qolsysprovider.TroubleConditionsContentProvider/trouble_conditions"
         self._table = "trouble_conditions"
+        self._abort_on_error = False
 
         self._columns = [
             "_id",
