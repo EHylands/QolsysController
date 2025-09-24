@@ -18,8 +18,8 @@ async def main() -> None:  # noqa: D103
     # Select plugin
     remote.select_plugin("remote")
 
-    remote.plugin.settings.panel_ip =  "192.168.10.220"
-    remote.plugin.settings.plugin_ip = "192.168.10.73"
+    remote.plugin.settings.panel_ip =  "192.168.10.*"
+    remote.plugin.settings.plugin_ip = "192.168.10.*"
     remote.plugin.settings.random_mac = "" # Example: F2:16:3E:33:ED:20
 
     # Additionnal remote plugin config
@@ -57,9 +57,9 @@ async def main() -> None:  # noqa: D103
     # await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
      # DISARM
-    await asyncio.sleep(3)
-    await remote.plugin.command_disarm(partition_id="0",
-                                       user_code="1111")
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_disarm(partition_id="0",
+    #                                   user_code="1111")
 
     # ARM_STAY
     #await asyncio.sleep(3)
@@ -69,11 +69,6 @@ async def main() -> None:  # noqa: D103
     #                                exit_sounds=False,
     #                                instant_arm=False)
 
-    # DISARM
-    await asyncio.sleep(3)
-    await remote.plugin.command_disarm(partition_id="0",
-                                       user_code="1111")
-
     # ARM_AWAY
     #await asyncio.sleep(3)
     #await remote.plugin.command_arm(partition_id=0,
@@ -81,11 +76,6 @@ async def main() -> None:  # noqa: D103
     #                               user_code='1111',
     #                                exit_sounds=True,
     #                               instant_arm=False)
-
-    # DISARM
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_disarm(partition_id=0,
-    #                                   user_code='1111')
 
     while True:
         await asyncio.sleep(1)
