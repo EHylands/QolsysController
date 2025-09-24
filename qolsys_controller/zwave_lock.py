@@ -1,6 +1,6 @@
 import logging
 
-from qolsys_controller.zwave_device import QolsysZWaveDevice
+from .zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 

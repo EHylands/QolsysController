@@ -1,9 +1,9 @@
 import logging
 
-from qolsys_controller.observable import QolsysObservable
-from qolsys_controller.panel import QolsysPanel
-from qolsys_controller.settings import QolsysSettings
-from qolsys_controller.state import QolsysState
+from .observable import QolsysObservable
+from .panel import QolsysPanel
+from .settings import QolsysSettings
+from .state import QolsysState
 
 LOGGER = logging.getLogger(__name__)
 

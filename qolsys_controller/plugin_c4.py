@@ -1,6 +1,6 @@
 import logging
 
-from qolsys_controller.plugin import QolsysPlugin
+from .plugin import QolsysPlugin
 
 LOGGER = logging.getLogger(__name__)
 

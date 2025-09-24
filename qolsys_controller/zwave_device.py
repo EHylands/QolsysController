@@ -1,6 +1,6 @@
 import logging
 
-from qolsys_controller.observable import QolsysObservable
+from .observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 

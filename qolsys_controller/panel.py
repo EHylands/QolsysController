@@ -3,21 +3,21 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from qolsys_controller.db.db import QolsysDB
-from qolsys_controller.enum import (
+from .database.db import QolsysDB
+from .enum import (
     PartitionAlarmState,
     PartitionAlarmType,
     PartitionSystemStatus,
 )
-from qolsys_controller.observable import QolsysObservable
-from qolsys_controller.partition import QolsysPartition
-from qolsys_controller.state import QolsysState
-from qolsys_controller.zone import QolsysZone
-from qolsys_controller.zwave_device import QolsysZWaveDevice
-from qolsys_controller.zwave_dimmer import QolsysDimmer
-from qolsys_controller.zwave_generic import QolsysGeneric
-from qolsys_controller.zwave_lock import QolsysLock
-from qolsys_controller.zwave_thermostat import QolsysThermostat
+from .observable import QolsysObservable
+from .partition import QolsysPartition
+from .state import QolsysState
+from .zone import QolsysZone
+from .zwave_device import QolsysZWaveDevice
+from .zwave_dimmer import QolsysDimmer
+from .zwave_generic import QolsysGeneric
+from .zwave_lock import QolsysLock
+from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 

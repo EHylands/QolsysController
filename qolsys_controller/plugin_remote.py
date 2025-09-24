@@ -8,17 +8,17 @@ import uuid
 
 import aiomqtt
 
-from qolsys_controller.enum import PartitionAlarmState, PartitionSystemStatus
-from qolsys_controller.errors import QolsysMqttError, QolsysSslError
-from qolsys_controller.mdns import QolsysMDNS
-from qolsys_controller.mqtt_command_queue import QolsysMqttCommandQueue
-from qolsys_controller.panel import QolsysPanel
-from qolsys_controller.pki import QolsysPKI
-from qolsys_controller.plugin import QolsysPlugin
-from qolsys_controller.settings import QolsysSettings
-from qolsys_controller.state import QolsysState
-from qolsys_controller.task_manager import QolsysTaskManager
-from qolsys_controller.utils_mqtt import fix_json_string, generate_random_mac
+from .enum import PartitionAlarmState, PartitionSystemStatus
+from .errors import QolsysMqttError, QolsysSslError
+from .mdns import QolsysMDNS
+from .mqtt_command_queue import QolsysMqttCommandQueue
+from .panel import QolsysPanel
+from .pki import QolsysPKI
+from .plugin import QolsysPlugin
+from .settings import QolsysSettings
+from .state import QolsysState
+from .task_manager import QolsysTaskManager
+from .utils_mqtt import fix_json_string, generate_random_mac
 
 LOGGER = logging.getLogger(__name__)
 

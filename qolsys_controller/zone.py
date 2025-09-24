@@ -1,7 +1,7 @@
 import logging
 
-from qolsys_controller.enum import ZoneSensorGroup, ZoneSensorType, ZoneStatus
-from qolsys_controller.observable import QolsysObservable
+from .enum import ZoneSensorGroup, ZoneSensorType, ZoneStatus
+from .observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 

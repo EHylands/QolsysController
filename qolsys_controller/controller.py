@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import logging
 
-from qolsys_controller.panel import QolsysPanel
-from qolsys_controller.plugin_c4 import QolsysPluginC4
-from qolsys_controller.plugin_remote import QolsysPluginRemote
-from qolsys_controller.settings import QolsysSettings
-from qolsys_controller.state import QolsysState
+from .panel import QolsysPanel
+from .plugin_c4 import QolsysPluginC4
+from .plugin_remote import QolsysPluginRemote
+from .settings import QolsysSettings
+from .state import QolsysState
 
 LOGGER = logging.getLogger(__name__)
 
