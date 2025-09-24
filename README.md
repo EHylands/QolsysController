@@ -67,5 +67,5 @@ cd qolsys_controller
 pip3.12 install -r requirements.txt
 
 # Change panel_ip and plugin_in in main.py file
-python3.12 main.py
+python3.12 example.py
 ```

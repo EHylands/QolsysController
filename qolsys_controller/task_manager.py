@@ -14,19 +14,13 @@ class QolsysTaskManager:
 
         def _done_callback(task: asyncio.Task) -> None:
             self._tasks.discard(task)
-            #try:
-            #    task.result()
-            #except Exception:
-            #    LOGGER.exception("Background task '%s' failed",label or coro.__name__)
 
         task.add_done_callback(_done_callback)
         return task
 
     def cancel(self,label:str) -> None:
         for task in self._tasks:
-            print(f"Task: {task.get_name()} Looking for: {label}")
             if task.get_name() == label:
-                print(f"Cancelling Task: {task.get_name()}")
                 task.cancel()
 
     def cancel_all(self) -> None:

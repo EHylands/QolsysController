@@ -1,6 +1,6 @@
 [project]
 name = "qolsys_controller"
-version = "0.0.1-beta.1"
+version = "0.0.1"
 authors = [
   { name="Eric Hylands", email="" },
 ]
@@ -31,5 +31,5 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ['ALL']
-ignore = ["E501","S608","S311","S104","D100","D101", "D102","D107","N802","N806","PERF401"]
+ignore = ["E501","S608","S311","S104","D100","D101", "D102","D107", "FBT001", "N802","N806","PERF401"]
 

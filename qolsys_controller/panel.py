@@ -352,6 +352,9 @@ class QolsysPanel(QolsysObservable):
 
         match eventName:
 
+            case "stopScreenCapture":
+                pass
+
             case "dbChanged":
 
                 match dbOperation:

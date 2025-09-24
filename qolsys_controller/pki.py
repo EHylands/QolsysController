@@ -32,7 +32,7 @@ class QolsysPKI:
 
     def set_id(self,pki_id:str) -> None:
         self._id = pki_id.replace(":","").upper()
-        LOGGER.debug(f"Using PKI: %s",self.formatted_id())
+        LOGGER.debug("Using PKI: %s",self.formatted_id())
         self._subkeys_directory = self._keys_directory + self.id + "/"
 
     @property
@@ -56,7 +56,7 @@ class QolsysPKI:
         return self._qolsys
 
     def auto_discover_pki(self) -> bool:
-        pattern = r'^[A-F0-9]{12}$'
+        pattern = r"^[A-Fa-f0-9]{12}$"
 
         LOGGER.debug("Auto Discovery Enabled")
         with os.scandir(self._keys_directory) as entries:
