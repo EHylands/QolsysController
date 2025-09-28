@@ -46,7 +46,9 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 
 ## ⚠️ Certificate Warning
 
-During pairing, the main panel issues **only one signed client certificate** per virtual IQ Remote. If any key files are lost or deleted, re-pairing may become impossible.
+During pairing, the main panel issues **only one signed client certificate** per virtual IQ Remote. If any key files are lost or deleted, re-pairing may become impossible. 
+
+A new PKI, including a new private key, can be recreated under specific circumstances, though the precise conditions remain unknown at this time.
 
 **Important:**  
 Immediately back up the following files from the `pki/` directory after initial pairing:
