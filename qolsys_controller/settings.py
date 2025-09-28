@@ -30,7 +30,7 @@ class QolsysSettings:
         return self._random_mac
 
     @random_mac.setter
-    def random_mac(self,random_mac:str) -> None:
+    def random_mac(self, random_mac:str) -> None:
         self._random_mac = random_mac
 
     @property
@@ -50,11 +50,11 @@ class QolsysSettings:
         return self._panel_ip
 
     @panel_ip.setter
-    def panel_ip(self, panel_ip:str) -> None:
+    def panel_ip(self, panel_ip: str) -> None:
         self._panel_ip = panel_ip
 
     @plugin_ip.setter
-    def plugin_ip(self,plugin_ip:str) -> None:
+    def plugin_ip(self, plugin_ip: str) -> None:
         self._plugin_ip = plugin_ip
 
     @property
@@ -62,10 +62,10 @@ class QolsysSettings:
         return self._config_directory
 
     @config_directory.setter
-    def config_directory(self,config_directory:str) -> None:
+    def config_directory(self, config_directory: str) -> None:
         self._config_directory = Path(config_directory)
-        self._pki_directory = self._config_directory.joinpath(Path("pki"))
-        self._media_directory = self._config_directory.joinpath(Path("media"))
+        self._pki_directory = self._config_directory.joinpath("pki")
+        self._media_directory = self._config_directory.joinpath("media")
         self._users_file_path = self._config_directory.joinpath("users.conf")
 
     @property
@@ -104,8 +104,8 @@ class QolsysSettings:
         LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
         return True
 
-    def check_config_directory(self,create:bool=True) -> bool:
-        if not Path(self.config_directory).is_dir():
+    def check_config_directory(self, create: bool=True) -> bool:
+        if not self.config_directory.is_dir():
             if not create:
                 LOGGER.debug("config_directory not found:  %s", self.config_directory)
                 return False

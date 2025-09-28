@@ -6,7 +6,7 @@ class QolsysMqttCommandQueue:
         self.lock = asyncio.Lock()
         self.waiters: dict[str, asyncio.Future] = {}
 
-    async def handle_response(self, response:dict) -> None:
+    async def handle_response(self, response: dict) -> None:
         requestID = response.get("requestID")
 
         if not requestID:
@@ -19,7 +19,7 @@ class QolsysMqttCommandQueue:
         if future and not future.done():
             future.set_result(response)
 
-    async def wait_for_response(self,request_id:str) -> None:
+    async def wait_for_response(self, request_id: str) -> None:
         if request_id in self.waiters:
             msg = f"Duplicate waiter for request_id: {request_id}"
             raise ValueError(msg)

@@ -11,36 +11,36 @@ class QolsysThermostat(QolsysZWaveDevice):
         super().__init__(zwave_dict)
 
         self._thermostat_id = thermostat_dict.get("_id")
-        self._thermostat_version =  thermostat_dict.get("version","")
-        self._thermostat_opr = thermostat_dict.get("opr","")
-        self._thermostat_partition_id = thermostat_dict.get("partition_id","")
-        self._thermostat_name = thermostat_dict.get("thermostat_name","")
-        self._thermostat_node_id = thermostat_dict.get("node_id","")
-        self._thermostat_device_temp_unit = thermostat_dict.get("device_temp_unit","") # 'F'
-        self._thermostat_current_temp = thermostat_dict.get("current_temp","") # "78.0"
-        self._thermostat_target_cool_temp = thermostat_dict.get("target_cool_temp","") # "78"
-        self._thermostat_target_heat_temp = thermostat_dict.get("target_heat_temp","") # "65"
-        self._thermostat_target_temp = thermostat_dict.get("target_temp","")
-        self._thermostat_power_usage = thermostat_dict.get("power_usage","")
-        self._thermostat_mode = thermostat_dict.get("thermostat_mode","") #"2"
-        self._thermostat_mode_bitmask = thermostat_dict.get("thermostat_mode_bitmask","") # "7,24"
-        self._thermostat_fan_mode = thermostat_dict.get("fan_mode","") # "0"
-        self._thermostat_fan_mode_bitmask = thermostat_dict.get("fan_mode_bitmask","") # "67"
-        self._thermostat_set_point_mode = thermostat_dict.get("set_point_mode","")
-        self._thermostat_set_point_mode_bitmask = thermostat_dict.get("set_point_mode_bitmask","") # "-122,1"
-        self._thermostat_created_by = thermostat_dict.get("created_by","")
-        self._thermostat_created_date = thermostat_dict.get("created_date","")
-        self._thermostat_updated_by = thermostat_dict.get("updated_by","")
-        self._thermostat_last_updated_date = thermostat_dict.get("last_updated_date","")
-        self._thermostat_mode_updated_time = thermostat_dict.get("thermostat_mode_updated_time","")
-        self._thermostat_fan_mode_updated_time = thermostat_dict.get("fan_mode_updated_time","")
-        self._thermostat_set_point_mode_updated_time = thermostat_dict.get("set_point_mode_updated_time","")
-        self._thermostat_target_cool_temp_updated_time = thermostat_dict.get("target_cool_temp_updated_time","")
-        self._thermostat_target_heat_temp_updated_time = thermostat_dict.get("target_heat_temp_updated_time","")
-        self._thermostat_current_temp_updated_time = thermostat_dict.get("current_temp_updated_time","")
-        self._thermostat_endpoint = thermostat_dict.get("endpoint","")
-        self._thermostat_paired_status = thermostat_dict.get("paired_status","")
-        self._thermostat_configuration_parameter = thermostat_dict.get("configuration_parameter","")
+        self._thermostat_version =  thermostat_dict.get("version", "")
+        self._thermostat_opr = thermostat_dict.get("opr", "")
+        self._thermostat_partition_id = thermostat_dict.get("partition_id", "")
+        self._thermostat_name = thermostat_dict.get("thermostat_name", "")
+        self._thermostat_node_id = thermostat_dict.get("node_id", "")
+        self._thermostat_device_temp_unit = thermostat_dict.get("device_temp_unit", "")  # 'F'
+        self._thermostat_current_temp = thermostat_dict.get("current_temp", "")  # "78.0"
+        self._thermostat_target_cool_temp = thermostat_dict.get("target_cool_temp", "")  # "78"
+        self._thermostat_target_heat_temp = thermostat_dict.get("target_heat_temp", "")  # "65"
+        self._thermostat_target_temp = thermostat_dict.get("target_temp", "")
+        self._thermostat_power_usage = thermostat_dict.get("power_usage", "")
+        self._thermostat_mode = thermostat_dict.get("thermostat_mode", "")  #"2"
+        self._thermostat_mode_bitmask = thermostat_dict.get("thermostat_mode_bitmask", "")  # "7,24"
+        self._thermostat_fan_mode = thermostat_dict.get("fan_mode", "")  # "0"
+        self._thermostat_fan_mode_bitmask = thermostat_dict.get("fan_mode_bitmask", "")  # "67"
+        self._thermostat_set_point_mode = thermostat_dict.get("set_point_mode", "")
+        self._thermostat_set_point_mode_bitmask = thermostat_dict.get("set_point_mode_bitmask", "")  # "-122,1"
+        self._thermostat_created_by = thermostat_dict.get("created_by", "")
+        self._thermostat_created_date = thermostat_dict.get("created_date", "")
+        self._thermostat_updated_by = thermostat_dict.get("updated_by", "")
+        self._thermostat_last_updated_date = thermostat_dict.get("last_updated_date", "")
+        self._thermostat_mode_updated_time = thermostat_dict.get("thermostat_mode_updated_time", "")
+        self._thermostat_fan_mode_updated_time = thermostat_dict.get("fan_mode_updated_time", "")
+        self._thermostat_set_point_mode_updated_time = thermostat_dict.get("set_point_mode_updated_time", "")
+        self._thermostat_target_cool_temp_updated_time = thermostat_dict.get("target_cool_temp_updated_time", "")
+        self._thermostat_target_heat_temp_updated_time = thermostat_dict.get("target_heat_temp_updated_time", "")
+        self._thermostat_current_temp_updated_time = thermostat_dict.get("current_temp_updated_time", "")
+        self._thermostat_endpoint = thermostat_dict.get("endpoint", "")
+        self._thermostat_paired_status = thermostat_dict.get("paired_status", "")
+        self._thermostat_configuration_parameter = thermostat_dict.get("configuration_parameter", "")
 
     @property
     def thermostat_node_id(self) -> str:
@@ -83,73 +83,73 @@ class QolsysThermostat(QolsysZWaveDevice):
         return self._thermostat_set_point_mode
 
     @thermostat_name.setter
-    def thermostat_name(self,value:str) -> None:
+    def thermostat_name(self, value: str) -> None:
         if self._thermostat_name != value:
-            LOGGER.debug("Thermostat%s (%s) - name: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - name: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_name = value
             self.notify()
 
     @thermostat_device_temp_unit.setter
-    def thermostat_device_temp_unit(self,value:str) -> None:
+    def thermostat_device_temp_unit(self, value: str) -> None:
         if self._thermostat_device_temp_unit != value:
-            LOGGER.debug("Thermostat%s (%s) - device_temp_unit: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - device_temp_unit: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_device_temp_unit = value
             self.notify()
 
     @thermostat_current_temp.setter
-    def thermostat_current_temp(self,value:str) -> None:
+    def thermostat_current_temp(self, value: str) -> None:
         if self._thermostat_current_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - current_temp: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - current_temp: %s",self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_current_temp = value
             self.notify()
 
     @thermostat_target_cool_temp.setter
-    def thermostat_target_cool_temp(self,value:str) -> None:
+    def thermostat_target_cool_temp(self, value: str) -> None:
         if self._thermostat_target_cool_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_target_cool_temp = value
             self.notify()
 
     @thermostat_target_heat_temp.setter
-    def thermostat_target_heat_temp(self,value:str) -> None:
+    def thermostat_target_heat_temp(self, value: str) -> None:
         if self._thermostat_target_heat_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_target_heat_temp = value
             self.notify()
 
     @thermostat_target_temp.setter
-    def thermostat_target_temp(self,value:str) -> None:
+    def thermostat_target_temp(self, value: str) -> None:
         if self._thermostat_target_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - target_temp: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - target_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_target_temp = value
             self.notify()
 
     @thermostat_mode.setter
-    def thermostat_mode(self,value:str) -> None:
+    def thermostat_mode(self, value: str) -> None:
         if self._thermostat_mode != value:
-            LOGGER.debug("Thermostat%s (%s) - mode: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - mode: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_mode = value
             self.notify()
 
     @thermostat_fan_mode.setter
-    def thermostat_fan_mode(self,value:str) -> None:
+    def thermostat_fan_mode(self, value: str) -> None:
         if self._thermostat_fan_mode != value:
-            LOGGER.debug("Thermostat%s (%s) - fan_mode: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_fan_mode = value
             self.notify()
 
     @thermostat_set_point_mode.setter
-    def thermostat_set_point_mode(self,value:str) -> None:
+    def thermostat_set_point_mode(self, value: str) -> None:
         if self._thermostat_set_point_mode != value:
-            LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s",self.thermostat_node_id,self.thermostat_name,value)
+            LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_set_point_mode = value
             self.notify()
 
-    def update_thermostat(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def update_thermostat(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id
-        node_id_update = data.get("node_id","")
+        node_id_update = data.get("node_id", "")
         if node_id_update != self.thermostat_node_id_node_id:
-            LOGGER.error("Updating Thermostat '%s' (%s) with Thermostat '%s' (different id)",self.thermostat_node_id,self.thermostat_name,node_id_update)
+            LOGGER.error("Updating Thermostat '%s' (%s) with Thermostat '%s' (different id)", self.thermostat_node_id, self.thermostat_name, node_id_update)
             return
 
         self.start_batch_update()

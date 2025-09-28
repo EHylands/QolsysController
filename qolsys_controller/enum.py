@@ -12,10 +12,10 @@ class PartitionSystemStatus(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 class PartitionAlarmState(StrEnum):
-        NONE = "None"
-        DELAY = "Delay"
-        ALARM = "Alarm"
-        UNKNOWN = "UNKNOWN"
+    NONE = "None"
+    DELAY = "Delay"
+    ALARM = "Alarm"
+    UNKNOWN = "UNKNOWN"
 
 class PartitionAlarmType(StrEnum):
     POLICE_EMERGENCY = "Police Emergency"
@@ -46,8 +46,8 @@ class ZoneSensorType(StrEnum):
     AUXILIARY_PENDANT = "Auxiliary Pendant"
     SMOKE_DETECTOR = "SmokeDetector"
     CO_DETECTOR = "CODetector"
-    #HARDWIRE_TRANSLATOR = "" # TBD
-    #WIRELESS_TRANSLATOR = "" #TBD
+    # HARDWIRE_TRANSLATOR = "" # TBD
+    # WIRELESS_TRANSLATOR = "" #TBD
     TEMPERATURE = "Temperature"
     HEAT = "Heat"
     WATER = "Water"
@@ -56,10 +56,10 @@ class ZoneSensorType(StrEnum):
     TILT = "Tilt"
     DOORBELL = "Doorbell"
     SMOKE_M = "Smoke_M"
-    #DOOR_WINDOW_M = "" #TBD
-    #OCCUPANCY = ""  #TBD
+    # DOOR_WINDOW_M = "" #TBD
+    # OCCUPANCY = ""  #TBD
     SIREN = "Siren"
-    #HIGH_TEMPERATURE = "" # TBD
+    # HIGH_TEMPERATURE = "" # TBD
     PANEL_MOTION = "Panel Motion"
     PANEL_GLASS_BREAK = "Panel Glass Break"
     BLUETOOTH = "Bluetooth"
@@ -76,33 +76,33 @@ class ZoneSensorGroup(StrEnum):
     MOBILE_AUXILIARY = "mobilemedical"
     MOBILE_SILENT_AUXILIARY = "mobilesilentmedical"
     SAFETY_MOTION = "safetymotion"
-    #ENTRY_EXIT_NORMAL_DELAY = "" #TBD
-    #ENTRY_EXIT_LONG_DELAY = "" #TBD
-    #INSTANT_PERIMETER_DW = "" #TBD
-    #INSTRANT_INTERIOR_DOOR = "" #TBD
-    #AWAY_INSTANT_FOLLOWER_DELAY = "" #TBD
-    #LOCAL_SAFETY_SENSOR = "" #TBD
-    #REPORTING_SAFETY_SENSOR = "" #TBD
-    #DELAYED_REPORTING_SAFETY_SENSOR = "" #TBD
-    #AWAY_INSTANT_MOTION = "" #TBD
-    #STAY_INSTANT_MOTION = "" #TBD
-    #STAY_DELAY_MOTION = "" #TBD
-    #AWAY_DELAY_MOTION = "" #TBD
-    #GLASS_BREAK = "" # TBD
-    #GLASS_BREAK_AWAY_ONLY = "" # TBD
-    #SMOKE_HEAT = "" # TBD
-    #CO = "" # TBD
-    #TAKEOVER = "" #TBD
-    #GARAGE_TILT_SAFETY = "" # TBD
-    #WATER_SENSOR = "" # TBD
-    #WATER_SENSOR_NON_REPORTING = "" # TBD
-    #SHOCK_GLASS_BREAK = "" # TBD
-    #SHOCK_GLASS_BREAK_AWAY_ONLY = "" # TBD
-    #FREEZE = "" # TBD
-    #FREEZE_NON_REPORTING = "" # TBD
-    #TEMP_REPORTING = "" #TBD
-    #TEMP_NON_REPORTING = "" #TBD
-    #SIREN = "" # TBD
+    # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
+    # ENTRY_EXIT_LONG_DELAY = "" #TBD
+    # INSTANT_PERIMETER_DW = "" #TBD
+    # INSTRANT_INTERIOR_DOOR = "" #TBD
+    # AWAY_INSTANT_FOLLOWER_DELAY = "" #TBD
+    # LOCAL_SAFETY_SENSOR = "" #TBD
+    # REPORTING_SAFETY_SENSOR = "" #TBD
+    # DELAYED_REPORTING_SAFETY_SENSOR = "" #TBD
+    # AWAY_INSTANT_MOTION = "" #TBD
+    # STAY_INSTANT_MOTION = "" #TBD
+    # STAY_DELAY_MOTION = "" #TBD
+    # AWAY_DELAY_MOTION = "" #TBD
+    # GLASS_BREAK = "" # TBD
+    # GLASS_BREAK_AWAY_ONLY = "" # TBD
+    # SMOKE_HEAT = "" # TBD
+    # CO = "" # TBD
+    # TAKEOVER = "" #TBD
+    # GARAGE_TILT_SAFETY = "" # TBD
+    # WATER_SENSOR = "" # TBD
+    # WATER_SENSOR_NON_REPORTING = "" # TBD
+    # SHOCK_GLASS_BREAK = "" # TBD
+    # SHOCK_GLASS_BREAK_AWAY_ONLY = "" # TBD
+    # FREEZE = "" # TBD
+    # FREEZE_NON_REPORTING = "" # TBD
+    # TEMP_REPORTING = "" #TBD
+    # TEMP_NON_REPORTING = "" #TBD
+    # SIREN = "" # TBD
 
 
 class ZWaveNodeStatus(StrEnum):

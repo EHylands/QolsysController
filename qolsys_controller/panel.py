@@ -21,7 +21,7 @@ from .zwave_thermostat import QolsysThermostat
 LOGGER = logging.getLogger(__name__)
 
 class QolsysPanel(QolsysObservable):
-    def __init__(self,settings:QolsysSettings,state:QolsysState) -> None:
+    def __init__(self, settings: QolsysSettings, state: QolsysState) -> None:
 
         self._state = state
         self._settings = settings
@@ -344,7 +344,7 @@ class QolsysPanel(QolsysObservable):
         self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
     # Parse panel update to database
-    def parse_iq2meid_message(self,data:dict) -> bool:  # noqa: C901, PLR0912, PLR0915
+    def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
 
         eventName = data.get("eventName")
         dbOperation = data.get("dbOperation")
@@ -375,7 +375,7 @@ class QolsysPanel(QolsysObservable):
 
                                 # Update Panel Settings - Send notification if settings ha changed
                                 if name in self.settings_panel and old_value != new_value:
-                                    LOGGER.debug("Panel Setting - %s: %s",name,new_value)
+                                    LOGGER.debug("Panel Setting - %s: %s", name, new_value)
                                     self.settings_panel_observer.notify()
 
                                 # Update Partition setting - Send notification if setting has changed
@@ -395,7 +395,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Sensor Content Provider
                             case self.db.table_sensor.uri:
-                                self.db.table_sensor.update(selection,selection_argument,content_values)
+                                self.db.table_sensor.update(selection,selection_argument, content_values)
                                 zoneid =  content_values.get("zoneid", "")
                                 zone = self._state.zone(zoneid)
                                 if zone is not None:
@@ -406,7 +406,7 @@ class QolsysPanel(QolsysObservable):
                                 name = content_values.get("name", "")
                                 new_value = content_values.get("value", "")
                                 partition_id = content_values.get("partition_id", "")
-                                self.db.table_state.update(selection,selection_argument,content_values)
+                                self.db.table_state.update(selection, selection_argument, content_values)
 
                                 if name in self.state_partition:
                                     partition = self._state.partition(partition_id)
@@ -417,35 +417,35 @@ class QolsysPanel(QolsysObservable):
 
                             # Update heat_map
                             case self.db.table_heat_map.uri:
-                                self.db.table_heat_map.update(selection,selection_argument,content_values)
+                                self.db.table_heat_map.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update master_slave
                             case self.db.table_master_slave.uri:
-                                self.db.table_master_slave.update(selection,selection_argument,content_values)
+                                self.db.table_master_slave.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update dashboard_msgs
                             case self.db.table_dashboard_msgs.uri:
-                                self.db.table_dashboard_msgs.update(selection,selection_argument,content_values)
+                                self.db.table_dashboard_msgs.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update PartitionContentProvider
                             case self.db.table_partition.uri:
-                                self.db.table_partition.update(selection,selection_argument,content_values)
-                                partition_id = content_values.get("partition_id","")
+                                self.db.table_partition.update(selection, selection_argument, content_values)
+                                partition_id = content_values.get("partition_id", "")
                                 partition = self._state.partition(partition_id)
                                 if partition is not None:
                                     partition.update_partition(content_values)
 
                             # Update History Content Provider
                             case self.db.table_history.uri:
-                                self.db.table_history.update(selection,selection_argument,content_values)
+                                self.db.table_history.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update DimmerLightsContentProvider
                             case self.db.table_dimmer.uri:
-                                self.db.table_dimmer.update(selection,selection_argument,content_values)
+                                self.db.table_dimmer.update(selection, selection_argument, content_values)
                                 node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysDimmer):
@@ -453,7 +453,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Thermostat Content Provider
                             case self.db.table_thermostat.uri:
-                                self.db.table_thermostat.update(selection,selection_argument,content_values)
+                                self.db.table_thermostat.update(selection,selection_argument, content_values)
                                 node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysThermostat):
@@ -461,15 +461,15 @@ class QolsysPanel(QolsysObservable):
 
                             # Update DoorLockContentProvider
                             case self.db.table_doorlock.uri:
-                                self.db.table_doorlock.update(selection,selection_argument,content_values)
+                                self.db.table_doorlock.update(selection, selection_argument, content_values)
                                 node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
-                                if node is not None and isinstance(node,QolsysLock):
+                                if node is not None and isinstance(node, QolsysLock):
                                     node.update_lock(content_values)
 
                             # Update ZwaveContentProvider
                             case self.db.table_zwave_node.uri:
-                                self.db.table_zwave_node.update(selection,selection_argument,content_values)
+                                self.db.table_zwave_node.update(selection, selection_argument, content_values)
                                 node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None:
@@ -477,21 +477,21 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Z-Wave History Content Provier
                             case self.db.table_zwave_history.uri:
-                                self.db.table_zwave_history.update(selection,selection_argument,content_values)
+                                self.db.table_zwave_history.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update AutomationDeviceContentProvider
                             case self.db.table_automation.uri:
-                                self.db.table_automation.update(selection,selection_argument,content_values)
+                                self.db.table_automation.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             # Update Alarmed Sensor Content Provider
                             case self.db.table_alarmedsensor.uri:
-                                self.db.table_alarmedsensor.update(selection,selection_argument,content_values)
+                                self.db.table_alarmedsensor.update(selection, selection_argument, content_values)
 
                             # Update IQ Remote Settings Content Provider
                             case self.db.table_iqremotesettings.uri:
-                                self.db.table_iqremotesettings.update(selection,selection_argument,content_values)
+                                self.db.table_iqremotesettings.update(selection, selection_argument, content_values)
                                 # No action needed
 
                             case _:
@@ -505,72 +505,72 @@ class QolsysPanel(QolsysObservable):
                         match uri:
 
                             case self.db.table_sensor.uri:
-                                self.db.table_sensor.delete(selection,selection_argument)
+                                self.db.table_sensor.delete(selection, selection_argument)
                                 self._state.sync_zones_data(self.get_zones_from_db())
                                 # Notify delete zone
 
                             case self.db.table_iqremotesettings.uri:
-                                self.db.table_iqremotesettings.delete(selection,selection_argument)
+                                self.db.table_iqremotesettings.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_state.uri:
-                                self.db.table_state.delete(selection,selection_argument)
+                                self.db.table_state.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_master_slave.uri:
-                                self.db.table_master_slave.delete(selection,selection_argument)
+                                self.db.table_master_slave.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_qolsyssettings.uri:
-                                self.db.table_qolsyssettings.delete(selection,selection_argument)
+                                self.db.table_qolsyssettings.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_alarmedsensor.uri:
-                                self.db.table_alarmedsensor.delete(selection,selection_argument)
+                                self.db.table_alarmedsensor.delete(selection, selection_argument)
                                 self._state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.table_history.uri:
-                                self.db.table_history.delete(selection,selection_argument)
+                                self.db.table_history.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_zwave_history.uri:
-                                self.db.table_zwave_history.delete(selection,selection_argument)
+                                self.db.table_zwave_history.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_doorlock.uri:
-                                self.db.table_doorlock.delete(selection,selection_argument)
+                                self.db.table_doorlock.delete(selection, selection_argument)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_dimmer.uri:
-                                self.db.table_dimmer.delete(selection,selection_argument)
+                                self.db.table_dimmer.delete(selection, selection_argument)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_thermostat.uri:
-                                self.db.table_thermostat.delete(selection,selection_argument)
+                                self.db.table_thermostat.delete(selection, selection_argument)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_zwave_node.uri:
-                                self.db.table_zwave_node.delete(selection,selection_argument)
+                                self.db.table_zwave_node.delete(selection, selection_argument)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_automation.uri:
-                                self.db.table_automation.delete(selection,selection_argument)
+                                self.db.table_automation.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_partition.uri:
-                                self.db.table_partition.delete(selection,selection_argument)
+                                self.db.table_partition.delete(selection, selection_argument)
                                 self._state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.table_user.uri:
-                                self.db.table_user.delete(selection,selection_argument)
+                                self.db.table_user.delete(selection, selection_argument)
                                 # No action needed
 
                             case self.db.table_dashboard_msgs.uri:
-                                self.db.table_dashboard_msgs.delete(selection,selection_argument)
+                                self.db.table_dashboard_msgs.delete(selection, selection_argument)
                                 # No action needed
 
                             case _:
-                                LOGGER.debug("iq2meid deleting unknown uri:%s",uri)
+                                LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
                                 LOGGER.debug(data)
 
                     case "insert":

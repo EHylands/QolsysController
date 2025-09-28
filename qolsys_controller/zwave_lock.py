@@ -13,21 +13,21 @@ class QolsysLock(QolsysZWaveDevice):
         super().__init__(zwave_dict)
 
         self._lock_id = lock_dict.get("_id")
-        self._lock_version =  lock_dict.get("version","")
-        self._lock_opr = lock_dict.get("opr","")
-        self._lock_partition_id = lock_dict.get("partition_id","")
-        self._lock_name = lock_dict.get("doorlock_name","")
-        self._lock_status = lock_dict.get("status","")
-        self._lock_node_id = lock_dict.get("node_id","")
-        self._lock_created_by = lock_dict.get("created_by","")
-        self._lock_created_date = lock_dict.get("created_date","")
-        self._lock_updated_by = lock_dict.get("updated_by","")
-        self._lock_last_updated_date = lock_dict.get("last_updated_date","")
-        self._lock_remote_arming = lock_dict.get("remote_arming","")
-        self._lock_keyfob_arming = lock_dict.get("keyfob_arming","")
-        self._lock_panel_arming = lock_dict.get("panel_arming","")
-        self._lock_endpoint = lock_dict.get("endpoint","")
-        self._lock_paired_status = lock_dict.get("paired_status","")
+        self._lock_version =  lock_dict.get("version", "")
+        self._lock_opr = lock_dict.get("opr", "")
+        self._lock_partition_id = lock_dict.get("partition_id", "")
+        self._lock_name = lock_dict.get("doorlock_name", "")
+        self._lock_status = lock_dict.get("status", "")
+        self._lock_node_id = lock_dict.get("node_id", "")
+        self._lock_created_by = lock_dict.get("created_by", "")
+        self._lock_created_date = lock_dict.get("created_date", "")
+        self._lock_updated_by = lock_dict.get("updated_by", "")
+        self._lock_last_updated_date = lock_dict.get("last_updated_date", "")
+        self._lock_remote_arming = lock_dict.get("remote_arming", "")
+        self._lock_keyfob_arming = lock_dict.get("keyfob_arming", "")
+        self._lock_panel_arming = lock_dict.get("panel_arming", "")
+        self._lock_endpoint = lock_dict.get("endpoint", "")
+        self._lock_paired_status = lock_dict.get("paired_status", "")
 
     @property
     def lock_node_id(self) -> str:
@@ -46,31 +46,31 @@ class QolsysLock(QolsysZWaveDevice):
         return self._paired_status
 
     @lock_status.setter
-    def lock_status(self,value:str) -> None:
+    def lock_status(self, value: str) -> None:
         if self._lock_status != value:
-            LOGGER.debug("Lock%s (%s) - status: %s",self.node_id,self.lock_name,value)
+            LOGGER.debug("Lock%s (%s) - status: %s", self.node_id, self.lock_name, value)
             self._lock_status = value
             self.notify()
 
     @lock_name.setter
-    def lock_name(self,value:str) -> None:
+    def lock_name(self, value: str) -> None:
         if self._lock_name != value:
-            LOGGER.debug("Lock%s (%s) - name: %s",self.node_id,self.lock_name,value)
+            LOGGER.debug("Lock%s (%s) - name: %s", self.node_id, self.lock_name, value)
             self._lock_name = value
             self.notify()
 
     @paired_status.setter
-    def paired_status(self, value:str) -> None:
+    def paired_status(self, value: str) -> None:
         if self._paired_status != value:
-            LOGGER.debug("Lock%s (%s) - paired_status: %s",self.node_id,self.lock_name,value)
+            LOGGER.debug("Lock%s (%s) - paired_status: %s", self.node_id, self.lock_name, value)
             self._lock_paired_status = value
             self.notify()
 
-    def update_lock(self,data:dict) -> None:  # noqa: C901, PLR0912
+    def update_lock(self, data: dict) -> None:  # noqa: C901, PLR0912
         # Check if we are updating same zoneid
-        node_id_update = data.get("node_id","")
+        node_id_update = data.get("node_id", "")
         if node_id_update != self.lock_node_id:
-            LOGGER.error("Updating Lock %s (%s) with Lock '%s' (different id)",self.lock_node_id,self.lock_name,node_id_update)
+            LOGGER.error("Updating Lock %s (%s) with Lock '%s' (different id)", self.lock_node_id, self.lock_name, node_id_update)
             return
 
         self.start_batch_update()
