@@ -89,7 +89,7 @@ class QolsysPartition(QolsysObservable):
             self.notify()
 
     @system_status_changed_time.setter
-    def system_status_changed_time(self,value:str) -> None:
+    def system_status_changed_time(self, value: str) -> None:
         if self._system_status_changed_time != value:
             LOGGER.debug("Partition%s (%s) - system_status_changed_time: %s", self._id, self._name, value)
             self._system_status_changed_time = value
@@ -183,8 +183,8 @@ class QolsysPartition(QolsysObservable):
         # Check if we are updating same partition_id
         partition_id_update = data.get("partition_id", "")
         if int(partition_id_update) != int(self.id):
-            LOGGER.error("Updating Partition%s (%s) with Partition '%s' (different id)",
-                          self._id, self._name, partition_id_update)
+            LOGGER.error(
+                "Updating Partition%s (%s) with Partition '%s' (different id)",self._id, self._name, partition_id_update)
             return
 
         self.start_batch_update()

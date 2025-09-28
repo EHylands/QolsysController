@@ -78,15 +78,16 @@ class QolsysTableZwaveNode(QolsysTable):
 
     def insert(self, data: dict) -> None:
         self._cursor.execute(
-            f"""INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
-            node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,basic_device_type,generic_device_type,
-            specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,library_type_version,protocol_version,
-            protocol_sub_version,application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,
-            library_type,last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,
-            multi_channel_details,rediscover_status,last_rediscover_time,neighbour_info,last_node_test_time,endpoint,endpoint_details,device_wakeup_time,
-            role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,paired_status,device_dsk,endpoint_secure_cmd_cls,
-            s2_security_keys,device_protocol,is_device_hidden,ime_data) VALUES
-             (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
+            f"""INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,
+            node_secure_cmd_cls,node_battery_level,node_battery_level_value,is_node_listening_node,basic_report_value,
+            switch_multilevel_report_value,basic_device_type,generic_device_type,specific_device_type,num_secure_command_class,
+            secure_command_class,manufacture_id,product_type,product_id,library_type_version,protocol_version,protocol_sub_version,
+            application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,library_type,
+            last_updated_date,node_battery_level_updated_time,basic_report_updated_time,switch_multilevel_report_updated_time,
+            multi_channel_details,rediscover_status,last_rediscover_time,neighbour_info,last_node_test_time,endpoint,endpoint_details,
+            device_wakeup_time,role_type,is_device_sleeping,counters_passed,counters_failed,group_id,command_classes_version,
+            paired_status,device_dsk,endpoint_secure_cmd_cls,s2_security_keys,device_protocol,is_device_hidden,ime_data)
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
                             data.get("_id"),
                             data.get("version", ""),
                             data.get("opr", ""),

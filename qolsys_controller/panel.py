@@ -36,13 +36,13 @@ class QolsysPanel(QolsysObservable):
         self.settings_panel_observer = QolsysObservable()
         self.settings_panel = [
             "PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING", "AUTO_BYPASS",
-            "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING","NO_ARM_LOW_BATTERY", "TEMPFORMAT",
-            "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS","GSM_SIGNAL_STRENGTH", "ANDROID_VERSION","HARDWARE_VERSION",
-            "TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER",
-            "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS",
-            "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER",
-            "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
-            "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N"
+            "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY",
+            "TEMPFORMAT", "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS", "GSM_SIGNAL_STRENGTH",
+            "ANDROID_VERSION", "HARDWARE_VERSION","TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY",
+            "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER", "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED",
+            "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS", "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE",
+            "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER", "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION",
+            "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS", "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N"
         ]
 
         self._PANEL_TAMPER_STATE = ""
@@ -397,7 +397,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Sensor Content Provider
                             case self.db.table_sensor.uri:
-                                self.db.table_sensor.update(selection,selection_argument, content_values)
+                                self.db.table_sensor.update(selection, selection_argument, content_values)
                                 zoneid = content_values.get("zoneid", "")
                                 zone = self._state.zone(zoneid)
                                 if zone is not None:
@@ -655,7 +655,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_thermostat.insert(data=content_values)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
-                            #ZWave Node Content Provider
+                            # ZWave Node Content Provider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.insert(data=content_values)
                                 self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
@@ -694,7 +694,6 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.insert(data=content_values)
                                 # No action needed
-
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
@@ -773,7 +772,7 @@ class QolsysPanel(QolsysObservable):
 
     def get_zones_from_db(self) -> list[QolsysZone]:
         zones = []
-        zones_list:list[dict] = self.db.get_zones()
+        zones_list: list[dict] = self.db.get_zones()
 
         # Create sensors array
         for zone_info in zones_list:

@@ -172,7 +172,7 @@ class QolsysPKI:
     def qolsys_cer_file_path(self) -> str:
         return self._subkeys_directory.joinpath(self.id + ".qolsys")
 
-    def create(self,mac: str, key_size: int) -> bool:
+    def create(self, mac: str, key_size: int) -> bool:
 
         self.set_id(mac)
 
@@ -222,7 +222,7 @@ class QolsysPKI:
             x509.NameAttribute(NameOID.LOCALITY_NAME, ""),
             x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Qolsys Inc."),
             x509.NameAttribute(NameOID.COMMON_NAME, "www.qolsys.com "),
-]       )
+        ])
         cert = x509.CertificateBuilder().subject_name(
             subject,
         ).issuer_name(
