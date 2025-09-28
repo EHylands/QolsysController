@@ -344,13 +344,13 @@ class QolsysPluginRemote(QolsysPlugin):
             while continue_pairing:
 
                 # Plugin is receiving panel_mac from panel
-                if(not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                if( not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.read(2048))
                     mac = request.decode()
 
                     address, port = writer.get_extra_info("peername")
-                    LOGGER.debug("Panel Connected from: %s:%s", address,port)
+                    LOGGER.debug("Panel Connected from: %s:%s", address, port)
                     LOGGER.debug("Receiving from Panel: %s", mac)
 
                     # Remove \x00 and \x01 from received string
@@ -364,7 +364,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     writer.write(message)
                     await writer.drain()
 
-                    #Sending CSR File to panel
+                    # Sending CSR File to panel
                     with open(self._pki.csr_file_path, "rb") as file:
                         content = file.read()
                         LOGGER.debug("Sending to Panel: [CSR File Content]")
@@ -375,7 +375,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     continue
 
                 # Read signed certificate data
-                if(received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                if( received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     signed_certificate_data += request.decode()
@@ -391,7 +391,7 @@ class QolsysPluginRemote(QolsysPlugin):
                             qolsys_certificate_data += certificates[1]
 
                 # Read qolsys certificate data
-                if(received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
+                if( received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     qolsys_certificate_data += request.decode()
@@ -488,10 +488,10 @@ class QolsysPluginRemote(QolsysPlugin):
             "remote_panel_battery_voltage": remote_panel_battery_voltage,
             "remote_panel_battery_technology": remote_panel_battery_technology,
             "remote_panel_plugged": remote_panel_plugged,
-            "remote_panel_battery_temperature" : remote_panel_battery_temperature,
+            "remote_panel_battery_temperature": remote_panel_battery_temperature,
             "requestID": requestID,
-            "responseTopic": responseTopic ,
-            "remoteMacAddess": remoteMacAddress,
+            "responseTopic":responseTopic ,
+            "remoteMacAddess":remoteMacAddress,
         }
 
         response = await self.send_command(topic, payload, requestID)
@@ -522,7 +522,7 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
+            "eventName": eventName,
             "macAddress": macAddress,
             "remote_panel_status": remote_panel_status,
             "ipAddress": ipAddress,
@@ -751,7 +751,7 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
-    async def command_disarm(self, partition_id: str, user_code: str="", exit_sounds: bool=True) -> bool:
+    async def command_disarm(self, partition_id: str, user_code: str = "", exit_sounds: bool = True) -> bool:
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
 
         partition = self.state.partition(partition_id)
@@ -802,7 +802,7 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {"eventName": eventName,
-                   "ipcServiceName" : ipcServiceName,
+                   "ipcServiceName": ipcServiceName,
                    "ipcInterfaceName": ipcInterfaceName,
                    "ipcTransactionID": ipcTransactionID,
                    "ipcRequest": [{
@@ -820,8 +820,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
 
-        ipcRequest =[{
-                "dataType": "int", # Node ID
+        ipcRequest = [{
+                "dataType": "int",  # Node ID
                 "dataValue": node_id,
             },
             {
@@ -830,7 +830,7 @@ class QolsysPluginRemote(QolsysPlugin):
             },
             {
                 "dataType": "byteArray",  # ZWAVE MULTILEVELSWITCH COMMAND
-                "dataValue": [38,1,level],
+                "dataValue": [38, 1, level],
             },
             {
                 "dataType": "int",  # ?
@@ -866,12 +866,11 @@ class QolsysPluginRemote(QolsysPlugin):
 
         await self.send_command(topic, payload, requestID)
 
-
-    async def command_arm(self, partition_id: str, arming_type: str, user_code: str="", exit_sounds: bool=False,
-                          instant_arm: bool=False) -> bool:
+    async def command_arm(self, partition_id: str, arming_type: str, user_code: str = "", exit_sounds: bool = False,
+                          instant_arm: bool = False) -> bool:
 
         LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",
-                     partition_id,arming_type, self.panel.SECURE_ARMING)
+                     partition_id, arming_type, self.panel.SECURE_ARMING)
 
         user_id = 0
 
