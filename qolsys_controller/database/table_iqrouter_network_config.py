@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableIqRouterNetworkConfig(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.IQRouterNetworkConfigContentProvider/iqrouter_network_config_table"
         self._table = "iqrouter_network_config_table"
@@ -20,7 +20,7 @@ class QolsysTableIqRouterNetworkConfig(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
+    def insert(self, data: dict) -> None:
         if data is not None:
             LOGGER.error("Please Report")
             LOGGER.error("Loading Table Format: %s", self.uri)

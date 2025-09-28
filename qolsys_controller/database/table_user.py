@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableUser(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.UserContentProvider/user"
         self._table = "user"
@@ -31,8 +31,8 @@ class QolsysTableUser(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(
+    def insert(self, data: dict) -> None:
+        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr",""),

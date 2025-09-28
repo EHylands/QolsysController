@@ -7,11 +7,11 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTable:
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         self._db: sqlite3.Connection = db
         self._cursor: sqlite3.Cursor = cursor
         self._uri: str = ""
-        self._table:str = ""
+        self._table: str = ""
         self._columns: list[str] = []
         self._abort_on_error: bool = False
 
@@ -65,8 +65,8 @@ class QolsysTable:
                raise error from err
 
     def update(self,selection:str,selection_argument:str,content_value:str) -> None:
-        # selection: 'zone_id=?, parition_id=?'  # noqa: ERA001
-        # selection_argument: '[3,1]'  # noqa: ERA001
+        # selection: 'zone_id=?, parition_id=?'
+        # selection_argument: '[3,1]'
         #  "contentValues":{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
         # Panel is sending query parameter for db update in text string
@@ -104,15 +104,15 @@ class QolsysTable:
         pass
 
     def delete(self,selection:str,selection_argument:str) -> None:
-        # selection: 'zone_id=?, parition_id=?'  # noqa: ERA001
-        # selection_argument: '[3,1]'  # noqa: ERA001
+        # selection: 'zone_id=?, parition_id=?'
+        # selection_argument: '[3,1]'
 
         selection_argument = selection_argument.strip("[]")
         selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         # Replace '?' in selection string with selection_argument
         #for i in selection_argument:
-        #    selection = selection.replace("?",f"'{i}'",1)  # noqa: ERA001
+        #    selection = selection.replace("?",f"'{i}'",1)
 
         try:
             query = f"DELETE FROM {self.table} WHERE {selection}"
@@ -130,5 +130,4 @@ class QolsysTable:
 
             if self._abort_on_error:
                raise error from err
-
 

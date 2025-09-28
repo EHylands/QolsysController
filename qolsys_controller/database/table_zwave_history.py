@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableZwaveHistory(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZDeviceHistoryContentProvider/zwave_history"
         self._table = "zwave_history"
@@ -35,8 +35,8 @@ class QolsysTableZwaveHistory(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,device_name,source,event,request,response,created_date,updated_date,last_updated_by,field_type,ack,protocol) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+    def insert(self, data: dict) -> None:
+        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,device_name,source,event,request,response,created_date,updated_date,last_updated_by,field_type,ack,protocol) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
             data.get("_id"),
             data.get("version",""),
             data.get("opr",""),

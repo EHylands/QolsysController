@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableScene(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.SceneContentProvider/scene"
         self._table = "scene"
@@ -33,7 +33,7 @@ class QolsysTableScene(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
+    def insert(self, data: dict) -> None:
         self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,scene_id,name,icon,color,flags,ack,create_time,created_by,update_time,updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
             data.get("_id"),
             data.get("version", ""),

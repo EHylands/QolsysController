@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableAutomation(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.AutomationDeviceContentProvider/automation"
         self._table = "automation"
@@ -42,8 +42,8 @@ class QolsysTableAutomation(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,virtual_node_id,version,opr,partition_id,end_point,extras,is_autolocking_enabled,device_type,endpoint_secure_cmd_classes,automation_id,device_name,protocol,node_battery_level_value,state,last_updated_date,manufacturer_id,endpoint_cmd_classes,device_id,nodeid_cmd_classes,is_device_hidden,nodeid_secure_cmd_classes,created_date,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+    def insert(self, data: dict) -> None:
+        self._cursor.execute(f"INSERT INTO {self.table} (_id,virtual_node_id,version,opr,partition_id,end_point,extras,is_autolocking_enabled,device_type,endpoint_secure_cmd_classes,automation_id,device_name,protocol,node_battery_level_value,state,last_updated_date,manufacturer_id,endpoint_cmd_classes,device_id,nodeid_cmd_classes,is_device_hidden,nodeid_secure_cmd_classes,created_date,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
             data.get("_id"),
             data.get("virtual_node_id", ""),
             data.get("version", ""),
@@ -70,4 +70,3 @@ class QolsysTableAutomation(QolsysTable):
             data.get("status", "")))
 
         self._db.commit()
-

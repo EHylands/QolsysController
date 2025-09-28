@@ -8,7 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableDashboardMsgs(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.DashboardMessagesContentProvider/dashboard_msgs"
         self._table = "dashboard_msgs"
@@ -31,8 +31,8 @@ class QolsysTableDashboardMsgs(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(
+    def insert(self, data: dict) -> None:
+        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,msg_id,title,description,received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
             data.get("_id"),
             data.get("version"),
             data.get("opr"),
@@ -47,4 +47,3 @@ class QolsysTableDashboardMsgs(QolsysTable):
             data.get("mime_type")))
 
         self._db.commit()
-

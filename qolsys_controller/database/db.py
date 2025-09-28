@@ -36,12 +36,13 @@ from .table_zwave_other import QolsysTableZwaveOther
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysDB:
 
     def __init__(self) -> None:  # noqa: PLR0915
 
-        self._db:sqlite3.Connection = sqlite3.connect(":memory:")
-        self._cursor:sqlite3.Cursor = self._db.cursor()
+        self._db: sqlite3.Connection = sqlite3.connect(":memory:")
+        self._cursor: sqlite3.Cursor = self._db.cursor()
 
         self.table_alarmedsensor = QolsysTableAlarmedSensor(self.db, self.cursor)
         self.table_automation = QolsysTableAutomation(self.db, self.cursor)
@@ -143,7 +144,7 @@ class QolsysDB:
         return self._cursor
 
     def get_partitions(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_partition.table} ORDER BY partition_id" )
+        self.cursor.execute(f"SELECT * FROM {self.table_partition.table} ORDER BY partition_id")
         self.db.commit()
 
         partitions = []
@@ -155,7 +156,7 @@ class QolsysDB:
         return partitions
 
     def get_zwave_devices(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY node_id" )
+        self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY node_id")
         self.db.commit()
 
         devices = []
@@ -167,7 +168,7 @@ class QolsysDB:
         return devices
 
     def get_locks(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY node_id" )
+        self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY node_id")
         self.db.commit()
 
         locks = []
@@ -179,7 +180,7 @@ class QolsysDB:
         return locks
 
     def get_thermostats(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_thermostat.table} ORDER BY node_id" )
+        self.cursor.execute(f"SELECT * FROM {self.table_thermostat.table} ORDER BY node_id")
         self.db.commit()
 
         thermostats = []
@@ -191,7 +192,7 @@ class QolsysDB:
         return thermostats
 
     def get_dimmers(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_dimmer.table} ORDER BY node_id" )
+        self.cursor.execute(f"SELECT * FROM {self.table_dimmer.table} ORDER BY node_id")
         self.db.commit()
 
         dimmers = []
@@ -203,7 +204,7 @@ class QolsysDB:
         return dimmers
 
     def get_zones(self) -> list[dict]:
-        self.cursor.execute(f"SELECT * FROM {self.table_sensor.table} ORDER BY zoneid" )
+        self.cursor.execute(f"SELECT * FROM {self.table_sensor.table} ORDER BY zoneid")
         self.db.commit()
 
         zones = []
@@ -214,7 +215,7 @@ class QolsysDB:
 
         return zones
 
-    def get_setting_panel(self, setting:str) -> str:
+    def get_setting_panel(self, setting: str) -> str:
         self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, "0"))
         row = self.cursor.fetchone()
 
@@ -224,7 +225,7 @@ class QolsysDB:
 
         return row[0]
 
-    def get_setting_partition(self, setting:str, partition_id:str) -> str | None:
+    def get_setting_partition(self, setting: str, partition_id: str) -> str | None:
         self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, partition_id))
         row = self.cursor.fetchone()
 
@@ -234,7 +235,7 @@ class QolsysDB:
 
         return row[0]
 
-    def get_state_partition(self, state:str, partition_id:str) -> str | None:
+    def get_state_partition(self, state: str, partition_id: str) -> str | None:
         self.cursor.execute(f"SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? ", (state, partition_id))
         row = self.cursor.fetchone()
 
@@ -244,7 +245,7 @@ class QolsysDB:
 
         return row[0]
 
-    def get_alarm_type(self, partition_id:str) -> list[str]:
+    def get_alarm_type(self, partition_id: str) -> list[str]:
         alarm_type = []
         self.cursor.execute(f"SELECT sgroup FROM {self.table_alarmedsensor.table} WHERE partition_id  = ? ", (partition_id))
         rows = self.cursor.fetchall()
@@ -258,14 +259,14 @@ class QolsysDB:
         for table in self._table_array:
             table.clear()
 
-    def get_table(self, uri:str) -> QolsysTable | None:
+    def get_table(self, uri: str) -> QolsysTable | None:
         for table in self._table_array:
             if uri == table.uri:
                 return table
 
         return None
 
-    def load_db(self, database:dict) -> None:
+    def load_db(self, database: dict) -> None:
 
         self.clear_db()
 

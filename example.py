@@ -22,11 +22,11 @@ async def main() -> None:  # noqa: D103
     remote.plugin.settings.config_directory = "./config/"
     remote.plugin.settings.panel_ip = "192.168.10.220"
     remote.plugin.settings.plugin_ip = "192.168.10.73"
-    remote.plugin.settings.random_mac = "" # Example: F2:16:3E:33:ED:20
+    remote.plugin.settings.random_mac = ""  # Example: F2:16:3E:33:ED:20
 
     # Additionnal remote plugin config
-    remote.plugin.check_user_code_on_disarm = False # Check user code in user.conf file
-    remote.plugin.log_mqtt_mesages = False # Enable for MQTT debug purposes
+    remote.plugin.check_user_code_on_disarm = False  # Check user code in user.conf file
+    remote.plugin.log_mqtt_mesages = False  # Enable for MQTT debug purposes
     remote.plugin.auto_discover_pki = True
 
     # Configure remote plugin
@@ -59,8 +59,8 @@ async def main() -> None:  # noqa: D103
     # await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
     # DISARM
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_disarm(partition_id="0",
+    # await asyncio.sleep(3)
+    # await remote.plugin.command_disarm(partition_id="0",
     #                                   user_code="1111")
 
     # ARM_STAY
@@ -77,8 +77,8 @@ async def main() -> None:  # noqa: D103
                                        user_code="1111")
 
     # ARM_AWAY
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_arm(partition_id=0,
+    # await asyncio.sleep(3)
+    # await remote.plugin.command_arm(partition_id=0,
     #                               arming_type='ARM-AWAY',
     #                               user_code='1111',
     #                                exit_sounds=True,
