@@ -24,8 +24,8 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPluginRemote(QolsysPlugin):
 
-    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings)-> None:
-        super().__init__(state,panel,settings)
+    def __init__(self, state:QolsysState, panel:QolsysPanel, settings:QolsysSettings)-> None:
+        super().__init__(state, panel, settings)
 
         # PKI
         self._pki = QolsysPKI(settings=settings)
@@ -87,7 +87,7 @@ class QolsysPluginRemote(QolsysPlugin):
     async def config(self,start_pairing:bool) -> bool:
         return await self._task_manager.run(self.config_task(start_pairing), self._mqtt_task_config_label)
 
-    async def config_task(self,start_pairing:bool) -> bool:
+    async def config_task(self, start_pairing:bool) -> bool:
         LOGGER.debug("Configuring Plugin")
         super().config()
 
@@ -97,7 +97,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # Read user file for access code
         loop = asyncio.get_running_loop()
-        if not loop.run_in_executor(None,self.panel.read_users_file):
+        if not loop.run_in_executor(None, self.panel.read_users_file):
             return False
 
         # Config PKI
@@ -128,7 +128,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return True
 
     async def start_operation(self) -> None:
-        await self._task_manager.run(self.mqtt_connect_task(reconnect=True),self._mqtt_task_connect_label)
+        await self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
 
     async def mqtt_connect_task(self,reconnect:bool) -> None:
         # Configure TLS parameters for MQTT connection
@@ -167,20 +167,20 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Only log mastermeid traffic for debug purposes
                 if self.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
-                    await self.aiomqtt.subscribe("mastermeid",qos=2)
+                    await self.aiomqtt.subscribe("mastermeid", qos=2)
 
                     # Subscribe to all topics
-                    await self.aiomqtt.subscribe("#",qos=2)
+                    await self.aiomqtt.subscribe("#", qos=2)
 
                 # Start mqtt_listent_task and mqtt_ping_task
                 self._task_manager.cancel(self._mqtt_task_listen_label)
                 self._task_manager.cancel(self._mqtt_task_ping_label)
                 self._task_manager.run(self.mqtt_listen_task(), self._mqtt_task_listen_label)
-                self._task_manager.run(self.mqtt_ping_task(),self._mqtt_task_ping_label)
+                self._task_manager.run(self.mqtt_ping_task(), self._mqtt_task_ping_label)
 
                 response_connect = await self.command_connect()
-                self.panel.imei = response_connect.get("master_imei","")
-                self.panel.product_type = response_connect.get("primary_product_type","")
+                self.panel.imei = response_connect.get("master_imei", "")
+                self.panel.product_type = response_connect.get("primary_product_type", "")
 
                 await self.command_pairing_request()
                 await self.command_pingevent()
@@ -205,7 +205,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 self.aiomqtt = None
 
                 if reconnect:
-                    LOGGER.debug("MQTT Error - %s: Reconnecting in %s seconds ...",err,self._mqtt_timeout)
+                    LOGGER.debug("MQTT Error - %s: Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
                 else:
                     raise QolsysMqttError from err
@@ -216,7 +216,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Pannels need to be re-paired
                 self.connected = False
                 self.connected_observer.notify()
-                await self.aiomqtt.__aexit__(None,None,None)
+                await self.aiomqtt.__aexit__(None, None, None)
                 self.aiomqtt = None
                 raise QolsysSslError from err
 
@@ -231,7 +231,7 @@ class QolsysPluginRemote(QolsysPlugin):
             async for message in self.aiomqtt.messages:
 
                 if self.log_mqtt_mesages:
-                    LOGGER.debug("MQTT TOPIC: %s\n%s",message.topic,message.payload.decode())
+                    LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
 
                 # Panel response to MQTT Commands
                 if message.topic.matches("response_" + self.settings.random_mac):
@@ -250,9 +250,9 @@ class QolsysPluginRemote(QolsysPlugin):
             self.connected = False
             self.connected_observer.notify()
 
-            LOGGER.debug("%s: Reconnecting in %s seconds ...",err,self._mqtt_timeout)
+            LOGGER.debug("%s: Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
             await asyncio.sleep(self.settings.mqtt_timeout)
-            self._task_manager.run(self.mqtt_connect_task(reconnect=True),self._mqtt_task_connect_label)
+            self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
 
         except ssl.SSLError as err:
             # SSL error is and authentication error with invalid certificates en pki
@@ -260,7 +260,7 @@ class QolsysPluginRemote(QolsysPlugin):
             # Pannels need to be re-paired
             self.connected = False
             self.connected_observer.notify()
-            await self.aiomqtt.__aexit__(None,None,None)
+            await self.aiomqtt.__aexit__(None, None, None)
             self.aiomqtt = None
             raise QolsysSslError from err
 
@@ -269,7 +269,7 @@ class QolsysPluginRemote(QolsysPlugin):
         if self.settings.random_mac == "":
             LOGGER.debug("Creating random_mac")
             self.settings.random_mac = generate_random_mac()
-            self._pki.create(self.settings.random_mac,key_size=self.settings.key_size)
+            self._pki.create(self.settings.random_mac, key_size=self.settings.key_size)
 
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
@@ -293,15 +293,15 @@ class QolsysPluginRemote(QolsysPlugin):
             pairing_port = random.randint(50000, 55000)
 
             # Start Pairing mDNS Brodcast
-            LOGGER.debug("Starting mDNS Service Discovery: %s:%s",self.settings.plugin_ip,str(pairing_port))
-            mdns_server = QolsysMDNS(self.settings.plugin_ip,pairing_port)
+            LOGGER.debug("Starting mDNS Service Discovery: %s:%s", self.settings.plugin_ip, str(pairing_port))
+            mdns_server = QolsysMDNS(self.settings.plugin_ip, pairing_port)
             await mdns_server.start_mdns()
 
             # Start Key Exchange Server
             LOGGER.debug("Starting Certificate Exchange Server")
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.load_cert_chain(certfile = self._pki.cer_file_path, keyfile = self._pki.key_file_path)
-            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,self.settings.plugin_ip, pairing_port,ssl=context)
+            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client, self.settings.plugin_ip, pairing_port, ssl=context)
 
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
@@ -319,7 +319,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # We have client sgined certificate at this point
         # Connect to Panel MQTT to send pairing command
-        await self._task_manager.run(self.mqtt_connect_task(reconnect=False),self._mqtt_task_connect_label)
+        await self._task_manager.run(self.mqtt_connect_task(reconnect=False), self._mqtt_task_connect_label)
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
@@ -345,8 +345,8 @@ class QolsysPluginRemote(QolsysPlugin):
                     mac = request.decode()
 
                     address, port = writer.get_extra_info("peername")
-                    LOGGER.debug("Panel Connected from: %s:%s",address,port)
-                    LOGGER.debug("Receiving from Panel: %s",mac)
+                    LOGGER.debug("Panel Connected from: %s:%s", address,port)
+                    LOGGER.debug("Receiving from Panel: %s", mac)
 
                     # Remove \x00 and \x01 from received string
                     self.settings.panel_mac = "".join(char for char in mac if char.isprintable())
@@ -355,7 +355,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                     # Sending random_mac to panel
                     message = b"\x00\x11" + self.settings.random_mac.encode()
-                    LOGGER.debug("Sending to Panel: %s",message.decode())
+                    LOGGER.debug("Sending to Panel: %s", message.decode())
                     writer.write(message)
                     await writer.drain()
 
@@ -423,7 +423,7 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
-        await self.aiomqtt.publish(topic=topic,payload=json.dumps(json_payload),qos=2)
+        await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=2)
         return await self._mqtt_command_queue.wait_for_response(request_id)
 
     async def command_connect(self) -> dict:
@@ -465,19 +465,19 @@ class QolsysPluginRemote(QolsysPlugin):
             "leaseDuration":"",
         }
 
-        payload = { "eventName":eventName,
-                    "ipAddress":ipAddress,
-                    "macAddress":macAddress,
+        payload = { "eventName": eventName,
+                    "ipAddress": ipAddress,
+                    "macAddress": macAddress,
                     "remoteClientID": remoteClientID,
-                    "softwareVersion":softwareVersion,
+                    "softwareVersion": softwareVersion,
                     "producType": producType,
                     "bssid": bssid,
                     "dhcpInfo": json.dumps(dhcpInfo),
-                    "lastUpdateChecksum":lastUpdateChecksum,
+                    "lastUpdateChecksum": lastUpdateChecksum,
                     "dealerIconsCheckSum" : dealerIconsCheckSum,
-                    "remote_feature_support_version":remote_feature_support_version,
+                    "remote_feature_support_version": remote_feature_support_version,
                     "current_battery_status": current_battery_status,
-                    "remote_panel_battery_status":remote_panel_battery_status,
+                    "remote_panel_battery_status": remote_panel_battery_status,
                     "remote_panel_battery_health": remote_panel_battery_health,
                     "remote_panel_battery_level": remote_panel_battery_level,
                     "remote_panel_battery_present": remote_panel_battery_present,
@@ -487,12 +487,12 @@ class QolsysPluginRemote(QolsysPlugin):
                     "remote_panel_battery_technology": remote_panel_battery_technology,
                     "remote_panel_plugged": remote_panel_plugged,
                     "remote_panel_battery_temperature" : remote_panel_battery_temperature,
-                    "requestID":requestID,
-                    "responseTopic":responseTopic ,
-                    "remoteMacAddess":remoteMacAddress,
+                    "requestID": requestID,
+                    "responseTopic": responseTopic ,
+                    "remoteMacAddess": remoteMacAddress,
             }
 
-        response = await self.send_command(topic,payload,requestID)
+        response = await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving connect command")
         return response
 
@@ -524,7 +524,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     "remote_panel_status": remote_panel_status,
                     "ipAddress": ipAddress,
                     "current_battery_status" : current_battery_status,
-                    "remote_panel_battery_percentage":remote_panel_battery_percentage,
+                    "remote_panel_battery_percentage": remote_panel_battery_percentage,
                     "remote_panel_battery_temperature" : remote_panel_battery_temperature,
                     "remote_panel_battery_status" : remote_panel_battery_status,
                     "remote_panel_battery_scale": remote_panel_battery_scale,
@@ -534,12 +534,12 @@ class QolsysPluginRemote(QolsysPlugin):
                     "remote_panel_battery_level": remote_panel_battery_level,
                     "remote_panel_battery_health" : remote_panel_battery_health,
                     "remote_panel_plugged" : remote_panel_plugged,
-                    "requestID":requestID,
+                    "requestID": requestID,
                     "responseTopic": responseTopic,
-                    "remoteMacAddess":remoteMacAddress,
+                    "remoteMacAddess": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving pingevent command")
 
 
@@ -553,14 +553,14 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
         remoteMacAddress = self.settings.random_mac
 
-        payload = {"eventName":eventName,
+        payload = {"eventName": eventName,
                    "startTimestamp": startTimestamp,
-                   "requestID":requestID,
-                   "responseTopic":responseTopic,
-                   "remoteMacAddess":remoteMacAddress,
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddess": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving timeSync command")
 
     async def command_sync_database(self) -> dict:
@@ -579,7 +579,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "remoteMacAddess": remoteMacAddress,
         }
 
-        response = await self.send_command(topic,payload,requestID)
+        response = await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving syncdatabase command")
         return response
 
@@ -593,13 +593,13 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
         acStatus = "Connected"
 
-        payload = {"eventName":eventName,
+        payload = {"eventName": eventName,
                    "acStatus" : acStatus,
-                   "requestID":requestID,
-                   "responseTopic":responseTopic,
-                   "remoteMacAddess":remoteMacAddress}
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddess": remoteMacAddress}
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
 
     async def command_dealer_logo(self) -> None:
         LOGGER.debug("MQTT: Sending dealerLogo command")
@@ -611,13 +611,13 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
-            "requestID":requestID,
-            "responseTopic":responseTopic,
-            "remoteMacAddess":remoteMacAddress,
+            "eventName": eventName,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddess": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
 
     async def command_pair_status_request(self) -> None:
         LOGGER.debug("MQTT: Sending pair_status_request command")
@@ -629,13 +629,13 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
-            "requestID":requestID,
-            "responseTopic":responseTopic,
-            "remoteMacAddess":remoteMacAddress,
+            "eventName": eventName,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddess": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving pair_status_request command")
 
     async def command_disconnect(self) -> None:
@@ -648,13 +648,13 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
+            "eventName": eventName,
             "remoteClientID": remoteClientID,
-            "requestID":requestID,
-            "remoteMacAddess":remoteMacAddress,
+            "requestID": requestID,
+            "remoteMacAddess": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
 
     async def command_pairing_request(self) -> dict:
         LOGGER.debug("MQTT: Sending pairing_request command")
@@ -691,7 +691,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "ipAddress": ipAddress,
             "macAddress": macAddress,
             "remoteClientID": remoteClientID,
-            "softwareVersion":softwareVersion,
+            "softwareVersion": softwareVersion,
             "producType": producType,
             "bssid": bssid,
             "dhcpInfo": json.dumps(dhcpInfo),
@@ -703,11 +703,11 @@ class QolsysPluginRemote(QolsysPlugin):
             "remoteMacAddess": remoteMacAddress,
         }
 
-        response = await self.send_command(topic,payload,requestID)
+        response = await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
-    async def command_ui_delay(self,partition_id:str) -> None:
+    async def command_ui_delay(self, partition_id:str) -> None:
         LOGGER.debug("MQTT: Sending ui_delay command")
 
         # partition state needs to be sent for ui_delay to work
@@ -732,7 +732,7 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
+            "eventName": eventName,
             "ipcServiceName" : ipcServiceName,
             "ipcInterfaceName" : ipcInterfaceName,
             "ipcTransactionID": ipcTransactionID,
@@ -748,8 +748,8 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic,payload,requestID)
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
-    async def command_disarm(self,partition_id:str,user_code:str="",exit_sounds:bool=True) -> bool:
-        LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s",self.check_user_code_on_disarm)
+    async def command_disarm(self, partition_id:str, user_code:str="", exit_sounds:bool=True) -> bool:
+        LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
 
         partition = self.state.partition(partition_id)
         if not partition:
@@ -778,8 +778,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
         disarm_command ={
             "operation_name": mqtt_disarm_command,
-            "userID":user_id,
-            "partitionID":int(partition_id), # INT EXPECTED
+            "userID": user_id,
+            "partitionID": int(partition_id), # INT EXPECTED
             "operation_source": 1,
             "disarm_exit_sounds": exit_sounds,
             "macAddress" : self.settings.random_mac,
@@ -794,7 +794,7 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
         responseTopic = "response_" + self.settings.random_mac
 
-        payload = {"eventName":eventName,
+        payload = {"eventName": eventName,
                    "ipcServiceName" : ipcServiceName,
                    "ipcInterfaceName" : ipcInterfaceName,
                    "ipcTransactionID": ipcTransactionID,
@@ -802,16 +802,16 @@ class QolsysPluginRemote(QolsysPlugin):
                        "dataType": "string",
                        "dataValue":  json.dumps(disarm_command),
                    }],
-                   "requestID":requestID,
-                   "responseTopic":responseTopic,
-                   "remoteMacAddress":remoteMacAddress}
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving disarm command")
 
         return True
 
-    async def command_zwave_switch_multi_level(self,node_id:int,level:int) -> None:
+    async def command_zwave_switch_multi_level(self, node_id:int, level:int) -> None:
 
         ipcRequest =[{
                 "dataType":"int", # Node ID
@@ -848,19 +848,19 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
         responseTopic = "response_" + self.settings.random_mac
 
-        payload = {"eventName":eventName,
+        payload = {"eventName": eventName,
                    "ipcServiceName" : ipcServiceName,
                    "ipcInterfaceName" : ipcInterfaceName,
                    "ipcTransactionID": ipcTransactionID,
                    "ipcRequest": ipcRequest,
-                   "requestID":requestID,
-                   "responseTopic":responseTopic,
-                   "remoteMacAddress":remoteMacAddress}
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
 
 
-    async def command_arm(self,partition_id:str,arming_type:str,user_code:str="",exit_sounds:bool=False,instant_arm:bool=False) -> bool:
+    async def command_arm(self, partition_id:str, arming_type:str, user_code:str="", exit_sounds:bool=False, instant_arm:bool=False) -> bool:
 
         LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",partition_id,arming_type,self.panel.SECURE_ARMING)
 
@@ -900,8 +900,8 @@ class QolsysPluginRemote(QolsysPlugin):
         arming_command ={
             "operation_name": mqtt_arming_type,
             "bypass_zoneid_set": "[]",
-            "userID":user_id,
-            "partitionID":int(partition_id),
+            "userID": user_id,
+            "partitionID": int(partition_id),
             "exitSoundValue":  exitSoundValue,
             "entryDelayValue": "OFF",
             "multiplePartitionsSelected" : False,
@@ -922,7 +922,7 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {
-            "eventName":eventName,
+            "eventName": eventName,
             "ipcServiceName" : ipcServiceName,
             "ipcInterfaceName" : ipcInterfaceName,
             "ipcTransactionID": ipcTransactionID,
@@ -930,12 +930,11 @@ class QolsysPluginRemote(QolsysPlugin):
                 "dataType": "string",
                 "dataValue":  json.dumps(arming_command),
             }],
-            "requestID":requestID,
-            "responseTopic":responseTopic,
-            "remoteMacAddress":remoteMacAddress,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddress": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
 
         return True
-

@@ -32,21 +32,19 @@ class QolsysController:
     def settings(self) -> QolsysSettings:
         return self._settings
 
-    def select_plugin(self,plugin: str) -> None:
+    def select_plugin(self, plugin: str) -> None:
 
         match plugin:
 
             case "c4":
                 LOGGER.debug("C4 Plugin Selected")
-                self.plugin = QolsysPluginC4(self.state,self.panel, self.settings)
+                self.plugin = QolsysPluginC4(self.state, self.panel, self.settings)
                 return
 
             case "remote":
                 LOGGER.debug("Remote Plugin Selected")
-                self.plugin = QolsysPluginRemote(self.state,self.panel, self.settings)
+                self.plugin = QolsysPluginRemote(self.state, self.panel, self.settings)
                 return
 
             case _:
                 LOGGER.debug("Unknow Plugin Selected")
-
-

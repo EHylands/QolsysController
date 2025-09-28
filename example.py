@@ -8,8 +8,9 @@ import sys
 from qolsys_controller.controller import QolsysController
 from qolsys_controller.errors import QolsysMqttError, QolsysSqlError, QolsysSslError
 
-logging.basicConfig(level=logging.DEBUG,format="%(levelname)s - %(module)s: %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s - %(module)s: %(message)s")
 LOGGER = logging.getLogger(__name__)
+
 
 async def main() -> None:  # noqa: D103
 
@@ -19,7 +20,7 @@ async def main() -> None:  # noqa: D103
     remote.select_plugin("remote")
 
     remote.plugin.settings.config_directory = "./config/"
-    remote.plugin.settings.panel_ip =  "192.168.10.220"
+    remote.plugin.settings.panel_ip = "192.168.10.220"
     remote.plugin.settings.plugin_ip = "192.168.10.73"
     remote.plugin.settings.random_mac = "" # Example: F2:16:3E:33:ED:20
 
@@ -37,13 +38,13 @@ async def main() -> None:  # noqa: D103
         await remote.plugin.start_operation()
 
     except QolsysMqttError:
-            LOGGER.debug("QolsysMqttError")
+        LOGGER.debug("QolsysMqttError")
 
     except QolsysSslError:
-            LOGGER.debug("QolsysSslError")
+        LOGGER.debug("QolsysSslError")
 
     except QolsysSqlError:
-            LOGGER.debug("QolsysSqlError")
+        LOGGER.debug("QolsysSqlError")
 
     if not remote.plugin.connected:
         LOGGER.error("Panel not ready for operation")
@@ -57,7 +58,7 @@ async def main() -> None:  # noqa: D103
     # await asyncio.sleep(3)
     # await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
-     # DISARM
+    # DISARM
     #await asyncio.sleep(3)
     #await remote.plugin.command_disarm(partition_id="0",
     #                                   user_code="1111")
@@ -70,12 +71,10 @@ async def main() -> None:  # noqa: D103
                                     exit_sounds=False,
                                     instant_arm=False)
 
-
     # DISARM
     await asyncio.sleep(3)
     await remote.plugin.command_disarm(partition_id="0",
                                        user_code="1111")
-
 
     # ARM_AWAY
     #await asyncio.sleep(3)
@@ -95,5 +94,3 @@ if sys.platform.lower() == "win32" or os.name.lower() == "nt":
     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 asyncio.run(main())
-
-

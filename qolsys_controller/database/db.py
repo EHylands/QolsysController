@@ -43,37 +43,37 @@ class QolsysDB:
         self._db:sqlite3.Connection = sqlite3.connect(":memory:")
         self._cursor:sqlite3.Cursor = self._db.cursor()
 
-        self.table_alarmedsensor = QolsysTableAlarmedSensor(self.db,self.cursor)
-        self.table_automation = QolsysTableAutomation(self.db,self.cursor)
-        self.table_country_locale = QolsysTableCountryLocale(self.db,self.cursor)
-        self.table_dashboard_msgs = QolsysTableDashboardMsgs(self.db,self.cursor)
-        self.table_dimmer = QolsysTableDimmerLight(self.db,self.cursor)
-        self.table_doorlock = QolsysTableDoorLock(self.db,self.cursor)
-        self.table_eu_event = QolsysTableEuEvent(self.db,self.cursor)
-        self.table_heat_map = QolsysTableHeatMap(self.db,self.cursor)
-        self.table_history = QolsysTableHistory(self.db,self.cursor)
-        self.table_iqremotesettings = QolsysTableIqRemoteSettings(self.db,self.cursor)
-        self.table_iqrouter_network_config = QolsysTableIqRouterNetworkConfig(self.db,self.cursor)
-        self.table_iqrouter_user_device = QolsysTableIqRouterUserDevice(self.db,self.cursor)
-        self.table_master_slave = QolsysTableMasterSlave(self.db,self.cursor)
-        self.table_partition = QolsysTablePartition(self.db,self.cursor)
-        self.table_powerg_device = QolsysTablePowerGDevice(self.db,self.cursor)
-        self.table_sensor = QolsysTableSensor(self.db,self.cursor)
-        self.table_smartsocket = QolsysTableSmartSocket(self.db,self.cursor)
-        self.table_qolsyssettings = QolsysTableQolsysSettings(self.db,self.cursor)
-        self.table_scene = QolsysTableScene(self.db,self.cursor)
-        self.table_state = QolsysTableState(self.db,self.cursor)
-        self.table_tcc = QolsysTableTcc(self.db,self.cursor)
-        self.table_thermostat = QolsysTableThermostat(self.db,self.cursor)
-        self.table_trouble_conditions = QolsysTableTroubleConditions(self.db,self.cursor)
-        self.table_user = QolsysTableUser(self.db,self.cursor)
-        self.table_virtual_device = QolsysTableVirtualDevice(self.db,self.cursor)
-        self.table_weather = QolsysTableWeather(self.db,self.cursor)
-        self.table_zigbee_device = QolsysTableZigbeeDevice(self.db,self.cursor)
-        self.table_zwave_association_goup = QolsysTableZwaveAssociationGroup(self.db,self.cursor)
-        self.table_zwave_history = QolsysTableZwaveHistory(self.db,self.cursor)
-        self.table_zwave_node = QolsysTableZwaveNode(self.db,self.cursor)
-        self.table_zwave_other = QolsysTableZwaveOther(self.db,self.cursor)
+        self.table_alarmedsensor = QolsysTableAlarmedSensor(self.db, self.cursor)
+        self.table_automation = QolsysTableAutomation(self.db, self.cursor)
+        self.table_country_locale = QolsysTableCountryLocale(self.db, self.cursor)
+        self.table_dashboard_msgs = QolsysTableDashboardMsgs(self.db, self.cursor)
+        self.table_dimmer = QolsysTableDimmerLight(self.db, self.cursor)
+        self.table_doorlock = QolsysTableDoorLock(self.db, self.cursor)
+        self.table_eu_event = QolsysTableEuEvent(self.db, self.cursor)
+        self.table_heat_map = QolsysTableHeatMap(self.db ,self.cursor)
+        self.table_history = QolsysTableHistory(self.db, self.cursor)
+        self.table_iqremotesettings = QolsysTableIqRemoteSettings(self.db, self.cursor)
+        self.table_iqrouter_network_config = QolsysTableIqRouterNetworkConfig(self.db, self.cursor)
+        self.table_iqrouter_user_device = QolsysTableIqRouterUserDevice(self.db, self.cursor)
+        self.table_master_slave = QolsysTableMasterSlave(self.db, self.cursor)
+        self.table_partition = QolsysTablePartition(self.db, self.cursor)
+        self.table_powerg_device = QolsysTablePowerGDevice(self.db, self.cursor)
+        self.table_sensor = QolsysTableSensor(self.db, self.cursor)
+        self.table_smartsocket = QolsysTableSmartSocket(self.db, self.cursor)
+        self.table_qolsyssettings = QolsysTableQolsysSettings(self.db, self.cursor)
+        self.table_scene = QolsysTableScene(self.db, self.cursor)
+        self.table_state = QolsysTableState(self.db, self.cursor)
+        self.table_tcc = QolsysTableTcc(self.db, self.cursor)
+        self.table_thermostat = QolsysTableThermostat(self.db, self.cursor)
+        self.table_trouble_conditions = QolsysTableTroubleConditions(self.db, self.cursor)
+        self.table_user = QolsysTableUser(self.db, self.cursor)
+        self.table_virtual_device = QolsysTableVirtualDevice(self.db, self.cursor)
+        self.table_weather = QolsysTableWeather(self.db, self.cursor)
+        self.table_zigbee_device = QolsysTableZigbeeDevice(self.db, self.cursor)
+        self.table_zwave_association_goup = QolsysTableZwaveAssociationGroup(self.db, self.cursor)
+        self.table_zwave_history = QolsysTableZwaveHistory(self.db, self.cursor)
+        self.table_zwave_node = QolsysTableZwaveNode(self.db, self.cursor)
+        self.table_zwave_other = QolsysTableZwaveOther(self.db, self.cursor)
 
         self._table_array = []
         self._table_array.append(self.table_sensor)
@@ -148,7 +148,7 @@ class QolsysDB:
 
         partitions = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             partitions.append(row_dict)
 
@@ -160,7 +160,7 @@ class QolsysDB:
 
         devices = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             devices.append(row_dict)
 
@@ -172,7 +172,7 @@ class QolsysDB:
 
         locks = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             locks.append(row_dict)
 
@@ -184,7 +184,7 @@ class QolsysDB:
 
         thermostats = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             thermostats.append(row_dict)
 
@@ -196,7 +196,7 @@ class QolsysDB:
 
         dimmers = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             dimmers.append(row_dict)
 
@@ -208,14 +208,14 @@ class QolsysDB:
 
         zones = []
         columns = [description[0] for description in self.cursor.description]
-        for row in  self.cursor.fetchall():
+        for row in self.cursor.fetchall():
             row_dict = dict(zip(columns, row, strict=True))
             zones.append(row_dict)
 
         return zones
 
-    def get_setting_panel(self,setting:str) -> str:
-        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting,"0"))
+    def get_setting_panel(self, setting:str) -> str:
+        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, "0"))
         row = self.cursor.fetchone()
 
         if row is None:
@@ -224,8 +224,8 @@ class QolsysDB:
 
         return row[0]
 
-    def get_setting_partition(self,setting:str,partition_id:str) -> str | None:
-        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting,partition_id))
+    def get_setting_partition(self, setting:str, partition_id:str) -> str | None:
+        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:
@@ -234,17 +234,17 @@ class QolsysDB:
 
         return row[0]
 
-    def get_state_partition(self,state:str,partition_id:str) -> str | None:
-        self.cursor.execute(f"SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? ", (state,partition_id))
+    def get_state_partition(self, state:str, partition_id:str) -> str | None:
+        self.cursor.execute(f"SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? ", (state, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:
-            LOGGER.debug("%s value not found",state)
+            LOGGER.debug("%s value not found", state)
             return None
 
         return row[0]
 
-    def get_alarm_type(self,partition_id:str) -> list[str]:
+    def get_alarm_type(self, partition_id:str) -> list[str]:
         alarm_type = []
         self.cursor.execute(f"SELECT sgroup FROM {self.table_alarmedsensor.table} WHERE partition_id  = ? ", (partition_id))
         rows = self.cursor.fetchall()
@@ -258,14 +258,14 @@ class QolsysDB:
         for table in self._table_array:
             table.clear()
 
-    def get_table(self,uri:str) -> QolsysTable | None:
+    def get_table(self, uri:str) -> QolsysTable | None:
         for table in self._table_array:
             if uri == table.uri:
                 return table
 
         return None
 
-    def load_db(self,database:dict) -> None:
+    def load_db(self, database:dict) -> None:
 
         self.clear_db()
 

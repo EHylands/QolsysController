@@ -29,10 +29,10 @@ async def main() -> None:  # noqa: D103
 
     Panel = qolsys_controller()
 
-     # Select plugin
+    # Select plugin
     Panel.select_plugin("remote")
     Panel.settings.config_directory = args.config_dir
-    Panel.plugin.settings.panel_ip =  args.panel_ip
+    Panel.plugin.settings.panel_ip = args.panel_ip
     Panel.plugin.settings.plugin_ip = args.plugin_ip
     Panel.plugin.settings.random_mac = ""
 
@@ -50,13 +50,13 @@ async def main() -> None:  # noqa: D103
         await Panel.plugin.start_operation()
 
     except QolsysMqttError:
-            LOGGER.debug("QolsysMqttError")
+        LOGGER.debug("QolsysMqttError")
 
     except QolsysSslError:
-            LOGGER.debug("QolsysSslError")
+        LOGGER.debug("QolsysSslError")
 
     except QolsysSqlError:
-            LOGGER.debug("QolsysSqlError")
+        LOGGER.debug("QolsysSqlError")
 
     if not Panel.plugin.connected:
         LOGGER.error("Panel not ready for operation")
@@ -73,5 +73,3 @@ if sys.platform.lower() == "win32" or os.name.lower() == "nt":
     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 asyncio.run(main())
-
-
