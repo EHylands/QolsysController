@@ -9,6 +9,7 @@ from .state import QolsysState
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysController:
 
     def __init__(self) -> None:
@@ -17,7 +18,7 @@ class QolsysController:
         self.plugin = None
         self._state = QolsysState()
         self._settings = QolsysSettings()
-        self._panel = QolsysPanel(settings=self.settings,state=self.state)
+        self._panel = QolsysPanel(settings=self.settings, state=self.state)
 
     @property
     def state(self) -> QolsysState:
@@ -37,12 +38,12 @@ class QolsysController:
 
             case "c4":
                 LOGGER.debug("C4 Plugin Selected")
-                self.plugin = QolsysPluginC4(self.state,self.panel,self.settings)
+                self.plugin = QolsysPluginC4(self.state,self.panel, self.settings)
                 return
 
             case "remote":
                 LOGGER.debug("Remote Plugin Selected")
-                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings)
+                self.plugin = QolsysPluginRemote(self.state,self.panel, self.settings)
                 return
 
             case _:

@@ -15,13 +15,13 @@ async def main() -> None:  # noqa: D103
     cli_parser = argparse.ArgumentParser()
     cli_parser.add_argument("--panel-ip", help="Qolsys Panel IP", default="")
     cli_parser.add_argument("--plugin-ip", help="Plugin IP", default="")
-    cli_parser.add_argument("--config-dir", help="Configuration Directory",default="./config/")
-    cli_parser.add_argument("--pki-autodiscovery", help="Enable PKI Autodiscovery",action="store_true")
-    cli_parser.add_argument("--debug", help="Verbose MQTT Traffic",action="store_true")
+    cli_parser.add_argument("--config-dir", help="Configuration Directory", default="./config/")
+    cli_parser.add_argument("--pki-autodiscovery", help="Enable PKI Autodiscovery", action="store_true")
+    cli_parser.add_argument("--debug", help="Verbose MQTT Traffic", action="store_true")
 
     args = cli_parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG,format="%(levelname)s - %(module)s: %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s - %(module)s: %(message)s")
     LOGGER = logging.getLogger(__name__)
 
     loop = asyncio.new_event_loop()
