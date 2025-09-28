@@ -13,17 +13,17 @@ class QolsysSettings:
         self._panel_mac = ""
         self._panel_ip = ""
 
-        self._config_directory:Path = Path()
-        self._pki_directory:Path = Path()
-        self._media_directory:Path = Path()
-        self._users_file_path:Path = Path()
+        self._config_directory: Path = Path()
+        self._pki_directory: Path = Path()
+        self._media_directory: Path = Path()
+        self._users_file_path: Path = Path()
 
         # Pki
-        self._key_size = 2048
+        self._key_size: int = 2048
 
         # MQTT
-        self._mqtt_timeout = 30
-        self._mqtt_ping = 600
+        self._mqtt_timeout: int = 30
+        self._mqtt_ping: int = 600
 
     @property
     def random_mac(self) -> str:
@@ -90,37 +90,37 @@ class QolsysSettings:
 
     def check_panel_ip(self) -> bool:
         if self._panel_ip == "":
-            LOGGER.debug("Invalid Panel IP:  %s",self._panel_ip)
+            LOGGER.debug("Invalid Panel IP:  %s", self._panel_ip)
             return False
 
-        LOGGER.debug("Found Panel IP: %s",self._panel_ip)
+        LOGGER.debug("Found Panel IP: %s", self._panel_ip)
         return True
 
     def check_plugin_ip(self) -> bool:
         if self._plugin_ip == "":
-            LOGGER.debug("Invalid Plugin IP:  %s",self._plugin_ip)
+            LOGGER.debug("Invalid Plugin IP:  %s", self._plugin_ip)
             return False
 
-        LOGGER.debug("Found Plugin IP: %s",self._plugin_ip)
+        LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
         return True
 
     def check_config_directory(self,create:bool=True) -> bool:
         if not Path(self.config_directory).is_dir():
             if not create:
-                LOGGER.debug("config_directory not found:  %s",self.config_directory)
+                LOGGER.debug("config_directory not found:  %s", self.config_directory)
                 return False
 
             # Create config directory if not found
-            LOGGER.debug("Creating config_directory: %s",self.config_directory)
+            LOGGER.debug("Creating config_directory: %s", self.config_directory)
             try:
                 self.config_directory.mkdir(parents=True)
             except PermissionError:
-                LOGGER.exception("Permission denied: Unable to create: %s",self.config_directory)
+                LOGGER.exception("Permission denied: Unable to create: %s", self.config_directory)
                 return False
             except Exception:
-                LOGGER.exception("Error creating config_directory: %s",self.config_directory)
+                LOGGER.exception("Error creating config_directory: %s", self.config_directory)
                 return False
 
-        LOGGER.debug("Using config_directory: %s",self.config_directory.resolve())
+        LOGGER.debug("Using config_directory: %s", self.config_directory.resolve())
         return True
 

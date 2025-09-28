@@ -28,19 +28,20 @@ class QolsysPanel(QolsysObservable):
         self._db = QolsysDB()
 
         # Partition settings
-        self.settings_partition = ["SYSTEM_STATUS","EXIT_SOUNDS","ENTRY_DELAYS","SYSTEM_STATUS_CHANGED_TIME"]
+        self.settings_partition = ["SYSTEM_STATUS", "EXIT_SOUNDS", "ENTRY_DELAYS", "SYSTEM_STATUS_CHANGED_TIME"]
         self.state_partition = ["ALARM_STATE"]
 
         # Panel settings
         self.settings_panel_observer = QolsysObservable()
-        self.settings_panel = ["PANEL_TAMPER_STATE","AC_STATUS","BATTERY_STATUS","FAIL_TO_COMMUNICATE","SECURE_ARMING",
-                                "AUTO_BYPASS","AUTO_STAY","AUTO_ARM_STAY","AUTO_EXIT_EXTENSION","FINAL_EXIT_DOOR_ARMING"
-                                "NO_ARM_LOW_BATTERY","TEMPFORMAT","LANGUAGE","COUNTRY","SYSTEM_TIME","GSM_CONNECTION_STATUS",
-                                "GSM_SIGNAL_STRENGTH","ANDROID_VERSION","HARDWARE_VERSION","TIMER_NORMAL_ENTRY_DELAY",
-                                "TIMER_NORMAL_EXIT_DELAY","TIMER_LONG_ENTRY_DELAY","TIMER_LONG_EXIT_DELAY","ZWAVE_CONTROLLER",
-                                "ZWAVE_CARD","POLICE_PANIC_ENABLED","FIRE_PANIC_ENABLED","AUXILIARY_PANIC_ENABLED","NIGHTMODE_SETTINGS",
-                                "NIGHT_SETTINGS_STATE","PARTITIONS","SIX_DIGIT_USER_CODE","SHOW_SECURITY_SENSORS","SYSTEM_LOGGED_IN_USER",
-                                "PANEL_SCENES_SETTING","CONTROL_4","ZWAVE_FIRM_WARE_VERSION","FINAL_EXIT_DOOR_ARMING","NO_ARM_LOW_BATTERY","MAC_ADDRESS","LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N" ]
+        self.settings_panel = ["PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING",
+                                "AUTO_BYPASS", "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING"
+                                "NO_ARM_LOW_BATTERY", "TEMPFORMAT", "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS",
+                                "GSM_SIGNAL_STRENGTH", "ANDROID_VERSION", "HARDWARE_VERSION", "TIMER_NORMAL_ENTRY_DELAY",
+                                "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER",
+                                "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS",
+                                "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER",
+                                "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
+                                "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N" ]
 
         self._PANEL_TAMPER_STATE = ""
         self._AC_STATUS = ""
@@ -294,7 +295,7 @@ class QolsysPanel(QolsysObservable):
     @property
     def unique_id(self)  -> str:
         mac_address = self.MAC_ADDRESS
-        return mac_address.replace(":","")
+        return mac_address.replace(":", "")
 
     @property
     def TIMER_LONG_EXIT_DELAY(self) ->  str:
@@ -367,8 +368,8 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Settings Content Provider
                             case self.db.table_qolsyssettings.uri:
-                                name = content_values.get("name","")
-                                new_value = content_values.get("value","")
+                                name = content_values.get("name", "")
+                                new_value = content_values.get("value", "")
                                 old_value = self.db.get_setting_panel(name)
                                 self.db.table_qolsyssettings.update(selection,selection_argument,content_values)
 
@@ -379,7 +380,7 @@ class QolsysPanel(QolsysObservable):
 
                                 # Update Partition setting - Send notification if setting has changed
                                 if name in self.settings_partition:
-                                    partition_id = content_values.get("partition_id","")
+                                    partition_id = content_values.get("partition_id", "")
                                     partition = self._state.partition(partition_id)
                                     if partition is not None:
                                        match name:
@@ -395,16 +396,16 @@ class QolsysPanel(QolsysObservable):
                             # Update Sensor Content Provider
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.update(selection,selection_argument,content_values)
-                                zoneid =  content_values.get("zoneid","")
+                                zoneid =  content_values.get("zoneid", "")
                                 zone = self._state.zone(zoneid)
                                 if zone is not None:
                                     zone.update(content_values)
 
                             # Update State
                             case self.db.table_state.uri:
-                                name = content_values.get("name","")
-                                new_value = content_values.get("value","")
-                                partition_id = content_values.get("partition_id","")
+                                name = content_values.get("name", "")
+                                new_value = content_values.get("value", "")
+                                partition_id = content_values.get("partition_id", "")
                                 self.db.table_state.update(selection,selection_argument,content_values)
 
                                 if name in self.state_partition:
@@ -445,7 +446,7 @@ class QolsysPanel(QolsysObservable):
                             # Update DimmerLightsContentProvider
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.update(selection,selection_argument,content_values)
-                                node_id =  content_values.get("node_id","")
+                                node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysDimmer):
                                     node.update_dimmer(content_values)
@@ -453,7 +454,7 @@ class QolsysPanel(QolsysObservable):
                             # Update Thermostat Content Provider
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.update(selection,selection_argument,content_values)
-                                node_id =  content_values.get("node_id","")
+                                node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysThermostat):
                                     node.update_thermostat(content_values)
@@ -461,7 +462,7 @@ class QolsysPanel(QolsysObservable):
                             # Update DoorLockContentProvider
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.update(selection,selection_argument,content_values)
-                                node_id =  content_values.get("node_id","")
+                                node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysLock):
                                     node.update_lock(content_values)
@@ -469,7 +470,7 @@ class QolsysPanel(QolsysObservable):
                             # Update ZwaveContentProvider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.update(selection,selection_argument,content_values)
-                                node_id =  content_values.get("node_id","")
+                                node_id =  content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None:
                                     node.update_base(content_values)
@@ -494,7 +495,7 @@ class QolsysPanel(QolsysObservable):
                                 # No action needed
 
                             case _:
-                                LOGGER.debug("iq2meid updating unknow uri:%s",uri)
+                                LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)
 
                     case "delete":
@@ -581,10 +582,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_state.uri:
                                 self.db.table_state.insert(data=content_values)
 
-                                name = content_values.get("name","")
-                                new_value = content_values.get("value","")
+                                name = content_values.get("name", "")
+                                new_value = content_values.get("value", "")
                                 if name in self.state_partition:
-                                    partition_id = content_values.get("partition_id","")
+                                    partition_id = content_values.get("partition_id", "")
                                     partition = self._state.partition(partition_id)
                                     if partition is not None:
                                         match name:
@@ -601,10 +602,10 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_qolsyssettings.insert(data=content_values)
 
                                 # Update Partition setting - Send notification if setting has changed
-                                name = content_values.get("name","")
-                                new_value = content_values.get("value","")
+                                name = content_values.get("name", "")
+                                new_value = content_values.get("value", "")
                                 if name in self.settings_partition:
-                                    partition_id = content_values.get("partition_id","")
+                                    partition_id = content_values.get("partition_id", "")
                                     partition = self._state.partition(partition_id)
                                     if partition is not None:
                                        match name:
@@ -665,12 +666,12 @@ class QolsysPanel(QolsysObservable):
                             # AlarmedSensorProvider
                             case self.db.table_alarmedsensor.uri:
 
-                                partition_id = content_values.get("partition_id","")
+                                partition_id = content_values.get("partition_id", "")
                                 self.db.table_alarmedsensor.insert(data=content_values)
 
                                 partition = self._state.partition(partition_id)
                                 if partition is not None:
-                                    partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup",""))])
+                                    partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup", ""))])
 
                             # IQRemoteSettingsProvider
                             case self.db.table_iqremotesettings.uri:
@@ -694,17 +695,17 @@ class QolsysPanel(QolsysObservable):
 
 
                             case _:
-                                LOGGER.debug("iq2meid inserting unknow uri:%s",uri)
+                                LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
                                 LOGGER.debug(data)
 
                     case _:
-                        LOGGER.debug("iq2meid - Unknow dboperation: %s",dbOperation)
+                        LOGGER.debug("iq2meid - Unknow dboperation: %s", dbOperation)
                         LOGGER.debug(data)
             case _:
-                LOGGER.debug("iq2meid - Unknow event: %s",eventName)
+                LOGGER.debug("iq2meid - Unknow event: %s", eventName)
                 LOGGER.debug(data)
 
-    def check_user(self,user_code:str) -> int:
+    def check_user(self, user_code: str) -> int:
         for user in self._users:
             if user["user_code"] == user_code:
                 return user["id"]
@@ -723,36 +724,36 @@ class QolsysPanel(QolsysObservable):
 
             device_added = False
 
-            zwave_node_id = device.get("node_id","")
+            zwave_node_id = device.get("node_id", "")
             # Check if z-wave device is a Dimmer
             for d in dimmers_list:
-                dimmer_node_id = d.get("node_id","")
+                dimmer_node_id = d.get("node_id", "")
 
                 # Found a Dimmer
                 if zwave_node_id == dimmer_node_id:
-                    qolsys_dimmer = QolsysDimmer(d,device)
+                    qolsys_dimmer = QolsysDimmer(d, device)
                     devices.append(qolsys_dimmer)
                     device_added = True
                     break
 
             # Check is z-wave devie is a Thermostat
             for thermostat in thermostats_list:
-                thermostat_node_id = thermostat.get("node_id","")
+                thermostat_node_id = thermostat.get("node_id", "")
 
                 # Found a Thermostat
                 if zwave_node_id == thermostat_node_id:
-                    qolsys_thermostat = QolsysThermostat(thermostat,device)
+                    qolsys_thermostat = QolsysThermostat(thermostat, device)
                     devices.append(qolsys_thermostat)
                     device_added = True
                     break
 
             # Check is z-wave device is a Lock
             for lock in locks_list:
-                lock_node_id = lock.get("node_id","")
+                lock_node_id = lock.get("node_id", "")
 
                 # Found a Lock
                 if zwave_node_id == lock_node_id:
-                    qolsys_lock = QolsysLock(lock,device)
+                    qolsys_lock = QolsysLock(lock, device)
                     devices.append(qolsys_lock)
                     device_added = True
                     break
@@ -789,10 +790,10 @@ class QolsysPanel(QolsysObservable):
             partition_id = partition_dict["partition_id"]
 
             settings_dict = {
-                "SYSTEM_STATUS": self.db.get_setting_partition("SYSTEM_STATUS",partition_id) or "UNKNOWN",
-                "SYSTEM_STATUS_CHANGED_TIME": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME",partition_id) or "",
-                "EXIT_SOUNDS": self.db.get_setting_partition("EXIT_SOUNDS",partition_id) or "",
-                "ENTRY_DELAYS":  self.db.get_setting_partition("ENTRY_DELAYS",partition_id) or "",
+                "SYSTEM_STATUS": self.db.get_setting_partition("SYSTEM_STATUS", partition_id) or "UNKNOWN",
+                "SYSTEM_STATUS_CHANGED_TIME": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME", partition_id) or "",
+                "EXIT_SOUNDS": self.db.get_setting_partition("EXIT_SOUNDS", partition_id) or "",
+                "ENTRY_DELAYS":  self.db.get_setting_partition("ENTRY_DELAYS", partition_id) or "",
             }
 
             alarm_type = []
@@ -802,54 +803,54 @@ class QolsysPanel(QolsysObservable):
                 else:
                     alarm_type.append(PartitionAlarmType(alarm))
 
-            alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE",partition_id) or "UNKNOWN")
+            alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE", partition_id) or "UNKNOWN")
 
-            partition = QolsysPartition(partition_dict,settings_dict,alarm_state,alarm_type)
+            partition = QolsysPartition(partition_dict, settings_dict, alarm_state, alarm_type)
             partitions.append(partition)
 
         return partitions
 
     def dump(self) -> None:
         LOGGER.debug("*** Qolsys Panel Information ***")
-        LOGGER.debug("Android Version: %s",self.ANDROID_VERSION)
-        LOGGER.debug("Hardware Version: %s",self.HARDWARE_VERSION)
-        LOGGER.debug("MAC Address: %s",self.MAC_ADDRESS)
-        LOGGER.debug("Unique ID: %s",self.unique_id)
-        LOGGER.debug("Panel Tamper State: %s",self.PANEL_TAMPER_STATE)
-        LOGGER.debug("AC Status: %s",self.AC_STATUS)
-        LOGGER.debug("Battery Status: %s",self.BATTERY_STATUS)
-        LOGGER.debug("GSM Connection Status: %s",self.GSM_CONNECTION_STATUS)
-        LOGGER.debug("GSM Signal Strength: %s",self.GSM_SIGNAL_STRENGTH)
-        LOGGER.debug("Fail To Communicate: %s",self.FAIL_TO_COMMUNICATE)
+        LOGGER.debug("Android Version: %s", self.ANDROID_VERSION)
+        LOGGER.debug("Hardware Version: %s", self.HARDWARE_VERSION)
+        LOGGER.debug("MAC Address: %s", self.MAC_ADDRESS)
+        LOGGER.debug("Unique ID: %s", self.unique_id)
+        LOGGER.debug("Panel Tamper State: %s", self.PANEL_TAMPER_STATE)
+        LOGGER.debug("AC Status: %s", self.AC_STATUS)
+        LOGGER.debug("Battery Status: %s", self.BATTERY_STATUS)
+        LOGGER.debug("GSM Connection Status: %s", self.GSM_CONNECTION_STATUS)
+        LOGGER.debug("GSM Signal Strength: %s", self.GSM_SIGNAL_STRENGTH)
+        LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
         #LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
-        LOGGER.debug("Country: %s",self.COUNTRY)
-        LOGGER.debug("Language: %s",self.LANGUAGE)
-        LOGGER.debug("Temp Format: %s",self.TEMPFORMAT)
-        LOGGER.debug("Z-Wave Firmware Version: %s",self.ZWAVE_FIRM_WARE_VERSION)
-        LOGGER.debug("Z-Wave Card Present: %s",self.ZWAVE_CARD)
-        LOGGER.debug("Z-Wave Controller Enabled: %s",self.ZWAVE_CONTROLLER)
-        LOGGER.debug("Partitons Enabled: %s",self.PARTITIONS)
-        LOGGER.debug("Control4 Enabled: %s",self.CONTROL_4)
-        LOGGER.debug("Six Digit User Code Enabled: %s",self.SIX_DIGIT_USER_CODE)
-        LOGGER.debug("Secure Arming: %s",self.SECURE_ARMING)
-        LOGGER.debug("Auto-Stay: %s",self.AUTO_STAY)
-        LOGGER.debug("Auto-Bypass: %s",self.AUTO_BYPASS)
-        LOGGER.debug("Auto-Arm-Stay: %s",self.AUTO_ARM_STAY)
-        LOGGER.debug("Auto-Exit-Extension: %s",self.AUTO_EXIT_EXTENSION)
-        LOGGER.debug("Final-Exit-Door-Arming: %s",self.FINAL_EXIT_DOOR_ARMING)
-        LOGGER.debug("No-Arm-Low-Battery: %s",self.NO_ARM_LOW_BATTERY)
-        LOGGER.debug("Normal Entry Delay: %s",self.TIMER_NORMAL_ENTRY_DELAY)
-        LOGGER.debug("Normal Exit Delay: %s",self.TIMER_NORMAL_EXIT_DELAY)
-        LOGGER.debug("Long Entry Delay: %s",self.TIMER_LONG_ENTRY_DELAY)
-        LOGGER.debug("Long Exit Delay: %s",self.TIMER_LONG_EXIT_DELAY)
-        LOGGER.debug("Auxiliary Panic Enabled: %s",self.AUXILIARY_PANIC_ENABLED)
-        LOGGER.debug("Fire Panic Enabled: %s",self.FIRE_PANIC_ENABLED)
-        LOGGER.debug("Police Panic Enabled: %s",self.POLICE_PANIC_ENABLED)
-        LOGGER.debug("Night Mode Settings: %s",self.NIGHTMODE_SETTINGS)
-        LOGGER.debug("Night Mode Settings Stage: %s",self.NIGHT_SETTINGS_STATE)
-        LOGGER.debug("Show Security Sensors: %s",self.SHOW_SECURITY_SENSORS)
+        LOGGER.debug("Country: %s", self.COUNTRY)
+        LOGGER.debug("Language: %s", self.LANGUAGE)
+        LOGGER.debug("Temp Format: %s", self.TEMPFORMAT)
+        LOGGER.debug("Z-Wave Firmware Version: %s", self.ZWAVE_FIRM_WARE_VERSION)
+        LOGGER.debug("Z-Wave Card Present: %s", self.ZWAVE_CARD)
+        LOGGER.debug("Z-Wave Controller Enabled: %s", self.ZWAVE_CONTROLLER)
+        LOGGER.debug("Partitons Enabled: %s", self.PARTITIONS)
+        LOGGER.debug("Control4 Enabled: %s", self.CONTROL_4)
+        LOGGER.debug("Six Digit User Code Enabled: %s", self.SIX_DIGIT_USER_CODE)
+        LOGGER.debug("Secure Arming: %s", self.SECURE_ARMING)
+        LOGGER.debug("Auto-Stay: %s", self.AUTO_STAY)
+        LOGGER.debug("Auto-Bypass: %s", self.AUTO_BYPASS)
+        LOGGER.debug("Auto-Arm-Stay: %s", self.AUTO_ARM_STAY)
+        LOGGER.debug("Auto-Exit-Extension: %s", self.AUTO_EXIT_EXTENSION)
+        LOGGER.debug("Final-Exit-Door-Arming: %s", self.FINAL_EXIT_DOOR_ARMING)
+        LOGGER.debug("No-Arm-Low-Battery: %s", self.NO_ARM_LOW_BATTERY)
+        LOGGER.debug("Normal Entry Delay: %s", self.TIMER_NORMAL_ENTRY_DELAY)
+        LOGGER.debug("Normal Exit Delay: %s", self.TIMER_NORMAL_EXIT_DELAY)
+        LOGGER.debug("Long Entry Delay: %s", self.TIMER_LONG_ENTRY_DELAY)
+        LOGGER.debug("Long Exit Delay: %s", self.TIMER_LONG_EXIT_DELAY)
+        LOGGER.debug("Auxiliary Panic Enabled: %s", self.AUXILIARY_PANIC_ENABLED)
+        LOGGER.debug("Fire Panic Enabled: %s", self.FIRE_PANIC_ENABLED)
+        LOGGER.debug("Police Panic Enabled: %s", self.POLICE_PANIC_ENABLED)
+        LOGGER.debug("Night Mode Settings: %s", self.NIGHTMODE_SETTINGS)
+        LOGGER.debug("Night Mode Settings Stage: %s", self.NIGHT_SETTINGS_STATE)
+        LOGGER.debug("Show Security Sensors: %s", self.SHOW_SECURITY_SENSORS)
 
         LOGGER.debug("Users list:")
         for user in self._users:
-            LOGGER.debug("User: %s",user["id"])
+            LOGGER.debug("User: %s", user["id"])
 

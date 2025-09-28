@@ -4,6 +4,7 @@ from collections.abc import Coroutine
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTaskManager:
     def __init__(self) -> None:
         self._tasks = set()

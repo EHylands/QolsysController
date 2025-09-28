@@ -11,56 +11,56 @@ class QolsysZone(QolsysObservable):
         super().__init__()
 
         self._zone_id = data.get("zoneid","")
-        self._sensorname =  data.get("sensorname","")
-        self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus",""))
-        self._sensortype = ZoneSensorType(data.get("sensortype",""))
-        self._sensorgroup =  data.get("sensorgroup","")
-        self._battery_status = data.get("battery_status","")
-        self._averagedBm = data.get("averagedBm","")
-        self._latestdBm = data.get("latestdBm","")
-        self._ac_status = data.get("ac_status","")
+        self._sensorname =  data.get("sensorname", "")
+        self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
+        self._sensortype = ZoneSensorType(data.get("sensortype", ""))
+        self._sensorgroup =  data.get("sensorgroup", "")
+        self._battery_status = data.get("battery_status", "")
+        self._averagedBm = data.get("averagedBm", "")
+        self._latestdBm = data.get("latestdBm", "")
+        self._ac_status = data.get("ac_status", "")
 
-        self._id = data.get("_id","")
-        self._zone_type = data.get("zone_type","")
-        self._sensor_id = data.get("sensorid","")
-        self._sensorstate = data.get("sensorstate","")
-        self._zone_physical_type = data.get("zone_physical_type","")
-        self._zone_alarm_type = data.get("zone_alarm_type","")
-        self._partition_id = data.get("partition_id","")
-        self._sensortts = data.get("sensortts","")
-        self._current_capability = data.get("current_capability","")
-        self._zone_rf_sensor = data.get("zone_rf_sensor","")
-        self._zone_supervised = data.get("zone_supervised","")
-        self._zone_reporting_enabled = data.get("zone_reporting_enabled","")
-        self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled","")
-        self._signal_source = data.get("signal_source","")
-        self._serial_number = data.get("serial_number","")
-        self._chimetype = data.get("chimetype","")
-        self._frame_count = data.get("frame_count","")
-        self._frame_type = data.get("frame_type","")
-        self._frame_id = data.get("frame_id","")
-        self._allowdisarming = data.get("allowdisarming","")
-        self._time = data.get("time","")
-        self._version = data.get("version","")
-        self._opr = data.get("opr","")
-        self._zone_equipement_code = data.get("zone_equipment_code","")
-        self._created_date = data.get("created_date","")
-        self._created_by = data.get("created_by","")
-        self._updated_by = data.get("updated_by","")
-        self._updated_date = data.get("updated_date","")
-        self._shortID = data.get("shortID","")
-        self._diag_24hr = data.get("diag_24hr","")
-        self._device_capability = data.get("device_capability","")
-        self._sub_type = data.get("sub_type","")
-        self._powerg_manufacture_id = data.get("powerg_manufacture_id","")
-        self._parent_node = data.get("parent_node","")
-        self._extras = data.get("extras","")
+        self._id = data.get("_id", "")
+        self._zone_type = data.get("zone_type", "")
+        self._sensor_id = data.get("sensorid", "")
+        self._sensorstate = data.get("sensorstate", "")
+        self._zone_physical_type = data.get("zone_physical_type", "")
+        self._zone_alarm_type = data.get("zone_alarm_type", "")
+        self._partition_id = data.get("partition_id", "")
+        self._sensortts = data.get("sensortts", "")
+        self._current_capability = data.get("current_capability", "")
+        self._zone_rf_sensor = data.get("zone_rf_sensor", "")
+        self._zone_supervised = data.get("zone_supervised", "")
+        self._zone_reporting_enabled = data.get("zone_reporting_enabled", "")
+        self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled", "")
+        self._signal_source = data.get("signal_source", "")
+        self._serial_number = data.get("serial_number", "")
+        self._chimetype = data.get("chimetype", "")
+        self._frame_count = data.get("frame_count", "")
+        self._frame_type = data.get("frame_type", "")
+        self._frame_id = data.get("frame_id", "")
+        self._allowdisarming = data.get("allowdisarming", "")
+        self._time = data.get("time", "")
+        self._version = data.get("version", "")
+        self._opr = data.get("opr", "")
+        self._zone_equipement_code = data.get("zone_equipment_code", "")
+        self._created_date = data.get("created_date", "")
+        self._created_by = data.get("created_by", "")
+        self._updated_by = data.get("updated_by", "")
+        self._updated_date = data.get("updated_date", "")
+        self._shortID = data.get("shortID", "")
+        self._diag_24hr = data.get("diag_24hr", "")
+        self._device_capability = data.get("device_capability", "")
+        self._sub_type = data.get("sub_type", "")
+        self._powerg_manufacture_id = data.get("powerg_manufacture_id", "")
+        self._parent_node = data.get("parent_node", "")
+        self._extras = data.get("extras", "")
 
     def update(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
-        zone_id_update = data.get("zoneid","")
+        zone_id_update = data.get("zoneid", "")
         if zone_id_update != self._zone_id:
-           LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)",self._zone_id,self.sensorname,zone_id_update)
+           LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)", self._zone_id, self.sensorname, zone_id_update)
            return
 
         self.start_batch_update()
@@ -224,14 +224,14 @@ class QolsysZone(QolsysObservable):
     @sensorstatus.setter
     def sensorstatus(self, new_value:ZoneStatus) -> None:
         if self._sensorstatus != new_value:
-            LOGGER.debug("Zone%s (%s) - sensorstatus: %s",self._zone_id,self.sensorname,new_value)
+            LOGGER.debug("Zone%s (%s) - sensorstatus: %s", self._zone_id, self.sensorname, new_value)
             self._sensorstatus = new_value
             self.notify()
 
     @battery_status.setter
     def battery_status(self, value:str) -> None:
         if self._battery_status != value:
-            LOGGER.debug("Zone%s (%s) - battery_status: %s",self.zone_id,self.sensorname,value)
+            LOGGER.debug("Zone%s (%s) - battery_status: %s", self.zone_id, self.sensorname, value)
             self._battery_status = value
             self.notify()
 
@@ -244,7 +244,7 @@ class QolsysZone(QolsysObservable):
     @time.setter
     def time(self, value:str) -> None:
         if self._time != value:
-            LOGGER.debug("Zone%s (%s) - time: %s",self.zone_id,self.sensorname,value)
+            LOGGER.debug("Zone%s (%s) - time: %s", self.zone_id, self.sensorname, value)
             self._time = value
             self.notify()
 
@@ -262,10 +262,10 @@ class QolsysZone(QolsysObservable):
             try:
                 ZoneSensorGroup(new_value)
             except ValueError:
-                LOGGER.exception("Unknown Sensor group: %s, please report",new_value)
+                LOGGER.exception("Unknown Sensor group: %s, please report", new_value)
 
             self._sensorgroup = new_value
-            LOGGER.debug("Zone%s (%s) - sensorgroup: %s",self.zone_id,self.sensorname,new_value.name)
+            LOGGER.debug("Zone%s (%s) - sensorgroup: %s", self.zone_id,self.sensorname, new_value.name)
             self.notify()
 
     @partition_id.setter

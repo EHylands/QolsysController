@@ -11,20 +11,20 @@ class QolsysDimmer(QolsysZWaveDevice):
         super().__init__(zwave_dict)
 
         self._dimmer_id = dimmer_dict.get("_id")
-        self._dimmer_version =  dimmer_dict.get("version","")
-        self._dimmer_opr = dimmer_dict.get("opr","")
-        self._dimmer_partition_id = dimmer_dict.get("partition_id","")
-        self._dimmer_name = dimmer_dict.get("dimmer_name","")
-        self._dimmer_status = dimmer_dict.get("status","")
-        self._dimmer_level = dimmer_dict.get("level","")
-        self._dimmer_node_id = dimmer_dict.get("node_id","")
-        self._dimmer_created_by = dimmer_dict.get("created_by","")
-        self._dimmer_created_date = dimmer_dict.get("created_date","")
-        self._dimmer_updated_by = dimmer_dict.get("updated_by","")
-        self._dimmer_last_updated_date = dimmer_dict.get("last_updated_date","")
-        self._dimmer_endpoint = dimmer_dict.get("endpoint","")
-        self._dimmer_power_details = dimmer_dict.get("power_details","")
-        self._dimmer_paired_status = dimmer_dict.get("paired_status","")
+        self._dimmer_version = dimmer_dict.get("version", "")
+        self._dimmer_opr = dimmer_dict.get("opr", "")
+        self._dimmer_partition_id = dimmer_dict.get("partition_id", "")
+        self._dimmer_name = dimmer_dict.get("dimmer_name", "")
+        self._dimmer_status = dimmer_dict.get("status", "")
+        self._dimmer_level = dimmer_dict.get("level", "")
+        self._dimmer_node_id = dimmer_dict.get("node_id", "")
+        self._dimmer_created_by = dimmer_dict.get("created_by", "")
+        self._dimmer_created_date = dimmer_dict.get("created_date", "")
+        self._dimmer_updated_by = dimmer_dict.get("updated_by", "")
+        self._dimmer_last_updated_date = dimmer_dict.get("last_updated_date", "")
+        self._dimmer_endpoint = dimmer_dict.get("endpoint", "")
+        self._dimmer_power_details = dimmer_dict.get("power_details", "")
+        self._dimmer_paired_status = dimmer_dict.get("paired_status", "")
 
     @property
     def dimmer_node_id(self) -> str:
@@ -45,21 +45,21 @@ class QolsysDimmer(QolsysZWaveDevice):
     @dimmer_level.setter
     def dimmer_level(self,value:str) -> None:
         if self._dimmer_level != value:
-            LOGGER.debug("Dimmer%s (%s) - level: %s",self.node_id,self.dimmer_name,value)
+            LOGGER.debug("Dimmer%s (%s) - level: %s", self.node_id, self.dimmer_name, value)
             self._dimmer_level = value
             self.notify()
 
     @dimmer_status.setter
     def dimmer_status(self,value:str) -> None:
         if self._dimmer_status != value:
-            LOGGER.debug("Dimmer%s (%s) - status: %s",self.node_id,self.dimmer_name,value)
+            LOGGER.debug("Dimmer%s (%s) - status: %s", self.node_id, self.dimmer_name, value)
             self._dimmer_status = value
             self.notify()
 
     @dimmer_name.setter
     def dimmer_name(self,value:str) -> None:
         if self._dimmer_name != value:
-            LOGGER.debug("Dimmer%s (%s) - name: %s",self.node_id,self.dimmer_name,value)
+            LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name,value)
             self._dimmer_name = value
             self.notify()
 
@@ -68,9 +68,9 @@ class QolsysDimmer(QolsysZWaveDevice):
 
     def update_dimmer(self,content_values:dict) -> None:  # noqa: C901
         # Check if we are updating same none_id
-        node_id_update = content_values.get("node_id","")
+        node_id_update = content_values.get("node_id", "")
         if node_id_update != self._dimmer_node_id:
-            LOGGER.error("Updating Dimmer %s (%s) with dimmer %s (different id)",self._node_id,self.dimmer_name,node_id_update)
+            LOGGER.error("Updating Dimmer %s (%s) with dimmer %s (different id)", self._node_id, self.dimmer_name, node_id_update)
             return
 
         self.start_batch_update()

@@ -10,9 +10,9 @@ LOGGER = logging.getLogger(__name__)
 class QolsysPlugin:
     def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings) -> None:
 
-        self._state = state
-        self._panel = panel
-        self._settings = settings
+        self._state: QolsysState = state
+        self._panel: QolsysPanel = panel
+        self._settings: QolsysSettings = settings
 
         self.connected = False
         self.connected_observer = QolsysObservable()

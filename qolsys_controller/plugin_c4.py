@@ -10,7 +10,7 @@ class QolsysPluginC4(QolsysPlugin):
                 # C4 Integration
                 self._token = ""
 
-        def config(self,panel_ip:str,token:str) -> bool:  # noqa: ARG002
+        def config(self, panel_ip:str, token:str) -> bool:  # noqa: ARG002
                 LOGGER.warning("C4Plugin: Configuring Plugin")
                 super().config()
                 return True

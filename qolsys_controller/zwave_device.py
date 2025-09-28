@@ -10,30 +10,30 @@ class QolsysZWaveDevice(QolsysObservable):
         super().__init__()
 
         self._id = zwave_dict.get("_id")
-        self._node_id = zwave_dict.get("node_id","")
-        self._node_name = zwave_dict.get("node_name","")
-        self._node_type =  zwave_dict.get("node_type","")
-        self._node_status = zwave_dict.get("node_status","")
-        self._partition_id = zwave_dict.get("partition_id","")
-        self._node_secure_cmd_cls = zwave_dict.get("node_secure_cmd_cls","")
-        self._node_battery_level = zwave_dict.get("node_battery_level","")
-        self._node_battery_level_value = zwave_dict.get("node_battery_level_value","")
-        self._is_node_listening_node = zwave_dict.get("is_node_listening_node","")
-        self._basic_report_value = zwave_dict.get("basic_report_value","")
-        self._switch_multilevel_report_value = zwave_dict.get("switch_multilevel_report_value","")
-        self._basic_device_type = zwave_dict.get("basic_device_type","")
-        self._generic_device_type = zwave_dict.get("generic_device_type","")
-        self._specific_device_type = zwave_dict.get("specific_device_type","")
-        self._num_secure_command_class = zwave_dict.get("num_secure_command_class","")
-        self._secure_command_class = zwave_dict.get("secure_command_class","")
-        self._manufacture_id = zwave_dict.get("manufacture_id","")
-        self._product_type = zwave_dict.get("product_type","")
-        self._device_protocol = zwave_dict.get("device_protocol","")
-        self._paired_status = zwave_dict.get("paired_status","")
-        self._is_device_sleeping = zwave_dict.get("is_device_sleeping","")
-        self._is_device_hidden = zwave_dict.get("is_device_hidden","")
-        self._last_updated_date = zwave_dict.get("last_updated_date","")
-        self._command_class_list = zwave_dict.get("command_class_list","")
+        self._node_id = zwave_dict.get("node_id", "")
+        self._node_name = zwave_dict.get("node_name", "")
+        self._node_type =  zwave_dict.get("node_type", "")
+        self._node_status = zwave_dict.get("node_status", "")
+        self._partition_id = zwave_dict.get("partition_id", "")
+        self._node_secure_cmd_cls = zwave_dict.get("node_secure_cmd_cls", "")
+        self._node_battery_level = zwave_dict.get("node_battery_level", "")
+        self._node_battery_level_value = zwave_dict.get("node_battery_level_value", "")
+        self._is_node_listening_node = zwave_dict.get("is_node_listening_node", "")
+        self._basic_report_value = zwave_dict.get("basic_report_value", "")
+        self._switch_multilevel_report_value = zwave_dict.get("switch_multilevel_report_value", "")
+        self._basic_device_type = zwave_dict.get("basic_device_type", "")
+        self._generic_device_type = zwave_dict.get("generic_device_type", "")
+        self._specific_device_type = zwave_dict.get("specific_device_type", "")
+        self._num_secure_command_class = zwave_dict.get("num_secure_command_class", "")
+        self._secure_command_class = zwave_dict.get("secure_command_class", "")
+        self._manufacture_id = zwave_dict.get("manufacture_id", "")
+        self._product_type = zwave_dict.get("product_type", "")
+        self._device_protocol = zwave_dict.get("device_protocol", "")
+        self._paired_status = zwave_dict.get("paired_status", "")
+        self._is_device_sleeping = zwave_dict.get("is_device_sleeping", "")
+        self._is_device_hidden = zwave_dict.get("is_device_hidden", "")
+        self._last_updated_date = zwave_dict.get("last_updated_date", "")
+        self._command_class_list = zwave_dict.get("command_class_list", "")
 
     @property
     def node_id(self) -> str:
@@ -70,9 +70,9 @@ class QolsysZWaveDevice(QolsysObservable):
     def update_base(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
         # Check if we are updating same node_id
-        node_id_update = data.get("node_id","")
+        node_id_update = data.get("node_id", "")
         if node_id_update != self._node_id:
-            LOGGER.error("Updating ZWave%s (%s) with ZWave%s (different node_id)",self.node_id,self.node_name,node_id_update)
+            LOGGER.error("Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update)
             return
 
         self.start_batch_update()
@@ -135,49 +135,49 @@ class QolsysZWaveDevice(QolsysObservable):
     @paired_status.setter
     def paired_status(self,value:str) -> str:
         if self._paired_status != value:
-            LOGGER.debug("ZWave%s (%s) - paired_status: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - paired_status: %s", self.node_id, self.node_name, value)
             self._paired_status = value
             self.notify()
 
     @node_battery_level.setter
     def node_battery_level(self,value:str) -> None:
         if self._node_battery_level != value:
-            LOGGER.debug("ZWave%s (%s) - node_battery_level: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - node_battery_level: %s", self.node_id, self.node_name, value)
             self._node_battery_level = value
             self.notify()
 
     @node_battery_level_value.setter
     def node_battery_level_value(self,value:str) -> str:
         if self._node_battery_level_value != value:
-            LOGGER.debug("ZWave%s (%s) - node_battery_level_value: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - node_battery_level_value: %s", self.node_id, self.node_name, value)
             self._node_battery_level_value = value
             self.notify()
 
     @node_status.setter
     def node_status(self,value:str) -> str:
         if self._node_status != value:
-            LOGGER.debug("ZWave%s (%s) - node_status: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - node_status: %s", self.node_id, self.node_name, value)
             self._node_status = value
             self.notify()
 
     @node_name.setter
     def node_name(self,value:str) -> str:
         if self._node_name != value:
-            LOGGER.debug("ZWave%s (%s) - node_name: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - node_name: %s", self.node_id, self.node_name, value)
             self._node_name = value
             self.notify()
 
     @node_type.setter
     def node_type(self,value:str) -> str:
         if self._node_type != value:
-            LOGGER.debug("ZWave%s (%s) - node_type: %s",self.node_id,self.node_name,value)
+            LOGGER.debug("ZWave%s (%s) - node_type: %s", self.node_id, self.node_name, value)
             self._node_type = value
             self.notify()
 
     @partition_id.setter
     def partition_id(self,value:str) -> str:
         if self._partition_id != value:
-            LOGGER.debug("ZWave%s (%s) - partition_id: %s",self._node_id,self._node_name,value)
+            LOGGER.debug("ZWave%s (%s) - partition_id: %s", self._node_id, self._node_name, value)
             self._partition_id = value
             self.notify()
 
