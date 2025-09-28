@@ -35,4 +35,3 @@ class QolsysTableQolsysSettings(QolsysTable):
             data.get("value", "")))
 
         self._db.commit()
-

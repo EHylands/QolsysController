@@ -31,7 +31,7 @@ class QolsysTableAlarmedSensor(QolsysTable):
 
     def insert(self, data: dict) -> None:
         self._cursor.execute(f"""INSERT INTO {self.table} (_id,partition_id,silenced,zone_id,sgroup,action,timed_out,type,
-                             priority,aseb_type) VALUES (?,?,?,?,?,?,?,?,?,?)""",(
+                             priority,aseb_type) VALUES (?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("partition_id", ""),
             data.get("silenced", ""),
@@ -44,4 +44,3 @@ class QolsysTableAlarmedSensor(QolsysTable):
             data.get("aseb_type", "")))
 
         self._db.commit()
-

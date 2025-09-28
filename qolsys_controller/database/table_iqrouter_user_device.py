@@ -25,4 +25,3 @@ class QolsysTableIqRouterUserDevice(QolsysTable):
             LOGGER.error("Please Report")
             LOGGER.error("Loading Table Format: %s", self.uri)
             LOGGER.error(data)
-

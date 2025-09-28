@@ -11,11 +11,13 @@ class PartitionSystemStatus(StrEnum):
     ARM_NIGHT_EXIT_DELAY = "ARM-NIGHT-EXIT-DELAY"
     UNKNOWN = "UNKNOWN"
 
+
 class PartitionAlarmState(StrEnum):
     NONE = "None"
     DELAY = "Delay"
     ALARM = "Alarm"
     UNKNOWN = "UNKNOWN"
+
 
 class PartitionAlarmType(StrEnum):
     POLICE_EMERGENCY = "Police Emergency"
@@ -23,6 +25,7 @@ class PartitionAlarmType(StrEnum):
     AUXILIARY_EMERGENCY = "Auxiliary Emergency"
     SILENT_AUXILIARY_EMERGENCY = "Silent Auxiliary Emergency"
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
+
 
 class ZoneStatus(StrEnum):
     OPEN = "Open"
@@ -36,6 +39,7 @@ class ZoneStatus(StrEnum):
     SYNCHONIZING = "Synchonizing"
     CONNECTED = "connected"
     FAILURE = "Failure"
+
 
 class ZoneSensorType(StrEnum):
     DOOR_WINDOW = "Door_Window"
@@ -65,6 +69,7 @@ class ZoneSensorType(StrEnum):
     BLUETOOTH = "Bluetooth"
     TAKEOVER_MODULE = "TakeoverModule"
     TRANSLATOR = "Translator"
+
 
 class ZoneSensorGroup(StrEnum):
     FIXED_INTRUSION = "fixedintrusion"

@@ -20,7 +20,7 @@ class QolsysTableZigbeeDevice(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
+    def insert(self, data: dict) -> None:
         if data is not None:
             LOGGER.error("Please Report")
             LOGGER.error("Loading Table Format: %s", self.uri)

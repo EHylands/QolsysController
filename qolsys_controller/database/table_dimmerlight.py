@@ -55,4 +55,3 @@ class QolsysTableDimmerLight(QolsysTable):
             data.get("paired_status", "")))
 
         self._db.commit()
-

@@ -5,6 +5,7 @@ from .table import QolsysTable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTableZwaveAssociationGroup(QolsysTable):
 
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:

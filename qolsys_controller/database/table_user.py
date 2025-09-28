@@ -36,7 +36,7 @@ class QolsysTableUser(QolsysTable):
                              expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
-            data.get("opr",""),
+            data.get("opr", ""),
             data.get("partition_id", ""),
             data.get("username", ""),
             data.get("userPin", ""),

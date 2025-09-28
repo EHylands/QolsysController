@@ -15,7 +15,7 @@ class QolsysPartition(QolsysObservable):
     EXIT_SOUNDS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
     ENTRY_DELAYS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
 
-    def __init__(self,partition_dict:dict,settings_dict:dict,alarm_state:PartitionAlarmState,alarm_type_array:list[PartitionAlarmType]) -> None:
+    def __init__(self, partition_dict: dict, settings_dict: dict, alarm_state: PartitionAlarmState, alarm_type_array: list[PartitionAlarmType]) -> None:
 
         super().__init__()
 
@@ -25,10 +25,10 @@ class QolsysPartition(QolsysObservable):
         self._devices = partition_dict.get("devices")
 
         # Partition Settings (qolsyssettings table)
-        self._system_status: PartitionSystemStatus = PartitionSystemStatus(settings_dict.get("SYSTEM_STATUS",""))
-        self._system_status_changed_time: str = settings_dict.get("SYSTEM_STATUS_CHANGED_TIME","")
-        self._exit_sounds: str = settings_dict.get("EXIT_SOUNDS","")
-        self._entry_delays: str = settings_dict.get("ENTRY_DELAYS","")
+        self._system_status: PartitionSystemStatus = PartitionSystemStatus(settings_dict.get("SYSTEM_STATUS", ""))
+        self._system_status_changed_time: str = settings_dict.get("SYSTEM_STATUS_CHANGED_TIME", "")
+        self._exit_sounds: str = settings_dict.get("EXIT_SOUNDS", "")
+        self._entry_delays: str = settings_dict.get("ENTRY_DELAYS", "")
 
         # Alarm State (state table)
         self._alarm_state:PartitionAlarmState = alarm_state
@@ -121,7 +121,7 @@ class QolsysPartition(QolsysObservable):
 
     @name.setter
     def name(self, value: str) -> None:
-         if self._name != value:
+        if self._name != value:
             LOGGER.debug("Partition%s (%s) - name: %s", self._id, self._name, value)
             self._name = value
             self.notify()

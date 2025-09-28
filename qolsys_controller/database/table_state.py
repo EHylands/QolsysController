@@ -27,7 +27,8 @@ class QolsysTableState(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,name,value,extraparams) VALUES (?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,name,value,extraparams)
+                              VALUES (?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -37,4 +38,3 @@ class QolsysTableState(QolsysTable):
             data.get("extraparams", "")))
 
         self._db.commit()
-

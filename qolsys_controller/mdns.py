@@ -6,11 +6,11 @@ from zeroconf.asyncio import AsyncZeroconf
 
 class QolsysMDNS:
 
-    def __init__(self,ip: str, port: int) -> None:
+    def __init__(self, ip: str, port: int) -> None:
 
-        self.azc =  AsyncZeroconf()
+        self.azc = AsyncZeroconf()
 
-        self.mdns_info  = ServiceInfo(
+        self.mdns_info = ServiceInfo(
             "_http._tcp.local.",
             "NsdPairService._http._tcp.local.",
             addresses=[socket.inet_aton(ip)],

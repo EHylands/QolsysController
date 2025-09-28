@@ -75,7 +75,6 @@ class QolsysTable:
         # Have not found a way to make it work with parametrized query yet
         # Using f string concat for moment ...
 
-
         # New Values to update in table
         # To change for parametrized
         db_value = ",".join([f"{key}='{value}'" for key, value in content_value.items()])
