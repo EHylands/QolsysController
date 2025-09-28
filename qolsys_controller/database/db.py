@@ -221,7 +221,7 @@ class QolsysDB:
         row = self.cursor.fetchone()
 
         if row is None:
-            LOGGER.debug("%s value not found",setting)
+            LOGGER.debug("%s value not found", setting)
             return None
 
         return row[0]
@@ -238,7 +238,8 @@ class QolsysDB:
         return row[0]
 
     def get_state_partition(self, state: str, partition_id: str) -> str | None:
-        self.cursor.execute(f"SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? ", (state, partition_id))
+        self.cursor.execute(f"""SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? """,
+                             (state, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:

@@ -32,7 +32,7 @@ class QolsysTableHistory(QolsysTable):
 
     def insert(self, data: dict) -> None:
         self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,device,events,time,ack,type,
-                             feature1,device_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",(
+                             feature1,device_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -46,4 +46,3 @@ class QolsysTableHistory(QolsysTable):
             data.get("device_id", "")))
 
         self._db.commit()
-

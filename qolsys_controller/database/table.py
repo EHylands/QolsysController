@@ -64,7 +64,7 @@ class QolsysTable:
             })
 
             if self._abort_on_error:
-               raise error from err
+                raise error from err
 
     def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
@@ -77,8 +77,8 @@ class QolsysTable:
 
 
         # New Values to update in table
-        # To change for parametrized 
-        db_value = ",".join([f"{key}='{value}'" for key,value in content_value.items()])
+        # To change for parametrized
+        db_value = ",".join([f"{key}='{value}'" for key, value in content_value.items()])
 
         # Selection Argument
         selection_argument = selection_argument.strip("[]")
@@ -86,7 +86,7 @@ class QolsysTable:
 
         try:
             query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
-            self._cursor.execute(query,selection_argument)
+            self._cursor.execute(query, selection_argument)
             self._db.commit()
 
         except sqlite3.Error as err:
@@ -100,12 +100,12 @@ class QolsysTable:
             })
 
             if self._abort_on_error:
-               raise error from err
+                raise error from err
 
     def insert(self) -> None:
         pass
 
-    def delete(self,selection: str, selection_argument: str) -> None:
+    def delete(self, selection: str, selection_argument: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # selection_argument: '[3,1]'
 
@@ -118,7 +118,7 @@ class QolsysTable:
 
         try:
             query = f"DELETE FROM {self.table} WHERE {selection}"
-            self._cursor.execute(query,selection_argument)
+            self._cursor.execute(query, selection_argument)
             self._db.commit()
 
         except sqlite3.Error as err:
@@ -131,4 +131,4 @@ class QolsysTable:
             })
 
             if self._abort_on_error:
-               raise error from err
+                raise error from err

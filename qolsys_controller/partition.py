@@ -81,7 +81,7 @@ class QolsysPartition(QolsysObservable):
         return self._command_arm_stay_instant
 
     @system_status.setter
-    def system_status(self, new_value:PartitionSystemStatus) -> None:
+    def system_status(self, new_value: PartitionSystemStatus) -> None:
         if self._system_status != new_value:
             LOGGER.debug("Partition%s (%s) - system_status: %s", self.id, self.name, new_value)
             self._system_status = new_value
@@ -95,14 +95,14 @@ class QolsysPartition(QolsysObservable):
             self.notify()
 
     @alarm_state.setter
-    def alarm_state(self,new_value:PartitionAlarmState) -> None:
+    def alarm_state(self, new_value: PartitionAlarmState) -> None:
         if self._alarm_state != new_value:
             LOGGER.debug("Partition%s (%s) - alarm_state: %s", self.id, self.name, new_value)
             self._alarm_state = new_value
             self.notify()
 
     @alarm_type_array.setter
-    def alarm_type_array(self, new_alarm_type_array:list[PartitionAlarmType]) -> None:
+    def alarm_type_array(self, new_alarm_type_array: list[PartitionAlarmType]) -> None:
 
         # If no changes are detected: return without notification
         if sorted(new_alarm_type_array, key=lambda c: c.value) == sorted(self.alarm_type_array, key=lambda c: c.value):
@@ -120,13 +120,13 @@ class QolsysPartition(QolsysObservable):
         self.append_alarm_type(new_alarm_type_array)
 
     @name.setter
-    def name(self,value:str) -> None:
+    def name(self, value: str) -> None:
          if self._name != value:
             LOGGER.debug("Partition%s (%s) - name: %s", self._id, self._name, value)
             self._name = value
             self.notify()
 
-    def append_alarm_type(self,new_alarm_type_array:list[PartitionAlarmType]) -> None:
+    def append_alarm_type(self, new_alarm_type_array: list[PartitionAlarmType]) -> None:
 
         data_changed = False
 
@@ -145,7 +145,7 @@ class QolsysPartition(QolsysObservable):
                 LOGGER.debug("Partition%s (%s) - alarm_type: %s", self._id, self._name, alarm)
 
     @exit_sounds.setter
-    def exit_sounds(self,value:str) -> None:
+    def exit_sounds(self, value: str) -> None:
         if value not in self.EXIT_SOUNDS_ARRAY:
             LOGGER.debug("Partition%s (%s) - Unknow exit_sounds %s", self._id, self._name, value)
             return
@@ -156,7 +156,7 @@ class QolsysPartition(QolsysObservable):
             self.notify()
 
     @entry_delays.setter
-    def entry_delays(self,value:str) -> None:
+    def entry_delays(self, value: str) -> None:
         if value not in self.ENTRY_DELAYS_ARRAY:
             LOGGER.debug("Partition%s (%s) - Unknow entry_delays %s", self._id, self._name, value)
             return
@@ -167,22 +167,23 @@ class QolsysPartition(QolsysObservable):
             self.notify()
 
     @command_exit_sounds.setter
-    def command_exit_sounds(self,value:str) -> None:
+    def command_exit_sounds(self, value: str) -> None:
         self._command_exit_sounds = value
         LOGGER.debug("Partition%s (%s) - command_exit_sounds: %s", self._id, self._name, value)
         self.notify()
 
     @command_arm_stay_instant.setter
-    def command_arm_stay_instant(self,value:str) -> None:
+    def command_arm_stay_instant(self, value: str) -> None:
         self._command_arm_stay_instant = value
         LOGGER.debug("Partition%s (%s) - arm_stay_instant: %s", self._id, self._name, value)
         self.notify()
 
-    def update_partition(self,data:dict) -> None:
+    def update_partition(self, data: dict) -> None:
         # Check if we are updating same partition_id
         partition_id_update = data.get("partition_id", "")
         if int(partition_id_update) != int(self.id):
-            LOGGER.error("Updating Partition%s (%s) with Partition '%s' (different id)", self._id, self._name, partition_id_update)
+            LOGGER.error("Updating Partition%s (%s) with Partition '%s' (different id)",
+                          self._id, self._name, partition_id_update)
             return
 
         self.start_batch_update()
@@ -197,7 +198,7 @@ class QolsysPartition(QolsysObservable):
 
         self.end_batch_update()
 
-    def update_settings(self,data:dict) -> None:
+    def update_settings(self, data: dict) -> None:
 
         self.start_batch_update()
 
@@ -228,8 +229,8 @@ class QolsysPartition(QolsysObservable):
 
     def to_dict_settings(self) -> dict:
         return {
-            "SYSTEM_STATUS":self.system_status.value,
+            "SYSTEM_STATUS": self.system_status.value,
             "SYSTEM_STATUS_CHANGED_TIME" : self.system_status_changed_time,
-            "EXIT_SOUNDS":self.exit_sounds,
-            "ENTRY_DELAYS":self.entry_delays,
+            "EXIT_SOUNDS": self.exit_sounds,
+            "ENTRY_DELAYS": self.entry_delays,
         }

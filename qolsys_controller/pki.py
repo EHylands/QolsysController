@@ -15,9 +15,9 @@ from .settings import QolsysSettings
 LOGGER = logging.getLogger(__name__)
 
 class QolsysPKI:
-    def __init__(self,settings:QolsysSettings) -> None:
+    def __init__(self, settings: QolsysSettings) -> None:
         self._id = ""
-        self._subkeys_directory:Path = Path
+        self._subkeys_directory: Path = Path
 
         self._key = None
         self._cer = None
@@ -34,8 +34,8 @@ class QolsysPKI:
     def formatted_id(self) -> str:
         return ":".join(self.id[i:i+2] for i in range(0, len(self.id), 2))
 
-    def set_id(self,pki_id:str) -> None:
-        self._id = pki_id.replace(":","").upper()
+    def set_id(self, pki_id: str) -> None:
+        self._id = pki_id.replace(":", "").upper()
         LOGGER.debug("Using PKI: %s",self.formatted_id())
         self._subkeys_directory = self._settings.pki_directory.joinpath(Path(self.id))
 
@@ -71,25 +71,25 @@ class QolsysPKI:
 
         return False
 
-    def load_private_key(self,key:str) -> bool:
+    def load_private_key(self, key: str) -> bool:
         try:
-            self._key = serialization.load_pem_private_key(key.encode(),password=None)
+            self._key = serialization.load_pem_private_key(key.encode(), password=None)
         except ValueError:
             LOGGER.debug("Private Key Value Error")
             return False
 
         return True
 
-    def load_certificate(self,cer:str) -> bool:
+    def load_certificate(self, cer: str) -> bool:
         try:
-            self._cer = x509.load_pem_x509_certificate(cer.encode(),None)
+            self._cer = x509.load_pem_x509_certificate(cer.encode(), None)
         except ValueError:
             LOGGER.debug("Certificate Value Error")
             return False
 
         return True
 
-    def load_certificate_signing_request(self,csr:str) -> bool:
+    def load_certificate_signing_request(self, csr: str) -> bool:
         try:
             self._csr = load_pem_x509_csr(csr.encode())
         except ValueError:
@@ -98,25 +98,25 @@ class QolsysPKI:
 
         return True
 
-    def load_qolsys_certificate(self,qolsys:str) -> bool:
+    def load_qolsys_certificate(self, qolsys: str) -> bool:
         try:
-            self._qolsys = x509.load_pem_x509_certificate(qolsys.encode(),None)
+            self._qolsys = x509.load_pem_x509_certificate(qolsys.encode(), None)
         except ValueError:
             LOGGER.debug("Qolsys Certificate Value Error")
             return False
 
         return True
 
-    def load_signed_client_certificate(self,secure:str) -> bool:
+    def load_signed_client_certificate(self, secure: str) -> bool:
         try:
-            self._secure = x509.load_pem_x509_certificate(secure.encode(),None)
+            self._secure = x509.load_pem_x509_certificate(secure.encode(), None)
         except ValueError:
             LOGGER.debug("Client Signed Certificate Value Error")
             return False
 
         return True
 
-    def check_key_file(self)->bool:
+    def check_key_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".key").resolve().exists():
             LOGGER.debug("Found KEY")
             return True
@@ -171,7 +171,7 @@ class QolsysPKI:
     def qolsys_cer_file_path(self) -> str:
         return self._subkeys_directory.joinpath(self.id + ".qolsys")
 
-    def create(self,mac:str,key_size:int)->bool:
+    def create(self,mac:str, key_size: int)->bool:
 
         self.set_id(mac)
 
@@ -200,7 +200,7 @@ class QolsysPKI:
             LOGGER.error("Create Signed Certificate File Colision")
             return False
 
-        LOGGER.debug("Creating PKI:  %s",self.formatted_id())
+        LOGGER.debug("Creating PKI:  %s", self.formatted_id())
 
         LOGGER.debug("Creating PKI Directory")
         self._subkeys_directory.resolve().mkdir(parents=True)
@@ -255,4 +255,3 @@ class QolsysPKI:
             file.write(csr_pem)
 
         return True
-

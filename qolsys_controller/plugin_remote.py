@@ -50,7 +50,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return self._log_mqtt_messages
 
     @log_mqtt_mesages.setter
-    def log_mqtt_mesages(self,log_mqtt_mesages:bool) -> None:
+    def log_mqtt_mesages(self, log_mqtt_mesages: bool) -> None:
         self._log_mqtt_messages = log_mqtt_mesages
 
     @property
@@ -58,7 +58,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return self._check_user_code_on_disarm
 
     @check_user_code_on_disarm.setter
-    def check_user_code_on_disarm(self,check_user_code_on_disarm:bool) -> None:
+    def check_user_code_on_disarm(self, check_user_code_on_disarm: bool) -> None:
         self._check_user_code_on_disarm = check_user_code_on_disarm
 
     @property
@@ -66,7 +66,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return self._auto_discover_pki
 
     @auto_discover_pki.setter
-    def auto_discover_pki(self,value:bool) -> None:
+    def auto_discover_pki(self, value: bool) -> None:
         self._auto_discover_pki = value
 
     def is_paired(self) -> bool:
@@ -84,10 +84,10 @@ class QolsysPluginRemote(QolsysPlugin):
             self.settings.check_panel_ip() and
             self.settings.check_plugin_ip())
 
-    async def config(self,start_pairing:bool) -> bool:
+    async def config(self, start_pairing: bool) -> bool:
         return await self._task_manager.run(self.config_task(start_pairing), self._mqtt_task_config_label)
 
-    async def config_task(self, start_pairing:bool) -> bool:
+    async def config_task(self, start_pairing: bool) -> bool:
         LOGGER.debug("Configuring Plugin")
         super().config()
 
@@ -130,15 +130,15 @@ class QolsysPluginRemote(QolsysPlugin):
     async def start_operation(self) -> None:
         await self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
 
-    async def mqtt_connect_task(self,reconnect:bool) -> None:
+    async def mqtt_connect_task(self, reconnect: bool) -> None:
         # Configure TLS parameters for MQTT connection
         tls_params = aiomqtt.TLSParameters(
             ca_certs = self._pki.qolsys_cer_file_path,
             certfile = self._pki.secure_file_path,
             keyfile = self._pki.key_file_path,
-            cert_reqs=ssl.CERT_REQUIRED,
-            tls_version=ssl.PROTOCOL_TLSv1_2,
-            ciphers="ALL:@SECLEVEL=0",
+            cert_reqs= ssl.CERT_REQUIRED,
+            tls_version= ssl.PROTOCOL_TLSv1_2,
+            ciphers= "ALL:@SECLEVEL=0",
         )
 
         LOGGER.debug("MQTT: Connecting ...")
@@ -146,13 +146,13 @@ class QolsysPluginRemote(QolsysPlugin):
         while True:
             try:
                 self.aiomqtt = aiomqtt.Client(
-                    hostname=self.settings.panel_ip,
-                    port=8883,
-                    tls_params=tls_params,
-                    tls_insecure=True,
-                    clean_session=True,
-                    timeout=self.settings.mqtt_timeout,
-                    identifier="QolsysController")
+                    hostname= self.settings.panel_ip,
+                    port= 8883,
+                    tls_params= tls_params,
+                    tls_insecure= True,
+                    clean_session= True,
+                    timeout= self.settings.mqtt_timeout,
+                    identifier= "QolsysController")
 
                 await self.aiomqtt.__aenter__()
 
@@ -162,7 +162,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 await self.aiomqtt.subscribe("iq2meid")
 
                 # Subscribte to MQTT commands response
-                await self.aiomqtt.subscribe("response_" + self.settings.random_mac,qos=2)
+                await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=2)
 
                 # Only log mastermeid traffic for debug purposes
                 if self.log_mqtt_mesages:
@@ -201,7 +201,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Receive pannel network error
                 self.connected = False
                 self.connected_observer.notify()
-                await self.aiomqtt.__aexit__(None,None,None)
+                await self.aiomqtt.__aexit__(None, None, None)
                 self.aiomqtt = None
 
                 if reconnect:
@@ -236,8 +236,8 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Panel response to MQTT Commands
                 if message.topic.matches("response_" + self.settings.random_mac):
                     data = message.payload.decode()
-                    #data = message.payload.decode().replace("\\\\", "\\")
-                    #data = fix_json_string(data)
+                    # data = message.payload.decode().replace("\\\\", "\\")
+                    # data = fix_json_string(data)
                     data = json.loads(data)
                     await self._mqtt_command_queue.handle_response(data)
 
@@ -418,7 +418,7 @@ class QolsysPluginRemote(QolsysPlugin):
             writer.close()
             self.certificate_exchange_server.close()
 
-    async def send_command(self,topic:str,json_payload:str,request_id:str) -> dict:
+    async def send_command(self, topic: str, json_payload: str, request_id: str) -> dict:
         if self.aiomqtt is None:
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError

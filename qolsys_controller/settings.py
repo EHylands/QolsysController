@@ -30,7 +30,7 @@ class QolsysSettings:
         return self._random_mac
 
     @random_mac.setter
-    def random_mac(self, random_mac:str) -> None:
+    def random_mac(self, random_mac: str) -> None:
         self._random_mac = random_mac
 
     @property
@@ -42,7 +42,7 @@ class QolsysSettings:
         return self._panel_mac
 
     @panel_mac.setter
-    def panel_mac(self,panel_mac:str) -> None:
+    def panel_mac(self,panel_mac: str) -> None:
         self._panel_mac = panel_mac
 
     @property

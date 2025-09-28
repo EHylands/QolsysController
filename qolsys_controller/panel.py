@@ -20,6 +20,7 @@ from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysPanel(QolsysObservable):
     def __init__(self, settings: QolsysSettings, state: QolsysState) -> None:
 
@@ -303,7 +304,7 @@ class QolsysPanel(QolsysObservable):
         return self._TIMER_LONG_EXIT_DELAY
 
     @property
-    def LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N(self) -> str :
+    def LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N(self) -> str:
         self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = self.db.get_setting_panel("LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N")
         return self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N
 
@@ -312,7 +313,7 @@ class QolsysPanel(QolsysObservable):
         return self._imei
 
     @imei.setter
-    def imei(self,value:str) -> None:
+    def imei(self, value: str) -> None:
         self._imei = value
 
     @property
@@ -320,7 +321,7 @@ class QolsysPanel(QolsysObservable):
         return self._product_type
 
     @product_type.setter
-    def product_type(self,value:str) -> None:
+    def product_type(self, value: str) -> None:
         self._product_type = value
 
     @property
@@ -329,7 +330,7 @@ class QolsysPanel(QolsysObservable):
         return self._SYSTEM_LOGGED_IN_USER
 
     @SYSTEM_LOGGED_IN_USER.setter
-    def SYSTEM_LOGGED_IN_USER(self,value:str) -> None:
+    def SYSTEM_LOGGED_IN_USER(self, value: str) -> None:
         self._SYSTEM_LOGGED_IN_USER = value
 
     @property
@@ -337,7 +338,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self,database:dict) -> None:
+    def load_database(self, database: dict) -> None:
         self.db.load_db(database)
         self._state.sync_partitions_data(self.get_partitions_from_db())
         self._state.sync_zones_data(self.get_zones_from_db())
@@ -371,7 +372,7 @@ class QolsysPanel(QolsysObservable):
                                 name = content_values.get("name", "")
                                 new_value = content_values.get("value", "")
                                 old_value = self.db.get_setting_panel(name)
-                                self.db.table_qolsyssettings.update(selection,selection_argument,content_values)
+                                self.db.table_qolsyssettings.update(selection, selection_argument, content_values)
 
                                 # Update Panel Settings - Send notification if settings ha changed
                                 if name in self.settings_panel and old_value != new_value:
@@ -446,7 +447,7 @@ class QolsysPanel(QolsysObservable):
                             # Update DimmerLightsContentProvider
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.update(selection, selection_argument, content_values)
-                                node_id =  content_values.get("node_id", "")
+                                node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysDimmer):
                                     node.update_dimmer(content_values)
@@ -454,7 +455,7 @@ class QolsysPanel(QolsysObservable):
                             # Update Thermostat Content Provider
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.update(selection,selection_argument, content_values)
-                                node_id =  content_values.get("node_id", "")
+                                node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node,QolsysThermostat):
                                     node.update_thermostat(content_values)
@@ -462,7 +463,7 @@ class QolsysPanel(QolsysObservable):
                             # Update DoorLockContentProvider
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.update(selection, selection_argument, content_values)
-                                node_id =  content_values.get("node_id", "")
+                                node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node, QolsysLock):
                                     node.update_lock(content_values)
@@ -470,7 +471,7 @@ class QolsysPanel(QolsysObservable):
                             # Update ZwaveContentProvider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.update(selection, selection_argument, content_values)
-                                node_id =  content_values.get("node_id", "")
+                                node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None:
                                     node.update_base(content_values)
@@ -608,7 +609,7 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id", "")
                                     partition = self._state.partition(partition_id)
                                     if partition is not None:
-                                       match name:
+                                        match name:
                                             case "SYSTEM_STATUS":
                                                 partition.system_status = PartitionSystemStatus(new_value)
                                             case "SYSTEM_STATUS_CHANGED_TIME":
@@ -773,7 +774,7 @@ class QolsysPanel(QolsysObservable):
         zones = []
         zones_list:list[dict] = self.db.get_zones()
 
-         # Create sensors array
+        # Create sensors array
         for zone_info in zones_list:
             zones.append(QolsysZone(zone_info))
 
@@ -822,7 +823,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("GSM Connection Status: %s", self.GSM_CONNECTION_STATUS)
         LOGGER.debug("GSM Signal Strength: %s", self.GSM_SIGNAL_STRENGTH)
         LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
-        #LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
+        # LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
         LOGGER.debug("Country: %s", self.COUNTRY)
         LOGGER.debug("Language: %s", self.LANGUAGE)
         LOGGER.debug("Temp Format: %s", self.TEMPFORMAT)
@@ -853,4 +854,3 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Users list:")
         for user in self._users:
             LOGGER.debug("User: %s", user["id"])
-
