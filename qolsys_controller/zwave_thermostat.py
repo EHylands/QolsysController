@@ -158,7 +158,7 @@ class QolsysThermostat(QolsysZWaveDevice):
 
         self.start_batch_update()
 
-        if "version" in  data:
+        if "version" in data:
             self._thermostat_version = data.get("version")
         if "opr" in data:
             self._thermostat_opr = data.get("opr")

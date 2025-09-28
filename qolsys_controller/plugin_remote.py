@@ -281,7 +281,8 @@ class QolsysPluginRemote(QolsysPlugin):
         if not (
             self._pki.check_key_file() and
             self._pki.check_cer_file() and
-            self._pki.check_csr_file()):
+            self._pki.check_csr_file()
+        ):
             LOGGER.error("PKI Error")
             return False
 
@@ -329,9 +330,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
-    async def handle_key_exchange_client(self,
-                                        reader: asyncio.StreamReader,
-                                        writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
+    async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
 
         received_panel_mac = False
         received_signed_client_certificate = False
@@ -345,9 +344,7 @@ class QolsysPluginRemote(QolsysPlugin):
             while continue_pairing:
 
                 # Plugin is receiving panel_mac from panel
-                if(not received_panel_mac and
-                   not received_signed_client_certificate and
-                   not received_qolsys_cer):
+                if(not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.read(2048))
                     mac = request.decode()
@@ -378,9 +375,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     continue
 
                 # Read signed certificate data
-                if(received_panel_mac and
-                   not received_signed_client_certificate and
-                   not received_qolsys_cer):
+                if(received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     signed_certificate_data += request.decode()
@@ -396,9 +391,7 @@ class QolsysPluginRemote(QolsysPlugin):
                             qolsys_certificate_data += certificates[1]
 
                 # Read qolsys certificate data
-                if(received_panel_mac and
-                   received_signed_client_certificate and
-                   not received_qolsys_cer):
+                if(received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     qolsys_certificate_data += request.decode()
@@ -464,41 +457,42 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
 
         dhcpInfo = {
-            "ipaddress":"",
-            "gateway":"",
-            "netmask":"",
-            "dns1":"",
-            "dns2":"",
-            "dhcpServer":"",
-            "leaseDuration":"",
+            "ipaddress": "",
+            "gateway": "",
+            "netmask": "",
+            "dns1": "",
+            "dns2": "",
+            "dhcpServer": "",
+            "leaseDuration": "",
         }
 
-        payload = { "eventName": eventName,
-                    "ipAddress": ipAddress,
-                    "macAddress": macAddress,
-                    "remoteClientID": remoteClientID,
-                    "softwareVersion": softwareVersion,
-                    "producType": producType,
-                    "bssid": bssid,
-                    "dhcpInfo": json.dumps(dhcpInfo),
-                    "lastUpdateChecksum": lastUpdateChecksum,
-                    "dealerIconsCheckSum" : dealerIconsCheckSum,
-                    "remote_feature_support_version": remote_feature_support_version,
-                    "current_battery_status": current_battery_status,
-                    "remote_panel_battery_status": remote_panel_battery_status,
-                    "remote_panel_battery_health": remote_panel_battery_health,
-                    "remote_panel_battery_level": remote_panel_battery_level,
-                    "remote_panel_battery_present": remote_panel_battery_present,
-                    "remote_panel_battery_percentage": remote_panel_battery_percentage,
-                    "remote_panel_battery_scale": remote_panel_battery_scale,
-                    "remote_panel_battery_voltage": remote_panel_battery_voltage,
-                    "remote_panel_battery_technology": remote_panel_battery_technology,
-                    "remote_panel_plugged": remote_panel_plugged,
-                    "remote_panel_battery_temperature" : remote_panel_battery_temperature,
-                    "requestID": requestID,
-                    "responseTopic": responseTopic ,
-                    "remoteMacAddess": remoteMacAddress,
-            }
+        payload = {
+            "eventName": eventName,
+            "ipAddress": ipAddress,
+            "macAddress": macAddress,
+            "remoteClientID": remoteClientID,
+            "softwareVersion": softwareVersion,
+            "producType": producType,
+            "bssid": bssid,
+            "dhcpInfo": json.dumps(dhcpInfo),
+            "lastUpdateChecksum": lastUpdateChecksum,
+            "dealerIconsCheckSum": dealerIconsCheckSum,
+            "remote_feature_support_version": remote_feature_support_version,
+            "current_battery_status": current_battery_status,
+            "remote_panel_battery_status": remote_panel_battery_status,
+            "remote_panel_battery_health": remote_panel_battery_health,
+            "remote_panel_battery_level": remote_panel_battery_level,
+            "remote_panel_battery_present": remote_panel_battery_present,
+            "remote_panel_battery_percentage": remote_panel_battery_percentage,
+            "remote_panel_battery_scale": remote_panel_battery_scale,
+            "remote_panel_battery_voltage": remote_panel_battery_voltage,
+            "remote_panel_battery_technology": remote_panel_battery_technology,
+            "remote_panel_plugged": remote_panel_plugged,
+            "remote_panel_battery_temperature" : remote_panel_battery_temperature,
+            "requestID": requestID,
+            "responseTopic": responseTopic ,
+            "remoteMacAddess": remoteMacAddress,
+        }
 
         response = await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving connect command")
@@ -527,29 +521,29 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
         responseTopic = "response_" + self.settings.random_mac
 
-        payload = {"eventName":eventName,
-                    "macAddress": macAddress,
-                    "remote_panel_status": remote_panel_status,
-                    "ipAddress": ipAddress,
-                    "current_battery_status" : current_battery_status,
-                    "remote_panel_battery_percentage": remote_panel_battery_percentage,
-                    "remote_panel_battery_temperature" : remote_panel_battery_temperature,
-                    "remote_panel_battery_status" : remote_panel_battery_status,
-                    "remote_panel_battery_scale": remote_panel_battery_scale,
-                    "remote_panel_battery_voltage" : remote_panel_battery_voltage,
-                    "remote_panel_battery_present" : remote_panel_battery_present,
-                    "remote_panel_battery_technology": remote_panel_battery_technology,
-                    "remote_panel_battery_level": remote_panel_battery_level,
-                    "remote_panel_battery_health" : remote_panel_battery_health,
-                    "remote_panel_plugged" : remote_panel_plugged,
-                    "requestID": requestID,
-                    "responseTopic": responseTopic,
-                    "remoteMacAddess": remoteMacAddress,
+        payload = {
+            "eventName":eventName,
+            "macAddress": macAddress,
+            "remote_panel_status": remote_panel_status,
+            "ipAddress": ipAddress,
+            "current_battery_status": current_battery_status,
+            "remote_panel_battery_percentage": remote_panel_battery_percentage,
+            "remote_panel_battery_temperature": remote_panel_battery_temperature,
+            "remote_panel_battery_status": remote_panel_battery_status,
+            "remote_panel_battery_scale": remote_panel_battery_scale,
+            "remote_panel_battery_voltage": remote_panel_battery_voltage,
+            "remote_panel_battery_present": remote_panel_battery_present,
+            "remote_panel_battery_technology": remote_panel_battery_technology,
+            "remote_panel_battery_level": remote_panel_battery_level,
+            "remote_panel_battery_health": remote_panel_battery_health,
+            "remote_panel_plugged": remote_panel_plugged,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddess": remoteMacAddress,
         }
 
         await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving pingevent command")
-
 
     async def command_timesync(self) -> None:
         LOGGER.debug("MQTT: Sending timeSync command")
@@ -561,11 +555,12 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
         remoteMacAddress = self.settings.random_mac
 
-        payload = {"eventName": eventName,
-                   "startTimestamp": startTimestamp,
-                   "requestID": requestID,
-                   "responseTopic": responseTopic,
-                   "remoteMacAddess": remoteMacAddress,
+        payload = {
+            "eventName": eventName,
+            "startTimestamp": startTimestamp,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddess": remoteMacAddress,
         }
 
         await self.send_command(topic, payload, requestID)
@@ -602,7 +597,7 @@ class QolsysPluginRemote(QolsysPlugin):
         acStatus = "Connected"
 
         payload = {"eventName": eventName,
-                   "acStatus" : acStatus,
+                   "acStatus": acStatus,
                    "requestID": requestID,
                    "responseTopic": responseTopic,
                    "remoteMacAddess": remoteMacAddress}
@@ -704,7 +699,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "bssid": bssid,
             "dhcpInfo": json.dumps(dhcpInfo),
             "lastUpdateChecksum": lastUpdateChecksum,
-            "dealerIconsCheckSum" : dealerIconsCheckSum,
+            "dealerIconsCheckSum": dealerIconsCheckSum,
             "remote_feature_support_version": remote_feature_support_version,
             "requestID": requestID,
             "responseTopic": responseTopic,
@@ -715,19 +710,19 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
-    async def command_ui_delay(self, partition_id:str) -> None:
+    async def command_ui_delay(self, partition_id: str) -> None:
         LOGGER.debug("MQTT: Sending ui_delay command")
 
         # partition state needs to be sent for ui_delay to work
         partition = self.state.partition(partition_id)
 
-        arming_command ={
+        arming_command = {
             "operation_name": "ui_delay",
             "panel_status": partition.system_status,
-            "userID":0,
-            "partitionID": partition_id, # STR EXPECTED
+            "userID": 0,
+            "partitionID": partition_id,  # STR EXPECTED
             "operation_source": 1,
-            "macAddress" : self.settings.random_mac,
+            "macAddress": self.settings.random_mac,
         }
 
         topic = "mastermeid"
@@ -741,8 +736,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
         payload = {
             "eventName": eventName,
-            "ipcServiceName" : ipcServiceName,
-            "ipcInterfaceName" : ipcInterfaceName,
+            "ipcServiceName": ipcServiceName,
+            "ipcInterfaceName": ipcInterfaceName,
             "ipcTransactionID": ipcTransactionID,
             "ipcRequest": [{
                 "dataType": "string",
@@ -753,10 +748,10 @@ class QolsysPluginRemote(QolsysPlugin):
             "remoteMacAddress": remoteMacAddress,
         }
 
-        await self.send_command(topic,payload,requestID)
+        await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
-    async def command_disarm(self, partition_id:str, user_code:str="", exit_sounds:bool=True) -> bool:
+    async def command_disarm(self, partition_id: str, user_code: str="", exit_sounds: bool=True) -> bool:
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
 
         partition = self.state.partition(partition_id)
@@ -773,24 +768,28 @@ class QolsysPluginRemote(QolsysPlugin):
                 return False
 
         async def get_mqtt_disarm_command() -> str:
-            if partition.alarm_state  == PartitionAlarmState.ALARM:
+            if partition.alarm_state == PartitionAlarmState.ALARM:
                 return "disarm_from_emergency"
-            if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY, PartitionSystemStatus.ARM_STAY_EXIT_DELAY,PartitionSystemStatus.ARM_NIGHT_EXIT_DELAY}:
+            if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY,
+                                           PartitionSystemStatus.ARM_STAY_EXIT_DELAY,
+                                           PartitionSystemStatus.ARM_NIGHT_EXIT_DELAY}:
                 return "disarm_from_openlearn_sensor"
-            if partition.system_status in {PartitionSystemStatus.ARM_AWAY, PartitionSystemStatus.ARM_STAY, PartitionSystemStatus.ARM_NIGHT}:
+            if partition.system_status in {PartitionSystemStatus.ARM_AWAY,
+                                           PartitionSystemStatus.ARM_STAY,
+                                           PartitionSystemStatus.ARM_NIGHT}:
                 await self.command_ui_delay(partition_id)
                 return "disarm_the_panel_from_entry_delay"
             return "disarm_from_openlearn_sensor"
 
         mqtt_disarm_command = await get_mqtt_disarm_command()
 
-        disarm_command ={
+        disarm_command = {
             "operation_name": mqtt_disarm_command,
             "userID": user_id,
-            "partitionID": int(partition_id), # INT EXPECTED
+            "partitionID": int(partition_id),  # INT EXPECTED
             "operation_source": 1,
             "disarm_exit_sounds": exit_sounds,
-            "macAddress" : self.settings.random_mac,
+            "macAddress": self.settings.random_mac,
         }
 
         topic = "mastermeid"
@@ -804,7 +803,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         payload = {"eventName": eventName,
                    "ipcServiceName" : ipcServiceName,
-                   "ipcInterfaceName" : ipcInterfaceName,
+                   "ipcInterfaceName": ipcInterfaceName,
                    "ipcTransactionID": ipcTransactionID,
                    "ipcRequest": [{
                        "dataType": "string",
@@ -819,31 +818,31 @@ class QolsysPluginRemote(QolsysPlugin):
 
         return True
 
-    async def command_zwave_switch_multi_level(self, node_id:int, level:int) -> None:
+    async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
 
         ipcRequest =[{
-                "dataType":"int", # Node ID
-                "dataValue":node_id,
+                "dataType": "int", # Node ID
+                "dataValue": node_id,
             },
             {
-                "dataType":"int",  # ?
-                "dataValue":0,
+                "dataType": "int",  # ?
+                "dataValue": 0,
             },
             {
-                "dataType":"byteArray",  # ZWAVE MULTILEVELSWITCH COMMAND
-                "dataValue":[38,1,level],
+                "dataType": "byteArray",  # ZWAVE MULTILEVELSWITCH COMMAND
+                "dataValue": [38,1,level],
             },
             {
-                "dataType":"int",  # ?
-                "dataValue":0,
+                "dataType": "int",  # ?
+                "dataValue": 0,
             },
             {
-                "dataType":"int",  # ?
-                "dataValue":106,
+                "dataType": "int",  # ?
+                "dataValue": 106,
             },
             {
-                "dataType":"byteArray",
-                "dataValue":[0],
+                "dataType": "byteArray",
+                "dataValue": [0],
             },
         ]
 
@@ -857,8 +856,8 @@ class QolsysPluginRemote(QolsysPlugin):
         responseTopic = "response_" + self.settings.random_mac
 
         payload = {"eventName": eventName,
-                   "ipcServiceName" : ipcServiceName,
-                   "ipcInterfaceName" : ipcInterfaceName,
+                   "ipcServiceName": ipcServiceName,
+                   "ipcInterfaceName": ipcInterfaceName,
                    "ipcTransactionID": ipcTransactionID,
                    "ipcRequest": ipcRequest,
                    "requestID": requestID,
@@ -868,9 +867,11 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic, payload, requestID)
 
 
-    async def command_arm(self, partition_id:str, arming_type:str, user_code:str="", exit_sounds:bool=False, instant_arm:bool=False) -> bool:
+    async def command_arm(self, partition_id: str, arming_type: str, user_code: str="", exit_sounds: bool=False,
+                          instant_arm: bool=False) -> bool:
 
-        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",partition_id,arming_type,self.panel.SECURE_ARMING)
+        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",
+                     partition_id,arming_type, self.panel.SECURE_ARMING)
 
         user_id = 0
 
@@ -882,7 +883,7 @@ class QolsysPluginRemote(QolsysPlugin):
         if self.panel.SECURE_ARMING == "true":
             # Do local user code verification to arm if secure arming is enabled
             user_id = self.panel.check_user(user_code)
-            if  user_id == -1:
+            if user_id == -1:
                 LOGGER.debug("MQTT: arm command error - user_code error")
                 return False
 
@@ -898,26 +899,26 @@ class QolsysPluginRemote(QolsysPlugin):
                 mqtt_arming_type = "ui_armnight"
 
             case _:
-                LOGGER.debug("MQTT: Sending arm command: Unknow arming_type:%s",arming_type)
+                LOGGER.debug("MQTT: Sending arm command: Unknow arming_type:%s", arming_type)
                 return False
 
         exitSoundValue = "ON"
         if not exit_sounds:
-             exitSoundValue = "OFF"
+            exitSoundValue = "OFF"
 
-        arming_command ={
+        arming_command = {
             "operation_name": mqtt_arming_type,
             "bypass_zoneid_set": "[]",
             "userID": user_id,
             "partitionID": int(partition_id),
             "exitSoundValue":  exitSoundValue,
             "entryDelayValue": "OFF",
-            "multiplePartitionsSelected" : False,
+            "multiplePartitionsSelected": False,
             "instant_arming": instant_arm,
-            "final_exit_arming_selected" : False,
+            "final_exit_arming_selected": False,
             "manually_selected_zones": "[]",
             "operation_source": 1,
-            "macAddress" : self.settings.random_mac,
+            "macAddress": self.settings.random_mac,
         }
 
         topic = "mastermeid"
@@ -931,8 +932,8 @@ class QolsysPluginRemote(QolsysPlugin):
 
         payload = {
             "eventName": eventName,
-            "ipcServiceName" : ipcServiceName,
-            "ipcInterfaceName" : ipcInterfaceName,
+            "ipcServiceName": ipcServiceName,
+            "ipcInterfaceName": ipcInterfaceName,
             "ipcTransactionID": ipcTransactionID,
             "ipcRequest": [{
                 "dataType": "string",
