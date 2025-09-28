@@ -1,4 +1,7 @@
-# QolsysController
+# Qolsys Controller - qolsys-controller
+
+![build](https://github.com/EHylands/QolsysController/actions/workflows/build.yaml/badge.svg)
+
 
 A Python module that emulates a virtual IQ Remote device, enabling full **local control** of a Qolsys IQ Panel over MQTT — no cloud access required.
 
