@@ -7,8 +7,8 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTableIqRemoteSettings(QolsysTable):
 
-    def __init__(self,db:sqlite3.Connection,cursor:sqlite3.Cursor) -> None:
-        super().__init__(db,cursor)
+    def __init__(self,db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+        super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.IQRemoteSettingsContentProvider/iqremotesettings"
         self._table = "iqremotesettings"
         self._abort_on_error = False

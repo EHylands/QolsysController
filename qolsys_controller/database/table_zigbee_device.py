@@ -5,10 +5,11 @@ from .table import QolsysTable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTableZigbeeDevice(QolsysTable):
 
-    def __init__(self,db:sqlite3.Connection,cursor:sqlite3.Cursor) -> None:
-        super().__init__(db,cursor)
+    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+        super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZigbeeDeviceContentProvider/zigbee_device"
         self._table = "zigbee_device"
         self._abort_on_error = False
@@ -22,6 +23,6 @@ class QolsysTableZigbeeDevice(QolsysTable):
     def insert(self, data:dict) -> None:
         if data is not None:
             LOGGER.error("Please Report")
-            LOGGER.error("Loading Table Format: %s",self.uri)
+            LOGGER.error("Loading Table Format: %s", self.uri)
             LOGGER.error(data)
 

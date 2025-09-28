@@ -5,10 +5,11 @@ from .table import QolsysTable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTableZwaveHistory(QolsysTable):
 
-    def __init__(self,db:sqlite3.Connection,cursor:sqlite3.Cursor) -> None:
-        super().__init__(db,cursor)
+    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+        super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZDeviceHistoryContentProvider/zwave_history"
         self._table = "zwave_history"
         self._abort_on_error = False

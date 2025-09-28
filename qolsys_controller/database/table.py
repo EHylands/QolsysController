@@ -7,13 +7,13 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTable:
 
-    def __init__(self,db:sqlite3.Connection,cursor:sqlite3.Cursor) -> None:
-        self._db:sqlite3.Connection = db
-        self._cursor:sqlite3.Cursor = cursor
-        self._uri:str = ""
+    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+        self._db: sqlite3.Connection = db
+        self._cursor: sqlite3.Cursor = cursor
+        self._uri: str = ""
         self._table:str = ""
-        self._columns:list[str] = []
-        self._abort_on_error:bool = False
+        self._columns: list[str] = []
+        self._abort_on_error: bool = False
 
     @property
     def uri(self) -> str:
