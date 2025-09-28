@@ -24,11 +24,11 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPluginRemote(QolsysPlugin):
 
-    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings,config_directory:str)-> None:
+    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings)-> None:
         super().__init__(state,panel,settings)
 
         # PKI
-        self._pki = QolsysPKI(keys_directory = config_directory + "pki/")
+        self._pki = QolsysPKI(settings=settings)
         self._auto_discover_pki = True
 
         # Plugin
@@ -40,8 +40,6 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # MQTT Client
         self.aiomqtt = None
-        self._mqtt_timeout = 30
-        self._mqtt_ping = 600
         self._mqtt_task_config_label = "mqtt_task_config"
         self._mqtt_task_listen_label = "mqtt_task_listen"
         self._mqtt_task_connect_label = "mqtt_task_connect"
@@ -80,8 +78,9 @@ class QolsysPluginRemote(QolsysPlugin):
         # 5- Qolsys Panel IP present
         return (self._pki.id != "" and
             self._pki.check_key_file() and
-            self._pki.check_secure_file() and
+            self._pki.check_cer_file() and
             self._pki.check_qolsys_cer_file() and
+            self._pki.check_secure_file() and
             self.settings.check_panel_ip() and
             self.settings.check_plugin_ip())
 
@@ -92,11 +91,16 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Configuring Plugin")
         super().config()
 
+        # Check and created config_directory
+        if not self.settings.check_config_directory(create=start_pairing):
+            return False
+
         # Read user file for access code
         loop = asyncio.get_running_loop()
         if not loop.run_in_executor(None,self.panel.read_users_file):
             return False
 
+        # Config PKI
         if self._auto_discover_pki:
             if self._pki.auto_discover_pki():
                 self.settings.random_mac = self._pki.formatted_id()
@@ -105,7 +109,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # Check if plugin is paired
         if self.is_paired():
-            LOGGER.debug("Panel is paired")
+            LOGGER.debug("Panel is Paired")
 
         else:
             LOGGER.debug("Panel not paired")
@@ -127,9 +131,7 @@ class QolsysPluginRemote(QolsysPlugin):
         await self._task_manager.run(self.mqtt_connect_task(reconnect=True),self._mqtt_task_connect_label)
 
     async def mqtt_connect_task(self,reconnect:bool) -> None:
-        if not self.is_paired():
-            return
-
+        # Configure TLS parameters for MQTT connection
         tls_params = aiomqtt.TLSParameters(
             ca_certs = self._pki.qolsys_cer_file_path,
             certfile = self._pki.secure_file_path,
@@ -149,7 +151,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     tls_params=tls_params,
                     tls_insecure=True,
                     clean_session=True,
-                    timeout=self._mqtt_timeout,
+                    timeout=self.settings.mqtt_timeout,
                     identifier="QolsysController")
 
                 await self.aiomqtt.__aenter__()
@@ -204,7 +206,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 if reconnect:
                     LOGGER.debug("MQTT Error - %s: Reconnecting in %s seconds ...",err,self._mqtt_timeout)
-                    await asyncio.sleep(self._mqtt_timeout)
+                    await asyncio.sleep(self.settings.mqtt_timeout)
                 else:
                     raise QolsysMqttError from err
 
@@ -222,7 +224,7 @@ class QolsysPluginRemote(QolsysPlugin):
         while True:
             if self.aiomqtt is not None and self.connected:
                 await self.command_pingevent()
-            await asyncio.sleep(self._mqtt_ping)
+            await asyncio.sleep(self.settings.mqtt_ping)
 
     async def mqtt_listen_task(self) -> None:
         try:
@@ -234,8 +236,8 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Panel response to MQTT Commands
                 if message.topic.matches("response_" + self.settings.random_mac):
                     data = message.payload.decode()
-                    #data = message.payload.decode().replace("\\\\", "\\")  # noqa: ERA001
-                    #data = fix_json_string(data)  # noqa: ERA001
+                    #data = message.payload.decode().replace("\\\\", "\\")
+                    #data = fix_json_string(data)
                     data = json.loads(data)
                     await self._mqtt_command_queue.handle_response(data)
 
@@ -249,7 +251,7 @@ class QolsysPluginRemote(QolsysPlugin):
             self.connected_observer.notify()
 
             LOGGER.debug("%s: Reconnecting in %s seconds ...",err,self._mqtt_timeout)
-            await asyncio.sleep(self._mqtt_timeout)
+            await asyncio.sleep(self.settings.mqtt_timeout)
             self._task_manager.run(self.mqtt_connect_task(reconnect=True),self._mqtt_task_connect_label)
 
         except ssl.SSLError as err:
@@ -267,7 +269,7 @@ class QolsysPluginRemote(QolsysPlugin):
         if self.settings.random_mac == "":
             LOGGER.debug("Creating random_mac")
             self.settings.random_mac = generate_random_mac()
-            self._pki.create(self.settings.random_mac,key_size=2048)
+            self._pki.create(self.settings.random_mac,key_size=self.settings.key_size)
 
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)

@@ -66,7 +66,7 @@ class QolsysDimmer(QolsysZWaveDevice):
     def is_on(self) -> bool:
         return self.dimmer_status == "On"
 
-    def update_dimmer(self,content_values:dict) -> None:
+    def update_dimmer(self,content_values:dict) -> None:  # noqa: C901
         # Check if we are updating same none_id
         node_id_update = content_values.get("node_id","")
         if node_id_update != self._dimmer_node_id:

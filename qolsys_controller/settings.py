@@ -1,14 +1,29 @@
 import logging
+from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
 class QolsysSettings:
 
     def __init__(self) -> None:
+
+        # Plugin
         self._plugin_ip = ""
         self._random_mac = ""
         self._panel_mac = ""
         self._panel_ip = ""
+
+        self._config_directory:Path = Path()
+        self._pki_directory:Path = Path()
+        self._media_directory:Path = Path()
+        self._users_file_path:Path = Path()
+
+        # Pki
+        self._key_size = 2048
+
+        # MQTT
+        self._mqtt_timeout = 30
+        self._mqtt_ping = 600
 
     @property
     def random_mac(self) -> str:
@@ -42,6 +57,37 @@ class QolsysSettings:
     def plugin_ip(self,plugin_ip:str) -> None:
         self._plugin_ip = plugin_ip
 
+    @property
+    def config_directory(self) -> str:
+        return self._config_directory
+
+    @config_directory.setter
+    def config_directory(self,config_directory:str) -> None:
+        self._config_directory = Path(config_directory)
+        self._pki_directory = self._config_directory.joinpath(Path("pki"))
+        self._media_directory = self._config_directory.joinpath(Path("media"))
+        self._users_file_path = self._config_directory.joinpath("users.conf")
+
+    @property
+    def pki_directory(self) -> Path:
+        return self._pki_directory
+
+    @property
+    def users_file_path(self) -> Path:
+        return self._users_file_path
+
+    @property
+    def key_size(self) -> int:
+        return self._key_size
+
+    @property
+    def mqtt_timeout(self) -> int:
+        return self._mqtt_timeout
+
+    @property
+    def mqtt_ping(self) -> int:
+        return self._mqtt_ping
+
     def check_panel_ip(self) -> bool:
         if self._panel_ip == "":
             LOGGER.debug("Invalid Panel IP:  %s",self._panel_ip)
@@ -57,3 +103,24 @@ class QolsysSettings:
 
         LOGGER.debug("Found Plugin IP: %s",self._plugin_ip)
         return True
+
+    def check_config_directory(self,create:bool=True) -> bool:
+        if not Path(self.config_directory).is_dir():
+            if not create:
+                LOGGER.debug("config_directory not found:  %s",self.config_directory)
+                return False
+
+            # Create config directory if not found
+            LOGGER.debug("Creating config_directory: %s",self.config_directory)
+            try:
+                self.config_directory.mkdir(parents=True)
+            except PermissionError:
+                LOGGER.exception("Permission denied: Unable to create: %s",self.config_directory)
+                return False
+            except Exception:
+                LOGGER.exception("Error creating config_directory: %s",self.config_directory)
+                return False
+
+        LOGGER.debug("Using config_directory: %s",self.config_directory.resolve())
+        return True
+

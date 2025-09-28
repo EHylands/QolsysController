@@ -11,14 +11,13 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysController:
 
-    def __init__(self,config_directory:str) -> None:
+    def __init__(self) -> None:
 
         # QolsysController Information
         self.plugin = None
-        self._config_directory = config_directory
         self._state = QolsysState()
-        self._panel = QolsysPanel(settings_directory=config_directory,state=self.state)
         self._settings = QolsysSettings()
+        self._panel = QolsysPanel(settings=self.settings,state=self.state)
 
     @property
     def state(self) -> QolsysState:
@@ -43,7 +42,7 @@ class QolsysController:
 
             case "remote":
                 LOGGER.debug("Remote Plugin Selected")
-                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings,self._config_directory)
+                self.plugin = QolsysPluginRemote(self.state,self.panel,self.settings)
                 return
 
             case _:

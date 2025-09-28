@@ -1,7 +1,5 @@
 import json
 import logging
-from datetime import datetime
-from pathlib import Path
 
 from .database.db import QolsysDB
 from .enum import (
@@ -11,6 +9,7 @@ from .enum import (
 )
 from .observable import QolsysObservable
 from .partition import QolsysPartition
+from .settings import QolsysSettings
 from .state import QolsysState
 from .zone import QolsysZone
 from .zwave_device import QolsysZWaveDevice
@@ -22,9 +21,10 @@ from .zwave_thermostat import QolsysThermostat
 LOGGER = logging.getLogger(__name__)
 
 class QolsysPanel(QolsysObservable):
-    def __init__(self,settings_directory:str,state:QolsysState) -> None:
+    def __init__(self,settings:QolsysSettings,state:QolsysState) -> None:
 
         self._state = state
+        self._settings = settings
         self._db = QolsysDB()
 
         # Partition settings
@@ -84,7 +84,6 @@ class QolsysPanel(QolsysObservable):
 
         self._users = []
         self._unique_id = ""
-        self._settings_directory = settings_directory
 
         self._imei = ""
         self._product_type = ""
@@ -92,7 +91,7 @@ class QolsysPanel(QolsysObservable):
     def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file
         try:
-            path = Path(self._settings_directory + "users.conf")
+            path = self._settings.users_file_path
             with path.open("r", encoding="utf-8") as file:
                 try:
                     users = json.load(file)
@@ -822,7 +821,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("GSM Connection Status: %s",self.GSM_CONNECTION_STATUS)
         LOGGER.debug("GSM Signal Strength: %s",self.GSM_SIGNAL_STRENGTH)
         LOGGER.debug("Fail To Communicate: %s",self.FAIL_TO_COMMUNICATE)
-        LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
+        #LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
         LOGGER.debug("Country: %s",self.COUNTRY)
         LOGGER.debug("Language: %s",self.LANGUAGE)
         LOGGER.debug("Temp Format: %s",self.TEMPFORMAT)

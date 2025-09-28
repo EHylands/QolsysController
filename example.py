@@ -13,13 +13,14 @@ LOGGER = logging.getLogger(__name__)
 
 async def main() -> None:  # noqa: D103
 
-    remote = QolsysController(config_directory="./config/")
+    remote = QolsysController()
 
     # Select plugin
     remote.select_plugin("remote")
 
-    remote.plugin.settings.panel_ip =  "192.168.10.*"
-    remote.plugin.settings.plugin_ip = "192.168.10.*"
+    remote.plugin.settings.config_directory = "./config/"
+    remote.plugin.settings.panel_ip =  "192.168.10.220"
+    remote.plugin.settings.plugin_ip = "192.168.10.73"
     remote.plugin.settings.random_mac = "" # Example: F2:16:3E:33:ED:20
 
     # Additionnal remote plugin config
@@ -62,12 +63,19 @@ async def main() -> None:  # noqa: D103
     #                                   user_code="1111")
 
     # ARM_STAY
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_arm(partition_id="0",
-    #                                arming_type="ARM-NIGHT",
-    #                                user_code="1111",
-    #                                exit_sounds=False,
-    #                                instant_arm=False)
+    await asyncio.sleep(3)
+    await remote.plugin.command_arm(partition_id="0",
+                                    arming_type="ARM-NIGHT",
+                                    user_code="1111",
+                                    exit_sounds=False,
+                                    instant_arm=False)
+
+
+    # DISARM
+    await asyncio.sleep(3)
+    await remote.plugin.command_disarm(partition_id="0",
+                                       user_code="1111")
+
 
     # ARM_AWAY
     #await asyncio.sleep(3)
@@ -77,8 +85,9 @@ async def main() -> None:  # noqa: D103
     #                                exit_sounds=True,
     #                               instant_arm=False)
 
-    while True:
-        await asyncio.sleep(1)
+    # Use an asyncio.Event to keep the program running efficiently
+    stop_event = asyncio.Event()
+    await stop_event.wait()
 
 # Change to the "Selector" event loop if platform is Windows
 if sys.platform.lower() == "win32" or os.name.lower() == "nt":
