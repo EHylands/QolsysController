@@ -38,11 +38,12 @@ class QolsysPanel(QolsysObservable):
             "PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING", "AUTO_BYPASS",
             "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY",
             "TEMPFORMAT", "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS", "GSM_SIGNAL_STRENGTH",
-            "ANDROID_VERSION", "HARDWARE_VERSION","TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY",
-            "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER", "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED",
-            "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS", "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE",
-            "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER", "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION",
-            "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS", "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N"
+            "ANDROID_VERSION", "HARDWARE_VERSION", "TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY",
+            "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER", "ZWAVE_CARD", "POLICE_PANIC_ENABLED",
+            "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS", "NIGHT_SETTINGS_STATE", "PARTITIONS",
+            "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER", "PANEL_SCENES_SETTING", "CONTROL_4",
+            "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
+            "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N",
         ]
 
         self._PANEL_TAMPER_STATE = ""
@@ -286,7 +287,7 @@ class QolsysPanel(QolsysObservable):
         return self._TIMER_LONG_ENTRY_DELAY
 
     @property
-    def  MAC_ADDRESS(self) -> str:
+    def MAC_ADDRESS(self) -> str:
         self._MAC_ADDRESS = self.db.get_setting_panel("MAC_ADDRESS")
         return self._MAC_ADDRESS
 
@@ -385,7 +386,7 @@ class QolsysPanel(QolsysObservable):
                                     partition_id = content_values.get("partition_id", "")
                                     partition = self._state.partition(partition_id)
                                     if partition is not None:
-                                       match name:
+                                        match name:
                                             case "SYSTEM_STATUS":
                                                 partition.system_status = PartitionSystemStatus(new_value)
                                             case "SYSTEM_STATUS_CHANGED_TIME":
@@ -455,7 +456,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Thermostat Content Provider
                             case self.db.table_thermostat.uri:
-                                self.db.table_thermostat.update(selection,selection_argument, content_values)
+                                self.db.table_thermostat.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
                                 if node is not None and isinstance(node, QolsysThermostat):

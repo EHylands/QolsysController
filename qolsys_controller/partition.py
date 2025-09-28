@@ -184,7 +184,7 @@ class QolsysPartition(QolsysObservable):
         partition_id_update = data.get("partition_id", "")
         if int(partition_id_update) != int(self.id):
             LOGGER.error(
-                "Updating Partition%s (%s) with Partition '%s' (different id)",self._id, self._name, partition_id_update)
+                "Updating Partition%s (%s) with Partition '%s' (different id)", self._id, self._name, partition_id_update)
             return
 
         self.start_batch_update()

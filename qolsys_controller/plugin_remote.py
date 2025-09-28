@@ -25,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysPluginRemote(QolsysPlugin):
 
-    def __init__(self, state: QolsysState, panel: QolsysPanel, settings: QolsysSettings)-> None:
+    def __init__(self, state: QolsysState, panel: QolsysPanel, settings: QolsysSettings) -> None:
         super().__init__(state, panel, settings)
 
         # PKI
@@ -135,27 +135,28 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def mqtt_connect_task(self, reconnect: bool) -> None:
         # Configure TLS parameters for MQTT connection
-        tls_params= aiomqtt.TLSParameters(
-            ca_certs= self._pki.qolsys_cer_file_path,
-            certfile= self._pki.secure_file_path,
-            keyfile= self._pki.key_file_path,
-            cert_reqs= ssl.CERT_REQUIRED,
-            tls_version= ssl.PROTOCOL_TLSv1_2,
-            ciphers= "ALL:@SECLEVEL=0",
+        tls_params = aiomqtt.TLSParameters(
+            ca_certs=self._pki.qolsys_cer_file_path,
+            certfile=self._pki.secure_file_path,
+            keyfile=self._pki.key_file_path,
+            cert_reqs=ssl.CERT_REQUIRED,
+            tls_version=ssl.PROTOCOL_TLSv1_2,
+            ciphers="ALL:@SECLEVEL=0",
         )
 
         LOGGER.debug("MQTT: Connecting ...")
 
         while True:
             try:
-                self.aiomqtt= aiomqtt.Client(
-                    hostname= self.settings.panel_ip,
-                    port= 8883,
-                    tls_params= tls_params,
-                    tls_insecure= True,
-                    clean_session= True,
-                    timeout= self.settings.mqtt_timeout,
-                    identifier= "QolsysController")
+                self.aiomqtt = aiomqtt.Client(
+                    hostname=self.settings.panel_ip,
+                    port=8883,
+                    tls_params=tls_params,
+                    tls_insecure=True,
+                    clean_session=True,
+                    timeout=self.settings.mqtt_timeout,
+                    identifier="QolsysController",
+                )
 
                 await self.aiomqtt.__aenter__()
 
@@ -264,10 +265,10 @@ class QolsysPluginRemote(QolsysPlugin):
             self.connected = False
             self.connected_observer.notify()
             await self.aiomqtt.__aexit__(None, None, None)
-            self.aiomqtt= None
+            self.aiomqtt = None
             raise QolsysSslError from err
 
-    async def start_initial_pairing(self)->bool:
+    async def start_initial_pairing(self) -> bool:
         # check if random_mac exist
         if self.settings.random_mac == "":
             LOGGER.debug("Creating random_mac")
@@ -277,7 +278,7 @@ class QolsysPluginRemote(QolsysPlugin):
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
         LOGGER.debug("Checking PKI")
-        if not(self._pki.check_key_file() and
+        if not (self._pki.check_key_file() and
                self._pki.check_cer_file() and
                self._pki.check_csr_file()):
             LOGGER.error("PKI Error")
@@ -303,7 +304,7 @@ class QolsysPluginRemote(QolsysPlugin):
             # Start Key Exchange Server
             LOGGER.debug("Starting Certificate Exchange Server")
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            context.load_cert_chain(certfile = self._pki.cer_file_path, keyfile = self._pki.key_file_path)
+            context.load_cert_chain(certfile=self._pki.cer_file_path, keyfile=self._pki.key_file_path)
             self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client, self.settings.plugin_ip, pairing_port, ssl=context)
 
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
@@ -326,7 +327,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
-    async def handle_key_exchange_client(self,reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
+    async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
 
         received_panel_mac = False
         received_signed_client_certificate = False

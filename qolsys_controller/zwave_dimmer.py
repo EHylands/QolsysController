@@ -60,7 +60,7 @@ class QolsysDimmer(QolsysZWaveDevice):
     @dimmer_name.setter
     def dimmer_name(self, value: str) -> None:
         if self._dimmer_name != value:
-            LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name,value)
+            LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name, value)
             self._dimmer_name = value
             self.notify()
 
@@ -71,7 +71,8 @@ class QolsysDimmer(QolsysZWaveDevice):
         # Check if we are updating same none_id
         node_id_update = content_values.get("node_id", "")
         if node_id_update != self._dimmer_node_id:
-            LOGGER.error("Updating Dimmer %s (%s) with dimmer %s (different id)", self._node_id, self.dimmer_name, node_id_update)
+            LOGGER.error(
+                "Updating Dimmer %s (%s) with dimmer %s (different id)", self._node_id, self.dimmer_name, node_id_update)
             return
 
         self.start_batch_update()
@@ -86,7 +87,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_created_by = content_values.get("created_by")
         if "created_date" in content_values:
             self._dimmer_created_date = content_values.get("created_date")
-        if "version" in  content_values:
+        if "version" in content_values:
             self._dimmer_version = content_values.get("version")
         if "opr" in content_values:
             self._dimmer_opr = content_values.get("opr")
@@ -95,7 +96,7 @@ class QolsysDimmer(QolsysZWaveDevice):
         if "updated_by" in content_values:
             self._dimmer_updated_by = content_values.get("updated_by")
         if "last_updated_date" in content_values:
-            self._last_updated_date= content_values.get("last_updated_date")
+            self._last_updated_date = content_values.get("last_updated_date")
         if "endpoint" in content_values:
             self._dimmer_endpoint = content_values.get("endpoint")
         if "power_details" in content_values:

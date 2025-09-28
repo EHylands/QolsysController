@@ -13,7 +13,7 @@ class QolsysZWaveDevice(QolsysObservable):
         self._id = zwave_dict.get("_id")
         self._node_id = zwave_dict.get("node_id", "")
         self._node_name = zwave_dict.get("node_name", "")
-        self._node_type =  zwave_dict.get("node_type", "")
+        self._node_type = zwave_dict.get("node_type", "")
         self._node_status = zwave_dict.get("node_status", "")
         self._partition_id = zwave_dict.get("partition_id", "")
         self._node_secure_cmd_cls = zwave_dict.get("node_secure_cmd_cls", "")

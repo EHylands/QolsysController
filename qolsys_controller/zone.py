@@ -12,8 +12,8 @@ class QolsysZone(QolsysObservable):
         super().__init__()
 
         self._zone_id = data.get("zoneid", "")
-        self._sensorname =  data.get("sensorname", "")
-        self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
+        self._sensorname = data.get("sensorname", "")
+        self._sensorstatus: ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
         self._sensortype = ZoneSensorType(data.get("sensortype", ""))
         self._sensorgroup = data.get("sensorgroup", "")
         self._battery_status = data.get("battery_status", "")
@@ -61,12 +61,12 @@ class QolsysZone(QolsysObservable):
 
         zone_id_update = data.get("zoneid", "")
         if zone_id_update != self._zone_id:
-           LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)", self._zone_id, self.sensorname, zone_id_update)
-           return
+            LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)", self._zone_id, self.sensorname, zone_id_update)
+            return
 
         self.start_batch_update()
 
-         # Update sensor_name
+        # Update sensor_name
         if "sensorname" in data:
             self.sensorname = data.get("sensorname")
 
@@ -203,7 +203,7 @@ class QolsysZone(QolsysObservable):
         return self._time
 
     @property
-    def latestdBm(self)  -> str:
+    def latestdBm(self) -> str:
         return self._latestdBm
 
     @property
@@ -266,7 +266,7 @@ class QolsysZone(QolsysObservable):
                 LOGGER.exception("Unknown Sensor group: %s, please report", new_value)
 
             self._sensorgroup = new_value
-            LOGGER.debug("Zone%s (%s) - sensorgroup: %s", self.zone_id,self.sensorname, new_value.name)
+            LOGGER.debug("Zone%s (%s) - sensorgroup: %s", self.zone_id, self.sensorname, new_value.name)
             self.notify()
 
     @partition_id.setter

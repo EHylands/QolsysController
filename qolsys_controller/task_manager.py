@@ -19,7 +19,7 @@ class QolsysTaskManager:
         task.add_done_callback(_done_callback)
         return task
 
-    def cancel(self,label:str) -> None:
+    def cancel(self, label: str) -> None:
         for task in self._tasks:
             if task.get_name() == label:
                 task.cancel()
@@ -37,5 +37,4 @@ class QolsysTaskManager:
 
     def dump(self) -> None:
         for task in self._tasks:
-            LOGGER.debug("Task: %s, Done: %s, Cancelled: %s",task.get_name(),task.done(),task.cancelled())
-
+            LOGGER.debug("Task: %s, Done: %s, Cancelled: %s", task.get_name(), task.done(), task.cancelled())

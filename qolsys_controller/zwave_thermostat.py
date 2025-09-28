@@ -7,12 +7,12 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysThermostat(QolsysZWaveDevice):
 
-    def __init__(self, thermostat_dict: dict, zwave_dict: dict)-> None:
+    def __init__(self, thermostat_dict: dict, zwave_dict: dict) -> None:
 
         super().__init__(zwave_dict)
 
         self._thermostat_id = thermostat_dict.get("_id")
-        self._thermostat_version =  thermostat_dict.get("version", "")
+        self._thermostat_version = thermostat_dict.get("version", "")
         self._thermostat_opr = thermostat_dict.get("opr", "")
         self._thermostat_partition_id = thermostat_dict.get("partition_id", "")
         self._thermostat_name = thermostat_dict.get("thermostat_name", "")
@@ -23,7 +23,7 @@ class QolsysThermostat(QolsysZWaveDevice):
         self._thermostat_target_heat_temp = thermostat_dict.get("target_heat_temp", "")  # "65"
         self._thermostat_target_temp = thermostat_dict.get("target_temp", "")
         self._thermostat_power_usage = thermostat_dict.get("power_usage", "")
-        self._thermostat_mode = thermostat_dict.get("thermostat_mode", "")  #"2"
+        self._thermostat_mode = thermostat_dict.get("thermostat_mode", "")  # "2"
         self._thermostat_mode_bitmask = thermostat_dict.get("thermostat_mode_bitmask", "")  # "7,24"
         self._thermostat_fan_mode = thermostat_dict.get("fan_mode", "")  # "0"
         self._thermostat_fan_mode_bitmask = thermostat_dict.get("fan_mode_bitmask", "")  # "67"
@@ -100,7 +100,7 @@ class QolsysThermostat(QolsysZWaveDevice):
     @thermostat_current_temp.setter
     def thermostat_current_temp(self, value: str) -> None:
         if self._thermostat_current_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - current_temp: %s",self.thermostat_node_id, self.thermostat_name, value)
+            LOGGER.debug("Thermostat%s (%s) - current_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_current_temp = value
             self.notify()
 
@@ -150,7 +150,10 @@ class QolsysThermostat(QolsysZWaveDevice):
         # Check if we are updating same none_id
         node_id_update = data.get("node_id", "")
         if node_id_update != self.thermostat_node_id_node_id:
-            LOGGER.error("Updating Thermostat '%s' (%s) with Thermostat '%s' (different id)", self.thermostat_node_id, self.thermostat_name, node_id_update)
+            LOGGER.error(
+                "Updating Thermostat '%s' (%s) with Thermostat '%s' (different id)",
+                self.thermostat_node_id, self.thermostat_name, node_id_update,
+            )
             return
 
         self.start_batch_update()
@@ -204,7 +207,7 @@ class QolsysThermostat(QolsysZWaveDevice):
         if "target_heat_temp_updated_time" in data:
             self._thermostat_target_heat_temp_updated_time = data.get("target_heat_temp_updated_time")
         if "current_temp_updated_time" in data:
-            self._thermostat_current_temp_updated_time= data.get("current_temp_updated_time")
+            self._thermostat_current_temp_updated_time = data.get("current_temp_updated_time")
         if "paired_status" in data:
             self._thermostat_paired_status = data.get("paired_status")
         if "endpoint" in data:

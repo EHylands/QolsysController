@@ -239,7 +239,7 @@ class QolsysDB:
 
     def get_state_partition(self, state: str, partition_id: str) -> str | None:
         self.cursor.execute(
-            f"""SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? """,(state, partition_id))
+            f"""SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? """, (state, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:

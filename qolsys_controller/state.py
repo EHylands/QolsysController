@@ -93,7 +93,7 @@ class QolsysState(QolsysObservable):
         self.partitions.append(new_partition)
         self.state_partition_observer.notify()
 
-    def partition_delete(self,partition_id:str) -> None:
+    def partition_delete(self, partition_id: str) -> None:
         partition = self.partition(partition_id)
 
         if partition is None:
@@ -146,7 +146,7 @@ class QolsysState(QolsysObservable):
         self.zwave_devices.append(new_zwave)
         self.state_zwave_observer.notify()
 
-    def zwave_delete(self,node_id:str) -> None:
+    def zwave_delete(self, node_id: str) -> None:
         zwave = self.zwave_device(node_id)
 
         if zwave is None:
@@ -250,7 +250,7 @@ class QolsysState(QolsysObservable):
         for state_partition in self.partitions:
             state_partition_list.append(state_partition.id)
 
-         # Update existing partitions
+        # Update existing partitions
         for state_partition in self.partitions:
             if state_partition.id in db_partition_list:
                 for db_partition in db_partitions:
@@ -296,12 +296,12 @@ class QolsysState(QolsysObservable):
             zid = zone.zone_id
             name = zone.sensorname
             LOGGER.debug("Zone%s (%s) - status: %s", zid, name, zone.sensorstatus)
-            LOGGER.debug("Zone%s (%s) - battery_status: %s", zid, name ,zone.battery_status)
-            LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid,name, zone.latestdBm)
-            LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid,name, zone.averagedBm)
+            LOGGER.debug("Zone%s (%s) - battery_status: %s", zid, name, zone.battery_status)
+            LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid, name, zone.latestdBm)
+            LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid, name, zone.averagedBm)
 
         for zwave in self.zwave_devices:
-            if isinstance(zwave,QolsysDimmer):
+            if isinstance(zwave, QolsysDimmer):
                 nid = zwave.node_id
                 name = zwave.dimmer_name
                 LOGGER.debug("Dimmer%s (%s) - status: %s", nid, name, zwave.dimmer_status)

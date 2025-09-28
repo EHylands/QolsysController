@@ -14,7 +14,7 @@ class QolsysLock(QolsysZWaveDevice):
         super().__init__(zwave_dict)
 
         self._lock_id = lock_dict.get("_id")
-        self._lock_version =  lock_dict.get("version", "")
+        self._lock_version = lock_dict.get("version", "")
         self._lock_opr = lock_dict.get("opr", "")
         self._lock_partition_id = lock_dict.get("partition_id", "")
         self._lock_name = lock_dict.get("doorlock_name", "")
@@ -71,12 +71,13 @@ class QolsysLock(QolsysZWaveDevice):
         # Check if we are updating same zoneid
         node_id_update = data.get("node_id", "")
         if node_id_update != self.lock_node_id:
-            LOGGER.error("Updating Lock %s (%s) with Lock '%s' (different id)", self.lock_node_id, self.lock_name, node_id_update)
+            LOGGER.error(
+                "Updating Lock %s (%s) with Lock '%s' (different id)", self.lock_node_id, self.lock_name, node_id_update)
             return
 
         self.start_batch_update()
 
-        if "version" in  data:
+        if "version" in data:
             self._lock_version = data.get("version")
         if "opr" in data:
             self._lock_opr = data.get("opr")
