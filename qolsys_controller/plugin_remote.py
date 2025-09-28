@@ -278,9 +278,10 @@ class QolsysPluginRemote(QolsysPlugin):
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
         LOGGER.debug("Checking PKI")
-        if not (self._pki.check_key_file() and
-               self._pki.check_cer_file() and
-               self._pki.check_csr_file()):
+        if not (
+            self._pki.check_key_file() and
+            self._pki.check_cer_file() and
+            self._pki.check_csr_file()):
             LOGGER.error("PKI Error")
             return False
 
@@ -305,7 +306,8 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.debug("Starting Certificate Exchange Server")
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.load_cert_chain(certfile=self._pki.cer_file_path, keyfile=self._pki.key_file_path)
-            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client, self.settings.plugin_ip, pairing_port, ssl=context)
+            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,
+                                                                          self.settings.plugin_ip, pairing_port, ssl=context)
 
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
@@ -327,7 +329,9 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
-    async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
+    async def handle_key_exchange_client(self,
+                                        reader: asyncio.StreamReader,
+                                        writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
 
         received_panel_mac = False
         received_signed_client_certificate = False
@@ -680,13 +684,13 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
 
         dhcpInfo = {
-            "ipaddress":"",
-            "gateway":"",
-            "netmask":"",
-            "dns1":"",
-            "dns2":"",
-            "dhcpServer":"",
-            "leaseDuration":"",
+            "ipaddress": "",
+            "gateway": "",
+            "netmask": "",
+            "dns1": "",
+            "dns2": "",
+            "dhcpServer": "",
+            "leaseDuration": "",
         }
 
         payload = {
