@@ -490,7 +490,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "remote_panel_plugged": remote_panel_plugged,
             "remote_panel_battery_temperature": remote_panel_battery_temperature,
             "requestID": requestID,
-            "responseTopic": responseTopic ,
+            "responseTopic": responseTopic,
             "remoteMacAddess": remoteMacAddress,
         }
 
