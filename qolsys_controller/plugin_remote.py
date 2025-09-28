@@ -344,7 +344,7 @@ class QolsysPluginRemote(QolsysPlugin):
             while continue_pairing:
 
                 # Plugin is receiving panel_mac from panel
-                if( not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                if (not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.read(2048))
                     mac = request.decode()
@@ -375,7 +375,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     continue
 
                 # Read signed certificate data
-                if( received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                if (received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     signed_certificate_data += request.decode()
@@ -391,7 +391,7 @@ class QolsysPluginRemote(QolsysPlugin):
                             qolsys_certificate_data += certificates[1]
 
                 # Read qolsys certificate data
-                if( received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
+                if (received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
 
                     request = (await reader.readline())
                     qolsys_certificate_data += request.decode()
