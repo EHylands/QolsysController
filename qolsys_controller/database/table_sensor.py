@@ -64,7 +64,14 @@ class QolsysTableSensor(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,sensorid,sensortype,sensorname,sensorgroup,chimetype,sensorstatus,time,sensorstate,sensortts,zoneid,frame_id,zone_alarm_type,zone_equipment_code,zone_physical_type,zone_type,zone_rf_sensor,zone_supervised,zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,latestdBm,averagedBm,serial_number,extras,ac_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,sensorid,sensortype,sensorname,
+                             sensorgroup,chimetype,sensorstatus,time,sensorstate,sensortts,zoneid,frame_id,zone_alarm_type,
+                             zone_equipment_code,zone_physical_type,zone_type,zone_rf_sensor,zone_supervised,
+                             zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,
+                             updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,
+                             allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,
+                             latestdBm,averagedBm,serial_number,extras,ac_status)
+                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),

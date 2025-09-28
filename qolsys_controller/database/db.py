@@ -51,7 +51,7 @@ class QolsysDB:
         self.table_dimmer = QolsysTableDimmerLight(self.db, self.cursor)
         self.table_doorlock = QolsysTableDoorLock(self.db, self.cursor)
         self.table_eu_event = QolsysTableEuEvent(self.db, self.cursor)
-        self.table_heat_map = QolsysTableHeatMap(self.db ,self.cursor)
+        self.table_heat_map = QolsysTableHeatMap(self.db, self.cursor)
         self.table_history = QolsysTableHistory(self.db, self.cursor)
         self.table_iqremotesettings = QolsysTableIqRemoteSettings(self.db, self.cursor)
         self.table_iqrouter_network_config = QolsysTableIqRouterNetworkConfig(self.db, self.cursor)
@@ -216,7 +216,8 @@ class QolsysDB:
         return zones
 
     def get_setting_panel(self, setting: str) -> str:
-        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, "0"))
+        self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
+                             WHERE name = ? and partition_id  = ? """, (setting, "0"))
         row = self.cursor.fetchone()
 
         if row is None:
@@ -226,11 +227,12 @@ class QolsysDB:
         return row[0]
 
     def get_setting_partition(self, setting: str, partition_id: str) -> str | None:
-        self.cursor.execute(f"SELECT value FROM {self.table_qolsyssettings.table} WHERE name = ? and partition_id  = ? ", (setting, partition_id))
+        self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
+                             WHERE name = ? and partition_id  = ? """, (setting, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:
-            LOGGER.debug("%s value not found",setting)
+            LOGGER.debug("%s value not found", setting)
             return None
 
         return row[0]

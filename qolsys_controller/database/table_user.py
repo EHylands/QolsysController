@@ -32,7 +32,8 @@ class QolsysTableUser(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,username,userPin,expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,username,userPin,
+                             expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr",""),
@@ -47,4 +48,3 @@ class QolsysTableUser(QolsysTable):
             data.get("hash_user", "")))
 
         self._db.commit()
-

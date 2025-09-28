@@ -31,7 +31,8 @@ class QolsysTableWeather(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,high_temp,low_temp,day_of_week,condition,icon,precipitation,current_weather_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,high_temp,low_temp,day_of_week,
+                             condition,icon,precipitation,current_weather_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -45,4 +46,3 @@ class QolsysTableWeather(QolsysTable):
             data.get("current_weather_date", "")))
 
         self._db.commit()
-

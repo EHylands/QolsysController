@@ -36,7 +36,10 @@ class QolsysTableCountryLocale(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,country,language,alpha2_code,language_code,date_format_enum,hour_format,temp_format,is_active,date_separator,zwave_region_frequency_code,zwave_region_frequency,zwave_region_prop_values) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,country,language,alpha2_code,
+                             language_code,date_format_enum,hour_format,temp_format,is_active,date_separator,
+                             zwave_region_frequency_code,zwave_region_frequency,zwave_region_prop_values)
+                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),

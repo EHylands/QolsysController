@@ -143,4 +143,3 @@ class QolsysTableZwaveNode(QolsysTable):
                             data.get("is_device_hidden", ""),
                             data.get("ime_data", "")))
         self._db.commit()
-

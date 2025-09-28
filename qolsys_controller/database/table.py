@@ -5,6 +5,7 @@ from qolsys_controller.errors import QolsysSqlError
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTable:
 
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
@@ -18,6 +19,7 @@ class QolsysTable:
     @property
     def uri(self) -> str:
         return self._uri
+
     @property
     def table(self) -> str:
         return self._table
@@ -64,7 +66,7 @@ class QolsysTable:
             if self._abort_on_error:
                raise error from err
 
-    def update(self,selection:str,selection_argument:str,content_value:str) -> None:
+    def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # selection_argument: '[3,1]'
         #  "contentValues":{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
@@ -103,7 +105,7 @@ class QolsysTable:
     def insert(self) -> None:
         pass
 
-    def delete(self,selection:str,selection_argument:str) -> None:
+    def delete(self,selection: str, selection_argument: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # selection_argument: '[3,1]'
 
@@ -111,7 +113,7 @@ class QolsysTable:
         selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         # Replace '?' in selection string with selection_argument
-        #for i in selection_argument:
+        # for i in selection_argument:
         #    selection = selection.replace("?",f"'{i}'",1)
 
         try:
@@ -130,4 +132,3 @@ class QolsysTable:
 
             if self._abort_on_error:
                raise error from err
-

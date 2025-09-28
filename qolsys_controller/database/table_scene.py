@@ -34,7 +34,9 @@ class QolsysTableScene(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,scene_id,name,icon,color,flags,ack,create_time,created_by,update_time,updated_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,scene_id,name,icon,
+                             color,flags,ack,create_time,created_by,update_time,updated_by)
+                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),

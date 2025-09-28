@@ -5,9 +5,10 @@ from .table import QolsysTable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysTableAlarmedSensor(QolsysTable):
 
-    def __init__(self, db:sqlite3.Connection, cursor:sqlite3.Cursor) -> None:
+    def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.AlarmedSensorProvider/alarmedsensor"
         self._table = "alarmedsensor"
@@ -28,7 +29,7 @@ class QolsysTableAlarmedSensor(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data:dict) -> None:
+    def insert(self, data: dict) -> None:
         self._cursor.execute(f"INSERT INTO {self.table} (_id,partition_id,silenced,zone_id,sgroup,action,timed_out,type,priority,aseb_type) VALUES (?,?,?,?,?,?,?,?,?,?)",(
             data.get("_id"),
             data.get("partition_id", ""),

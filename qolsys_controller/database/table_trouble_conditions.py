@@ -29,7 +29,8 @@ class QolsysTableTroubleConditions(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,device_id,device_name,trouble_condition,status,time) VALUES (?,?,?,?,?,?,?,?,?)", (
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,device_id,device_name,
+                             trouble_condition,status,time) VALUES (?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -41,4 +42,3 @@ class QolsysTableTroubleConditions(QolsysTable):
             data.get("time", "")))
 
         self._db.commit()
-

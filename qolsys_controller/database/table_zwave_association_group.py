@@ -32,7 +32,9 @@ class QolsysTableZwaveAssociationGroup(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,group_name,associated_nodes,group_id,created_date,last_updated_date,group_command_class,max_supported_nodes,node_id,endpoint) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",(
+        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,group_name,associated_nodes,
+                             group_id,created_date,last_updated_date,group_command_class,max_supported_nodes,node_id,
+                             endpoint) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",(
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -48,4 +50,3 @@ class QolsysTableZwaveAssociationGroup(QolsysTable):
             data.get("endpoint", "")))
 
         self._db.commit()
-
