@@ -3,6 +3,8 @@
 /__pycache__
 .pyc
 build
+dist
+config
 __pycache__
 *.key
 *.secure
