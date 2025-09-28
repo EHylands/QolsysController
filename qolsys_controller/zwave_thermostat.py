@@ -4,9 +4,10 @@ from .zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysThermostat(QolsysZWaveDevice):
 
-    def __init__(self,thermostat_dict:dict,zwave_dict:dict)-> None:
+    def __init__(self, thermostat_dict: dict, zwave_dict: dict)-> None:
 
         super().__init__(zwave_dict)
 
@@ -245,4 +246,3 @@ class QolsysThermostat(QolsysZWaveDevice):
             "endpoint": self._thermostat_endpoint,
             "configuration_parameter": self._thermostat_configuration_parameter,
         }
-

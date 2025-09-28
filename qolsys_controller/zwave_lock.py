@@ -4,11 +4,12 @@ from .zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysLock(QolsysZWaveDevice):
 
     LOCK_STATUS_ARRAY = ["Locked"]  # noqa: RUF012
 
-    def __init__(self,lock_dict:dict,zwave_dict:dict) -> None:
+    def __init__(self, lock_dict: dict, zwave_dict: dict) -> None:
 
         super().__init__(zwave_dict)
 
@@ -124,7 +125,3 @@ class QolsysLock(QolsysZWaveDevice):
             "endpoint": self._lock_endpoint,
             "paired_status": self._lock_paired_status,
         }
-
-
-
-

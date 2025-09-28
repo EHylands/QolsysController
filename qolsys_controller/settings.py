@@ -3,6 +3,7 @@ from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysSettings:
 
     def __init__(self) -> None:
@@ -42,7 +43,7 @@ class QolsysSettings:
         return self._panel_mac
 
     @panel_mac.setter
-    def panel_mac(self,panel_mac: str) -> None:
+    def panel_mac(self, panel_mac: str) -> None:
         self._panel_mac = panel_mac
 
     @property
@@ -104,7 +105,7 @@ class QolsysSettings:
         LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
         return True
 
-    def check_config_directory(self, create: bool=True) -> bool:
+    def check_config_directory(self, create: bool = True) -> bool:
         if not self.config_directory.is_dir():
             if not create:
                 LOGGER.debug("config_directory not found:  %s", self.config_directory)
@@ -123,4 +124,3 @@ class QolsysSettings:
 
         LOGGER.debug("Using config_directory: %s", self.config_directory.resolve())
         return True
-

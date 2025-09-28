@@ -77,7 +77,7 @@ class ZoneSensorGroup(StrEnum):
     FIXED_SILENT = "fixedsilentkey"
     MOBILE_SILENT = "mobilesilentkey"
     FIXED_AUXILIARY = "fixedmedical"
-    FIXED_SILENT_AUXILIARY= "fixedsilentmedical"
+    FIXED_SILENT_AUXILIARY = "fixedsilentmedical"
     MOBILE_AUXILIARY = "mobilemedical"
     MOBILE_SILENT_AUXILIARY = "mobilesilentmedical"
     SAFETY_MOTION = "safetymotion"
@@ -111,7 +111,5 @@ class ZoneSensorGroup(StrEnum):
 
 
 class ZWaveNodeStatus(StrEnum):
-     NORMAL = "Normal"
-     UNREACHABLE = "Unreachable"
-
-
+    NORMAL = "Normal"
+    UNREACHABLE = "Unreachable"

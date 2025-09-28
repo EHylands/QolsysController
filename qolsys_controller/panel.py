@@ -34,15 +34,16 @@ class QolsysPanel(QolsysObservable):
 
         # Panel settings
         self.settings_panel_observer = QolsysObservable()
-        self.settings_panel = ["PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING",
-                                "AUTO_BYPASS", "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING"
-                                "NO_ARM_LOW_BATTERY", "TEMPFORMAT", "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS",
-                                "GSM_SIGNAL_STRENGTH", "ANDROID_VERSION", "HARDWARE_VERSION", "TIMER_NORMAL_ENTRY_DELAY",
-                                "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER",
-                                "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS",
-                                "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER",
-                                "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
-                                "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N" ]
+        self.settings_panel = [
+            "PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING", "AUTO_BYPASS",
+            "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING","NO_ARM_LOW_BATTERY", "TEMPFORMAT",
+            "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS","GSM_SIGNAL_STRENGTH", "ANDROID_VERSION","HARDWARE_VERSION",
+            "TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY", "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER",
+            "ZWAVE_CARD", "POLICE_PANIC_ENABLED", "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS",
+            "NIGHT_SETTINGS_STATE", "PARTITIONS", "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS" , "SYSTEM_LOGGED_IN_USER",
+            "PANEL_SCENES_SETTING", "CONTROL_4", "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
+            "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N"
+        ]
 
         self._PANEL_TAMPER_STATE = ""
         self._AC_STATUS = ""
@@ -290,16 +291,16 @@ class QolsysPanel(QolsysObservable):
         return self._MAC_ADDRESS
 
     @MAC_ADDRESS.setter
-    def MAC_ADDRESS(self, value:str) -> None:
+    def MAC_ADDRESS(self, value: str) -> None:
         self._MAC_ADDRESS = value
 
     @property
-    def unique_id(self)  -> str:
+    def unique_id(self) -> str:
         mac_address = self.MAC_ADDRESS
         return mac_address.replace(":", "")
 
     @property
-    def TIMER_LONG_EXIT_DELAY(self) ->  str:
+    def TIMER_LONG_EXIT_DELAY(self) -> str:
         self._TIMER_LONG_EXIT_DELAY = self.db.get_setting_panel("TIMER_LONG_ENTRY_DELAY")
         return self._TIMER_LONG_EXIT_DELAY
 
@@ -397,7 +398,7 @@ class QolsysPanel(QolsysObservable):
                             # Update Sensor Content Provider
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.update(selection,selection_argument, content_values)
-                                zoneid =  content_values.get("zoneid", "")
+                                zoneid = content_values.get("zoneid", "")
                                 zone = self._state.zone(zoneid)
                                 if zone is not None:
                                     zone.update(content_values)
@@ -449,7 +450,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_dimmer.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
-                                if node is not None and isinstance(node,QolsysDimmer):
+                                if node is not None and isinstance(node, QolsysDimmer):
                                     node.update_dimmer(content_values)
 
                             # Update Thermostat Content Provider
@@ -457,7 +458,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_thermostat.update(selection,selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
                                 node = self._state.zwave_device(node_id)
-                                if node is not None and isinstance(node,QolsysThermostat):
+                                if node is not None and isinstance(node, QolsysThermostat):
                                     node.update_thermostat(content_values)
 
                             # Update DoorLockContentProvider
@@ -783,7 +784,7 @@ class QolsysPanel(QolsysObservable):
     def get_partitions_from_db(self) -> list[QolsysPartition]:
 
         partitions = []
-        partition_list:list[dict] = self.db.get_partitions()
+        partition_list: list[dict] = self.db.get_partitions()
 
         # Create partitions array
         for partition_dict in partition_list:
@@ -794,7 +795,7 @@ class QolsysPanel(QolsysObservable):
                 "SYSTEM_STATUS": self.db.get_setting_partition("SYSTEM_STATUS", partition_id) or "UNKNOWN",
                 "SYSTEM_STATUS_CHANGED_TIME": self.db.get_setting_partition("SYSTEM_STATUS_CHANGED_TIME", partition_id) or "",
                 "EXIT_SOUNDS": self.db.get_setting_partition("EXIT_SOUNDS", partition_id) or "",
-                "ENTRY_DELAYS":  self.db.get_setting_partition("ENTRY_DELAYS", partition_id) or "",
+                "ENTRY_DELAYS": self.db.get_setting_partition("ENTRY_DELAYS", partition_id) or "",
             }
 
             alarm_type = []

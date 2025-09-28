@@ -4,9 +4,10 @@ from .observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysZWaveDevice(QolsysObservable):
 
-    def __init__(self,zwave_dict:dict) -> None:
+    def __init__(self, zwave_dict: dict) -> None:
         super().__init__()
 
         self._id = zwave_dict.get("_id")
@@ -67,12 +68,14 @@ class QolsysZWaveDevice(QolsysObservable):
     def partition_id(self) -> str:
         return self._partition_id
 
-    def update_base(self,data:dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def update_base(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
         # Check if we are updating same node_id
         node_id_update = data.get("node_id", "")
         if node_id_update != self._node_id:
-            LOGGER.error("Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update)
+            LOGGER.error(
+                "Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update
+            )
             return
 
         self.start_batch_update()
@@ -129,53 +132,53 @@ class QolsysZWaveDevice(QolsysObservable):
         self.end_batch_update()
 
     @node_id.setter
-    def node_id(self,value:str) -> str:
+    def node_id(self, value: str) -> str:
         self._node_id = value
 
     @paired_status.setter
-    def paired_status(self,value:str) -> str:
+    def paired_status(self, value: str) -> str:
         if self._paired_status != value:
             LOGGER.debug("ZWave%s (%s) - paired_status: %s", self.node_id, self.node_name, value)
             self._paired_status = value
             self.notify()
 
     @node_battery_level.setter
-    def node_battery_level(self,value:str) -> None:
+    def node_battery_level(self, value: str) -> None:
         if self._node_battery_level != value:
             LOGGER.debug("ZWave%s (%s) - node_battery_level: %s", self.node_id, self.node_name, value)
             self._node_battery_level = value
             self.notify()
 
     @node_battery_level_value.setter
-    def node_battery_level_value(self,value:str) -> str:
+    def node_battery_level_value(self, value: str) -> str:
         if self._node_battery_level_value != value:
             LOGGER.debug("ZWave%s (%s) - node_battery_level_value: %s", self.node_id, self.node_name, value)
             self._node_battery_level_value = value
             self.notify()
 
     @node_status.setter
-    def node_status(self,value:str) -> str:
+    def node_status(self, value: str) -> str:
         if self._node_status != value:
             LOGGER.debug("ZWave%s (%s) - node_status: %s", self.node_id, self.node_name, value)
             self._node_status = value
             self.notify()
 
     @node_name.setter
-    def node_name(self,value:str) -> str:
+    def node_name(self, value: str) -> str:
         if self._node_name != value:
             LOGGER.debug("ZWave%s (%s) - node_name: %s", self.node_id, self.node_name, value)
             self._node_name = value
             self.notify()
 
     @node_type.setter
-    def node_type(self,value:str) -> str:
+    def node_type(self, value: str) -> str:
         if self._node_type != value:
             LOGGER.debug("ZWave%s (%s) - node_type: %s", self.node_id, self.node_name, value)
             self._node_type = value
             self.notify()
 
     @partition_id.setter
-    def partition_id(self,value:str) -> str:
+    def partition_id(self, value: str) -> str:
         if self._partition_id != value:
             LOGGER.debug("ZWave%s (%s) - partition_id: %s", self._node_id, self._node_name, value)
             self._partition_id = value

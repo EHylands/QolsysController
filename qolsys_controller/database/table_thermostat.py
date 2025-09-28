@@ -58,8 +58,8 @@ class QolsysTableThermostat(QolsysTable):
                              node_id,created_by,created_date,updated_by,last_updated_date,thermostat_mode_updated_time,
                              fan_mode_updated_time,set_point_mode_updated_time,target_cool_temp_updated_time,
                              target_heat_temp_updated_time,current_temp_updated_time,device_temp_unit,endpoint,
-                             paired_status,configuration_parameter) 
-                             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                             paired_status,configuration_parameter)
+                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),

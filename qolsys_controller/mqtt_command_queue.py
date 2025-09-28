@@ -29,4 +29,3 @@ class QolsysMqttCommandQueue:
             self.waiters[request_id] = future
 
         return await future
-

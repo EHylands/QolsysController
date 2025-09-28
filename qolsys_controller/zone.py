@@ -5,16 +5,17 @@ from .observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysZone(QolsysObservable):
 
     def __init__(self, data: dict) -> None:
         super().__init__()
 
-        self._zone_id = data.get("zoneid","")
+        self._zone_id = data.get("zoneid", "")
         self._sensorname =  data.get("sensorname", "")
         self._sensorstatus:ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
         self._sensortype = ZoneSensorType(data.get("sensortype", ""))
-        self._sensorgroup =  data.get("sensorgroup", "")
+        self._sensorgroup = data.get("sensorgroup", "")
         self._battery_status = data.get("battery_status", "")
         self._averagedBm = data.get("averagedBm", "")
         self._latestdBm = data.get("latestdBm", "")

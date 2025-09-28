@@ -77,7 +77,8 @@ class QolsysTableZwaveNode(QolsysTable):
         self._create_table()
 
     def insert(self, data: dict) -> None:
-        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
+        self._cursor.execute(
+            f"""INSERT INTO {self.table} (_id,version,opr,partition_id,node_id,node_name,node_type,node_status,node_secure_cmd_cls,node_battery_level,
             node_battery_level_value,is_node_listening_node,basic_report_value,switch_multilevel_report_value,basic_device_type,generic_device_type,
             specific_device_type,num_secure_command_class,secure_command_class,manufacture_id,product_type,product_id,library_type_version,protocol_version,
             protocol_sub_version,application_version,application_sub_version,capability,command_class_list,lenof_command_class_list,security,

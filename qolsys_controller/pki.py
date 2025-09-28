@@ -14,6 +14,7 @@ from .settings import QolsysSettings
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysPKI:
     def __init__(self, settings: QolsysSettings) -> None:
         self._id = ""
@@ -36,7 +37,7 @@ class QolsysPKI:
 
     def set_id(self, pki_id: str) -> None:
         self._id = pki_id.replace(":", "").upper()
-        LOGGER.debug("Using PKI: %s",self.formatted_id())
+        LOGGER.debug("Using PKI: %s", self.formatted_id())
         self._subkeys_directory = self._settings.pki_directory.joinpath(Path(self.id))
 
     @property
@@ -123,28 +124,28 @@ class QolsysPKI:
         LOGGER.debug("No KEY File")
         return False
 
-    def check_cer_file(self)->bool:
+    def check_cer_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".cer").resolve().exists():
             LOGGER.debug("Found CER")
             return True
         LOGGER.debug("No CER File")
         return False
 
-    def check_csr_file(self)->bool:
+    def check_csr_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".csr").resolve().exists():
             LOGGER.debug("Found CSR")
             return True
         LOGGER.debug("No CSR File")
         return False
 
-    def check_secure_file(self)->bool:
+    def check_secure_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".secure").resolve().exists():
             LOGGER.debug("Found Signed Client Certificate")
             return True
         LOGGER.debug("No Signed Client Certificate File")
         return False
 
-    def check_qolsys_cer_file(self)->bool:
+    def check_qolsys_cer_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".qolsys").resolve().exists():
             LOGGER.debug("Found Qolsys Certificate")
             return True
@@ -171,7 +172,7 @@ class QolsysPKI:
     def qolsys_cer_file_path(self) -> str:
         return self._subkeys_directory.joinpath(self.id + ".qolsys")
 
-    def create(self,mac:str, key_size: int)->bool:
+    def create(self,mac: str, key_size: int) -> bool:
 
         self.set_id(mac)
 

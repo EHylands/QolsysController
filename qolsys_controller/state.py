@@ -41,7 +41,7 @@ class QolsysState(QolsysObservable):
     def zwave_dimmers(self) -> list[QolsysDimmer]:
         dimmers = []
         for device in self.zwave_devices:
-            if isinstance(device,QolsysDimmer):
+            if isinstance(device, QolsysDimmer):
                 dimmers.append(device)
 
         return dimmers
@@ -50,7 +50,7 @@ class QolsysState(QolsysObservable):
     def zwave_locks(self) -> list[QolsysLock]:
         locks = []
         for device in self.zwave_devices:
-            if isinstance(device,QolsysLock):
+            if isinstance(device, QolsysLock):
                 locks.append(device)
 
         return locks
@@ -59,7 +59,7 @@ class QolsysState(QolsysObservable):
     def zwave_thermostats(self) -> list[QolsysThermostat]:
         thermostats = []
         for device in self.zwave_devices:
-            if isinstance(device,QolsysThermostat):
+            if isinstance(device, QolsysThermostat):
                 thermostats.append(device)
 
         return thermostats
@@ -76,17 +76,18 @@ class QolsysState(QolsysObservable):
     def state_zwave_observer(self) -> QolsysObservable:
         return self._state_zwave_observer
 
-    def partition(self, partition_id:str) -> QolsysPartition:
+    def partition(self, partition_id: str) -> QolsysPartition:
         for partition in self.partitions:
             if partition.id == partition_id:
                 return partition
 
         return None
 
-    def partition_add(self,new_partition:QolsysPartition) -> None:
+    def partition_add(self, new_partition: QolsysPartition) -> None:
         for partition in self.partitions:
             if new_partition.id == partition.id:
-                LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List", new_partition.id, partition.name)
+                LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List",
+                             new_partition.id, partition.name)
                 return
 
         self.partitions.append(new_partition)
@@ -102,14 +103,14 @@ class QolsysState(QolsysObservable):
         self.partitions.remove(partition)
         self.state_partition_observer.notify()
 
-    def zone(self,zone_id:str) -> QolsysZone:
+    def zone(self, zone_id: str) -> QolsysZone:
         for zone in self.zones:
             if zone.zone_id == zone_id:
                 return zone
 
         return None
 
-    def zone_add(self, new_zone:QolsysZone) -> None:
+    def zone_add(self, new_zone: QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
                 LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, self.sensorname)
@@ -118,7 +119,7 @@ class QolsysState(QolsysObservable):
         self.zones.append(new_zone)
         self.state_zone_observer.notify()
 
-    def zone_delete(self,zone_id:str) -> None:
+    def zone_delete(self, zone_id: str) -> None:
         zone = self.zone(zone_id)
 
         if zone is None:
@@ -128,17 +129,18 @@ class QolsysState(QolsysObservable):
         self.zones.remove(zone)
         self.state_zone_observer.notify()
 
-    def zwave_device(self,node_id:str) -> QolsysZWaveDevice:
+    def zwave_device(self, node_id: str) -> QolsysZWaveDevice:
         for zwave_device in self.zwave_devices:
             if zwave_device.node_id == node_id:
                 return zwave_device
 
         return None
 
-    def zwave_add(self, new_zwave:QolsysZWaveDevice) -> None:
+    def zwave_add(self, new_zwave: QolsysZWaveDevice) -> None:
         for zwave_device in self.zwave_devices:
             if new_zwave.node_id == zwave_device.node_id:
-                LOGGER.debug("Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List", new_zwave.node_id, zwave_device.node_name)
+                LOGGER.debug("Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List",
+                             new_zwave.node_id, zwave_device.node_name)
                 return
 
         self.zwave_devices.append(new_zwave)
@@ -154,7 +156,7 @@ class QolsysState(QolsysObservable):
         self.zwave_devices.remove(zwave)
         self.state_zwave_observer.notify()
 
-    def sync_zwave_devices_data(self, db_zwaves:list[QolsysZWaveDevice]) -> None:  # noqa: C901, PLR0912
+    def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: C901, PLR0912
 
         db_zwave_list = []
         for db_zwave in db_zwaves:
@@ -210,7 +212,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - delete ZWave%s", state_zwave.none_id)
                 self.zwave_delete(int(state_zwave.node_id))
 
-    def sync_zones_data(self, db_zones:list[QolsysZone]) -> None:  # noqa: C901
+    def sync_zones_data(self, db_zones: list[QolsysZone]) -> None:  # noqa: C901
         db_zone_list = []
         for db_zone in db_zones:
             db_zone_list.append(db_zone.zone_id)
@@ -239,7 +241,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - add Zone%s", db_zone.zone_id)
                 self.zone_add(db_zone)
 
-    def sync_partitions_data(self, db_partitions:list[QolsysPartition]) -> None:  # noqa: C901
+    def sync_partitions_data(self, db_partitions: list[QolsysPartition]) -> None:  # noqa: C901
         db_partition_list = []
         for db_partition in db_partitions:
             db_partition_list.append(db_partition.id)
@@ -253,7 +255,7 @@ class QolsysState(QolsysObservable):
             if state_partition.id in db_partition_list:
                 for db_partition in db_partitions:
                     if state_partition.id == db_partition.id:
-                        LOGGER.debug("sync_data - update Partition%s",state_partition.id)
+                        LOGGER.debug("sync_data - update Partition%s", state_partition.id)
                         state_partition.update_partition(db_partition.to_dict_partition())
                         state_partition.update_settings(db_partition.to_dict_settings())
                         state_partition.alarm_type_array = db_partition.alarm_type_array

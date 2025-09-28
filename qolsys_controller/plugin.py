@@ -7,8 +7,9 @@ from .state import QolsysState
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysPlugin:
-    def __init__(self,state:QolsysState,panel:QolsysPanel,settings:QolsysSettings) -> None:
+    def __init__(self, state: QolsysState, panel: QolsysPanel, settings: QolsysSettings) -> None:
 
         self._state: QolsysState = state
         self._panel: QolsysPanel = panel

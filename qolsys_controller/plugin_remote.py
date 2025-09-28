@@ -18,13 +18,14 @@ from .plugin import QolsysPlugin
 from .settings import QolsysSettings
 from .state import QolsysState
 from .task_manager import QolsysTaskManager
-from .utils_mqtt import fix_json_string, generate_random_mac
+from .utils_mqtt import generate_random_mac
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysPluginRemote(QolsysPlugin):
 
-    def __init__(self, state:QolsysState, panel:QolsysPanel, settings:QolsysSettings)-> None:
+    def __init__(self, state: QolsysState, panel: QolsysPanel, settings: QolsysSettings)-> None:
         super().__init__(state, panel, settings)
 
         # PKI
@@ -76,13 +77,15 @@ class QolsysPluginRemote(QolsysPlugin):
         # 3- Signed certificate file present
         # 4- Qolsys certificate present
         # 5- Qolsys Panel IP present
-        return (self._pki.id != "" and
+        return (
+            self._pki.id != "" and
             self._pki.check_key_file() and
             self._pki.check_cer_file() and
             self._pki.check_qolsys_cer_file() and
             self._pki.check_secure_file() and
             self.settings.check_panel_ip() and
-            self.settings.check_plugin_ip())
+            self.settings.check_plugin_ip()
+        )
 
     async def config(self, start_pairing: bool) -> bool:
         return await self._task_manager.run(self.config_task(start_pairing), self._mqtt_task_config_label)
@@ -132,10 +135,10 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def mqtt_connect_task(self, reconnect: bool) -> None:
         # Configure TLS parameters for MQTT connection
-        tls_params = aiomqtt.TLSParameters(
-            ca_certs = self._pki.qolsys_cer_file_path,
-            certfile = self._pki.secure_file_path,
-            keyfile = self._pki.key_file_path,
+        tls_params= aiomqtt.TLSParameters(
+            ca_certs= self._pki.qolsys_cer_file_path,
+            certfile= self._pki.secure_file_path,
+            keyfile= self._pki.key_file_path,
             cert_reqs= ssl.CERT_REQUIRED,
             tls_version= ssl.PROTOCOL_TLSv1_2,
             ciphers= "ALL:@SECLEVEL=0",
@@ -145,7 +148,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         while True:
             try:
-                self.aiomqtt = aiomqtt.Client(
+                self.aiomqtt= aiomqtt.Client(
                     hostname= self.settings.panel_ip,
                     port= 8883,
                     tls_params= tls_params,
@@ -261,7 +264,7 @@ class QolsysPluginRemote(QolsysPlugin):
             self.connected = False
             self.connected_observer.notify()
             await self.aiomqtt.__aexit__(None, None, None)
-            self.aiomqtt = None
+            self.aiomqtt= None
             raise QolsysSslError from err
 
     async def start_initial_pairing(self)->bool:

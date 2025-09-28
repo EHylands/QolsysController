@@ -4,9 +4,10 @@ from .zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 
+
 class QolsysDimmer(QolsysZWaveDevice):
 
-    def __init__(self,dimmer_dict:dict,zwave_dict:dict) -> None:
+    def __init__(self, dimmer_dict: dict, zwave_dict: dict) -> None:
 
         super().__init__(zwave_dict)
 
@@ -43,21 +44,21 @@ class QolsysDimmer(QolsysZWaveDevice):
         return self._dimmer_level
 
     @dimmer_level.setter
-    def dimmer_level(self,value:str) -> None:
+    def dimmer_level(self, value: str) -> None:
         if self._dimmer_level != value:
             LOGGER.debug("Dimmer%s (%s) - level: %s", self.node_id, self.dimmer_name, value)
             self._dimmer_level = value
             self.notify()
 
     @dimmer_status.setter
-    def dimmer_status(self,value:str) -> None:
+    def dimmer_status(self, value: str) -> None:
         if self._dimmer_status != value:
             LOGGER.debug("Dimmer%s (%s) - status: %s", self.node_id, self.dimmer_name, value)
             self._dimmer_status = value
             self.notify()
 
     @dimmer_name.setter
-    def dimmer_name(self,value:str) -> None:
+    def dimmer_name(self, value: str) -> None:
         if self._dimmer_name != value:
             LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name,value)
             self._dimmer_name = value
@@ -66,7 +67,7 @@ class QolsysDimmer(QolsysZWaveDevice):
     def is_on(self) -> bool:
         return self.dimmer_status == "On"
 
-    def update_dimmer(self,content_values:dict) -> None:  # noqa: C901
+    def update_dimmer(self, content_values: dict) -> None:  # noqa: C901
         # Check if we are updating same none_id
         node_id_update = content_values.get("node_id", "")
         if node_id_update != self._dimmer_node_id:
