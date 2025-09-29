@@ -123,4 +123,33 @@ class QolsysSettings:
                 return False
 
         LOGGER.debug("Using config_directory: %s", self.config_directory.resolve())
+
+        # Create pki directory if not found
+        if not self.pki_directory.is_dir():
+            LOGGER.debug("Creating pki_directory: %s", self.pki_directory.resolve())
+            try:
+                self.pki_directory.mkdir(parents=True)
+            except PermissionError:
+                LOGGER.exception("Permission denied: Unable to create: %s", self.pki_directory.resolve())
+                return False
+            except Exception:
+                LOGGER.exception("Error creating pki_directory: %s", self.pki_directory.resolve())
+                return False
+
+        LOGGER.debug("Using pki_directory: %s", self.pki_directory.resolve())
+
+        # Create media directory if not found
+        if not self._media_directory.is_dir():
+            LOGGER.debug("Creating media_directory: %s", self._media_directory.resolve())
+            try:
+                self._media_directory.mkdir(parents=True)
+            except PermissionError:
+                LOGGER.exception("Permission denied: Unable to create: %s", self._media_directory.resolve())
+                return False
+            except Exception:
+                LOGGER.exception("Error creating media_directory: %s", self._media_directory.resolve())
+                return False
+
+        LOGGER.debug("Using media_directory: %s", self._media_directory.resolve())
+
         return True
