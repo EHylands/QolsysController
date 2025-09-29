@@ -93,22 +93,23 @@ class QolsysPanel(QolsysObservable):
         self._product_type = ""
 
     def read_users_file(self) -> bool:
-        # Loading user_code data from users.conf file
-        try:
-            path = self._settings.users_file_path
-            with path.open("r", encoding="utf-8") as file:
-                try:
-                    users = json.load(file)
-                    for user in users:
-                        self._users.append(user)
+        # Loading user_code data from users.conf file if exists
+        if self._settings.users_file_path.is_file():
+            try:
+                path = self._settings.users_file_path
+                with path.open("r", encoding="utf-8") as file:
+                    try:
+                        users = json.load(file)
+                        for user in users:
+                            self._users.append(user)
 
-                except json.JSONDecodeError:
-                    LOGGER.exception("users.conf file json error")
-                    return False
+                    except json.JSONDecodeError:
+                        LOGGER.exception("users.conf file json error")
+                        return False
 
-        except FileNotFoundError:
-            LOGGER.exception("users.conf file not found")
-            return False
+            except FileNotFoundError:
+                LOGGER.exception("users.conf file not found")
+                return False
 
         return True
 
