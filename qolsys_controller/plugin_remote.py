@@ -112,6 +112,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # Set mqtt_remote_client_id
         self.settings.mqtt_remote_client_id = "qolsys-controller-" + self._pki.formatted_id()
+        LOGGER.debug("Using MQTT remoteClientID: %s", self.settings.mqtt_remote_client_id)
 
         # Check if plugin is paired
         if self.is_paired():

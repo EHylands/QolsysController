@@ -36,7 +36,7 @@ class QolsysPKI:
         return ":".join(self.id[i:i+2] for i in range(0, len(self.id), 2))
 
     def set_id(self, pki_id: str) -> None:
-        self._id = pki_id.replace(":", "").upper()
+        self._id = pki_id.replace(":", "").lower()
         LOGGER.debug("Using PKI: %s", self.formatted_id())
         self._subkeys_directory = self._settings.pki_directory.joinpath(Path(self.id))
 

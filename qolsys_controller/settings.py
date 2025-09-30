@@ -24,7 +24,7 @@ class QolsysSettings:
 
         # MQTT
         self._mqtt_timeout: int = 30
-        self._mqtt_ping: int = 15
+        self._mqtt_ping: int = 600
         self._mqtt_remote_client_id = ""
 
     @property
@@ -33,7 +33,7 @@ class QolsysSettings:
 
     @random_mac.setter
     def random_mac(self, random_mac: str) -> None:
-        self._random_mac = random_mac
+        self._random_mac = random_mac.lower()
 
     @property
     def plugin_ip(self) -> str:
@@ -89,6 +89,10 @@ class QolsysSettings:
     @property
     def mqtt_ping(self) -> int:
         return self._mqtt_ping
+
+    @mqtt_ping.setter
+    def mqtt_ping(self, ping:int) -> None:
+        self._mqtt_ping = ping
 
     @property
     def mqtt_remote_client_id(self) -> str:
