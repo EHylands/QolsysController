@@ -818,6 +818,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Android Version: %s", self.ANDROID_VERSION)
         LOGGER.debug("Hardware Version: %s", self.HARDWARE_VERSION)
         LOGGER.debug("MAC Address: %s", self.MAC_ADDRESS)
+        LOGGER.debug("MQTT remoteClientID: %s", self._settings.mqtt_remote_client_id)
         LOGGER.debug("Unique ID: %s", self.unique_id)
         LOGGER.debug("Panel Tamper State: %s", self.PANEL_TAMPER_STATE)
         LOGGER.debug("AC Status: %s", self.AC_STATUS)

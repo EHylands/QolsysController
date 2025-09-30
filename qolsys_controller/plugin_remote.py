@@ -110,6 +110,9 @@ class QolsysPluginRemote(QolsysPlugin):
         else:
             self._pki.set_id(self.settings.random_mac)
 
+        # Set mqtt_remote_client_id
+        self.settings.mqtt_remote_client_id = "qolsys-controller-" + self._pki.formatted_id()
+
         # Check if plugin is paired
         if self.is_paired():
             LOGGER.debug("Panel is Paired")
@@ -132,6 +135,24 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def start_operation(self) -> None:
         await self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
+
+    async def stop_operation(self) -> None:
+        LOGGER.debug("Stopping Plugin Operation")
+
+        if self.certificate_exchange_server is not None:
+            self.certificate_exchange_server.close()
+
+        if self.aiomqtt is not None:
+            await self.aiomqtt.__aexit__(None, None, None)
+            self.aiomqtt = None
+
+        self._task_manager.cancel(self._mqtt_task_connect_label)
+        self._task_manager.cancel(self._mqtt_task_listen_label)
+        self._task_manager.cancel(self._mqtt_task_ping_label)
+        self._task_manager.cancel(self._mqtt_task_config_label)
+
+        self.connected = False
+        self.connected_observer.notify()
 
     async def mqtt_connect_task(self, reconnect: bool) -> None:
         # Configure TLS parameters for MQTT connection
@@ -228,6 +249,7 @@ class QolsysPluginRemote(QolsysPlugin):
         while True:
             if self.aiomqtt is not None and self.connected:
                 await self.command_pingevent()
+
             await asyncio.sleep(self.settings.mqtt_ping)
 
     async def mqtt_listen_task(self) -> None:
@@ -434,7 +456,7 @@ class QolsysPluginRemote(QolsysPlugin):
         ipAddress = self.settings.plugin_ip
         eventName = "connect_v204"
         macAddress = self.settings.random_mac
-        remoteClientID = "QolsysController"
+        remoteClientID = self.settings.mqtt_remote_client_id
         softwareVersion = "4.4.1"
         producType = "tab07_rk68"
         bssid = ""
@@ -646,7 +668,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         topic = "mastermeid"
         eventName = "disconnect"
-        remoteClientID = "QolsysRemote"
+        remoteClientID = self.settings.mqtt_remote_client_id
         requestID = str(uuid.uuid4())
         remoteMacAddress = self.settings.random_mac
 
