@@ -208,7 +208,6 @@ class QolsysPluginRemote(QolsysPlugin):
                 self.panel.imei = response_connect.get("master_imei", "")
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
-                await self.command_pairing_request()
                 await self.command_pingevent()
                 await self.command_timesync()
                 await self.command_pair_status_request()
@@ -491,11 +490,12 @@ class QolsysPluginRemote(QolsysPlugin):
 
         payload = {
             "eventName": eventName,
+            "pairing_request": True,
             "ipAddress": ipAddress,
             "macAddress": macAddress,
             "remoteClientID": remoteClientID,
             "softwareVersion": softwareVersion,
-            "producType": producType,
+            "productType": producType,
             "bssid": bssid,
             "dhcpInfo": json.dumps(dhcpInfo),
             "lastUpdateChecksum": lastUpdateChecksum,
@@ -690,9 +690,9 @@ class QolsysPluginRemote(QolsysPlugin):
         pairing_request = True
         ipAddress = self.settings.plugin_ip
         macAddress = self.settings.random_mac
-        remoteClientID = "QolsysController"
+        remoteClientID = self.settings.mqtt_remote_client_id
         softwareVersion = "4.4.1"
-        producType = "tab07_rk68"
+        productType = "tab07_rk68"
         bssid = ""
         lastUpdateChecksum = "2132501716"
         dealerIconsCheckSum = ""
@@ -718,7 +718,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "macAddress": macAddress,
             "remoteClientID": remoteClientID,
             "softwareVersion": softwareVersion,
-            "producType": producType,
+            "producType": productType,
             "bssid": bssid,
             "dhcpInfo": json.dumps(dhcpInfo),
             "lastUpdateChecksum": lastUpdateChecksum,
