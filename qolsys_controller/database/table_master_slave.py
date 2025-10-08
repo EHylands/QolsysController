@@ -34,6 +34,7 @@ class QolsysTableMasterSlave(QolsysTable):
             "upgrade_status",
             "name",
             "bssid",
+            "ssid",
             "dhcpInfo",
             "topology",
             "reboot_reason",
@@ -44,8 +45,8 @@ class QolsysTableMasterSlave(QolsysTable):
     def insert(self, data: dict) -> None:
         self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,zone_id,ip_address,mac_address,
                              device_type,created_by,created_date,updated_by,last_updated_date,status,device_name,
-                             last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,dhcpInfo,topology)
-                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                             last_updated_iq_remote_checksum,software_version,upgrade_status,name,bssid,ssid,dhcpInfo,topology)
+                              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -65,6 +66,7 @@ class QolsysTableMasterSlave(QolsysTable):
             data.get("upgrade_status", ""),
             data.get("name", ""),
             data.get("bssid", ""),
+            data.get("ssid", ""),
             data.get("dhcpInfo", ""),
             data.get("topology", "")))
 

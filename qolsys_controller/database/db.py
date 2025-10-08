@@ -15,11 +15,15 @@ from .table_iqremotesettings import QolsysTableIqRemoteSettings
 from .table_iqrouter_network_config import QolsysTableIqRouterNetworkConfig
 from .table_iqrouter_user_device import QolsysTableIqRouterUserDevice
 from .table_master_slave import QolsysTableMasterSlave
+from .table_nest_device import QolsysTableNestDevice
+from .table_output_rules import QolsysTableOutputRules
 from .table_partition import QolsysTablePartition
+from .table_pgm_outputs import QolsysTablePgmOutputs
 from .table_powerg_device import QolsysTablePowerGDevice
 from .table_qolsyssettings import QolsysTableQolsysSettings
 from .table_scene import QolsysTableScene
 from .table_sensor import QolsysTableSensor
+from .table_shades import QolsysTableShades
 from .table_smartsocket import QolsysTableSmartSocket
 from .table_state import QolsysTableState
 from .table_tcc import QolsysTableTcc
@@ -75,6 +79,10 @@ class QolsysDB:
         self.table_zwave_history = QolsysTableZwaveHistory(self.db, self.cursor)
         self.table_zwave_node = QolsysTableZwaveNode(self.db, self.cursor)
         self.table_zwave_other = QolsysTableZwaveOther(self.db, self.cursor)
+        self.table_pgm_outputs = QolsysTablePgmOutputs(self.db, self.cursor)
+        self.table_output_rules = QolsysTableOutputRules(self.db, self.cursor)
+        self.table_shades = QolsysTableShades(self.db, self.cursor)
+        self.table_nest_device = QolsysTableNestDevice(self.db, self.cursor)
 
         self._table_array = []
         self._table_array.append(self.table_sensor)
@@ -108,6 +116,10 @@ class QolsysDB:
         self._table_array.append(self.table_zwave_association_goup)
         self._table_array.append(self.table_virtual_device)
         self._table_array.append(self.table_eu_event)
+        self._table_array.append(self.table_pgm_outputs)
+        self._table_array.append(self.table_output_rules)
+        self._table_array.append(self.table_shades)
+        self._table_array.append(self.table_nest_device)
 
         # Other Table not Implemented
         # content://com.qolsys.qolsysprovider.AllSensorsContentProvider/all_sensor
@@ -134,6 +146,7 @@ class QolsysDB:
         # content://com.qolsys.qolsysprovider.AxonRSSIContentProvider/axon_rssi_table
         # content://com.qolsys.qolsysprovider.PowerGDeviceContentProvider/powerg_device
         # content://com.qolsys.qolsysprovider.PowerGRSSIContentProvider/powerg_rssi_table
+        # content://com.qolsys.qolsysprovider.PgmOutputsContentProvider/pgm_outputs
 
     @property
     def db(self) -> sqlite3.Connection:
