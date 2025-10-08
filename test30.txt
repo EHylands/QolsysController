@@ -1,0 +1,77 @@
+DEBUG - selector_events: Using selector: KqueueSelector
+DEBUG - controller: Remote Plugin Selected
+DEBUG - plugin_remote: Configuring Plugin
+DEBUG - settings: Using config_directory: /Users/eric.hylands/QolsysRemote/config
+DEBUG - settings: Using pki_directory: /Users/eric.hylands/QolsysRemote/config/pki
+DEBUG - settings: Using media_directory: /Users/eric.hylands/QolsysRemote/config/media
+DEBUG - pki: Auto Discovery Enabled
+DEBUG - pki: Using PKI: cc:4b:73:86:5c:89
+DEBUG - plugin_remote: Using MQTT remoteClientID: qolsys-controller-cc:4b:73:86:5c:89
+DEBUG - pki: Found KEY
+DEBUG - pki: Found CER
+DEBUG - pki: Found Qolsys Certificate
+DEBUG - pki: Found Signed Client Certificate
+DEBUG - settings: Found Panel IP: 192.168.10.220
+DEBUG - settings: Found Plugin IP: 192.168.10.73
+DEBUG - plugin_remote: Panel is Paired
+DEBUG - plugin_remote: Starting Plugin Operation
+DEBUG - plugin_remote: MQTT: Connecting ...
+DEBUG - plugin_remote: MQTT: Client Connected
+DEBUG - plugin_remote: MQTT: Sending connect command
+DEBUG - plugin_remote: MQTT TOPIC: mastermeid
+{"eventName": "connect_v204", "pairing_request": true, "ipAddress": "192.168.10.73", "macAddress": "cc:4b:73:86:5c:89", "remoteClientID": "qolsys-controller-cc:4b:73:86:5c:89", "softwareVersion": "4.4.1", "productType": "tab07_rk68", "bssid": "", "dhcpInfo": "{\"ipaddress\": \"\", \"gateway\": \"\", \"netmask\": \"\", \"dns1\": \"\", \"dns2\": \"\", \"dhcpServer\": \"\", \"leaseDuration\": \"\"}", "lastUpdateChecksum": "2132501716", "dealerIconsCheckSum": "", "remote_feature_support_version": "1", "current_battery_status": "Normal", "remote_panel_battery_status": 3, "remote_panel_battery_health": 2, "remote_panel_battery_level": 100, "remote_panel_battery_present": true, "remote_panel_battery_percentage": 100, "remote_panel_battery_scale": 100, "remote_panel_battery_voltage": 4082, "remote_panel_battery_technology": "", "remote_panel_plugged": 1, "remote_panel_battery_temperature": 430, "requestID": "a5e1946a-8843-43d2-866e-3d79ee4d39ef", "responseTopic": "response_cc:4b:73:86:5c:89", "remoteMacAddess": "cc:4b:73:86:5c:89"}
+DEBUG - plugin_remote: MQTT TOPIC: iq2meid
+{"eventName":"dbChanged","dbOperation":"update","uri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave","selectionArgs":["cc:4b:73:86:5c:89"],"changedUri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave\/update\/:{\"eventName\":\"dbChanged\",\"dbOperation\":\"update\",\"uri\":\"content:\\\/\\\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\\\/master_slave\",\"tcc\":379,\"uuid\":\"wFeU5194\",\"selection\":\"mac_address=?\",\"selectionArgs\":[\"cc:4b:73:86:5c:89\"],\"contentValues\":{\"dhcpInfo\":\"{\\\"ipaddress\\\": \\\"\\\", \\\"gateway\\\": \\\"\\\", \\\"netmask\\\": \\\"\\\", \\\"dns1\\\": \\\"\\\", \\\"dns2\\\": \\\"\\\", \\\"dhcpServer\\\": \\\"\\\", \\\"leaseDuration\\\": \\\"\\\"}\",\"bssid\":\"\",\"topology\":\"0\",\"device_type\":\"tab07_rk68\",\"ip_address\":\"192.168.10.73\",\"version\":\"0\",\"created_by\":\"\",\"ssid\":\"\",\"opr\":\"0\",\"partition_id\":\"0\",\"zone_id\":\"1\",\"upgrade_status\":\"\",\"device_name\":\"cc:4b:73:86:5c:89\",\"mac_address\":\"cc:4b:73:86:5c:89\",\"last_updated_iq_remote_checksum\":\"2132501716\",\"updated_by\":\"\",\"name\":\"IQ Remote 1\",\"_id\":\"136\",\"created_date\":\"\",\"software_version\":\"4.4.1\",\"last_updated_date\":\"\",\"status\":\"Active\"}}","selection":"mac_address=?","contentValues":{"dhcpInfo":"{\"ipaddress\": \"\", \"gateway\": \"\", \"netmask\": \"\", \"dns1\": \"\", \"dns2\": \"\", \"dhcpServer\": \"\", \"leaseDuration\": \"\"}","bssid":"","topology":"0","device_type":"tab07_rk68","ip_address":"192.168.10.73","version":"0","created_by":"","ssid":"","opr":"0","partition_id":"0","zone_id":"1","upgrade_status":"","device_name":"cc:4b:73:86:5c:89","mac_address":"cc:4b:73:86:5c:89","last_updated_iq_remote_checksum":"2132501716","updated_by":"","name":"IQ Remote 1","_id":"136","created_date":"","software_version":"4.4.1","last_updated_date":"","status":"Active"}}
+DEBUG - plugin_remote: MQTT TOPIC: iq2meid
+{"eventName":"dbChanged","dbOperation":"update","uri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave","selectionArgs":["cc:4b:73:86:5c:89"],"changedUri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave\/update\/:{\"eventName\":\"dbChanged\",\"dbOperation\":\"update\",\"uri\":\"content:\\\/\\\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\\\/master_slave\",\"tcc\":380,\"uuid\":\"wFeU5195\",\"selection\":\"mac_address=?\",\"selectionArgs\":[\"cc:4b:73:86:5c:89\"],\"contentValues\":{\"dhcpInfo\":\"{\\\"ipaddress\\\": \\\"\\\", \\\"gateway\\\": \\\"\\\", \\\"netmask\\\": \\\"\\\", \\\"dns1\\\": \\\"\\\", \\\"dns2\\\": \\\"\\\", \\\"dhcpServer\\\": \\\"\\\", \\\"leaseDuration\\\": \\\"\\\"}\",\"mac_address\":\"cc:4b:73:86:5c:89\"}}","selection":"mac_address=?","contentValues":{"dhcpInfo":"{\"ipaddress\": \"\", \"gateway\": \"\", \"netmask\": \"\", \"dns1\": \"\", \"dns2\": \"\", \"dhcpServer\": \"\", \"leaseDuration\": \"\"}","mac_address":"cc:4b:73:86:5c:89"}}
+DEBUG - plugin_remote: MQTT TOPIC: iq2meid
+{"eventName":"dbChanged","dbOperation":"update","uri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave","selectionArgs":["cc:4b:73:86:5c:89"],"changedUri":"content:\/\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\/master_slave\/update\/:{\"eventName\":\"dbChanged\",\"dbOperation\":\"update\",\"uri\":\"content:\\\/\\\/com.qolsys.qolsysprovider.MasterSlaveContentProvider\\\/master_slave\",\"tcc\":381,\"uuid\":\"wFeU5196\",\"selection\":\"mac_address=?\",\"selectionArgs\":[\"cc:4b:73:86:5c:89\"],\"contentValues\":{\"mac_address\":\"cc:4b:73:86:5c:89\",\"bssid\":\"\"}}","selection":"mac_address=?","contentValues":{"mac_address":"cc:4b:73:86:5c:89","bssid":""}}
+DEBUG - plugin_remote: MQTT TOPIC: iq2meid
+{"eventName":"dbChanged","dbOperation":"update","uri":"content:\/\/com.qolsys.qolsysprovider.SensorContentProvider\/sensor","selectionArgs":["1"],"changedUri":"content:\/\/com.qolsys.qolsysprovider.SensorContentProvider\/sensor\/update\/:{\"eventName\":\"dbChanged\",\"dbOperation\":\"update\",\"uri\":\"content:\\\/\\\/com.qolsys.qolsysprovider.SensorContentProvider\\\/sensor\",\"tcc\":290,\"uuid\":\"wFeU5197\",\"selection\":\"zoneid=?\",\"selectionArgs\":[\"1\"],\"contentValues\":{\"zoneid\":\"1\",\"time\":\"11764436\",\"sensorstatus\":\"Active\"},\"oldContentValues\":{\"sensorgroup\":\"fixedintrusion\",\"frame_count\":\"-1\",\"powerg_manufacture_id\":\"0\",\"latestdBm\":\"999\",\"averagedBm\":\"999\",\"zone_type\":\"104\",\"shortID\":\"0\",\"zone_alarm_type\":\"0\",\"zone_physical_type\":\"4\",\"zone_rf_sensor\":\"Y\",\"signal_source\":\"W\",\"frame_type\":\"0\",\"version\":\"0\",\"created_by\":\"241\",\"battery_status\":\"Normal\",\"opr\":\"0\",\"zone_two_way_voice_enabled\":\"N\",\"current_capability\":\"WiFi\",\"updated_by\":\"241\",\"zoneid\":\"1\",\"_id\":\"149\",\"sensorstate\":\"0\",\"zone_supervised\":\"Y\",\"diag_24hr\":\"3\",\"extras\":\"{}\",\"sensorname\":\"IQ Remote 1\",\"device_capability\":\"\",\"partition_id\":\"0\",\"chimetype\":\"None\",\"zone_equipment_code\":\"1\",\"sub_type\":\"\",\"frame_id\":\"IQR1\",\"sensortype\":\"Keypad\",\"sensorstatus\":\"Active\",\"sensortts\":\"Off\",\"serial_number\":\"\",\"sensorid\":\"IQR1\",\"allowspeaker\":\"0\",\"zone_reporting_enabled\":\"N\",\"parent_node\":\"1\",\"allowdisarming\":\"1\",\"time\":\"11715145\",\"created_date\":\"1759720279238\",\"updated_date\":\"1759720279238\"}}","selection":"zoneid=?","contentValues":{"zoneid":"1","time":"11764436","sensorstatus":"Active"}}
+DEBUG - plugin_remote: MQTT TOPIC: response_cc:4b:73:86:5c:89
+{"requestID":"a5e1946a-8843-43d2-866e-3d79ee4d39ef","responseTopic":"response_cc:4b:73:86:5c:89","eventName":"connect","ip":"192.168.10.73","responseStatus":false,"primaryPanelTimeInMills":1759961994338,"dealerIconsUpdateStatus":"delete","patchState":"patch_present","patchPresent":true,"updateAvailable":true,"master_mac":"3c:31:78:a0:fb:9f","master_imei":"015900008819926","DEVICES_SUPPORTED":"tab07_rk68,tab07_1_rk68,rk68_qls_pgr,tab07_2_rk68","isEtisalat":"0","primary_product_type":"msm8953_64","primary_sdk_version":28}
+DEBUG - plugin_remote: MQTT: Receiving connect command
+DEBUG - plugin_remote: MQTT: Sending pingevent command
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/eric.hylands/QolsysRemote/example.py", line 38, in main
+    await remote.plugin.start_operation()
+  File "/Users/eric.hylands/QolsysRemote/qolsys_controller/plugin_remote.py", line 138, in start_operation
+    await self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
+  File "/Users/eric.hylands/QolsysRemote/qolsys_controller/plugin_remote.py", line 211, in mqtt_connect_task
+    await self.command_pingevent()
+  File "/Users/eric.hylands/QolsysRemote/qolsys_controller/plugin_remote.py", line 568, in command_pingevent
+    await self.send_command(topic, payload, requestID)
+  File "/Users/eric.hylands/QolsysRemote/qolsys_controller/plugin_remote.py", line 449, in send_command
+    await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=0)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/aiomqtt/client.py", line 112, in decorated
+    return await method(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/aiomqtt/client.py", line 505, in publish
+    await self._wait_for(confirmation.wait(), timeout=timeout)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/aiomqtt/client.py", line 513, in _wait_for
+    return await asyncio.wait_for(fut, timeout=timeout_for_asyncio)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eric.hylands/QolsysRemote/example.py", line 106, in <module>
+    asyncio.run(main())
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt

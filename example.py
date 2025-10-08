@@ -26,7 +26,7 @@ async def main() -> None:  # noqa: D103
 
     # Additionnal remote plugin config
     remote.plugin.check_user_code_on_disarm = False  # Check user code in user.conf file
-    remote.plugin.log_mqtt_mesages = False  # Enable for MQTT debug purposes
+    remote.plugin.log_mqtt_mesages = True  # Enable for MQTT debug purposes
     remote.plugin.auto_discover_pki = True
 
     # Configure remote plugin
@@ -52,6 +52,12 @@ async def main() -> None:  # noqa: D103
 
     LOGGER.debug("Qolsys Panel Ready for operation")
 
+    #await asyncio.sleep(5)
+
+    #await remote.plugin.stop_operation()
+
+    LOGGER.debug("Qolsys Panel - Stopped")
+
     # Change Z-Wave dimmer
     # node_id: z-wane device id
     # level: 0-99, -1 to switch from off to previous on dimmer level
@@ -64,25 +70,26 @@ async def main() -> None:  # noqa: D103
     #                                   user_code="1111")
 
     # ARM_STAY
-    await asyncio.sleep(3)
-    await remote.plugin.command_arm(partition_id="0",
-                                    arming_type="ARM-NIGHT",
-                                    user_code="1111",
-                                    exit_sounds=False,
-                                    instant_arm=False)
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_arm(partition_id="0",
+    #                                arming_type="ARM-STAY",
+    #                               user_code="1111",
+    #                                exit_sounds=False,
+    #                                instant_arm=True)
 
-    # DISARM
-    await asyncio.sleep(3)
-    await remote.plugin.command_disarm(partition_id="0",
-                                       user_code="1111")
 
     # ARM_AWAY
-    # await asyncio.sleep(3)
-    # await remote.plugin.command_arm(partition_id=0,
-    #                               arming_type='ARM-AWAY',
-    #                               user_code='1111',
-    #                                exit_sounds=True,
-    #                               instant_arm=False)
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_arm(partition_id='0',
+    #                               arming_type="ARM-STAY",
+    #                               user_code="1111",
+    #                                exit_sounds=False,
+    #                               instant_arm=True)
+
+    # DISARM
+    #await asyncio.sleep(10)
+    #await remote.plugin.command_disarm(partition_id="0", user_code="1111", silent_disarming=True)
+
 
     # Use an asyncio.Event to keep the program running efficiently
     stop_event = asyncio.Event()
