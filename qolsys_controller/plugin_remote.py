@@ -34,6 +34,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # Plugin
         self.certificate_exchange_server = None
+        self._check_user_code_on_arm = False
         self._check_user_code_on_disarm = True
         self._log_mqtt_messages = False
         self._task_manager = QolsysTaskManager()
@@ -61,6 +62,14 @@ class QolsysPluginRemote(QolsysPlugin):
     @check_user_code_on_disarm.setter
     def check_user_code_on_disarm(self, check_user_code_on_disarm: bool) -> None:
         self._check_user_code_on_disarm = check_user_code_on_disarm
+
+    @property
+    def check_user_code_on_arm(self) -> bool:
+        return self._check_user_code_on_arm
+
+    @check_user_code_on_arm.setter
+    def check_user_code_on_arm(self, check_user_code_on_arm: bool) -> None:
+        self._check_user_code_on_arm = check_user_code_on_arm
 
     @property
     def auto_discover_pki(self) -> bool:
@@ -903,7 +912,7 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
             return False
 
-        if self.panel.SECURE_ARMING == "true":
+        if self.panel.SECURE_ARMING == "true" and self.check_user_code_on_arm:
             # Do local user code verification to arm if secure arming is enabled
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
