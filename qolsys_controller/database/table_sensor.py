@@ -59,6 +59,7 @@ class QolsysTableSensor(QolsysTable):
             "averagedBm",
             "serial_number",
             "extras",
+            "allowspeaker",
         ]
 
         self._create_table()
@@ -70,9 +71,9 @@ class QolsysTableSensor(QolsysTable):
                              zone_two_way_voice_enabled, zone_reporting_enabled, battery_status,created_date,created_by,
                              updated_date,updated_by,frame_count,frame_type,current_capability,shortID,diag_24hr,
                              allowdisarming,device_capability,sub_type, signal_source, powerg_manufacture_id,parent_node,
-                             latestdBm,averagedBm,serial_number,extras,ac_status)
+                             latestdBm,averagedBm,serial_number,extras,ac_status,allowspeaker)
                               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
-                             ?,?,?,?,?,?,?,?,?,?,?)""", (
+                             ?,?,?,?,?,?,?,?,?,?,?,?)""", (
             data.get("_id"),
             data.get("version", ""),
             data.get("opr", ""),
@@ -116,6 +117,7 @@ class QolsysTableSensor(QolsysTable):
             data.get("averagedBm", ""),
             data.get("serial_number", ""),
             data.get("extras", ""),
-            data.get("ac_status", "")))
+            data.get("ac_status", ""),
+            data.get("allowspeaker", "")))
 
         self._db.commit()

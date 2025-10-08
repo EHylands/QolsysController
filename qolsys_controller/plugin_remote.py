@@ -188,15 +188,15 @@ class QolsysPluginRemote(QolsysPlugin):
                 await self.aiomqtt.subscribe("iq2meid")
 
                 # Subscribte to MQTT commands response
-                await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=2)
+                await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=0)
 
                 # Only log mastermeid traffic for debug purposes
                 if self.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
-                    await self.aiomqtt.subscribe("mastermeid", qos=2)
+                    await self.aiomqtt.subscribe("mastermeid", qos=0)
 
                     # Subscribe to all topics
-                    await self.aiomqtt.subscribe("#", qos=2)
+                    await self.aiomqtt.subscribe("#", qos=0)
 
                 # Start mqtt_listent_task and mqtt_ping_task
                 self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -446,7 +446,7 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
-        await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=2)
+        await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=0)
         return await self._mqtt_command_queue.wait_for_response(request_id)
 
     async def command_connect(self) -> dict:
@@ -775,15 +775,13 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
     async def command_disarm(self, partition_id: str, user_code: str = "", exit_sounds: bool = True) -> bool:
-        LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
-
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: disarm command error - Unknow Partition")
             return False
 
         # Do local user code verification
-        user_id = 0
+        user_id = 1
         if self.check_user_code_on_disarm:
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
@@ -802,9 +800,12 @@ class QolsysPluginRemote(QolsysPlugin):
                                            PartitionSystemStatus.ARM_NIGHT}:
                 await self.command_ui_delay(partition_id)
                 return "disarm_the_panel_from_entry_delay"
+
             return "disarm_from_openlearn_sensor"
 
         mqtt_disarm_command = await get_mqtt_disarm_command()
+        LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
+
 
         disarm_command = {
             "operation_name": mqtt_disarm_command,
