@@ -68,7 +68,12 @@ class QolsysTable:
 
     def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
+
+        # Firmware 4.4.1 is sending contentValues as string
         # selection_argument: '[3,1]'
+        # Firmware 4.6.1: 
+        # selection_argument: ['cc:4b:73:86:5c:89']
+
         #  "contentValues":{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
         # Panel is sending query parameter for db update in text string
@@ -80,8 +85,11 @@ class QolsysTable:
         db_value = ",".join([f"{key}='{value}'" for key, value in content_value.items()])
 
         # Selection Argument
-        selection_argument = selection_argument.strip("[]")
-        selection_argument = [item.strip() for item in selection_argument.split(",")]
+        # Panel send selection_argument as list in Firmware 4.6.1
+        if(type(selection_argument) is not list):
+            #Firmware 4.4.1, seletion_argument is sent as a string
+            selection_argument = selection_argument.strip("[]")
+            selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         try:
             query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
@@ -108,12 +116,12 @@ class QolsysTable:
         # selection: 'zone_id=?, parition_id=?'
         # selection_argument: '[3,1]'
 
-        selection_argument = selection_argument.strip("[]")
-        selection_argument = [item.strip() for item in selection_argument.split(",")]
-
-        # Replace '?' in selection string with selection_argument
-        # for i in selection_argument:
-        #    selection = selection.replace("?",f"'{i}'",1)
+        # Selection Argument
+        # Panel send selection_argument as list in Firmware 4.6.1
+        if(type(selection_argument) is not list):
+            #Firmware 4.4.1, seletion_argument is sent as a string
+            selection_argument = selection_argument.strip("[]")
+            selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         try:
             query = f"DELETE FROM {self.table} WHERE {selection}"
