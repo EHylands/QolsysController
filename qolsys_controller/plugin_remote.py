@@ -196,7 +196,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     await self.aiomqtt.subscribe("mastermeid", qos=0)
 
                     # Subscribe to all topics
-                    await self.aiomqtt.subscribe("#", qos=0)
+                    #await self.aiomqtt.subscribe("#", qos=0)
 
                 # Start mqtt_listent_task and mqtt_ping_task
                 self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -733,7 +733,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
-    async def command_ui_delay(self, partition_id: str) -> None:
+    async def command_ui_delay(self, partition_id: str,silent_disarming:bool = False) -> None:
         LOGGER.debug("MQTT: Sending ui_delay command")
 
         # partition state needs to be sent for ui_delay to work
@@ -744,6 +744,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "panel_status": partition.system_status,
             "userID": 0,
             "partitionID": partition_id,  # STR EXPECTED
+            "silentDisarming":silent_disarming,
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
@@ -774,7 +775,7 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
-    async def command_disarm(self, partition_id: str, user_code: str = "", exit_sounds: bool = True) -> bool:
+    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> bool:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: disarm command error - Unknow Partition")
@@ -788,7 +789,7 @@ class QolsysPluginRemote(QolsysPlugin):
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return False
 
-        async def get_mqtt_disarm_command() -> str:
+        async def get_mqtt_disarm_command(silent_disarming:bool) -> str:
             if partition.alarm_state == PartitionAlarmState.ALARM:
                 return "disarm_from_emergency"
             if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY,
@@ -798,12 +799,12 @@ class QolsysPluginRemote(QolsysPlugin):
             if partition.system_status in {PartitionSystemStatus.ARM_AWAY,
                                            PartitionSystemStatus.ARM_STAY,
                                            PartitionSystemStatus.ARM_NIGHT}:
-                await self.command_ui_delay(partition_id)
+                await self.command_ui_delay(partition_id,silent_disarming)
                 return "disarm_the_panel_from_entry_delay"
 
             return "disarm_from_openlearn_sensor"
 
-        mqtt_disarm_command = await get_mqtt_disarm_command()
+        mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
 
 
@@ -812,7 +813,6 @@ class QolsysPluginRemote(QolsysPlugin):
             "userID": user_id,
             "partitionID": int(partition_id),  # INT EXPECTED
             "operation_source": 1,
-            "disarm_exit_sounds": exit_sounds,
             "macAddress": self.settings.random_mac,
         }
 

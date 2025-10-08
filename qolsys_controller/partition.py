@@ -39,6 +39,7 @@ class QolsysPartition(QolsysObservable):
 
         # Other
         self._command_exit_sounds = True
+        self._command_silent_disarming = False
         self._command_arm_stay_instant = True
 
     @property
@@ -80,6 +81,14 @@ class QolsysPartition(QolsysObservable):
     @property
     def command_arm_stay_instant(self) -> bool:
         return self._command_arm_stay_instant
+
+    @property
+    def command_silent_disarming(self) -> bool:
+        return self._command_silent_disarming
+
+    @command_silent_disarming.setter
+    def command_silent_disarming(self, value: bool) -> None:
+        self._command_silent_disarming = value
 
     @system_status.setter
     def system_status(self, new_value: PartitionSystemStatus) -> None:
