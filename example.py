@@ -26,7 +26,7 @@ async def main() -> None:  # noqa: D103
 
     # Additionnal remote plugin config
     remote.plugin.check_user_code_on_disarm = False  # Check user code in user.conf file
-    remote.plugin.log_mqtt_mesages = True  # Enable for MQTT debug purposes
+    remote.plugin.log_mqtt_mesages = False  # Enable for MQTT debug purposes
     remote.plugin.auto_discover_pki = True
 
     # Configure remote plugin
@@ -70,12 +70,12 @@ async def main() -> None:  # noqa: D103
     #                                   user_code="1111")
 
     # ARM_STAY
-    #await asyncio.sleep(3)
-    #await remote.plugin.command_arm(partition_id="0",
-    #                                arming_type="ARM-STAY",
-    #                               user_code="1111",
-    #                                exit_sounds=False,
-    #                                instant_arm=True)
+    await asyncio.sleep(3)
+    await remote.plugin.command_arm(partition_id="0",
+                                    arming_type="ARM-STAY",
+                                   user_code="1111",
+                                    exit_sounds=False,
+                                    instant_arm=True)
 
 
     # ARM_AWAY
@@ -87,8 +87,8 @@ async def main() -> None:  # noqa: D103
     #                               instant_arm=True)
 
     # DISARM
-    #await asyncio.sleep(10)
-    #await remote.plugin.command_disarm(partition_id="0", user_code="1111", silent_disarming=True)
+    await asyncio.sleep(5)
+    await remote.plugin.command_disarm(partition_id="0", user_code="1111", silent_disarming=True)
 
 
     # Use an asyncio.Event to keep the program running efficiently
