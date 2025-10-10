@@ -132,7 +132,6 @@ class QolsysDB:
         # content://com.qolsys.qolsysprovider.ProvisionListContentProvider/provision_list
         # content://com.qolsys.qolsysprovider.PowerGSignalStrengthContentProvider/powerg_signal_strength
         # content://com.qolsys.qolsysprovider.ProximityTagContentProvider/proximity_tag
-        # content://com.qolsys.qolsysprovider.OutputRulesContentProvider/output_rules
         # content://com.qolsys.qolsysprovider.IQCameraContentProvider/iqcamera
         # content://com.qolsys.qolsysprovider.CorbusDeviceContentProvider/corbus_device
         # content://com.qolsys.qolsysprovider.AutomationRulesContentProvider/automation_rules
@@ -144,9 +143,7 @@ class QolsysDB:
         # content://com.qolsys.qolsysprovider.AxonSignalStrengthContentProvider/axon_signal_strength
         # content://com.qolsys.qolsysprovider.PanelInfoContentProvider/panel_info
         # content://com.qolsys.qolsysprovider.AxonRSSIContentProvider/axon_rssi_table
-        # content://com.qolsys.qolsysprovider.PowerGDeviceContentProvider/powerg_device
         # content://com.qolsys.qolsysprovider.PowerGRSSIContentProvider/powerg_rssi_table
-        # content://com.qolsys.qolsysprovider.PgmOutputsContentProvider/pgm_outputs
 
     @property
     def db(self) -> sqlite3.Connection:
@@ -155,6 +152,18 @@ class QolsysDB:
     @property
     def cursor(self) -> sqlite3.Cursor:
         return self._cursor
+
+    def get_scenes(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.table_scene.table} ORDER BY scene_id")
+        self.db.commit()
+
+        scenes = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            scenes.append(row_dict)
+
+        return scenes
 
     def get_partitions(self) -> list[dict]:
         self.cursor.execute(f"SELECT * FROM {self.table_partition.table} ORDER BY partition_id")

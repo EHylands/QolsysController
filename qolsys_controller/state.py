@@ -2,6 +2,7 @@ import logging
 
 from .observable import QolsysObservable
 from .partition import QolsysPartition
+from .scene import QolsysScene
 from .zone import QolsysZone
 from .zwave_device import QolsysZWaveDevice
 from .zwave_dimmer import QolsysDimmer
@@ -20,10 +21,12 @@ class QolsysState(QolsysObservable):
         self._partitions = []
         self._zones = []
         self._zwave_devices = []
+        self._scenes = []
 
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
         self._state_zwave_observer = QolsysObservable()
+        self._state_scene_observer = QolsysObservable()
 
     @property
     def partitions(self) -> list[QolsysPartition]:
@@ -36,6 +39,10 @@ class QolsysState(QolsysObservable):
     @property
     def zones(self) -> list[QolsysZone]:
         return self._zones
+
+    @property
+    def scenes(self) -> list[QolsysScene]:
+        return self._scenes
 
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
@@ -76,6 +83,10 @@ class QolsysState(QolsysObservable):
     def state_zwave_observer(self) -> QolsysObservable:
         return self._state_zwave_observer
 
+    @property
+    def state_scene_observer(self) -> QolsysObservable:
+        return self._state_scene_observer
+
     def partition(self, partition_id: str) -> QolsysPartition:
         for partition in self.partitions:
             if partition.id == partition_id:
@@ -102,6 +113,32 @@ class QolsysState(QolsysObservable):
 
         self.partitions.remove(partition)
         self.state_partition_observer.notify()
+
+    def scene(self, scene_id: str) -> QolsysScene:
+        for scene in self.scenes:
+            if scene.scene_id == scene_id:
+                return scene
+
+        return None
+
+    def scene_add(self, new_scene: QolsysScene) -> None:
+        for scene in self.scenes:
+            if new_scene.scene_id == scene.scene_id:
+                LOGGER.debug("Adding Scene to State, Scene%s (%s) - Allready in Scene List", new_scene.scene_id, scene.name )
+                return
+
+        self.scenes.append(new_scene)
+        self.state_scene_observer.notify()
+
+    def scene_delete(self, scene_id: str) -> None:
+        scene = self.scene(scene_id)
+
+        if scene is None:
+            LOGGER.debug("Deleting Scene from State, Scene%s not found", scene_id)
+            return
+
+        self.scenes.remove(scene)
+        self.state_scene_observer.notify()
 
     def zone(self, zone_id: str) -> QolsysZone:
         for zone in self.zones:
@@ -211,6 +248,36 @@ class QolsysState(QolsysObservable):
             if state_zwave.node_id not in db_zwave_list:
                 LOGGER.debug("sync_data - delete ZWave%s", state_zwave.none_id)
                 self.zwave_delete(int(state_zwave.node_id))
+
+    def sync_scenes_data(self, db_scenes: list[QolsysScene]) -> None:
+        db_scene_list = []
+        for db_scene in db_scenes:
+            db_scene_list.append(db_scene.scene_id)
+
+        state_scene_list = []
+        for state_scene in self.scenes:
+            state_scene_list.append(state_scene.scene_id)
+
+        # Update existing scenes
+        for state_scene in self.scenes:
+            if state_scene.scene_id in db_scene_list:
+                for db_scene in db_scenes:
+                    if state_scene.scene_id == db_scene.scene_id:
+                        LOGGER.debug("sync_data - update Scene%s", state_scene.scene_id)
+                        state_scene.update(db_scene.to_dict())
+                        break
+
+        # Delete scenes
+        for state_scene in self.scenes:
+            if state_scene.scene_id not in db_scene_list:
+                LOGGER.debug("sync_data - delete Scene%s", state_scene.scene_id)
+                self.scene_delete(int(state_scene.scene_id))
+
+        # Add new scene
+        for db_scene in db_scenes:
+            if db_scene.scene_id not in state_scene_list:
+                LOGGER.debug("sync_data - add Scene%s", db_scene.scene_id)
+                self.scene_add(db_scene)
 
     def sync_zones_data(self, db_zones: list[QolsysZone]) -> None:  # noqa: C901
         db_zone_list = []
@@ -338,3 +405,8 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Generic%s (%s) - battery_level: %s", zid, name, zwave.node_battery_level)
                 LOGGER.debug("Generic%s (%s) - battery_level_vale: %s", zid, name, zwave.node_battery_level_value)
                 continue
+
+        for scene in self.scenes:
+            sid = scene.scene_id
+            name = scene.name
+            LOGGER.debug("Scene%s (%s)",sid, name)

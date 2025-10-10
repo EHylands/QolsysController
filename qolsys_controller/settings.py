@@ -25,6 +25,7 @@ class QolsysSettings:
         # MQTT
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 600
+        self._mqtt_qos:int = 0
         self._mqtt_remote_client_id = ""
 
     @property
@@ -93,6 +94,10 @@ class QolsysSettings:
     @mqtt_ping.setter
     def mqtt_ping(self, ping:int) -> None:
         self._mqtt_ping = ping
+
+    @property
+    def mqtt_qos(self) -> int:
+        return self._mqtt_qos
 
     @property
     def mqtt_remote_client_id(self) -> str:

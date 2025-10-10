@@ -9,6 +9,7 @@ from .enum import (
 )
 from .observable import QolsysObservable
 from .partition import QolsysPartition
+from .scene import QolsysScene
 from .settings import QolsysSettings
 from .state import QolsysState
 from .zone import QolsysZone
@@ -346,6 +347,7 @@ class QolsysPanel(QolsysObservable):
         self._state.sync_partitions_data(self.get_partitions_from_db())
         self._state.sync_zones_data(self.get_zones_from_db())
         self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+        self._state.sync_scenes_data(self.get_scenes_from_db())
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
@@ -771,6 +773,16 @@ class QolsysPanel(QolsysObservable):
                 devices.append(qolsys_generic)
 
         return devices
+
+    def get_scenes_from_db(self) -> list[QolsysScene]:
+        scenes = []
+        scenes_list: list[dict] = self.db.get_scenes()
+
+        # Create scenes array
+        for scene_info in scenes_list:
+            scenes.append(QolsysScene(scene_info))
+
+        return scenes
 
     def get_zones_from_db(self) -> list[QolsysZone]:
         zones = []

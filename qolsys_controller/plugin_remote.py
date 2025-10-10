@@ -197,15 +197,15 @@ class QolsysPluginRemote(QolsysPlugin):
                 await self.aiomqtt.subscribe("iq2meid")
 
                 # Subscribte to MQTT commands response
-                await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=0)
+                await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=self.settings.mqtt_qos)
 
                 # Only log mastermeid traffic for debug purposes
                 if self.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
-                    await self.aiomqtt.subscribe("mastermeid", qos=0)
+                    await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
                     # Subscribe to all topics
-                    #await self.aiomqtt.subscribe("#", qos=0)
+                    #await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
 
                 # Start mqtt_listent_task and mqtt_ping_task
                 self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -455,7 +455,7 @@ class QolsysPluginRemote(QolsysPlugin):
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
-        await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=0)
+        await self.aiomqtt.publish(topic=topic, payload=json.dumps(json_payload), qos=self.settings.mqtt_qos)
         return await self._mqtt_command_queue.wait_for_response(request_id)
 
     async def command_connect(self) -> dict:

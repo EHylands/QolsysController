@@ -19,6 +19,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 | **Partitions**       | Arming status                    | ✅ |
 |                      | Set Exit sounds                  | ✅            |
 |                      | Home Instant arming              | ✅            |
+|                      | Home Silent Disarm               | ✅            |
 |                      | Alarm state and type             | ✅            |
 |                      | Disarm pictures             | 🛠️ WIP            |
 |---|---|---|

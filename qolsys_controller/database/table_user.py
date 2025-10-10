@@ -13,6 +13,7 @@ class QolsysTableUser(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.UserContentProvider/user"
         self._table = "user"
         self._abort_on_error = False
+        self._implemented = True
 
         self._columns = [
             "_id",
@@ -27,24 +28,18 @@ class QolsysTableUser(QolsysTable):
             "lastname",
             "check_in",
             "hash_user",
+            "updated_date",
+            "updated_by",
+            "created_date",
+            "created_by",
+            "user_permissions",
+            "door_locks",
+            "active_duration_type",
+            "active",
+            "start_date",
+            "tag_flag",
+            "check_in_time",
         ]
 
         self._create_table()
 
-    def insert(self, data: dict) -> None:
-        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,username,userPin,
-                             expirydate,usertype,userid,lastname,check_in,hash_user) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", (
-            data.get("_id"),
-            data.get("version", ""),
-            data.get("opr", ""),
-            data.get("partition_id", ""),
-            data.get("username", ""),
-            data.get("userPin", ""),
-            data.get("expirydate", ""),
-            data.get("usertype", ""),
-            data.get("userid", ""),
-            data.get("lastname", ""),
-            data.get("check_in", ""),
-            data.get("hash_user", "")))
-
-        self._db.commit()

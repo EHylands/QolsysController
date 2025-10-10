@@ -13,6 +13,8 @@ class QolsysTableDashboardMsgs(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.DashboardMessagesContentProvider/dashboard_msgs"
         self._table = "dashboard_msgs"
         self._abort_on_error = False
+        self._implemented = True
+
 
         self._columns = [
             "_id",
@@ -30,21 +32,3 @@ class QolsysTableDashboardMsgs(QolsysTable):
         ]
 
         self._create_table()
-
-    def insert(self, data: dict) -> None:
-        self._cursor.execute(f"""INSERT INTO {self.table} (_id,version,opr,partition_id,msg_id,title,description,
-                             received_time,start_time,end_time,read,mime_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", (
-            data.get("_id"),
-            data.get("version"),
-            data.get("opr"),
-            data.get("partition_id"),
-            data.get("msg_id"),
-            data.get("title"),
-            data.get("description"),
-            data.get("received_time"),
-            data.get("start_time"),
-            data.get("end_time"),
-            data.get("read"),
-            data.get("mime_type")))
-
-        self._db.commit()

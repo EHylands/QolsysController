@@ -15,6 +15,7 @@ class QolsysTable:
         self._table: str = ""
         self._columns: list[str] = []
         self._abort_on_error: bool = False
+        self._implemented:bool = False
 
     @property
     def uri(self) -> str:
@@ -66,22 +67,52 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
+    def insert(self, data: dict) -> None:
+        try:
+            if not self._implemented and data is not None:
+                LOGGER.warning("New Table format: %s", self.uri)
+                LOGGER.warning("Table: %s", self.table)
+                LOGGER.warning(data)
+                LOGGER.warning("Please Report")
+                return
+
+            full_data = {col: data.get(col, "") for col in self._columns}
+
+            new_columns = []
+            for key in data:
+                if key not in self._columns:
+                    new_columns.append(key)
+
+            # Warn if new column found in iq2meid database
+            if new_columns:
+                LOGGER.warning("New column found in iq2meid database")
+                LOGGER.warning("Table: %s", self.table)
+                LOGGER.warning("New Columns: %s", new_columns)
+                LOGGER.warning("Please Report")
+
+            col_str = ", ".join(full_data.keys())
+            placeholder_str = ", ".join([f":{key}" for key in full_data])
+            query = f"INSERT OR IGNORE INTO {self.table} ({col_str}) VALUES ({placeholder_str})"
+            self._cursor.execute(query, full_data)
+            self._db.commit()
+
+        except sqlite3.Error as err:
+            error = QolsysSqlError({
+                "table": self.table,
+                "query": query,
+                "columns": self._columns,
+            })
+
+            if self._abort_on_error:
+                raise error from err
+
     def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
-
-        # Firmware 4.4.1 is sending contentValues as string
-        # selection_argument: '[3,1]'
-        # Firmware 4.6.1: 
-        # selection_argument: ['cc:4b:73:86:5c:89']
-
-        #  "contentValues":{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
-
-        # Panel is sending query parameter for db update in text string
-        # Have not found a way to make it work with parametrized query yet
-        # Using f string concat for moment ...
+        # Firmware 4.4.1: selection_argument: '[3,1]'
+        # Firmware 4.6.1: selection_argument: ['3','1']
+        # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
         # New Values to update in table
-        # To change for parametrized
         db_value = ",".join([f"{key}='{value}'" for key, value in content_value.items()])
 
         # Selection Argument
@@ -109,15 +140,12 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def insert(self) -> None:
-        pass
-
     def delete(self, selection: str, selection_argument: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
-        # selection_argument: '[3,1]'
+        # Firmware 4.4.1: selection_argument: '[3,1]'
+        # Firmware 4.6.1: selection_argument: ['3','1']
 
         # Selection Argument
-        # Panel send selection_argument as list in Firmware 4.6.1
         if(type(selection_argument) is not list):
             #Firmware 4.4.1, seletion_argument is sent as a string
             selection_argument = selection_argument.strip("[]")

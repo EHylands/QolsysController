@@ -245,7 +245,7 @@ class QolsysZone(QolsysObservable):
     @time.setter
     def time(self, value: str) -> None:
         if self._time != value:
-            LOGGER.debug("Zone%s (%s) - time: %s", self.zone_id, self.sensorname, value)
+            #LOGGER.debug("Zone%s (%s) - time: %s", self.zone_id, self.sensorname, value)
             self._time = value
             self.notify()
 

@@ -12,6 +12,7 @@ class QolsysTableZigbeeDevice(QolsysTable):
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZigbeeDeviceContentProvider/zigbee_device"
         self._table = "zigbee_device"
+        self._implemented = True
         self._abort_on_error = False
 
         self._columns = [
@@ -19,9 +20,3 @@ class QolsysTableZigbeeDevice(QolsysTable):
         ]
 
         self._create_table()
-
-    def insert(self, data: dict) -> None:
-        if data is not None:
-            LOGGER.error("Please Report")
-            LOGGER.error("Loading Table Format: %s", self.uri)
-            LOGGER.error(data)

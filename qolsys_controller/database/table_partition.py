@@ -13,6 +13,7 @@ class QolsysTablePartition(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.PartitionContentProvider/partition"
         self._table = "partition"
         self._abort_on_error = True
+        self._implemented = True
 
         self._columns = [
             "_id",
@@ -24,14 +25,3 @@ class QolsysTablePartition(QolsysTable):
         ]
 
         self._create_table()
-
-    def insert(self, data: dict) -> None:
-        self._cursor.execute(f"INSERT INTO {self.table} (_id,version,opr,partition_id,name,devices) VALUES (?,?,?,?,?,?)", (
-            data.get("_id"),
-            data.get("version", ""),
-            data.get("opr", ""),
-            data.get("partition_id", ""),
-            data.get("name", ""),
-            data.get("devices", "")))
-
-        self._db.commit()

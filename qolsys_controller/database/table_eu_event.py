@@ -13,6 +13,8 @@ class QolsysTableEuEvent(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.EUEventContentProvider/eu_event"
         self._table = "eu_event"
         self._abort_on_error = False
+        self._implemented = False
+
 
         self._columns = [
             "_id",
@@ -20,8 +22,3 @@ class QolsysTableEuEvent(QolsysTable):
 
         self._create_table()
 
-    def insert(self, data: dict) -> None:
-        if data is not None:
-            LOGGER.error("Please Report")
-            LOGGER.error("Loading Table Format: %s", self.uri)
-            LOGGER.error(data)
