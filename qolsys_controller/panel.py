@@ -500,6 +500,15 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_iqremotesettings.update(selection, selection_argument, content_values)
                                 # No action needed
 
+                            # Update Scene Content Provider
+                            case self.db.table_scene.uri:
+                                self.db.table_scene.update(selection, selection_argument, content_values)
+                                scene_id = content_values.get("scene_id", "")
+                                scene = self._state.scene(scene_id)
+                                if scene is not None and isinstance(node, QolsysScene):
+                                    scene.update(content_values)
+
+
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)

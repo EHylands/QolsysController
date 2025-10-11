@@ -1,6 +1,8 @@
 import logging
 
 from .zwave_device import QolsysZWaveDevice
+from .enum_zwave import ThermostateFanMode, ThermostatMode
+import ast
 
 LOGGER = logging.getLogger(__name__)
 
@@ -249,3 +251,57 @@ class QolsysThermostat(QolsysZWaveDevice):
             "endpoint": self._thermostat_endpoint,
             "configuration_parameter": self._thermostat_configuration_parameter,
         }
+
+    def thermostat_mode(self) -> ThermostatMode:
+        thermostat_mode = int(self._thermostat_mode)
+        for mode in ThermostatMode:
+            if thermostat_mode == mode:
+                return mode
+        return None
+
+    def available_thermostat_mode(self) -> list[ThermostatMode]:
+
+        int_list = [int(x) for x in self._thermostat_mode_bitmask.split(",")]
+        byte_array = bytes(int_list)
+        bitmask = int.from_bytes(byte_array, byteorder="little")
+
+        mode_array = []
+        for mode in ThermostateFanMode:
+            if mode.value & bitmask:
+                mode_array.append(mode)
+
+        return mode_array
+
+    def thermostat_fan_mode(self) -> ThermostateFanMode:
+        thermostat_fan_mode = int(self._thermostat_fan_mode)
+        for mode in ThermostatMode:
+            if thermostat_fan_mode == mode:
+                return mode
+        return None
+
+    def available_thermostat_fan_mode(self) -> list[ThermostateFanMode]:
+
+        int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.split(",")]
+        byte_array = bytes(int_list)
+        bitmask = int.from_bytes(byte_array, byteorder="little")
+
+        fan_mode_array = []
+        for mode in ThermostateFanMode:
+            if mode.value & bitmask:
+                fan_mode_array.append(mode)
+
+        return fan_mode_array
+
+    def available_thermostat_set_point_mode(self) -> list[ThermostatMode]:
+
+        int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.split(",")]
+        byte_array = bytes(int_list)
+        bitmask = int.from_bytes(byte_array, byteorder="little")
+
+        set_point_mode_array = []
+        for mode in ThermostatMode:
+            if mode.value & bitmask:
+                set_point_mode_array.append(mode)
+
+        return set_point_mode_array
+

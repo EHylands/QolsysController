@@ -19,6 +19,7 @@ from .settings import QolsysSettings
 from .state import QolsysState
 from .task_manager import QolsysTaskManager
 from .utils_mqtt import generate_random_mac
+from .enum_zwave import ThermostateFanMode, ThermostatMode
 
 LOGGER = logging.getLogger(__name__)
 
@@ -205,7 +206,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
                     # Subscribe to all topics
-                    #await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
+                    await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
 
                 # Start mqtt_listent_task and mqtt_ping_task
                 self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -816,7 +817,6 @@ class QolsysPluginRemote(QolsysPlugin):
         mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.check_user_code_on_disarm)
 
-
         disarm_command = {
             "operation_name": mqtt_disarm_command,
             "userID": user_id,
@@ -851,8 +851,20 @@ class QolsysPluginRemote(QolsysPlugin):
 
         return True
 
-    async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
+    async def command_zwave_thermostat_setpoint_set(self, node_id: int, mode:ThermostatMode, setpoint:float) -> None:
+        # Command 67
+        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command: NOT IMPLEMENTED")
 
+    async def command_zwave_thermostat_mode_set(self, node_id: int, mode:ThermostatMode) -> None:
+        # Command 64
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command: NOT IMPLEMENTED")
+
+    async def command_zwave_thermostat_fan_mode_set(self, node_id: int, fan_mode:ThermostateFanMode) -> None:
+        # Command 68
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command: NOT IMPLEMENTED")
+
+    async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
+        LOGGER.debug("MQTT: Sending zwave_switch_multi_level command")
         ipcRequest = [{
                 "dataType": "int",  # Node ID
                 "dataValue": node_id,
@@ -862,8 +874,10 @@ class QolsysPluginRemote(QolsysPlugin):
                 "dataValue": 0,
             },
             {
-                "dataType": "byteArray",  # ZWAVE MULTILEVELSWITCH COMMAND
-                "dataValue": [38, 1, level],
+                # [38,1,level] ZWAVE MULTILEVELSWITCH SET (level 255 to set to previous state)
+                # [38,2] ZWAVE MULTILEVELSWITCH GET
+                "dataType": "byteArray",
+                "dataValue": [38,1,level],
             },
             {
                 "dataType": "int",  # ?
@@ -898,6 +912,62 @@ class QolsysPluginRemote(QolsysPlugin):
                    "remoteMacAddress": remoteMacAddress}
 
         await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving zwave_switch_multi_level command")
+
+    async def command_zwave_switch_binary(self, node_id: int, status:bool) -> None:
+        LOGGER.debug("MQTT:Sending zwave_switch_binary command")
+
+        level = 0
+        if status:
+            level = 99
+
+        ipcRequest = [{
+                "dataType": "int",
+                "dataValue": node_id,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [37,1,level],
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 106,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [0],
+            },
+        ]
+
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qzwaveservice"
+        ipcInterfaceName = "android.os.IQZwaveService"
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {"eventName": eventName,
+                   "ipcServiceName": ipcServiceName,
+                   "ipcInterfaceName": ipcInterfaceName,
+                   "ipcTransactionID": ipcTransactionID,
+                   "ipcRequest": ipcRequest,
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT:Receiving zwave_switch_binary command")
+
 
     async def command_arm(self, partition_id: str, arming_type: str, user_code: str = "", exit_sounds: bool = False,
                           instant_arm: bool = False) -> bool:
@@ -979,3 +1049,46 @@ class QolsysPluginRemote(QolsysPlugin):
         await self.send_command(topic, payload, requestID)
 
         return True
+
+    async def command_execute_scene(self,scene_id:str) -> bool:
+        LOGGER.debug("MQTT: Sending execute_scene command")
+
+        scene = self.state.scene(scene_id)
+        if not scene:
+            LOGGER.debug("MQTT: command_execute_scene Erro - Unknow Scene: %s", scene_id)
+            return False
+
+        scene_command = {
+            "operation_name": "execute_scene",
+            "scene_id": scene.scene_id,
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qinternalservice"
+        ipcInterfaceName = "android.os.IQInternalService"
+        ipcTransactionID = 7
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {
+            "eventName": eventName,
+            "ipcServiceName": ipcServiceName,
+            "ipcInterfaceName": ipcInterfaceName,
+            "ipcTransactionID": ipcTransactionID,
+            "ipcRequest": [{
+                "dataType": "string",
+                "dataValue":  json.dumps(scene_command),
+            }],
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddress": remoteMacAddress,
+        }
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving execute_scene command")
+
+        return False
