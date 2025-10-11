@@ -9,6 +9,7 @@ import uuid
 import aiomqtt
 
 from .enum import PartitionAlarmState, PartitionSystemStatus
+from .enum_zwave import ThermostatFanMode, ThermostatMode
 from .errors import QolsysMqttError, QolsysSslError
 from .mdns import QolsysMDNS
 from .mqtt_command_queue import QolsysMqttCommandQueue
@@ -19,7 +20,6 @@ from .settings import QolsysSettings
 from .state import QolsysState
 from .task_manager import QolsysTaskManager
 from .utils_mqtt import generate_random_mac
-from .enum_zwave import ThermostateFanMode, ThermostatMode
 
 LOGGER = logging.getLogger(__name__)
 
@@ -853,15 +853,156 @@ class QolsysPluginRemote(QolsysPlugin):
 
     async def command_zwave_thermostat_setpoint_set(self, node_id: int, mode:ThermostatMode, setpoint:float) -> None:
         # Command 67
-        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command: NOT IMPLEMENTED")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command: EXPERIMENTAL")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command")
+        ipcRequest = [{
+                "dataType": "int",
+                "dataValue": node_id,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [67,1,mode,setpoint],
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 106,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [0],
+            },
+        ]
+
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qzwaveservice"
+        ipcInterfaceName = "android.os.IQZwaveService"
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {"eventName": eventName,
+                   "ipcServiceName": ipcServiceName,
+                   "ipcInterfaceName": ipcInterfaceName,
+                   "ipcTransactionID": ipcTransactionID,
+                   "ipcRequest": ipcRequest,
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
 
     async def command_zwave_thermostat_mode_set(self, node_id: int, mode:ThermostatMode) -> None:
         # Command 64
-        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command: NOT IMPLEMENTED")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command: EXPERIMENTAL")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command")
+        ipcRequest = [{
+                "dataType": "int",
+                "dataValue": node_id,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [64,1,mode],
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 106,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [0],
+            },
+        ]
 
-    async def command_zwave_thermostat_fan_mode_set(self, node_id: int, fan_mode:ThermostateFanMode) -> None:
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qzwaveservice"
+        ipcInterfaceName = "android.os.IQZwaveService"
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {"eventName": eventName,
+                   "ipcServiceName": ipcServiceName,
+                   "ipcInterfaceName": ipcInterfaceName,
+                   "ipcTransactionID": ipcTransactionID,
+                   "ipcRequest": ipcRequest,
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
+
+    async def command_zwave_thermostat_fan_mode_set(self, node_id: int, fan_mode:ThermostatFanMode) -> None:
         # Command 68
-        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command: NOT IMPLEMENTED")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command: EXPERIMENTAL")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command")
+        ipcRequest = [{
+                "dataType": "int",
+                "dataValue": node_id,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [68,1,fan_mode],
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 106,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [0],
+            },
+        ]
+
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qzwaveservice"
+        ipcInterfaceName = "android.os.IQZwaveService"
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {"eventName": eventName,
+                   "ipcServiceName": ipcServiceName,
+                   "ipcInterfaceName": ipcInterfaceName,
+                   "ipcTransactionID": ipcTransactionID,
+                   "ipcRequest": ipcRequest,
+                   "requestID": requestID,
+                   "responseTopic": responseTopic,
+                   "remoteMacAddress": remoteMacAddress}
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
 
     async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
         LOGGER.debug("MQTT: Sending zwave_switch_multi_level command")
@@ -875,7 +1016,6 @@ class QolsysPluginRemote(QolsysPlugin):
             },
             {
                 # [38,1,level] ZWAVE MULTILEVELSWITCH SET (level 255 to set to previous state)
-                # [38,2] ZWAVE MULTILEVELSWITCH GET
                 "dataType": "byteArray",
                 "dataValue": [38,1,level],
             },

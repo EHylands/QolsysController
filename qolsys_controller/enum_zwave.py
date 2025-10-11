@@ -20,7 +20,7 @@ class ThermostatMode(Enum):
     MANUFACTURER_SPECEFIC: 0x8000
 
 
-class ThermostateFanMode(Enum):
+class ThermostatFanMode(Enum):
     AUTO_LOW: 0x0001
     LOW: 0x0002
     AUTO_HIGH: 0x0004

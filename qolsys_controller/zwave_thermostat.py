@@ -1,8 +1,7 @@
 import logging
 
+from .enum_zwave import ThermostatFanMode, ThermostatMode
 from .zwave_device import QolsysZWaveDevice
-from .enum_zwave import ThermostateFanMode, ThermostatMode
-import ast
 
 LOGGER = logging.getLogger(__name__)
 
@@ -266,27 +265,27 @@ class QolsysThermostat(QolsysZWaveDevice):
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
         mode_array = []
-        for mode in ThermostateFanMode:
+        for mode in ThermostatMode:
             if mode.value & bitmask:
                 mode_array.append(mode)
 
         return mode_array
 
-    def thermostat_fan_mode(self) -> ThermostateFanMode:
+    def thermostat_fan_mode(self) -> ThermostatFanMode:
         thermostat_fan_mode = int(self._thermostat_fan_mode)
         for mode in ThermostatMode:
             if thermostat_fan_mode == mode:
                 return mode
         return None
 
-    def available_thermostat_fan_mode(self) -> list[ThermostateFanMode]:
+    def available_thermostat_fan_mode(self) -> list[ThermostatFanMode]:
 
         int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
         fan_mode_array = []
-        for mode in ThermostateFanMode:
+        for mode in ThermostatFanMode:
             if mode.value & bitmask:
                 fan_mode_array.append(mode)
 
