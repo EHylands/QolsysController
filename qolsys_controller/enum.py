@@ -34,6 +34,7 @@ class ZoneStatus(StrEnum):
     INACTIVE = "Inactive"
     ACTIVATED = "Activated"
     IDLE = "Idle"
+    NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
     TAMPERED = "Tampered"
     SYNCHONIZING = "Synchonizing"

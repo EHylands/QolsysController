@@ -39,6 +39,7 @@ class QolsysTableMasterSlave(QolsysTable):
             "dhcpInfo",
             "topology",
             "reboot_reason",
+            "field_remote_camera_streaming",
         ]
 
         self._create_table()
