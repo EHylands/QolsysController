@@ -219,13 +219,13 @@ class QolsysState(QolsysObservable):
                         # Update Thermostat
                         if isinstance(state_zwave, QolsysThermostat) and isinstance(db_zwave, QolsysThermostat):
                             state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_thermostat(db_zwave.to_dict_base())
+                            state_zwave.update_thermostat(db_zwave.to_dict_thermostat)
                             break
 
                         # Update Lock
                         if isinstance(state_zwave, QolsysLock) and isinstance(db_zwave, QolsysLock):
                             state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_lock(db_zwave.to_dict_base())
+                            state_zwave.update_lock(db_zwave.to_dict_lock)
                             break
 
                         # Generic Z-Wave Device

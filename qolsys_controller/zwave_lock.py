@@ -108,7 +108,7 @@ class QolsysLock(QolsysZWaveDevice):
 
         self.end_batch_update()
 
-    def to_dict_dimmer(self) -> dict:
+    def to_dict_lock(self) -> dict:
         return {
             "_id": self._lock_id,
             "version": self._lock_version,
