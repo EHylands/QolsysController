@@ -772,13 +772,13 @@ class QolsysPanel(QolsysObservable):
                     device_added = True
                     break
 
-            # Found a SmartOutlet
+            # Found a Smart Outlet
 
             # Found Garage Door Openner
 
             # No Specific z-wave device found, add a generic z-wave device
             if not device_added:
-                qolsys_generic = QolsysGeneric()
+                qolsys_generic = QolsysGeneric(device)
                 devices.append(qolsys_generic)
 
         return devices
