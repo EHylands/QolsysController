@@ -39,6 +39,7 @@ class ZoneStatus(StrEnum):
     TAMPERED = "Tampered"
     SYNCHONIZING = "Synchonizing"
     CONNECTED = "connected"
+    DISCONNECTED = "disconnected"
     FAILURE = "Failure"
 
 
