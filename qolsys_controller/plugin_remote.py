@@ -193,7 +193,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 await self.aiomqtt.__aenter__()
 
-                LOGGER.debug("MQTT: Client Connected")
+                LOGGER.info("MQTT: Client Connected")
 
                 # Subscribe to panel internal databse updates
                 await self.aiomqtt.subscribe("iq2meid")
@@ -864,9 +864,10 @@ class QolsysPluginRemote(QolsysPlugin):
         return True
 
     async def command_zwave_doorlock_set(self, node_id: int, locked:bool) -> None:
-        # Command 68
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command: EXPERIMENTAL")
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)",node_id,locked)
+
+        command = 68
 
         # 0 unlocked
         # 255 lockeck
@@ -884,7 +885,7 @@ class QolsysPluginRemote(QolsysPlugin):
             },
             {
                 "dataType": "byteArray",
-                "dataValue": [68,lock_mode],
+                "dataValue": [command,lock_mode],
             },
             {
                 "dataType": "int",
