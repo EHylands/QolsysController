@@ -32,6 +32,7 @@ class QolsysTableDoorLock(QolsysTable):
             "panel_arming",
             "endpoint",
             "paired_status",
+            "configuration",
         ]
 
         self._create_table()
