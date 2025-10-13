@@ -42,6 +42,7 @@ class QolsysTableSensor(QolsysTable):
             "zone_reporting_enabled",
             "zone_feature1",
             "zone_feature2",
+            "zone_feature3",
             "battery_status",
             "created_date",
             "created_by",

@@ -108,12 +108,13 @@ class QolsysTable:
 
     def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
+
+        # selection_argument:
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
+
         # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
-        # New Values to update in table
-        db_value = ",".join([f"{key}='{value}'" for key, value in content_value.items()])
 
         # Selection Argument
         # Panel send selection_argument as list in Firmware 4.6.1
@@ -123,6 +124,24 @@ class QolsysTable:
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         try:
+            full_data = {}
+            new_columns = []
+
+            for key, value in content_value.items():
+                if key in self._columns:
+                    full_data[key] = value
+                else:
+                    new_columns.append(key)
+
+            db_value = ",".join([f"{key}='{value}'" for key, value in full_data.items()])
+
+            # Warn if new column found in iq2meid database
+            if new_columns:
+                LOGGER.warning("New column found in iq2meid database")
+                LOGGER.warning("Table: %s", self.table)
+                LOGGER.warning("New Columns: %s", new_columns)
+                LOGGER.warning("Please Report")
+
             query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
             self._cursor.execute(query, selection_argument)
             self._db.commit()
