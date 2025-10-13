@@ -53,7 +53,7 @@ class QolsysScene(QolsysObservable):
         return self._color
 
     @name.setter
-    def name(self, value: str) -> None: 
+    def name(self, value: str) -> None:
         if self._name != value:
             self._name = value
             self.notify()

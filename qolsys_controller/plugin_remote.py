@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import datetime
 import json
 import logging
@@ -200,10 +201,13 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Subscribte to MQTT commands response
                 await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=self.settings.mqtt_qos)
 
-                # Only log mastermeid traffic for debug purposes
+                # Subscribe to Z-Wave response
+                await self.aiomqtt.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
+
+                # Only log all traffic for debug purposes
                 if self.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
-                    await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
+                    #await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
                     # Subscribe to all topics
                     await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
@@ -281,6 +285,14 @@ class QolsysPluginRemote(QolsysPlugin):
                 if message.topic.matches("iq2meid"):
                     data = json.loads(message.payload.decode())
                     self.panel.parse_iq2meid_message(data)
+
+                # Panel Z-Wave response
+                if message.topic.matches("ZWAVE_RESPONSE"):
+                    data = json.loads(message.payload.decode())
+                    zwave = data.get("ZWAVE_RESPONSE","")
+                    decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD","")).hex()
+                    LOGGER.debug("Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",zwave.get("NODE_ID",""),zwave.get("ZWAVE_COMMAND_STATUS",""),decoded_payload)
+
 
         except aiomqtt.MqttError as err:
             self.connected = False
@@ -851,6 +863,66 @@ class QolsysPluginRemote(QolsysPlugin):
 
         return True
 
+    async def command_zwave_doorlock_set(self, node_id: int, locked:bool) -> None:
+        # Command 68
+        LOGGER.debug("MQTT: Sending zwave_doorlock_set command: EXPERIMENTAL")
+        LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)",node_id,locked)
+
+        # 0 unlocked
+        # 255 lockeck
+        lock_mode = 0
+        if locked:
+            lock_mode = 255
+
+        ipcRequest = [{
+                "dataType": "int",
+                "dataValue": node_id,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [68,lock_mode],
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 106,
+            },
+            {
+                "dataType": "byteArray",
+                "dataValue": [0],
+            },
+        ]
+
+        topic = "mastermeid"
+        eventName = "ipcCall"
+        ipcServiceName = "qzwaveservice"
+        ipcInterfaceName = "android.os.IQZwaveService"
+        ipcTransactionID = 47
+        requestID = str(uuid.uuid4())
+        remoteMacAddress = self.settings.random_mac
+        responseTopic = "response_" + self.settings.random_mac
+
+        payload = {
+            "eventName": eventName,
+            "ipcServiceName": ipcServiceName,
+            "ipcInterfaceName": ipcInterfaceName,
+            "ipcTransactionID": ipcTransactionID,
+            "ipcRequest": ipcRequest,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddress": remoteMacAddress,
+        }
+
+        await self.send_command(topic, payload, requestID)
+        LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
+
     async def command_zwave_thermostat_setpoint_set(self, node_id: int, mode:ThermostatMode, setpoint:float) -> None:
         # Command 67
         LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command: EXPERIMENTAL")
@@ -941,14 +1013,16 @@ class QolsysPluginRemote(QolsysPlugin):
         remoteMacAddress = self.settings.random_mac
         responseTopic = "response_" + self.settings.random_mac
 
-        payload = {"eventName": eventName,
-                   "ipcServiceName": ipcServiceName,
-                   "ipcInterfaceName": ipcInterfaceName,
-                   "ipcTransactionID": ipcTransactionID,
-                   "ipcRequest": ipcRequest,
-                   "requestID": requestID,
-                   "responseTopic": responseTopic,
-                   "remoteMacAddress": remoteMacAddress}
+        payload = {
+            "eventName": eventName,
+            "ipcServiceName": ipcServiceName,
+            "ipcInterfaceName": ipcInterfaceName,
+            "ipcTransactionID": ipcTransactionID,
+            "ipcRequest": ipcRequest,
+            "requestID": requestID,
+            "responseTopic": responseTopic,
+            "remoteMacAddress": remoteMacAddress
+        }
 
         await self.send_command(topic, payload, requestID)
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")

@@ -234,8 +234,8 @@ class QolsysState(QolsysObservable):
                             break
 
                         # zwave node_id has changed of node_type, delete and add again
-                        # self.zwave_delete(int(state_zwave.node_id))  # noqa: ERA001
-                        # self.zwave_add(db_zwave)  # noqa: ERA001
+                        # self.zwave_delete(int(state_zwave.node_id))
+                        # self.zwave_add(db_zwave)
 
         # Add new zwave device
         for db_zwave in db_zwaves:
