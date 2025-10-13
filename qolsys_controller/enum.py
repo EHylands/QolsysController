@@ -25,9 +25,10 @@ class PartitionAlarmType(StrEnum):
     AUXILIARY_EMERGENCY = "Auxiliary Emergency"
     SILENT_AUXILIARY_EMERGENCY = "Silent Auxiliary Emergency"
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
-
+    GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
 
 class ZoneStatus(StrEnum):
+    ALARMED = "Alarmed"
     OPEN = "Open"
     CLOSED = "Closed"
     ACTIVE = "Active"
@@ -83,6 +84,9 @@ class ZoneSensorGroup(StrEnum):
     MOBILE_AUXILIARY = "mobilemedical"
     MOBILE_SILENT_AUXILIARY = "mobilesilentmedical"
     SAFETY_MOTION = "safetymotion"
+    GLASS_BREAK = "glassbreak"
+    GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
+
     # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
     # ENTRY_EXIT_LONG_DELAY = "" #TBD
     # INSTANT_PERIMETER_DW = "" #TBD
@@ -95,8 +99,6 @@ class ZoneSensorGroup(StrEnum):
     # STAY_INSTANT_MOTION = "" #TBD
     # STAY_DELAY_MOTION = "" #TBD
     # AWAY_DELAY_MOTION = "" #TBD
-    # GLASS_BREAK = "" # TBD
-    # GLASS_BREAK_AWAY_ONLY = "" # TBD
     # SMOKE_HEAT = "" # TBD
     # CO = "" # TBD
     # TAKEOVER = "" #TBD

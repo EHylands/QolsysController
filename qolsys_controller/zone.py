@@ -266,7 +266,7 @@ class QolsysZone(QolsysObservable):
                 LOGGER.exception("Unknown Sensor group: %s, please report", new_value)
 
             self._sensorgroup = new_value
-            LOGGER.debug("Zone%s (%s) - sensorgroup: %s", self.zone_id, self.sensorname, new_value.name)
+            LOGGER.debug("Zone%s (%s) - sensorgroup: %s", self.zone_id, self.sensorname, new_value)
             self.notify()
 
     @partition_id.setter
