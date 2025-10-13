@@ -12,7 +12,7 @@ class QolsysTableDoorLock(QolsysTable):
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.DoorLocksContentProvider/doorlock"
         self._table = "doorlock"
-        self._abort_on_error = True
+        self._abort_on_error = False
         self._implemented = True
 
         self._columns = [

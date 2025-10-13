@@ -12,7 +12,7 @@ class QolsysTableDimmerLight(QolsysTable):
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.DimmerLightsContentProvider/dimmerlight"
         self._table = "dimmerlight"
-        self._abort_on_error = True
+        self._abort_on_error = False
         self._implemented = True
 
         self._columns = [

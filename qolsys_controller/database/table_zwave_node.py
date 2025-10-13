@@ -12,7 +12,7 @@ class QolsysTableZwaveNode(QolsysTable):
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ZwaveContentProvider/zwave_node"
         self._table = "zwave_node"
-        self._abort_on_error = True
+        self._abort_on_error = False
         self._implemented = True
 
         self._columns = [
