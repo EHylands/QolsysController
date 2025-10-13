@@ -41,6 +41,7 @@ class QolsysTableSensor(QolsysTable):
             "zone_two_way_voice_enabled",
             "zone_reporting_enabled",
             "zone_feature1",
+            "zone_feature2",
             "battery_status",
             "created_date",
             "created_by",
