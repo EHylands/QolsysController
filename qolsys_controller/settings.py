@@ -91,13 +91,13 @@ class QolsysSettings:
     def key_size(self) -> int:
         return self._key_size
 
-    @property
-    def mqtt_timeout(self) -> int:
-        return self._mqtt_timeout
+    @mqtt_timeout.setter
+    def mqtt_timeout(self, value: int) -> None:
+        self._mqtt_timeout = value
 
-    @property
-    def mqtt_ping(self) -> int:
-        return self._mqtt_ping
+    @mqtt_ping.setter
+    def mqtt_ping(self, value: int) -> None:
+        self._mqtt_ping = value
 
     @mqtt_ping.setter
     def mqtt_ping(self, ping:int) -> None:

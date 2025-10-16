@@ -199,6 +199,8 @@ class QolsysPartition(QolsysObservable):
     def command_arm_entry_delay(self, value:bool) -> None:
         self._command_arm_entry_delay = value
         LOGGER.debug("Partition%s (%s) - command_arm_entry_delay: %s", self._id, self._name, value)
+        self.notify()
+
 
 
     def update_partition(self, data: dict) -> None:
