@@ -74,7 +74,7 @@ class QolsysZWaveDevice(QolsysObservable):
         node_id_update = data.get("node_id", "")
         if node_id_update != self._node_id:
             LOGGER.error(
-                "Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update
+                "Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update,
             )
             return
 

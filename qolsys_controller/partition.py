@@ -41,6 +41,7 @@ class QolsysPartition(QolsysObservable):
         self._command_exit_sounds = True
         self._command_arm_stay_instant = True
         self._command_arm_stay_silent_disarming = False
+        self._command_arm_entry_delay = True
 
     @property
     def id(self) -> int:
@@ -85,6 +86,10 @@ class QolsysPartition(QolsysObservable):
     @property
     def command_arm_stay_silent_disarming(self) -> bool:
         return self._command_arm_stay_silent_disarming
+
+    @property
+    def command_arm_entry_delay(self) -> bool:
+        return self._command_arm_entry_delay
 
     @system_status.setter
     def system_status(self, new_value: PartitionSystemStatus) -> None:
@@ -189,6 +194,12 @@ class QolsysPartition(QolsysObservable):
         self._command_arm_stay_silent_disarming = value
         LOGGER.debug("Partition%s (%s) - arm_stay_silent_disarming: %s", self._id, self._name, value)
         self.notify()
+
+    @command_arm_entry_delay.setter
+    def command_arm_entry_delay(self, value:bool) -> None:
+        self._command_arm_entry_delay = value
+        LOGGER.debug("Partition%s (%s) - command_arm_entry_delay: %s", self._id, self._name, value)
+
 
     def update_partition(self, data: dict) -> None:
         # Check if we are updating same partition_id

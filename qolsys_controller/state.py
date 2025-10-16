@@ -193,7 +193,7 @@ class QolsysState(QolsysObservable):
         self.zwave_devices.remove(zwave)
         self.state_zwave_observer.notify()
 
-    def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: C901, PLR0912
+    def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
 
         db_zwave_list = []
         for db_zwave in db_zwaves:
@@ -279,7 +279,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - add Scene%s", db_scene.scene_id)
                 self.scene_add(db_scene)
 
-    def sync_zones_data(self, db_zones: list[QolsysZone]) -> None:  # noqa: C901
+    def sync_zones_data(self, db_zones: list[QolsysZone]) -> None:
         db_zone_list = []
         for db_zone in db_zones:
             db_zone_list.append(db_zone.zone_id)
@@ -308,7 +308,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - add Zone%s", db_zone.zone_id)
                 self.zone_add(db_zone)
 
-    def sync_partitions_data(self, db_partitions: list[QolsysPartition]) -> None:  # noqa: C901
+    def sync_partitions_data(self, db_partitions: list[QolsysPartition]) -> None:
         db_partition_list = []
         for db_partition in db_partitions:
             db_partition_list.append(db_partition.id)

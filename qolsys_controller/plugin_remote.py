@@ -299,6 +299,7 @@ class QolsysPluginRemote(QolsysPlugin):
             self.connected_observer.notify()
 
             LOGGER.debug("%s: Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
+            self._task_manager.cancel(self.mqtt_ping_task)
             await asyncio.sleep(self.settings.mqtt_timeout)
             self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
 
@@ -374,7 +375,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
-    async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+    async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
 
         received_panel_mac = False
         received_signed_client_certificate = False
@@ -927,7 +928,7 @@ class QolsysPluginRemote(QolsysPlugin):
     async def command_zwave_thermostat_setpoint_set(self, node_id: int, mode:ThermostatMode, setpoint:float) -> None:
         # Command 67
         LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command: EXPERIMENTAL")
-        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set command")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s)",node_id,mode,setpoint)
         ipcRequest = [{
                 "dataType": "int",
                 "dataValue": node_id,
@@ -978,7 +979,7 @@ class QolsysPluginRemote(QolsysPlugin):
     async def command_zwave_thermostat_mode_set(self, node_id: int, mode:ThermostatMode) -> None:
         # Command 64
         LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command: EXPERIMENTAL")
-        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)",node_id,mode)
         ipcRequest = [{
                 "dataType": "int",
                 "dataValue": node_id,
@@ -1022,7 +1023,7 @@ class QolsysPluginRemote(QolsysPlugin):
             "ipcRequest": ipcRequest,
             "requestID": requestID,
             "responseTopic": responseTopic,
-            "remoteMacAddress": remoteMacAddress
+            "remoteMacAddress": remoteMacAddress,
         }
 
         await self.send_command(topic, payload, requestID)
@@ -1031,7 +1032,7 @@ class QolsysPluginRemote(QolsysPlugin):
     async def command_zwave_thermostat_fan_mode_set(self, node_id: int, fan_mode:ThermostatFanMode) -> None:
         # Command 68
         LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command: EXPERIMENTAL")
-        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command")
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)",node_id,fan_mode)
         ipcRequest = [{
                 "dataType": "int",
                 "dataValue": node_id,
@@ -1080,7 +1081,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
 
     async def command_zwave_switch_multi_level(self, node_id: int, level: int) -> None:
-        LOGGER.debug("MQTT: Sending zwave_switch_multi_level command")
+        LOGGER.debug("MQTT: Sending zwave_switch_multi_level command  - Node(%s) - Level(%s)",node_id,level)
         ipcRequest = [{
                 "dataType": "int",  # Node ID
                 "dataValue": node_id,
@@ -1185,10 +1186,10 @@ class QolsysPluginRemote(QolsysPlugin):
 
 
     async def command_arm(self, partition_id: str, arming_type: str, user_code: str = "", exit_sounds: bool = False,
-                          instant_arm: bool = False) -> bool:
+                          instant_arm: bool = False, entry_delay: bool = True) -> bool:
 
-        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s",
-                     partition_id, arming_type, self.panel.SECURE_ARMING)
+        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+                     partition_id, arming_type, self.panel.SECURE_ARMING,exit_sounds,instant_arm,entry_delay)
 
         user_id = 0
 
@@ -1223,13 +1224,17 @@ class QolsysPluginRemote(QolsysPlugin):
         if not exit_sounds:
             exitSoundValue = "OFF"
 
+        entryDelay = "ON"
+        if not entry_delay:
+            entryDelay = "OFF"
+
         arming_command = {
             "operation_name": mqtt_arming_type,
             "bypass_zoneid_set": "[]",
             "userID": user_id,
             "partitionID": int(partition_id),
             "exitSoundValue":  exitSoundValue,
-            "entryDelayValue": "OFF",
+            "entryDelayValue": entryDelay,
             "multiplePartitionsSelected": False,
             "instant_arming": instant_arm,
             "final_exit_arming_selected": False,

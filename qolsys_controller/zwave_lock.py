@@ -67,7 +67,7 @@ class QolsysLock(QolsysZWaveDevice):
             self._lock_paired_status = value
             self.notify()
 
-    def update_lock(self, data: dict) -> None:  # noqa: C901, PLR0912
+    def update_lock(self, data: dict) -> None:  # noqa: PLR0912
         # Check if we are updating same zoneid
         node_id_update = data.get("node_id", "")
         if node_id_update != self.lock_node_id:

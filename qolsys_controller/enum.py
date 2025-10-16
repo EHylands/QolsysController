@@ -86,6 +86,9 @@ class ZoneSensorGroup(StrEnum):
     SAFETY_MOTION = "safetymotion"
     GLASS_BREAK = "glassbreak"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
+    SMOKE_HEAT = "smoke_heat"
+    CO = "co"
+
 
     # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
     # ENTRY_EXIT_LONG_DELAY = "" #TBD
@@ -99,8 +102,6 @@ class ZoneSensorGroup(StrEnum):
     # STAY_INSTANT_MOTION = "" #TBD
     # STAY_DELAY_MOTION = "" #TBD
     # AWAY_DELAY_MOTION = "" #TBD
-    # SMOKE_HEAT = "" # TBD
-    # CO = "" # TBD
     # TAKEOVER = "" #TBD
     # GARAGE_TILT_SAFETY = "" # TBD
     # WATER_SENSOR = "" # TBD

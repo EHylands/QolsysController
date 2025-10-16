@@ -2,6 +2,8 @@ import asyncio
 import logging
 from collections.abc import Coroutine
 
+import aiomqtt
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -14,6 +16,16 @@ class QolsysTaskManager:
         self._tasks.add(task)
 
         def _done_callback(task: asyncio.Task) -> None:
+
+            try:
+                task.result()
+
+            except asyncio.CancelledError:
+                LOGGER.debug("Task Cancelled: %s",task.get_name())
+
+            except Exception as e:  # noqa: BLE001
+                LOGGER.debug("[Callback] Task failed with: %s",e)
+
             self._tasks.discard(task)
 
         task.add_done_callback(_done_callback)

@@ -52,6 +52,14 @@ class QolsysSettings:
     def panel_ip(self) -> str:
         return self._panel_ip
 
+    @property
+    def mqtt_timeout(self) -> int:
+        return self._mqtt_timeout
+
+    @property
+    def mqtt_ping(self) -> int:
+        return self._mqtt_ping
+
     @panel_ip.setter
     def panel_ip(self, panel_ip: str) -> None:
         self._panel_ip = panel_ip
