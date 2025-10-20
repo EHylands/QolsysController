@@ -10,7 +10,6 @@ ipython==8.12.3
 ipywidgets==8.1.7
 keyring==25.6.0
 protobuf==6.33.0
-pyOpenSSL==24.3.0
 pyOpenSSL==25.3.0
 pytest==8.4.2
 python_bcrypt==0.3.2
