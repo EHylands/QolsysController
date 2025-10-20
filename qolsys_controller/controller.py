@@ -9,7 +9,6 @@ from .state import QolsysState
 
 LOGGER = logging.getLogger(__name__)
 
-
 class QolsysController:
 
     def __init__(self) -> None:

@@ -852,7 +852,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command: EXPERIMENTAL")
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)",node_id,locked)
 
-        command = 68
+        command = 98
 
         # 0 unlocked
         # 255 lockeck
