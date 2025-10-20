@@ -7,8 +7,8 @@ import logging
 import random
 import ssl
 import uuid
-from pathlib import Path
 
+import aiofiles
 import aiomqtt
 
 from .enum import PartitionAlarmState, PartitionSystemStatus
@@ -359,6 +359,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 except asyncio.CancelledError:
                     LOGGER.debug("Stoping Certificate Exchange Server")
+                    await self.certificate_exchange_server.wait_closed()
                     LOGGER.debug("Stoping mDNS Service Discovery")
                     await mdns_server.stop_mdns()
 
@@ -402,8 +403,8 @@ class QolsysPluginRemote(QolsysPlugin):
                     await writer.drain()
 
                     # Sending CSR File to panel
-                    with Path.open(self._pki.csr_file_path, "rb") as file:
-                        content = file.read()
+                    async with aiofiles.open(self._pki.csr_file_path, mode='rb') as f:
+                        content = await f.read()
                         LOGGER.debug("Sending to Panel: [CSR File Content]")
                         writer.write(content)
                         writer.write(b"sent")
@@ -415,22 +416,22 @@ class QolsysPluginRemote(QolsysPlugin):
                 if (received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
                     request = await reader.readuntil(b"sent")
                     if request.endswith(b"sent"):
-                        request = request[:-5]
+                        request = request[:-4]
 
                     LOGGER.debug("Saving [Signed Client Certificate]")
-                    with Path.open(self._pki.secure_file_path, "wb") as f:
-                        f.write(request)
+                    async with aiofiles.open(self._pki.secure_file_path, mode="wb") as f:
+                        await f.write(request)
                         received_signed_client_certificate = True
 
                 # Read qolsys certificate data
                 if (received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
                     request = await reader.readuntil(b"sent")
                     if request.endswith(b"sent"):
-                        request = request[:-5]
+                        request = request[:-4]
 
                     LOGGER.debug("Saving [Qolsys Certificate]")
-                    with Path.open(self._pki.qolsys_cer_file_path, "wb") as f:
-                        f.write(request)
+                    async with aiofiles.open(self._pki.qolsys_cer_file_path, mode="wb") as f:
+                        await f.write(request)
                         received_qolsys_cer = True
                         continue_pairing = False
 
