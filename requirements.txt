@@ -8,7 +8,6 @@ filelock==3.20.0
 HTMLParser==0.0.2
 ipython==8.12.3
 ipywidgets==8.1.7
-jnius==1.1.0
 keyring==25.6.0
 protobuf==6.33.0
 pyOpenSSL==24.3.0
