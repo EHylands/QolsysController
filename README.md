@@ -17,10 +17,11 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 | **Panel**            | Diagnostics sensors              | ✅  |
 |---|---|---|
 | **Partitions**       | Arming status                    | ✅ |
-|                      | Set Exit sounds                  | ✅            |
-|                      | Home Instant arming              | ✅            |
-|                      | Home Silent Disarm               | ✅            |
 |                      | Alarm state and type             | ✅            |
+|                      | Set Exit sound                   | ✅            |
+|                      | Set Entry Delay                  | ✅            |
+|                      | Arm-Stay Instant arming          | ✅            |
+|                      | Arm-Stay Silent Disarm           | ✅            |
 |                      | Disarm pictures             | 🛠️ WIP            |
 |---|---|---|
 | **Zones**            | Sensor Status                    | ✅            |

@@ -102,6 +102,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self.partitions.append(new_partition)
+        self.partitions.sort(key=lambda x: x.id, reverse=False)
         self.state_partition_observer.notify()
 
     def partition_delete(self, partition_id: str) -> None:
@@ -128,6 +129,8 @@ class QolsysState(QolsysObservable):
                 return
 
         self.scenes.append(new_scene)
+        self.scenes.sort(key=lambda x: x.scene_id, reverse=False)
+
         self.state_scene_observer.notify()
 
     def scene_delete(self, scene_id: str) -> None:
@@ -144,7 +147,6 @@ class QolsysState(QolsysObservable):
         for zone in self.zones:
             if zone.zone_id == zone_id:
                 return zone
-
         return None
 
     def zone_add(self, new_zone: QolsysZone) -> None:
@@ -154,6 +156,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self.zones.append(new_zone)
+        self.zones.sort(key=lambda x: x.zone_id, reverse=False)
         self.state_zone_observer.notify()
 
     def zone_delete(self, zone_id: str) -> None:
@@ -181,6 +184,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self.zwave_devices.append(new_zwave)
+        self.zwave_devices.sort(key=lambda x: x.node_id, reverse=False)
         self.state_zwave_observer.notify()
 
     def zwave_delete(self, node_id: str) -> None:
@@ -247,7 +251,7 @@ class QolsysState(QolsysObservable):
         for state_zwave in self.zwave_devices:
             if state_zwave.node_id not in db_zwave_list:
                 LOGGER.debug("sync_data - delete ZWave%s", state_zwave.none_id)
-                self.zwave_delete(int(state_zwave.node_id))
+                self.zwave_delete(state_zwave.node_id)
 
     def sync_scenes_data(self, db_scenes: list[QolsysScene]) -> None:
         db_scene_list = []
@@ -271,7 +275,7 @@ class QolsysState(QolsysObservable):
         for state_scene in self.scenes:
             if state_scene.scene_id not in db_scene_list:
                 LOGGER.debug("sync_data - delete Scene%s", state_scene.scene_id)
-                self.scene_delete(int(state_scene.scene_id))
+                self.scene_delete(state_scene.scene_id)
 
         # Add new scene
         for db_scene in db_scenes:
@@ -300,7 +304,7 @@ class QolsysState(QolsysObservable):
         for state_zone in self.zones:
             if state_zone.zone_id not in db_zone_list:
                 LOGGER.debug("sync_data - delete Zone%s", state_zone.zone_id)
-                self.zone_delete(int(state_zone.zone_id))
+                self.zone_delete(state_zone.zone_id)
 
         # Add new zone
         for db_zone in db_zones:

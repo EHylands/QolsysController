@@ -26,6 +26,7 @@ class PartitionAlarmType(StrEnum):
     SILENT_AUXILIARY_EMERGENCY = "Silent Auxiliary Emergency"
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
+    GLASS_BREAK = "glassbreak"
 
 class ZoneStatus(StrEnum):
     ALARMED = "Alarmed"

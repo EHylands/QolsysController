@@ -2,8 +2,6 @@ import asyncio
 import logging
 from collections.abc import Coroutine
 
-import aiomqtt
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -31,14 +29,21 @@ class QolsysTaskManager:
         task.add_done_callback(_done_callback)
         return task
 
+    def get_task(self, label:str) -> asyncio.Task | None:
+        for task in self._tasks:
+             if task.get_name() == label:
+                 return task
+        return None
+
     def cancel(self, label: str) -> None:
         for task in self._tasks:
             if task.get_name() == label:
                 task.cancel()
 
-    def cancel_all(self) -> None:
+    async def cancel_all(self) -> None:
         for task in self._tasks:
             task.cancel()
+            await task
 
     async def wait_all(self) -> None:
         if self._tasks:

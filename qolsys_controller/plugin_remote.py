@@ -1,11 +1,13 @@
 import asyncio
 import base64
+import contextlib
 import datetime
 import json
 import logging
 import random
 import ssl
 import uuid
+from pathlib import Path
 
 import aiomqtt
 
@@ -146,7 +148,7 @@ class QolsysPluginRemote(QolsysPlugin):
         return True
 
     async def start_operation(self) -> None:
-        await self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
+        await self._task_manager.run(self.mqtt_connect_task(reconnect=True, run_forever=True), self._mqtt_task_connect_label)
 
     async def stop_operation(self) -> None:
         LOGGER.debug("Stopping Plugin Operation")
@@ -166,7 +168,7 @@ class QolsysPluginRemote(QolsysPlugin):
         self.connected = False
         self.connected_observer.notify()
 
-    async def mqtt_connect_task(self, reconnect: bool) -> None:
+    async def mqtt_connect_task(self, reconnect: bool, run_forever: bool) -> None:
         # Configure TLS parameters for MQTT connection
         tls_params = aiomqtt.TLSParameters(
             ca_certs=self._pki.qolsys_cer_file_path,
@@ -179,6 +181,9 @@ class QolsysPluginRemote(QolsysPlugin):
 
         LOGGER.debug("MQTT: Connecting ...")
 
+        self._task_manager.cancel(self._mqtt_task_listen_label)
+        self._task_manager.cancel(self._mqtt_task_ping_label)
+
         while True:
             try:
                 self.aiomqtt = aiomqtt.Client(
@@ -188,7 +193,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
-                    identifier="QolsysController",
+                    identifier= self.settings.mqtt_remote_client_id,
                 )
 
                 await self.aiomqtt.__aenter__()
@@ -207,14 +212,11 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Only log all traffic for debug purposes
                 if self.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
-                    #await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
+                    await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
                     # Subscribe to all topics
-                    await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
+                    # await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
 
-                # Start mqtt_listent_task and mqtt_ping_task
-                self._task_manager.cancel(self._mqtt_task_listen_label)
-                self._task_manager.cancel(self._mqtt_task_ping_label)
                 self._task_manager.run(self.mqtt_listen_task(), self._mqtt_task_listen_label)
                 self._task_manager.run(self.mqtt_ping_task(), self._mqtt_task_ping_label)
 
@@ -223,7 +225,6 @@ class QolsysPluginRemote(QolsysPlugin):
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
                 await self.command_pingevent()
-                await self.command_timesync()
                 await self.command_pair_status_request()
 
                 response_database = await self.command_sync_database()
@@ -234,17 +235,24 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 self.connected = True
                 self.connected_observer.notify()
+
+                if not run_forever:
+                    self.connected = False
+                    self.connected_observer.notify()
+                    self._task_manager.cancel(self._mqtt_task_listen_label)
+                    self._task_manager.cancel(self._mqtt_task_ping_label)
+                    await self.aiomqtt.__aexit__(None,None,None)
+
                 break
 
             except aiomqtt.MqttError as err:
                 # Receive pannel network error
                 self.connected = False
                 self.connected_observer.notify()
-                await self.aiomqtt.__aexit__(None, None, None)
                 self.aiomqtt = None
 
                 if reconnect:
-                    LOGGER.debug("MQTT Error - %s: Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
+                    LOGGER.debug("MQTT Error - %s: Connect - Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
                 else:
                     raise QolsysMqttError from err
@@ -255,14 +263,14 @@ class QolsysPluginRemote(QolsysPlugin):
                 # Pannels need to be re-paired
                 self.connected = False
                 self.connected_observer.notify()
-                await self.aiomqtt.__aexit__(None, None, None)
                 self.aiomqtt = None
                 raise QolsysSslError from err
 
     async def mqtt_ping_task(self) -> None:
         while True:
             if self.aiomqtt is not None and self.connected:
-                await self.command_pingevent()
+                with contextlib.suppress(aiomqtt.MqttError):
+                    await self.command_pingevent()
 
             await asyncio.sleep(self.settings.mqtt_ping)
 
@@ -293,25 +301,13 @@ class QolsysPluginRemote(QolsysPlugin):
                     decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD","")).hex()
                     LOGGER.debug("Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",zwave.get("NODE_ID",""),zwave.get("ZWAVE_COMMAND_STATUS",""),decoded_payload)
 
-
         except aiomqtt.MqttError as err:
             self.connected = False
             self.connected_observer.notify()
 
-            LOGGER.debug("%s: Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
-            self._task_manager.cancel(self.mqtt_ping_task)
+            LOGGER.debug("%s: Listen - Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
             await asyncio.sleep(self.settings.mqtt_timeout)
-            self._task_manager.run(self.mqtt_connect_task(reconnect=True), self._mqtt_task_connect_label)
-
-        except ssl.SSLError as err:
-            # SSL error is and authentication error with invalid certificates en pki
-            # We cannot recover from this error automaticly
-            # Pannels need to be re-paired
-            self.connected = False
-            self.connected_observer.notify()
-            await self.aiomqtt.__aexit__(None, None, None)
-            self.aiomqtt = None
-            raise QolsysSslError from err
+            self._task_manager.run(self.mqtt_connect_task(reconnect=True, run_forever=True), self._mqtt_task_connect_label)
 
     async def start_initial_pairing(self) -> bool:
         # check if random_mac exist
@@ -354,7 +350,6 @@ class QolsysPluginRemote(QolsysPlugin):
             context.load_cert_chain(certfile=self._pki.cer_file_path, keyfile=self._pki.key_file_path)
             self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,
                                                                           self.settings.plugin_ip, pairing_port, ssl=context)
-
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
 
@@ -371,7 +366,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         # We have client sgined certificate at this point
         # Connect to Panel MQTT to send pairing command
-        await self._task_manager.run(self.mqtt_connect_task(reconnect=False), self._mqtt_task_connect_label)
+        await self._task_manager.run(self.mqtt_connect_task(reconnect=False, run_forever=False), self._mqtt_task_connect_label)
         LOGGER.debug("Plugin Pairing Completed ")
         return True
 
@@ -380,9 +375,6 @@ class QolsysPluginRemote(QolsysPlugin):
         received_panel_mac = False
         received_signed_client_certificate = False
         received_qolsys_cer = False
-
-        signed_certificate_data = ""
-        qolsys_certificate_data = ""
 
         try:
             continue_pairing = True
@@ -410,7 +402,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     await writer.drain()
 
                     # Sending CSR File to panel
-                    with open(self._pki.csr_file_path, "rb") as file:
+                    with Path.open(self._pki.csr_file_path, "rb") as file:
                         content = file.read()
                         LOGGER.debug("Sending to Panel: [CSR File Content]")
                         writer.write(content)
@@ -421,36 +413,26 @@ class QolsysPluginRemote(QolsysPlugin):
 
                 # Read signed certificate data
                 if (received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                    request = await reader.readuntil(b"sent")
+                    if request.endswith(b"sent"):
+                        request = request[:-5]
 
-                    request = (await reader.readline())
-                    signed_certificate_data += request.decode()
-
-                    if "sent" in request.decode():
-                        certificates = [item for item in signed_certificate_data.split("sent") if item]
-                        LOGGER.debug("Saving [Signed Client Certificate]")
-                        with open(self._pki.secure_file_path, "wb") as f:
-                            f.write(certificates[0].encode())
-                            received_signed_client_certificate = True
-
-                        if len(certificates) > 1:
-                            qolsys_certificate_data += certificates[1]
+                    LOGGER.debug("Saving [Signed Client Certificate]")
+                    with Path.open(self._pki.secure_file_path, "wb") as f:
+                        f.write(request)
+                        received_signed_client_certificate = True
 
                 # Read qolsys certificate data
                 if (received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
+                    request = await reader.readuntil(b"sent")
+                    if request.endswith(b"sent"):
+                        request = request[:-5]
 
-                    request = (await reader.readline())
-                    qolsys_certificate_data += request.decode()
-
-                    if "sent" in request.decode():
+                    LOGGER.debug("Saving [Qolsys Certificate]")
+                    with Path.open(self._pki.qolsys_cer_file_path, "wb") as f:
+                        f.write(request)
+                        received_qolsys_cer = True
                         continue_pairing = False
-                        certificates = [item for item in qolsys_certificate_data.split("sent") if item]
-
-                        LOGGER.debug("Saving [Qolsys Certificate]")
-                        with open(self._pki.qolsys_cer_file_path, "w") as f:
-                            f.write(certificates[0])
-                            received_qolsys_cer = True
-                            continue_pairing = False
-                            writer.close()
 
                     continue
 
@@ -462,6 +444,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         finally:
             writer.close()
+            await writer.wait_closed()
             self.certificate_exchange_server.close()
 
     async def send_command(self, topic: str, json_payload: str, request_id: str) -> dict:
@@ -1185,11 +1168,11 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT:Receiving zwave_switch_binary command")
 
 
-    async def command_arm(self, partition_id: str, arming_type: str, user_code: str = "", exit_sounds: bool = False,
+    async def command_arm(self, partition_id: str, arming_type: str, user_code: str = "", exit_sounds: bool = False,  # noqa: PLR0913
                           instant_arm: bool = False, entry_delay: bool = True) -> bool:
 
-        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, secure_arm:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
-                     partition_id, arming_type, self.panel.SECURE_ARMING,exit_sounds,instant_arm,entry_delay)
+        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+                     partition_id, arming_type,exit_sounds,instant_arm,entry_delay)
 
         user_id = 0
 

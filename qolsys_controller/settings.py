@@ -14,6 +14,7 @@ class QolsysSettings:
         self._panel_mac = ""
         self._panel_ip = ""
 
+        # Path
         self._config_directory: Path = Path()
         self._pki_directory: Path = Path()
         self._media_directory: Path = Path()
@@ -27,6 +28,10 @@ class QolsysSettings:
         self._mqtt_ping: int = 600
         self._mqtt_qos:int = 0
         self._mqtt_remote_client_id = ""
+
+        # Operation
+        self._motion_sensor_delay:bool = True
+        self._motion_sensor_delay_sec:int = 310
 
     @property
     def random_mac(self) -> str:
@@ -59,6 +64,18 @@ class QolsysSettings:
     @property
     def mqtt_ping(self) -> int:
         return self._mqtt_ping
+
+    @property
+    def motion_sensor_delay(self) -> bool:
+        return self._motion_sensor_delay
+
+    @property
+    def motion_sensor_delay_sec(self) -> int:
+        return self._motion_sensor_delay_sec
+
+    @motion_sensor_delay.setter
+    def motion_sensor_delay(self, value: bool) -> None:
+        self._motion_sensor_delay = value
 
     @panel_ip.setter
     def panel_ip(self, panel_ip: str) -> None:
@@ -131,7 +148,7 @@ class QolsysSettings:
         LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
         return True
 
-    def check_config_directory(self, create: bool = True) -> bool:
+    def check_config_directory(self, create: bool = True) -> bool:  # noqa: PLR0911
         if not self.config_directory.is_dir():
             if not create:
                 LOGGER.debug("config_directory not found:  %s", self.config_directory)

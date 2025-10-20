@@ -1,4 +1,7 @@
+import asyncio
 import logging
+
+from qolsys_controller.settings import QolsysSettings
 
 from .enum import ZoneSensorGroup, ZoneSensorType, ZoneStatus
 from .observable import QolsysObservable
@@ -8,8 +11,12 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysZone(QolsysObservable):
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict, settings: QolsysSettings) -> None:
         super().__init__()
+
+        self._settings = settings
+
+        self._delay_task:asyncio.Task = None
 
         self._zone_id = data.get("zoneid", "")
         self._sensorname = data.get("sensorname", "")
@@ -214,20 +221,41 @@ class QolsysZone(QolsysObservable):
     def averagedBm(self, value: str) -> None:
         if self._averagedBm != value:
             self._averagedBm = value
+
+            if value == "":
+                self._averagedBm = 0
+
             self.notify()
 
     @latestdBm.setter
     def latestdBm(self, value: str) -> None:
         if self._latestdBm != value:
             self.latestdBm = value
+
+            if value == "":
+                self._latestdBm = 0
+
             self.notify()
 
     @sensorstatus.setter
     def sensorstatus(self, new_value: ZoneStatus) -> None:
+        if self._settings.motion_sensor_delay and self._sensortype in {ZoneSensorType.MOTION, ZoneSensorType.PANEL_MOTION}:
+            if new_value == ZoneStatus.IDLE:
+                return
+            if self._delay_task is not None:
+                self._delay_task.cancel()
+            self._delay_task = asyncio.create_task(self.delay_zone(ZoneStatus.IDLE))
+
         if self._sensorstatus != new_value:
             LOGGER.debug("Zone%s (%s) - sensorstatus: %s", self._zone_id, self.sensorname, new_value)
             self._sensorstatus = new_value
             self.notify()
+
+    async def delay_zone(self,next_status: ZoneStatus) -> None:
+        await asyncio.sleep(self._settings.motion_sensor_delay_sec)
+        self._sensorstatus = next_status
+        LOGGER.debug("Zone%s (%s) - sensorstatus: %s", self._zone_id, self.sensorname, next_status)
+        self.notify()
 
     @battery_status.setter
     def battery_status(self, value: str) -> None:

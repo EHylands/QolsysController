@@ -353,13 +353,16 @@ class QolsysPanel(QolsysObservable):
     def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
 
         eventName = data.get("eventName")
-        dbOperation = data.get("dbOperation")
+        dbOperation = data.get("dbOperation","")
         uri = data.get("uri")
 
         match eventName:
 
             case "stopScreenCapture":
                 pass
+
+            case "primaryDisconnect":
+                LOGGER.info("Main Panel Disconnect")
 
             case "dbChanged":
 
@@ -507,6 +510,11 @@ class QolsysPanel(QolsysObservable):
                                 scene = self._state.scene(scene_id)
                                 if scene is not None and isinstance(node, QolsysScene):
                                     scene.update(content_values)
+
+                            # Update Trouble Conditions
+                            case self.db.table_trouble_conditions:
+                                self.db.table_trouble_conditions.update(selection,selection_argument,content_values)
+                                # No action needed
 
 
                             case _:
@@ -799,7 +807,7 @@ class QolsysPanel(QolsysObservable):
 
         # Create sensors array
         for zone_info in zones_list:
-            zones.append(QolsysZone(zone_info))
+            zones.append(QolsysZone(zone_info,self._settings))
 
         return zones
 
