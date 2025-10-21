@@ -13,12 +13,21 @@ class QolsysTableEuEvent(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.EUEventContentProvider/eu_event"
         self._table = "eu_event"
         self._abort_on_error = False
-        self._implemented = False
+        self._implemented = True
 
 
         self._columns = [
             "_id",
+            "version",
+            "opr",
+            "partition_id",
+            "history_id",
+            "device_id",
+            "device",
+            "events",
+            "time",
+            "ack",
+            "type",
         ]
 
         self._create_table()
-

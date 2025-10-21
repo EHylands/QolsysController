@@ -516,6 +516,12 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_trouble_conditions.update(selection,selection_argument,content_values)
                                 # No action needed
 
+                            # Update EU_EVENT:
+                            case self.db.table_eu_event:
+                                self.db.table_eu_event.update(selection,selection_argument,content_values)
+                                # No action needed
+
+
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -591,6 +597,9 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.delete(selection, selection_argument)
                                 # No action needed
+
+                            case self.db.table_eu_event:
+                                self.db.table_eu_event.delete(selection,selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -715,6 +724,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.insert(data=content_values)
                                 # No action needed
+
+                            # EU_EVENT
+                            case self.db.table_eu_event:
+                                self.db.table_eu_event.insert(data=content_values)
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
