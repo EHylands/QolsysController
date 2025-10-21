@@ -55,8 +55,7 @@ async def main() -> None:  # noqa: D103
     #await asyncio.sleep(5)
 
     #await remote.plugin.stop_operation()
-
-    LOGGER.debug("Qolsys Panel - Stopped")
+    #LOGGER.debug("Qolsys Panel - Stopped")
 
     # Change Z-Wave dimmer
     # node_id: z-wane device id
@@ -65,17 +64,18 @@ async def main() -> None:  # noqa: D103
     # await remote.plugin.command_zwave_switch_multi_level(node_id=6,level=99)
 
     # DISARM
-    # await asyncio.sleep(3)
-    # await remote.plugin.command_disarm(partition_id="0",
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_disarm(partition_id="0",
     #                                   user_code="1111")
 
     # ARM_STAY
-    await asyncio.sleep(3)
-    await remote.plugin.command_arm(partition_id="0",
-                                    arming_type="ARM-STAY",
-                                   user_code="1111",
-                                    exit_sounds=False,
-                                    instant_arm=True)
+    #await asyncio.sleep(3)
+    #await remote.plugin.command_arm(partition_id="0",
+    #                                arming_type="ARM-STAY",
+    #                               user_code="1111",
+    #                                exit_sounds=False,
+    #                                instant_arm=True,
+    #                                entry_delay=False)
 
 
     # ARM_AWAY
@@ -87,9 +87,15 @@ async def main() -> None:  # noqa: D103
     #                               instant_arm=True)
 
     # DISARM
-    await asyncio.sleep(5)
-    await remote.plugin.command_disarm(partition_id="0", user_code="1111", silent_disarming=True)
+    #await asyncio.sleep(5)
+    #await remote.plugin.command_disarm(partition_id="0", user_code="1111", silent_disarming=True)
 
+    #await asyncio.sleep(5)
+    #await remote.plugin.command_execute_scene(scene_id="3")
+
+    #await asyncio.sleep(5)
+    #await remote.plugin.command_zwave_switch_multi_level(6,80)
+    #await remote.plugin.command_zwave_doorlock_set(node_id="7",locked=True)
 
     # Use an asyncio.Event to keep the program running efficiently
     stop_event = asyncio.Event()

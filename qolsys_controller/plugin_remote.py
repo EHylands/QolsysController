@@ -855,7 +855,7 @@ class QolsysPluginRemote(QolsysPlugin):
         command = 98
 
         # 0 unlocked
-        # 255 lockeck
+        # 255 locked
         lock_mode = 0
         if locked:
             lock_mode = 255
@@ -870,7 +870,7 @@ class QolsysPluginRemote(QolsysPlugin):
             },
             {
                 "dataType": "byteArray",
-                "dataValue": [command,lock_mode],
+                "dataValue": [command,1,lock_mode],
             },
             {
                 "dataType": "int",
