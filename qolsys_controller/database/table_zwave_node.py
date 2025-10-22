@@ -57,6 +57,7 @@ class QolsysTableZwaveNode(QolsysTable):
             "last_rediscover_time",
             "neighbour_info",
             "last_node_test_time",
+            "notification_capabilities",
             "endpoint",
             "endpoint_details",
             "device_wakeup_time",

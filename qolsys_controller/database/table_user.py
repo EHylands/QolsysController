@@ -39,6 +39,7 @@ class QolsysTableUser(QolsysTable):
             "start_date",
             "tag_flag",
             "check_in_time",
+            "user_feature1",
         ]
 
         self._create_table()

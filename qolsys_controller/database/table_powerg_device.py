@@ -18,6 +18,30 @@ class QolsysTablePowerGDevice(QolsysTable):
 
         self._columns = [
             "_id",
+            "avg_link_quality",
+            "battery_voltage",
+            "capabilities",
+            "dealer_code",
+            "extras",
+            "firmware_version",
+            "led",
+            "light",
+            "link_quality",
+            "link_status",
+            "longID",
+            "manufacturing_id",
+            "notification_period",
+            "opr",
+            "parent_node",
+            "partition_id",
+            "radio_id",
+            "radio_version",
+            "shortID",
+            "status_data",
+            "supported_type",
+            "temperature",
+            "version",
+            "writeable_capabilities",
         ]
 
         self._create_table()

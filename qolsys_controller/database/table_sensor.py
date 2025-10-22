@@ -62,6 +62,7 @@ class QolsysTableSensor(QolsysTable):
             "latestdBm",
             "averagedBm",
             "serial_number",
+            "secondary_panel_mac_address",
             "extras",
             "allowspeaker",
         ]

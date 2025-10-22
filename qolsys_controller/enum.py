@@ -47,6 +47,7 @@ class ZoneStatus(StrEnum):
 
 class ZoneSensorType(StrEnum):
     DOOR_WINDOW = "Door_Window"
+    DOORBELL = "Doorbell"
     MOTION = "Motion"
     GLASS_BREAK = "GlassBreak"
     KEY_FOB = "KeyFob"
@@ -62,7 +63,6 @@ class ZoneSensorType(StrEnum):
     SHOCK = "Shock"
     FREEZE = "Freeze"
     TILT = "Tilt"
-    DOORBELL = "Doorbell"
     SMOKE_M = "Smoke_M"
     # DOOR_WINDOW_M = "" #TBD
     # OCCUPANCY = ""  #TBD
@@ -73,22 +73,26 @@ class ZoneSensorType(StrEnum):
     BLUETOOTH = "Bluetooth"
     TAKEOVER_MODULE = "TakeoverModule"
     TRANSLATOR = "Translator"
+    TAMPER = "Tamper Sensor"
 
 
 class ZoneSensorGroup(StrEnum):
+    CO = "co"
     FIXED_INTRUSION = "fixedintrusion"
-    MOBILE_INTRUSION = "mobileintrusion"
     FIXED_SILENT = "fixedsilentkey"
+    MOBILE_INTRUSION = "mobileintrusion"
     MOBILE_SILENT = "mobilesilentkey"
     FIXED_AUXILIARY = "fixedmedical"
     FIXED_SILENT_AUXILIARY = "fixedsilentmedical"
+    LOCAL_SAFETY_SENSOR = "localsafety"
     MOBILE_AUXILIARY = "mobilemedical"
     MOBILE_SILENT_AUXILIARY = "mobilesilentmedical"
     SAFETY_MOTION = "safetymotion"
     GLASS_BREAK = "glassbreak"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
     SMOKE_HEAT = "smoke_heat"
-    CO = "co"
+    TAMPER_ZONE = "tamperzone"
+    SHOCK = "shock"
 
 
     # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
@@ -96,7 +100,6 @@ class ZoneSensorGroup(StrEnum):
     # INSTANT_PERIMETER_DW = "" #TBD
     # INSTRANT_INTERIOR_DOOR = "" #TBD
     # AWAY_INSTANT_FOLLOWER_DELAY = "" #TBD
-    # LOCAL_SAFETY_SENSOR = "" #TBD
     # REPORTING_SAFETY_SENSOR = "" #TBD
     # DELAYED_REPORTING_SAFETY_SENSOR = "" #TBD
     # AWAY_INSTANT_MOTION = "" #TBD

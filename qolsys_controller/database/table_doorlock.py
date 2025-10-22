@@ -17,6 +17,7 @@ class QolsysTableDoorLock(QolsysTable):
 
         self._columns = [
             "_id",
+            "capabilities",
             "version",
             "opr",
             "partition_id",
