@@ -149,6 +149,12 @@ class QolsysState(QolsysObservable):
                 return zone
         return None
 
+    def zone_from_short_id(self, short_id: int) -> QolsysZone | None:
+        for zone in self.zones:
+            if zone.shortID == short_id:
+                return zone
+        return None
+
     def zone_add(self, new_zone: QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
@@ -299,6 +305,7 @@ class QolsysState(QolsysObservable):
                     if state_zone.zone_id == db_zone.zone_id:
                         LOGGER.debug("sync_data - update Zone%s", state_zone.zone_id)
                         state_zone.update(db_zone.to_dict())
+                        state_zone.update_powerg(db_zone.to_powerg_dict())
 
         # Delete zones
         for state_zone in self.zones:

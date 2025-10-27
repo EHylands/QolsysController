@@ -11,7 +11,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysZone(QolsysObservable):
 
-    def __init__(self, data: dict, settings: QolsysSettings) -> None:
+    def __init__(self, data: dict, settings: QolsysSettings) -> None:  # noqa: PLR0915
         super().__init__()
 
         self._settings = settings
@@ -27,6 +27,9 @@ class QolsysZone(QolsysObservable):
         self._averagedBm = data.get("averagedBm", "")
         self._latestdBm = data.get("latestdBm", "")
         self._ac_status = data.get("ac_status", "")
+        self._shortID = data.get("shortID", "")
+        self._device_capability = data.get("device_capability", "")
+        self._current_capability = data.get("current_capability", "")
 
         self._id = data.get("_id", "")
         self._zone_type = data.get("zone_type", "")
@@ -56,13 +59,68 @@ class QolsysZone(QolsysObservable):
         self._created_by = data.get("created_by", "")
         self._updated_by = data.get("updated_by", "")
         self._updated_date = data.get("updated_date", "")
-        self._shortID = data.get("shortID", "")
         self._diag_24hr = data.get("diag_24hr", "")
-        self._device_capability = data.get("device_capability", "")
         self._sub_type = data.get("sub_type", "")
         self._powerg_manufacture_id = data.get("powerg_manufacture_id", "")
         self._parent_node = data.get("parent_node", "")
         self._extras = data.get("extras", "")
+
+        # EXTRA POWERG ATTRIBUTES
+        self._powerg_long_id = ""
+        self._powerg_status_data:str = ""
+        self._powerg_temperature:str = ""
+        self._powerg_light:str = ""
+        self._powerg_notification_period = ""
+        self._powerg_average_link_quality = ""
+        self._powerg_link_quality = ""
+        self._powerg_link_status = ""
+        self._powerg_battery_voltage = ""
+
+    def is_powerg_enabled(self) -> bool:
+        return self._current_capability == "PowerG"
+
+    def is_powerg_temperature_enabled(self) -> bool:
+        return self._powerg_temperature != ""
+
+    def is_powerg_light_enabled(self) -> bool:
+        return self._powerg_light != ""
+
+    def update_powerg(self, data: dict) -> None:
+        short_id_update = data.get("shortID", "")
+        if short_id_update != self.shortID:
+            LOGGER.error("Updating Zone%s PowerG Attribute (%s) with Zone%s (different shortID)", self._zone_id, self.sensorname, short_id_update)
+            return
+
+        self.start_batch_update()
+
+        if "longID" in data:
+            self._powerg_long_id = data.get("longID")
+
+        if "status_data" in data:
+            self.powerg_status_data = data.get("status_data")
+
+        if "temperature" in data:
+            self.powerg_temperature = data.get("temperature")
+
+        if "light" in data:
+            self.powerg_light = data.get("light")
+
+        if "notification_period" in data:
+            self._powerg_notification_period = data.get("notification_period")
+
+        if "average_link_quality" in data:
+            self._powerg_average_link_quality = data.get("average_link_quality")
+
+        if "link_quality" in data:
+            self._powerg_link_quality = data.get("link_quality")
+
+        if "link_status" in data:
+            self._powerg_link_status = data.get("link_status")
+
+        if "battery_voltage" in data:
+            self._powerg_battery_voltage = data.get("battery_voltage")
+
+        self.end_batch_update()
 
     def update(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
@@ -73,31 +131,24 @@ class QolsysZone(QolsysObservable):
 
         self.start_batch_update()
 
-        # Update sensor_name
         if "sensorname" in data:
             self.sensorname = data.get("sensorname")
 
-        # Update sensorsatus
         if "sensorstatus" in data:
             self.sensorstatus = ZoneStatus(data.get("sensorstatus"))
 
-        # Update battery_status
         if "battery_status" in data:
             self.battery_status = data.get("battery_status")
 
-        # Update time
         if "time" in data:
             self.time = data.get("time")
 
-        # Update partition_id
         if "partition_id" in data:
             self._partition_id = data.get("partition_id")
 
-        # Update lastestdBm
         if "lastestdBm" in data:
             self.latestdBm = data.get("latestdBm")
 
-        # Update averagedBm
         if "averagedBm" in data:
             self.averagedBm = data.get("averagedBm")
 
@@ -206,8 +257,16 @@ class QolsysZone(QolsysObservable):
         return self._partition_id
 
     @property
+    def shortID(self) -> str:
+        return self._shortID
+
+    @property
     def time(self) -> str:
         return self._time
+
+    @property
+    def current_capability(self) -> str:
+        return self._current_capability
 
     @property
     def latestdBm(self) -> str:
@@ -216,6 +275,43 @@ class QolsysZone(QolsysObservable):
     @property
     def averagedBm(self) -> str:
         return self._averagedBm
+
+    @property
+    def device_capability(self) -> str:
+        return self._device_capability
+
+    @property
+    def powerg_temperature(self) -> float | None:
+        return self._powerg_temperature
+
+    @property
+    def powerg_light(self) -> float | None:
+        return self._powerg_light
+
+    @property
+    def powerg_status_data(self) -> str:
+        return self._powerg_status_data
+
+    @powerg_temperature.setter
+    def powerg_temperature(self, value: str) -> None:
+        if self._powerg_temperature != value:
+                LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", self._zone_id, self.sensorname, value)
+                self._powerg_temperature = value
+                self.notify()
+
+    @powerg_light.setter
+    def powerg_light(self, value: str) -> None:
+        if self._powerg_light != value:
+            LOGGER.debug("Zone%s (%s) - powerg_light: %s", self._zone_id, self.sensorname, value)
+            self._powerg_light = value
+            self.notify()
+
+    @powerg_status_data.setter
+    def powerg_status_data(self, value: str) -> None:
+        if self._powerg_status_data != value:
+            LOGGER.debug("Zone%s (%s) - powerg_status_data: %s", self._zone_id, self.sensorname, value)
+            self._powerg_status_data = value
+            self.notify()
 
     @averagedBm.setter
     def averagedBm(self, value: str) -> None:
@@ -302,6 +398,20 @@ class QolsysZone(QolsysObservable):
         if self.partition_id != value:
             self.partition_id = value
             self.notify()
+
+    def to_powerg_dict(self) -> dict:
+        return {
+            "shortID": self.shortID,
+            "longID": self._powerg_long_id,
+            "status_data": self._powerg_status_data,
+            "temperature": self._powerg_temperature,
+            "light": self._powerg_light,
+            "notification_period": self._powerg_notification_period,
+            "average_link_quality": self._powerg_average_link_quality,
+            "link_quality": self._powerg_link_quality,
+            "link_status": self._powerg_link_status,
+            "battery_voltage": self._powerg_battery_voltage,
+        }
 
     def to_dict(self) -> dict:
         return {
