@@ -406,7 +406,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.update(selection, selection_argument, content_values)
                                 zoneid = content_values.get("zoneid", "")
-                                zone = self._state.zone(zoneid)
+                                zone = self._state.zone(zone_id=zoneid)
                                 if zone is not None:
                                     zone.update(content_values)
 
@@ -521,7 +521,14 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_eu_event.update(selection,selection_argument,content_values)
                                 # No action needed
 
-
+                            # Update PowerG Device
+                            case self.db.table_powerg_device:
+                                self.db.table_powerg_device.update(selection,selection_argument,content_values)
+                                short_id = content_values.get("shortID", "")
+                                zone = self._state.zone_from_short_id(short_id)
+                                if zone is not None:
+                                    LOGGER.debug("iq2meid updating powerg device for zoneid(%s):%s", zone.zone_id,content_values)
+                                    zone.update_powerg(content_values)
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -600,6 +607,9 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_eu_event:
                                 self.db.table_eu_event.delete(selection,selection_argument)
+
+                            case self.db.table_powerg_device:
+                                self.db.table_powerg_device.delete(selection,selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -729,6 +739,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_eu_event:
                                 self.db.table_eu_event.insert(data=content_values)
 
+                            # PowerG Device
+                            case self.db.table_powerg_device:
+                                self.db.table_powerg_device.insert(data=content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -820,7 +834,17 @@ class QolsysPanel(QolsysObservable):
 
         # Create sensors array
         for zone_info in zones_list:
-            zones.append(QolsysZone(zone_info,self._settings))
+
+            new_zone = QolsysZone(zone_info,self._settings)
+
+            if new_zone.current_capability == "POWERG":
+                LOGGER.debug("Loading PowerG device info for zone %s", new_zone.id)
+                powerg_dict = self.db.get_powerg(short_id= new_zone.shortID)
+                LOGGER.debug("PowerG device info: %s", powerg_dict)
+                if powerg_dict is not None:
+                    new_zone.update_powerg(powerg_dict)
+
+            zones.append(new_zone)
 
         return zones
 

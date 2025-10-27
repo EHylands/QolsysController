@@ -237,6 +237,19 @@ class QolsysDB:
 
         return zones
 
+    def get_powerg(self, short_id: str) -> dict:
+
+        self.cursor.execute(f"SELECT * FROM {self.table_powerg_device} WHERE shortID = ?",short_id)
+        row = self.cursor.fetchone()
+
+        if row is None:
+            LOGGER.debug("%s value not found", short_id)
+            return None
+
+        columns = [description[0] for description in self.cursor.description]
+        return  dict(zip(columns, row, strict=True))
+
+
     def get_setting_panel(self, setting: str) -> str:
         self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
                              WHERE name = ? and partition_id  = ? """, (setting, "0"))
