@@ -1,3 +1,4 @@
+from hmac import new
 import json
 import logging
 
@@ -512,17 +513,17 @@ class QolsysPanel(QolsysObservable):
                                     scene.update(content_values)
 
                             # Update Trouble Conditions
-                            case self.db.table_trouble_conditions:
+                            case self.db.table_trouble_conditions.uri:
                                 self.db.table_trouble_conditions.update(selection,selection_argument,content_values)
                                 # No action needed
 
                             # Update EU_EVENT:
-                            case self.db.table_eu_event:
+                            case self.db.table_eu_event.uri:
                                 self.db.table_eu_event.update(selection,selection_argument,content_values)
                                 # No action needed
 
                             # Update PowerG Device
-                            case self.db.table_powerg_device:
+                            case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.update(selection,selection_argument,content_values)
                                 short_id = content_values.get("shortID", "")
                                 zone = self._state.zone_from_short_id(short_id)
@@ -605,10 +606,10 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_dashboard_msgs.delete(selection, selection_argument)
                                 # No action needed
 
-                            case self.db.table_eu_event:
+                            case self.db.table_eu_event.uri:
                                 self.db.table_eu_event.delete(selection,selection_argument)
 
-                            case self.db.table_powerg_device:
+                            case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.delete(selection,selection_argument)
 
                             case _:
@@ -736,11 +737,11 @@ class QolsysPanel(QolsysObservable):
                                 # No action needed
 
                             # EU_EVENT
-                            case self.db.table_eu_event:
+                            case self.db.table_eu_event.uri:
                                 self.db.table_eu_event.insert(data=content_values)
 
                             # PowerG Device
-                            case self.db.table_powerg_device:
+                            case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.insert(data=content_values)
 
                             case _:
@@ -834,11 +835,10 @@ class QolsysPanel(QolsysObservable):
 
         # Create sensors array
         for zone_info in zones_list:
-
             new_zone = QolsysZone(zone_info,self._settings)
 
             if new_zone.current_capability == "POWERG":
-                LOGGER.debug("Loading PowerG device info for zone %s", new_zone.id)
+                LOGGER.debug("Loading PowerG device info for zone %s", new_zone.zone_id)
                 powerg_dict = self.db.get_powerg(short_id= new_zone.shortID)
                 LOGGER.debug("PowerG device info: %s", powerg_dict)
                 if powerg_dict is not None:

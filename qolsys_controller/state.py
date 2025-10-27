@@ -378,6 +378,12 @@ class QolsysState(QolsysObservable):
             LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid, name, zone.latestdBm)
             LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid, name, zone.averagedBm)
 
+            if zone.is_powerg_temperature_enabled():
+                LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", zid, name, zone.powerg_temperature)
+
+            if zone.is_powerg_light_enabled():
+                LOGGER.debug("Zone%s (%s) - powerg_light: %s", zid, name, zone.powerg_light)
+
         for zwave in self.zwave_devices:
             if isinstance(zwave, QolsysDimmer):
                 nid = zwave.node_id

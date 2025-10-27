@@ -13,7 +13,7 @@ class QolsysTablePowerGDevice(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.PowerGDeviceContentProvider/powerg_device"
         self._table = "powerg_device"
         self._abort_on_error = False
-        self._implemented = False
+        self._implemented = True
 
 
         self._columns = [
