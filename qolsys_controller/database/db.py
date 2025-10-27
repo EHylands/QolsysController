@@ -245,7 +245,7 @@ class QolsysDB:
             row = self.cursor.fetchone()
 
             if row is None:
-                LOGGER.debug("%s value not found", short_id)
+                LOGGER.debug("%s value not found", (short_id,))
                 return None
 
             columns = [description[0] for description in self.cursor.description]
