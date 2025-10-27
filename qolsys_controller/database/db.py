@@ -239,13 +239,13 @@ class QolsysDB:
 
     def get_powerg(self, short_id: str) -> dict:
         try:
-            self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?",short_id)
+            self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?",(short_id,))
             self.db.commit()
 
             row = self.cursor.fetchone()
 
             if row is None:
-                LOGGER.debug("%s value not found", (short_id,))
+                LOGGER.debug("%s value not found", short_id)
                 return None
 
             columns = [description[0] for description in self.cursor.description]
