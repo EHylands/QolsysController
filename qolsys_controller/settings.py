@@ -77,6 +77,10 @@ class QolsysSettings:
     def motion_sensor_delay(self, value: bool) -> None:
         self._motion_sensor_delay = value
 
+    @motion_sensor_delay_sec.setter
+    def motion_sensor_delay_sec(self, value: int) -> None:
+        self._motion_sensor_delay_sec = value
+
     @panel_ip.setter
     def panel_ip(self, panel_ip: str) -> None:
         self._panel_ip = panel_ip
