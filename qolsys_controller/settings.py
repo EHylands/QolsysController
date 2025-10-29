@@ -68,7 +68,6 @@ class QolsysSettings:
     @property
     def motion_sensor_delay(self) -> bool:
         return self._motion_sensor_delay
-
     @property
     def motion_sensor_delay_sec(self) -> int:
         return self._motion_sensor_delay_sec
