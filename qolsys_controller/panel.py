@@ -1,4 +1,3 @@
-from hmac import new
 import json
 import logging
 
@@ -922,3 +921,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Users list:")
         for user in self._users:
             LOGGER.debug("User: %s", user["id"])
+
+        LOGGER.debug("*** Plugin Information ***")
+        LOGGER.debug("Motion Delay Enabled: %s", self._settings.motion_sensor_delay)
+        LOGGER.debug("Motion Delay Value: %s", self._settings.motion_sensor_delay_sec)

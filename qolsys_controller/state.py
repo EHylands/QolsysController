@@ -352,7 +352,7 @@ class QolsysState(QolsysObservable):
                 self.partition_add(db_partition)
 
     def dump(self) -> None:  # noqa: PLR0915
-        LOGGER.debug("*** Information ***")
+        LOGGER.debug("*** Device Information ***")
 
         for partition in self.partitions:
             pid = partition.id

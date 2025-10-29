@@ -403,7 +403,7 @@ class QolsysPluginRemote(QolsysPlugin):
                     await writer.drain()
 
                     # Sending CSR File to panel
-                    async with aiofiles.open(self._pki.csr_file_path, mode='rb') as f:
+                    async with aiofiles.open(self._pki.csr_file_path, mode="rb") as f:
                         content = await f.read()
                         LOGGER.debug("Sending to Panel: [CSR File Content]")
                         writer.write(content)
