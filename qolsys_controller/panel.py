@@ -369,9 +369,13 @@ class QolsysPanel(QolsysObservable):
                 match dbOperation:
 
                     case "update":
-                        content_values = data.get("contentValues")
-                        selection = data.get("selection")
-                        selection_argument = data.get("selectionArgs")
+                        content_values = data.get("contentValues","")
+                        selection = data.get("selection","")
+                        selection_argument = data.get("selectionArgs","")
+
+                        if selection_argument == "" or selection == "":
+                            LOGGER.debug("iq2meid invalid update selection or selectionArgs")
+                            LOGGER.debug("data:%s", data)
 
                         match uri:
 
@@ -535,8 +539,12 @@ class QolsysPanel(QolsysObservable):
                                 LOGGER.debug(data)
 
                     case "delete":
-                        selection = data.get("selection")
-                        selection_argument = data.get("selectionArgs")
+                        selection = data.get("selection","")
+                        selection_argument = data.get("selectionArgs","")
+
+                        if selection_argument == "" or selection == "":
+                            LOGGER.debug("iq2meid invalid delete selection or selectionArgs")
+                            LOGGER.debug("data:%s", data)
 
                         match uri:
 
@@ -635,7 +643,7 @@ class QolsysPanel(QolsysObservable):
                                                 partition.alarm_state = PartitionAlarmState(new_value)
 
                             # Inser Partition Content Provider
-                            case self.db.table_partition:
+                            case self.db.table_partition.uri:
                                 self.db.table_partition.insert(data=content_values)
                                 self._state.sync_partitions_data(self.get_partitions_from_db())
 

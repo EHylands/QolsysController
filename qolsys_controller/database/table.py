@@ -92,6 +92,7 @@ class QolsysTable:
 
             col_str = ", ".join(full_data.keys())
             placeholder_str = ", ".join([f":{key}" for key in full_data])
+
             query = f"INSERT OR IGNORE INTO {self.table} ({col_str}) VALUES ({placeholder_str})"
             self._cursor.execute(query, full_data)
             self._db.commit()
@@ -112,9 +113,14 @@ class QolsysTable:
         # selection_argument:
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
-
         # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
+        if selection_argument == "":
+            LOGGER.debug("Update called with empty selection_argument")
+            LOGGER.debug("Table: %s", self.table)
+            LOGGER.debug("Selection: %s", selection)
+            LOGGER.debug("selection_argument: %s", selection_argument)
+            return
 
         # Selection Argument
         # Panel send selection_argument as list in Firmware 4.6.1
@@ -163,6 +169,14 @@ class QolsysTable:
         # selection: 'zone_id=?, parition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
+
+
+        if selection_argument == "":
+            LOGGER.debug("Delete called with empty selection_argument")
+            LOGGER.debug("Table: %s", self.table)
+            LOGGER.debug("Selection: %s", selection)
+            LOGGER.debug("selection_argument: %s", selection_argument)
+            return
 
         # Selection Argument
         if(type(selection_argument) is not list):

@@ -44,7 +44,7 @@ class QolsysPartition(QolsysObservable):
         self._command_arm_entry_delay = True
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self._id
 
     @property
