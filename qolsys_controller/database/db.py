@@ -237,6 +237,18 @@ class QolsysDB:
 
         return zones
 
+    def get_weather(self) -> list[dict]:
+        self.cursor.execute(f"SELECT * FROM {self.table_weather.table} ORDER BY _id")
+        self.db.commit()
+
+        weather_list = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            weather_list.append(row_dict)
+
+        return weather_list
+
     def get_powerg(self, short_id: str) -> dict:
         try:
             self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?",(short_id,))

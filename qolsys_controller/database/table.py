@@ -68,6 +68,7 @@ class QolsysTable:
                 raise error from err
 
     def insert(self, data: dict) -> None:
+
         try:
             if not self._implemented and data is not None:
                 LOGGER.warning("New Table format: %s", self.uri)

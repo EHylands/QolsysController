@@ -9,7 +9,7 @@ class QolsysPluginC4(QolsysPlugin):
     def __init__(self) -> None:
 
         # C4 Integration
-        self._token = ""
+        raise NotImplementedError("C4 Plugin Not Yet Implemented") # noqa: EM101
 
     def config(self, panel_ip: str, token: str) -> bool:  # noqa: ARG002
         LOGGER.warning("C4Plugin: Configuring Plugin")

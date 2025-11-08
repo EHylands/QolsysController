@@ -1,18 +1,27 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 LOGGER = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from .controller import QolsysController
 
 
 class QolsysSettings:
 
-    def __init__(self) -> None:
+    def __init__(self, controller: QolsysController) -> None:
+
+        # Main controller
+        self._controller = controller
 
         # Plugin
-        self._plugin_ip = ""
-        self._random_mac = ""
-        self._panel_mac = ""
-        self._panel_ip = ""
+        self._plugin_ip: str = ""
+        self._random_mac: str = ""
+        self._panel_mac: str  = ""
+        self._panel_ip: str = ""
 
         # Path
         self._config_directory: Path = Path()
@@ -26,12 +35,12 @@ class QolsysSettings:
         # MQTT
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 600
-        self._mqtt_qos:int = 0
-        self._mqtt_remote_client_id = ""
+        self._mqtt_qos: int = 0
+        self._mqtt_remote_client_id: str = ""
 
         # Operation
-        self._motion_sensor_delay:bool = True
-        self._motion_sensor_delay_sec:int = 310
+        self._motion_sensor_delay: bool = True
+        self._motion_sensor_delay_sec: int = 310
 
     @property
     def random_mac(self) -> str:
@@ -68,6 +77,7 @@ class QolsysSettings:
     @property
     def motion_sensor_delay(self) -> bool:
         return self._motion_sensor_delay
+
     @property
     def motion_sensor_delay_sec(self) -> int:
         return self._motion_sensor_delay_sec
@@ -89,7 +99,7 @@ class QolsysSettings:
         self._plugin_ip = plugin_ip
 
     @property
-    def config_directory(self) -> str:
+    def config_directory(self) -> Path:
         return self._config_directory
 
     @config_directory.setter
@@ -119,10 +129,6 @@ class QolsysSettings:
     def mqtt_ping(self, value: int) -> None:
         self._mqtt_ping = value
 
-    @mqtt_ping.setter
-    def mqtt_ping(self, ping:int) -> None:
-        self._mqtt_ping = ping
-
     @property
     def mqtt_qos(self) -> int:
         return self._mqtt_qos
@@ -132,7 +138,7 @@ class QolsysSettings:
         return self._mqtt_remote_client_id
 
     @mqtt_remote_client_id.setter
-    def mqtt_remote_client_id(self,client_id:str) -> None:
+    def mqtt_remote_client_id(self,client_id: str) -> None:
         self._mqtt_remote_client_id = client_id
 
     def check_panel_ip(self) -> bool:

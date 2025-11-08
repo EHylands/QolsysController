@@ -34,4 +34,3 @@ class ThermostatFanMode(Enum):
     QUIET: 0x0400
     EXTERNAL_CIRCULATION: 0x0800
     MANUFACTURER_SPECEFIC: 0x1000
-

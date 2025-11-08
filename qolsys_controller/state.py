@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
+
+from qolsys_controller.database import db
 
 from .observable import QolsysObservable
-from .partition import QolsysPartition
-from .scene import QolsysScene
-from .zone import QolsysZone
+from .weather import QolsysWeather
 from .zwave_device import QolsysZWaveDevice
 from .zwave_dimmer import QolsysDimmer
 from .zwave_generic import QolsysGeneric
@@ -12,11 +15,22 @@ from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from .controller import QolsysController
+    from .partition import QolsysPartition
+    from .scene import QolsysScene
+    from .zone import QolsysZone
+    from .zwave_device import QolsysZWaveDevice
+
 
 class QolsysState(QolsysObservable):
 
-    def __init__(self) -> None:
+    def __init__(self, controller: QolsysController) -> None:
         super().__init__()
+
+        self._controller = controller
+
+        self._weather = QolsysWeather()
 
         self._partitions = []
         self._zones = []
@@ -31,6 +45,10 @@ class QolsysState(QolsysObservable):
     @property
     def partitions(self) -> list[QolsysPartition]:
         return self._partitions
+
+    @property
+    def weather(self) -> QolsysWeather:
+        return self._weather
 
     @property
     def zwave_devices(self) -> list[QolsysZWaveDevice]:
@@ -259,6 +277,10 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - delete ZWave%s", state_zwave.none_id)
                 self.zwave_delete(state_zwave.node_id)
 
+    def sync_weather_data(self, db_weather: QolsysWeather) -> None:
+        LOGGER.debug("sync_data - update Weather")
+        self._weather.update(db_weather.forecasts)
+
     def sync_scenes_data(self, db_scenes: list[QolsysScene]) -> None:
         db_scene_list = []
         for db_scene in db_scenes:
@@ -351,7 +373,7 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - Add Partition%s", db_partition.id)
                 self.partition_add(db_partition)
 
-    def dump(self) -> None:  # noqa: PLR0915
+    def dump(self) -> None:  # noqa: PLR0912, PLR0915
         LOGGER.debug("*** Device Information ***")
 
         for partition in self.partitions:
@@ -427,3 +449,6 @@ class QolsysState(QolsysObservable):
             sid = scene.scene_id
             name = scene.name
             LOGGER.debug("Scene%s (%s)",sid, name)
+
+        for forecast in self.weather.forecasts:
+            LOGGER.debug("Weather - %s - High: %s, Low:%s, Condition:%s", forecast.day_of_week[0:3],forecast.high_temp,forecast.low_temp,forecast.condition)

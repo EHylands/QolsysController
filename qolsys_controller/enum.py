@@ -94,7 +94,6 @@ class ZoneSensorGroup(StrEnum):
     TAMPER_ZONE = "tamperzone"
     SHOCK = "shock"
 
-
     # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
     # ENTRY_EXIT_LONG_DELAY = "" #TBD
     # INSTANT_PERIMETER_DW = "" #TBD

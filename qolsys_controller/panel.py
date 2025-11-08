@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
+from typing import TYPE_CHECKING
 
 from .database.db import QolsysDB
 from .enum import (
@@ -10,10 +13,8 @@ from .enum import (
 from .observable import QolsysObservable
 from .partition import QolsysPartition
 from .scene import QolsysScene
-from .settings import QolsysSettings
-from .state import QolsysState
+from .weather import QolsysForecast, QolsysWeather
 from .zone import QolsysZone
-from .zwave_device import QolsysZWaveDevice
 from .zwave_dimmer import QolsysDimmer
 from .zwave_generic import QolsysGeneric
 from .zwave_lock import QolsysLock
@@ -21,12 +22,15 @@ from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from .controller import QolsysController
+    from .zwave_device import QolsysZWaveDevice
+
 
 class QolsysPanel(QolsysObservable):
-    def __init__(self, settings: QolsysSettings, state: QolsysState) -> None:
+    def __init__(self, controller: QolsysController) -> None:
 
-        self._state = state
-        self._settings = settings
+        self._controller = controller
         self._db = QolsysDB()
 
         # Partition settings
@@ -95,9 +99,9 @@ class QolsysPanel(QolsysObservable):
 
     def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file if exists
-        if self._settings.users_file_path.is_file():
+        if self._controller.settings.users_file_path.is_file():
             try:
-                path = self._settings.users_file_path
+                path = self._controller.settings.users_file_path
                 with path.open("r", encoding="utf-8") as file:
                     try:
                         users = json.load(file)
@@ -344,10 +348,12 @@ class QolsysPanel(QolsysObservable):
 
     def load_database(self, database: dict) -> None:
         self.db.load_db(database)
-        self._state.sync_partitions_data(self.get_partitions_from_db())
-        self._state.sync_zones_data(self.get_zones_from_db())
-        self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
-        self._state.sync_scenes_data(self.get_scenes_from_db())
+        self._controller.state.sync_partitions_data(self.get_partitions_from_db())
+        self._controller.state.sync_zones_data(self.get_zones_from_db())
+        self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+        self._controller.state.sync_scenes_data(self.get_scenes_from_db())
+        self._controller.state.sync_weather_data(self.get_weather_from_db())
+
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
@@ -394,7 +400,7 @@ class QolsysPanel(QolsysObservable):
                                 # Update Partition setting - Send notification if setting has changed
                                 if name in self.settings_partition:
                                     partition_id = content_values.get("partition_id", "")
-                                    partition = self._state.partition(partition_id)
+                                    partition = self._controller.state.partition(partition_id)
                                     if partition is not None:
                                         match name:
                                             case "SYSTEM_STATUS":
@@ -410,7 +416,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.update(selection, selection_argument, content_values)
                                 zoneid = content_values.get("zoneid", "")
-                                zone = self._state.zone(zone_id=zoneid)
+                                zone = self._controller.state.zone(zone_id=zoneid)
                                 if zone is not None:
                                     zone.update(content_values)
 
@@ -422,7 +428,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_state.update(selection, selection_argument, content_values)
 
                                 if name in self.state_partition:
-                                    partition = self._state.partition(partition_id)
+                                    partition = self._controller.state.partition(partition_id)
                                     if partition is not None:
                                         match name:
                                             case "ALARM_STATE":
@@ -447,7 +453,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_partition.uri:
                                 self.db.table_partition.update(selection, selection_argument, content_values)
                                 partition_id = content_values.get("partition_id", "")
-                                partition = self._state.partition(partition_id)
+                                partition = self._controller.state.partition(partition_id)
                                 if partition is not None:
                                     partition.update_partition(content_values)
 
@@ -460,7 +466,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._state.zwave_device(node_id)
+                                node = self._controller.state.zwave_device(node_id)
                                 if node is not None and isinstance(node, QolsysDimmer):
                                     node.update_dimmer(content_values)
 
@@ -468,7 +474,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._state.zwave_device(node_id)
+                                node = self._controller.state.zwave_device(node_id)
                                 if node is not None and isinstance(node, QolsysThermostat):
                                     node.update_thermostat(content_values)
 
@@ -476,7 +482,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._state.zwave_device(node_id)
+                                node = self._controller.state.zwave_device(node_id)
                                 if node is not None and isinstance(node, QolsysLock):
                                     node.update_lock(content_values)
 
@@ -484,7 +490,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._state.zwave_device(node_id)
+                                node = self._controller.state.zwave_device(node_id)
                                 if node is not None:
                                     node.update_base(content_values)
 
@@ -511,7 +517,7 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_scene.uri:
                                 self.db.table_scene.update(selection, selection_argument, content_values)
                                 scene_id = content_values.get("scene_id", "")
-                                scene = self._state.scene(scene_id)
+                                scene = self._controller.state.scene(scene_id)
                                 if scene is not None and isinstance(node, QolsysScene):
                                     scene.update(content_values)
 
@@ -529,10 +535,15 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.update(selection,selection_argument,content_values)
                                 short_id = content_values.get("shortID", "")
-                                zone = self._state.zone_from_short_id(short_id)
+                                zone = self._controller.state.zone_from_short_id(short_id)
                                 if zone is not None:
                                     LOGGER.debug("iq2meid updating powerg device for zoneid(%s):%s", zone.zone_id,content_values)
                                     zone.update_powerg(content_values)
+
+                            # Update Weather
+                            case self.db.table_weather.uri:
+                                self.db.table_weather.update(selection,selection_argument,content_values)
+                                self._controller.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -550,7 +561,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.delete(selection, selection_argument)
-                                self._state.sync_zones_data(self.get_zones_from_db())
+                                self._controller.state.sync_zones_data(self.get_zones_from_db())
                                 # Notify delete zone
 
                             case self.db.table_iqremotesettings.uri:
@@ -571,7 +582,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_alarmedsensor.uri:
                                 self.db.table_alarmedsensor.delete(selection, selection_argument)
-                                self._state.sync_partitions_data(self.get_partitions_from_db())
+                                self._controller.state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.table_history.uri:
                                 self.db.table_history.delete(selection, selection_argument)
@@ -583,19 +594,19 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.delete(selection, selection_argument)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.delete(selection, selection_argument)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.delete(selection, selection_argument)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.delete(selection, selection_argument)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             case self.db.table_automation.uri:
                                 self.db.table_automation.delete(selection, selection_argument)
@@ -603,7 +614,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_partition.uri:
                                 self.db.table_partition.delete(selection, selection_argument)
-                                self._state.sync_partitions_data(self.get_partitions_from_db())
+                                self._controller.state.sync_partitions_data(self.get_partitions_from_db())
 
                             case self.db.table_user.uri:
                                 self.db.table_user.delete(selection, selection_argument)
@@ -618,6 +629,10 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.delete(selection,selection_argument)
+
+                            case self.db.table_weather.uri:
+                                self.db.table_weather.delete(selection,selection_argument)
+                                self._controller.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -636,7 +651,7 @@ class QolsysPanel(QolsysObservable):
                                 new_value = content_values.get("value", "")
                                 if name in self.state_partition:
                                     partition_id = content_values.get("partition_id", "")
-                                    partition = self._state.partition(partition_id)
+                                    partition = self._controller.state.partition(partition_id)
                                     if partition is not None:
                                         match name:
                                             case "ALARM_STATE":
@@ -645,7 +660,7 @@ class QolsysPanel(QolsysObservable):
                             # Inser Partition Content Provider
                             case self.db.table_partition.uri:
                                 self.db.table_partition.insert(data=content_values)
-                                self._state.sync_partitions_data(self.get_partitions_from_db())
+                                self._controller.state.sync_partitions_data(self.get_partitions_from_db())
 
                             # Insert Settings Content Provider
                             case self.db.table_qolsyssettings.uri:
@@ -656,7 +671,7 @@ class QolsysPanel(QolsysObservable):
                                 new_value = content_values.get("value", "")
                                 if name in self.settings_partition:
                                     partition_id = content_values.get("partition_id", "")
-                                    partition = self._state.partition(partition_id)
+                                    partition = self._controller.state.partition(partition_id)
                                     if partition is not None:
                                         match name:
                                             case "SYSTEM_STATUS":
@@ -686,27 +701,27 @@ class QolsysPanel(QolsysObservable):
                             # Sensor Content Provider
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.insert(data=content_values)
-                                self._state.sync_zones_data(self.get_zones_from_db())
+                                self._controller.state.sync_zones_data(self.get_zones_from_db())
 
                             # Door Lock Content Provider
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.insert(data=content_values)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # Dimmer Content Provider
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.insert(data=content_values)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # Thermostat Content Provider
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.insert(data=content_values)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # ZWave Node Content Provider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.insert(data=content_values)
-                                self._state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
 
                             # HistoryContentProvider
                             case self.db.table_history.uri:
@@ -719,7 +734,7 @@ class QolsysPanel(QolsysObservable):
                                 partition_id = content_values.get("partition_id", "")
                                 self.db.table_alarmedsensor.insert(data=content_values)
 
-                                partition = self._state.partition(partition_id)
+                                partition = self._controller.state.partition(partition_id)
                                 if partition is not None:
                                     partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup", ""))])
 
@@ -750,6 +765,11 @@ class QolsysPanel(QolsysObservable):
                             # PowerG Device
                             case self.db.table_powerg_device.uri:
                                 self.db.table_powerg_device.insert(data=content_values)
+
+                            # Weather
+                            case self.db.table_weather.uri:
+                                self.db.table_weather.insert(data=content_values)
+                                self._controller.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
@@ -836,13 +856,26 @@ class QolsysPanel(QolsysObservable):
 
         return scenes
 
+    def get_weather_from_db(self) -> QolsysWeather:
+        weather = QolsysWeather()
+        forecast_dic_list: list[dict] = self.db.get_weather()
+
+        forecast_obj_list = []
+        for forecast in forecast_dic_list:
+            forecast_obj_list.append(QolsysForecast(forecast))
+
+        # Create weather array
+        weather.update(forecast_obj_list)
+
+        return weather
+
     def get_zones_from_db(self) -> list[QolsysZone]:
         zones = []
         zones_list: list[dict] = self.db.get_zones()
 
         # Create sensors array
         for zone_info in zones_list:
-            new_zone = QolsysZone(zone_info,self._settings)
+            new_zone = QolsysZone(zone_info,self._controller.settings)
 
             if new_zone.current_capability == "POWERG":
                 LOGGER.debug("Loading PowerG device info for zone %s", new_zone.zone_id)
@@ -931,5 +964,5 @@ class QolsysPanel(QolsysObservable):
             LOGGER.debug("User: %s", user["id"])
 
         LOGGER.debug("*** Plugin Information ***")
-        LOGGER.debug("Motion Delay Enabled: %s", self._settings.motion_sensor_delay)
-        LOGGER.debug("Motion Delay Value: %s", self._settings.motion_sensor_delay_sec)
+        LOGGER.debug("Motion Delay Enabled: %s", self._controller.settings.motion_sensor_delay)
+        LOGGER.debug("Motion Delay Value: %s", self._controller.settings.motion_sensor_delay_sec)
