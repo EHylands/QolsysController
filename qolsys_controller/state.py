@@ -431,7 +431,7 @@ class QolsysState(QolsysObservable):
             if isinstance(zwave, QolsysLock):
                 zid = zwave.lock_node_id
                 name = zwave.lock_name
-                LOGGER.debug("Lock%s (%s) - current_temp: %s", zid, name, zwave.lock_status)
+                LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
                 continue
 
             if isinstance(zwave, QolsysGeneric):

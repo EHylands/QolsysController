@@ -15,9 +15,6 @@ if TYPE_CHECKING:
 class QolsysPlugin:
     def __init__(self, controller: QolsysController) -> None:
         self._controller = controller
-        #self._state = controller.state
-        #self._panel = controller.panel
-        #self._settings = controller.settings
         self.connected = False
         self.connected_observer = QolsysObservable()
 

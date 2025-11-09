@@ -543,7 +543,7 @@ class QolsysPanel(QolsysObservable):
                             # Update Weather
                             case self.db.table_weather.uri:
                                 self.db.table_weather.update(selection,selection_argument,content_values)
-                                self._controller.sync_weather_data(self.get_weather_from_db())
+                                self._controller.state.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -632,7 +632,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_weather.uri:
                                 self.db.table_weather.delete(selection,selection_argument)
-                                self._controller.sync_weather_data(self.get_weather_from_db())
+                                self._controller.state.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -769,7 +769,7 @@ class QolsysPanel(QolsysObservable):
                             # Weather
                             case self.db.table_weather.uri:
                                 self.db.table_weather.insert(data=content_values)
-                                self._controller.sync_weather_data(self.get_weather_from_db())
+                                self._controller.state.sync_weather_data(self.get_weather_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
