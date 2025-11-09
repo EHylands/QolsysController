@@ -739,7 +739,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Sending ui_delay command")
 
         # partition state needs to be sent for ui_delay to work
-        partition = self.state.partition(partition_id)
+        partition = self._controller.state.partition(partition_id)
 
         arming_command = {
             "operation_name": "ui_delay",
@@ -778,7 +778,7 @@ class QolsysPluginRemote(QolsysPlugin):
         LOGGER.debug("MQTT: Receiving ui_delay command")
 
     async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> bool:
-        partition = self.state.partition(partition_id)
+        partition = self._controller.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: disarm command error - Unknow Partition")
             return False
@@ -1172,7 +1172,7 @@ class QolsysPluginRemote(QolsysPlugin):
 
         user_id = 0
 
-        partition = self.state.partition(partition_id)
+        partition = self._controller.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
             return False
@@ -1252,7 +1252,7 @@ class QolsysPluginRemote(QolsysPlugin):
     async def command_execute_scene(self,scene_id:str) -> bool:
         LOGGER.debug("MQTT: Sending execute_scene command")
 
-        scene = self.state.scene(scene_id)
+        scene = self._controller.state.scene(scene_id)
         if not scene:
             LOGGER.debug("MQTT: command_execute_scene Erro - Unknow Scene: %s", scene_id)
             return False

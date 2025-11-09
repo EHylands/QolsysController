@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.database import db
-
 from .observable import QolsysObservable
 from .weather import QolsysWeather
 from .zwave_device import QolsysZWaveDevice
@@ -451,4 +449,4 @@ class QolsysState(QolsysObservable):
             LOGGER.debug("Scene%s (%s)",sid, name)
 
         for forecast in self.weather.forecasts:
-            LOGGER.debug("Weather - %s - High: %s, Low:%s, Condition:%s", forecast.day_of_week[0:3],forecast.high_temp,forecast.low_temp,forecast.condition)
+            LOGGER.debug("Weather - %s - High: %s, Low:%s, Condition: %s", forecast.day_of_week[0:3],forecast.high_temp,forecast.low_temp,forecast.condition)
