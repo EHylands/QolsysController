@@ -110,18 +110,16 @@ class QolsysTable:
 
     def update(self, selection: str, selection_argument: str, content_value: str) -> None:
         # selection: 'zone_id=?, parition_id=?'
-
         # selection_argument:
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
         # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
-        if selection_argument == "":
-            LOGGER.debug("Update called with empty selection_argument")
+        if selection is None or selection_argument is None:
+            LOGGER.debug("Update called with None selection or None selection_argument")
             LOGGER.debug("Table: %s", self.table)
             LOGGER.debug("Selection: %s", selection)
             LOGGER.debug("selection_argument: %s", selection_argument)
-            return
 
         # Selection Argument
         # Panel send selection_argument as list in Firmware 4.6.1
@@ -149,8 +147,13 @@ class QolsysTable:
                 LOGGER.warning("New Columns: %s", new_columns)
                 LOGGER.warning("Please Report")
 
-            query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
-            self._cursor.execute(query, selection_argument)
+            if selection:
+                query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
+                self._cursor.execute(query, selection_argument)
+            else:
+                query = f"UPDATE {self.table} SET {db_value}"
+                self._cursor.execute(query)
+
             self._db.commit()
 
         except sqlite3.Error as err:
@@ -171,13 +174,11 @@ class QolsysTable:
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
 
-
-        if selection_argument == "":
-            LOGGER.debug("Delete called with empty selection_argument")
+        if selection is None or selection_argument is None:
+            LOGGER.debug("Delete called with None selection or None selection_argument")
             LOGGER.debug("Table: %s", self.table)
             LOGGER.debug("Selection: %s", selection)
             LOGGER.debug("selection_argument: %s", selection_argument)
-            return
 
         # Selection Argument
         if(type(selection_argument) is not list):
@@ -186,8 +187,13 @@ class QolsysTable:
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
         try:
-            query = f"DELETE FROM {self.table} WHERE {selection}"
-            self._cursor.execute(query, selection_argument)
+            if selection:
+                query = f"DELETE FROM {self.table} WHERE {selection}"
+                self._cursor.execute(query, selection_argument)
+            else:
+                # Delete all rows from table if selection is None
+                self.clear()
+
             self._db.commit()
 
         except sqlite3.Error as err:

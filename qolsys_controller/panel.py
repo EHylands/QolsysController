@@ -376,12 +376,8 @@ class QolsysPanel(QolsysObservable):
 
                     case "update":
                         content_values = data.get("contentValues","")
-                        selection = data.get("selection","")
-                        selection_argument = data.get("selectionArgs","")
-
-                        if selection_argument == "" or selection == "":
-                            LOGGER.debug("iq2meid invalid update selection or selectionArgs")
-                            LOGGER.debug("data:%s", data)
+                        selection = data.get("selection")
+                        selection_argument = data.get("selectionArgs")
 
                         match uri:
 
@@ -437,17 +433,14 @@ class QolsysPanel(QolsysObservable):
                             # Update heat_map
                             case self.db.table_heat_map.uri:
                                 self.db.table_heat_map.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update master_slave
                             case self.db.table_master_slave.uri:
                                 self.db.table_master_slave.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update dashboard_msgs
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update PartitionContentProvider
                             case self.db.table_partition.uri:
@@ -460,7 +453,6 @@ class QolsysPanel(QolsysObservable):
                             # Update History Content Provider
                             case self.db.table_history.uri:
                                 self.db.table_history.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update DimmerLightsContentProvider
                             case self.db.table_dimmer.uri:
@@ -497,12 +489,10 @@ class QolsysPanel(QolsysObservable):
                             # Update Z-Wave History Content Provier
                             case self.db.table_zwave_history.uri:
                                 self.db.table_zwave_history.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update AutomationDeviceContentProvider
                             case self.db.table_automation.uri:
                                 self.db.table_automation.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update Alarmed Sensor Content Provider
                             case self.db.table_alarmedsensor.uri:
@@ -511,7 +501,6 @@ class QolsysPanel(QolsysObservable):
                             # Update IQ Remote Settings Content Provider
                             case self.db.table_iqremotesettings.uri:
                                 self.db.table_iqremotesettings.update(selection, selection_argument, content_values)
-                                # No action needed
 
                             # Update Scene Content Provider
                             case self.db.table_scene.uri:
@@ -524,12 +513,10 @@ class QolsysPanel(QolsysObservable):
                             # Update Trouble Conditions
                             case self.db.table_trouble_conditions.uri:
                                 self.db.table_trouble_conditions.update(selection,selection_argument,content_values)
-                                # No action needed
 
                             # Update EU_EVENT:
                             case self.db.table_eu_event.uri:
                                 self.db.table_eu_event.update(selection,selection_argument,content_values)
-                                # No action needed
 
                             # Update PowerG Device
                             case self.db.table_powerg_device.uri:
@@ -537,7 +524,6 @@ class QolsysPanel(QolsysObservable):
                                 short_id = content_values.get("shortID", "")
                                 zone = self._controller.state.zone_from_short_id(short_id)
                                 if zone is not None:
-                                    LOGGER.debug("iq2meid updating powerg device for zoneid(%s):%s", zone.zone_id,content_values)
                                     zone.update_powerg(content_values)
 
                             # Update Weather
@@ -550,35 +536,26 @@ class QolsysPanel(QolsysObservable):
                                 LOGGER.debug(data)
 
                     case "delete":
-                        selection = data.get("selection","")
-                        selection_argument = data.get("selectionArgs","")
-
-                        if selection_argument == "" or selection == "":
-                            LOGGER.debug("iq2meid invalid delete selection or selectionArgs")
-                            LOGGER.debug("data:%s", data)
+                        selection = data.get("selection")
+                        selection_argument = data.get("selectionArgs")
 
                         match uri:
 
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.delete(selection, selection_argument)
                                 self._controller.state.sync_zones_data(self.get_zones_from_db())
-                                # Notify delete zone
 
                             case self.db.table_iqremotesettings.uri:
                                 self.db.table_iqremotesettings.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_state.uri:
                                 self.db.table_state.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_master_slave.uri:
                                 self.db.table_master_slave.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_qolsyssettings.uri:
                                 self.db.table_qolsyssettings.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_alarmedsensor.uri:
                                 self.db.table_alarmedsensor.delete(selection, selection_argument)
@@ -586,11 +563,9 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_history.uri:
                                 self.db.table_history.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_zwave_history.uri:
                                 self.db.table_zwave_history.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.delete(selection, selection_argument)
@@ -610,7 +585,6 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_automation.uri:
                                 self.db.table_automation.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_partition.uri:
                                 self.db.table_partition.delete(selection, selection_argument)
@@ -618,11 +592,9 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_user.uri:
                                 self.db.table_user.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.delete(selection, selection_argument)
-                                # No action needed
 
                             case self.db.table_eu_event.uri:
                                 self.db.table_eu_event.delete(selection,selection_argument)
@@ -726,7 +698,6 @@ class QolsysPanel(QolsysObservable):
                             # HistoryContentProvider
                             case self.db.table_history.uri:
                                 self.db.table_history.insert(data=content_values)
-                                # No action needed
 
                             # AlarmedSensorProvider
                             case self.db.table_alarmedsensor.uri:
@@ -741,22 +712,18 @@ class QolsysPanel(QolsysObservable):
                             # IQRemoteSettingsProvider
                             case self.db.table_iqremotesettings.uri:
                                 self.db.table_iqremotesettings.insert(data=content_values)
-                                # No action needed
 
                             # HeatMapContentProvider
                             case self.db.table_heat_map.uri:
                                 self.db.table_heat_map.insert(data=content_values)
-                                # No action needed
 
                             # ZDeviceHistoryContentProvider
                             case self.db.table_zwave_history.uri:
                                 self.db.table_zwave_history.insert(data=content_values)
-                                # No action needed
 
                             # Dashboard Message Content Provider
                             case self.db.table_dashboard_msgs.uri:
                                 self.db.table_dashboard_msgs.insert(data=content_values)
-                                # No action needed
 
                             # EU_EVENT
                             case self.db.table_eu_event.uri:
