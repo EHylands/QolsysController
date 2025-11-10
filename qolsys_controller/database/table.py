@@ -108,23 +108,14 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def update(self, selection: str, selection_argument: str, content_value: str) -> None:
+    def update(self, selection: str | None, selection_argument: list | str | None, content_value: str | None) -> None:
         # selection: 'zone_id=?, parition_id=?'
-        # selection_argument:
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
         # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
-        if selection is None or selection_argument is None:
-            LOGGER.debug("Update called with None selection or None selection_argument")
-            LOGGER.debug("Table: %s", self.table)
-            LOGGER.debug("Selection: %s", selection)
-            LOGGER.debug("selection_argument: %s", selection_argument)
-
-        # Selection Argument
-        # Panel send selection_argument as list in Firmware 4.6.1
-        if(type(selection_argument) is not list):
-            #Firmware 4.4.1, seletion_argument is sent as a string
+        # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
+        if(type(selection_argument) is str):
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
@@ -169,20 +160,13 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def delete(self, selection: str, selection_argument: str) -> None:
+    def delete(self, selection: str | None, selection_argument: list | str | None) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
 
-        if selection is None or selection_argument is None:
-            LOGGER.debug("Delete called with None selection or None selection_argument")
-            LOGGER.debug("Table: %s", self.table)
-            LOGGER.debug("Selection: %s", selection)
-            LOGGER.debug("selection_argument: %s", selection_argument)
-
-        # Selection Argument
-        if(type(selection_argument) is not list):
-            #Firmware 4.4.1, seletion_argument is sent as a string
+        # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
+        if(type(selection_argument) is str):
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
@@ -191,7 +175,6 @@ class QolsysTable:
                 query = f"DELETE FROM {self.table} WHERE {selection}"
                 self._cursor.execute(query, selection_argument)
             else:
-                # Delete all rows from table if selection is None
                 self.clear()
 
             self._db.commit()

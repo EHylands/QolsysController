@@ -10,42 +10,38 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 - 🔢 Supports **4-digit user codes**
 - ⚠️ Uses a **custom local usercode database** — panel's internal user code verification process is not yet supported
 
-### Supported Features Milestones
+## ✨ Functionality Highlights
 
-| Device               | Feature                          | Status        |
-|----|---|---|
-| **Panel**            | Diagnostics sensors              | ✅  |
-|---|---|---|
-| **Partitions**       | Arming status                    | ✅ |
-|                      | Alarm state and type             | ✅            |
-|                      | Set Exit sound                   | ✅            |
-|                      | Set Entry Delay                  | ✅            |
-|                      | Arm-Stay Instant arming          | ✅            |
-|                      | Arm-Stay Silent Disarm           | ✅            |
-|                      | Disarm pictures             | 🛠️ WIP            |
-|---|---|---|
-| **Zones**            | Sensor Status                    | ✅            |
-|                      | Tamper State                     | ✅             |
-|                      | Battery Level                    | ✅            |
-|                      | Signal Level                     | ✅            |
-|----|---|---|
-| **Dimmers**           | Read Light Status and Level      | ✅            |
-|                      | Set Lights Status and Level       | ✅           |
-|---|---|---|
-| **Door Locks**        | Read Lock State                  | ✅            |
-|                      | Set Lock State                   | 🛠️ WIP        |
-|---|---|---|
-| **Thermostats**       | Read Thermostat State            | ✅            |
-|                      | Set  Thermostat State            | 🛠️ WIP        |
-|---|---|---|
-| **Garage Doors**      | All                              | 🛠️ WIP        |
-|---|---|---|
-| **Outlets**           | All                              | 🛠️ WIP        |
-|---|---|---|
-| **Generic Z-Wave**   | Read Battery Level               | ✅ |
-|                      | Read Pairing Status              | ✅ |
-|                      | Read Node Status                 | ✅ |
-|                      | Control Generic Z-Wave Devices   | 🔄 TBD       |
+| Category               | Feature                              | Status |
+|------------------------|--------------------------------------|--------|
+| **Panel**              | Diagnostic Sensors                   | ✅     |
+|                        | Panel Scenes                         | ✅     |
+|                        | Weather Forecast                     | ✅     |
+|                        | (Alarm.com Weather to Panel)         |        |
+| **Partition**          | Arming Status                        | ✅     |
+|                        | Alarm State                          | ✅     |
+|                        | Home Instant Arming                  | ✅     |
+|                        | Home Silent Disarming (Firmware 4.6.1)| ✅     |
+|                        | Set Exit Sounds                      | ✅     |
+|                        | Set Entry Delay                      | ✅            |
+|                        | Disarm Photos                        | 🛠️     |
+|                        | TTS                                  | 🛠️     |
+| **Zones**              | Sensor Status                        | ✅     |
+|                        | Tamper State                         | ✅     |
+|                        | Battery Level                        | ✅     |
+|                        | Temperature (supported PowerG device)| ✅     |
+|                        | Light (supported PowerG device)      | ✅     |
+|                        | Average dBm                          | ✅     |
+|                        | Latest dBm                           | ✅     |
+| **Z-Wave Devices**     | Battery Level                        | ✅     |
+|                        | Node Status                          | ✅     |
+|                        | Control Generic Devices              | TBD    |
+| **Z-Wave Dimmers**     | Light Status and Level Control       | ✅     |
+| **Z-Wave Door Locks**  | Lock, Unlock                         | ✅     |
+| **Z-Wave Thermostats** | Read device status                   | ✅     |
+|                        | Write device status                  | ✅     |
+| **Z-Wave Garage Doors**|                                      | 🛠️     |
+| **Z-Wave Outlets**     |                                      | 🛠️     |
 
 
 ## ⚠️ Certificate Warning

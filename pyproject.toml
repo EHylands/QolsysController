@@ -1,6 +1,6 @@
 [project]
 name = "qolsys-controller"
-version = "0.0.52"
+version = "0.0.53"
 authors = [
   { name="Eric Hylands", email="" },
 ]
@@ -27,7 +27,7 @@ build-backend = "hatchling.build"
 packages = ["qolsys_controller/"]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 
 [tool.ruff.lint]
 select = ['ALL']
