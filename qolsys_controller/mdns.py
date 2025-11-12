@@ -7,7 +7,6 @@ from zeroconf.asyncio import AsyncZeroconf
 class QolsysMDNS:
 
     def __init__(self, ip: str, port: int, external_zero_conf: AsyncZeroconf | None = None) -> None:
-
         # Add possible external zeroconf instance provided by Home Assistant by example
         # If no external instance is provided, create our own
         if external_zero_conf:

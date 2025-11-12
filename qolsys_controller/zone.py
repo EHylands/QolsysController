@@ -1,10 +1,9 @@
 import asyncio
 import logging
 
-from qolsys_controller.settings import QolsysSettings
-
-from .enum import ZoneSensorGroup, ZoneSensorType, ZoneStatus
+from .enum import DeviceCapability, ZoneSensorGroup, ZoneSensorType, ZoneStatus
 from .observable import QolsysObservable
+from .settings import QolsysSettings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,21 +14,20 @@ class QolsysZone(QolsysObservable):
         super().__init__()
 
         self._settings = settings
-
         self._delay_task:asyncio.Task = None
 
-        self._zone_id = data.get("zoneid", "")
-        self._sensorname = data.get("sensorname", "")
+        self._zone_id: str = data.get("zoneid", "")
+        self._sensorname: str = data.get("sensorname", "")
         self._sensorstatus: ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
         self._sensortype = ZoneSensorType(data.get("sensortype", ""))
-        self._sensorgroup = data.get("sensorgroup", "")
-        self._battery_status = data.get("battery_status", "")
-        self._averagedBm = data.get("averagedBm", "")
-        self._latestdBm = data.get("latestdBm", "")
-        self._ac_status = data.get("ac_status", "")
-        self._shortID = data.get("shortID", "")
-        self._device_capability = data.get("device_capability", "")
-        self._current_capability = data.get("current_capability", "")
+        self._sensorgroup: str = data.get("sensorgroup", "")
+        self._battery_status: str = data.get("battery_status", "")
+        self._averagedBm: str = data.get("averagedBm", "")
+        self._latestdBm: str = data.get("latestdBm", "")
+        self._ac_status: str = data.get("ac_status", "")
+        self._shortID: str = data.get("shortID", "")
+        self._device_capability: str = data.get("device_capability", "")
+        self._current_capability: str = data.get("current_capability", "")
 
         self._id = data.get("_id", "")
         self._zone_type = data.get("zone_type", "")
@@ -39,7 +37,6 @@ class QolsysZone(QolsysObservable):
         self._zone_alarm_type = data.get("zone_alarm_type", "")
         self._partition_id = data.get("partition_id", "")
         self._sensortts = data.get("sensortts", "")
-        self._current_capability = data.get("current_capability", "")
         self._zone_rf_sensor = data.get("zone_rf_sensor", "")
         self._zone_supervised = data.get("zone_supervised", "")
         self._zone_reporting_enabled = data.get("zone_reporting_enabled", "")
@@ -66,24 +63,36 @@ class QolsysZone(QolsysObservable):
         self._extras = data.get("extras", "")
 
         # EXTRA POWERG ATTRIBUTES
-        self._powerg_long_id = ""
-        self._powerg_status_data:str = ""
-        self._powerg_temperature:str = ""
-        self._powerg_light:str = ""
-        self._powerg_notification_period = ""
-        self._powerg_average_link_quality = ""
-        self._powerg_link_quality = ""
-        self._powerg_link_status = ""
-        self._powerg_battery_voltage = ""
+        self._powerg_long_id: str = ""
+        self._powerg_status_data: str = ""
+        self._powerg_temperature: str = ""
+        self._powerg_light: str = ""
+        self._powerg_notification_period: str = ""
+        self._powerg_average_link_quality: str = ""
+        self._powerg_link_quality: str = ""
+        self._powerg_link_status: str = ""
+        self._powerg_battery_voltage: str = ""
 
     def is_powerg_enabled(self) -> bool:
-        return self._current_capability == "PowerG"
+        return self._current_capability == DeviceCapability.POWERG
 
     def is_powerg_temperature_enabled(self) -> bool:
         return self._powerg_temperature != ""
 
     def is_powerg_light_enabled(self) -> bool:
         return self._powerg_light != ""
+
+    def is_average_dbm_enabled(self) -> bool:
+        return self.averagedBm is not None
+
+    def is_latest_dbm_enabled(self) -> bool:
+        return self.latestdBm is not None
+
+    def is_battery_enabled(self) -> bool:
+        return self.battery_status != ""
+
+    def is_ac_enabled(self) -> bool:
+        return self.ac_status != ""
 
     def update_powerg(self, data: dict) -> None:
         short_id_update = data.get("shortID", "")
@@ -123,7 +132,6 @@ class QolsysZone(QolsysObservable):
         self.end_batch_update()
 
     def update(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
-
         zone_id_update = data.get("zoneid", "")
         if zone_id_update != self._zone_id:
             LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)", self._zone_id, self.sensorname, zone_id_update)
@@ -269,16 +277,32 @@ class QolsysZone(QolsysObservable):
         return self._current_capability
 
     @property
-    def latestdBm(self) -> str:
-        return self._latestdBm
+    def latestdBm(self) -> int | None:
+        try:
+            n = int(self._latestdBm)
+            if n >= 0 and n < 999:  # noqa: PLR2004
+                return n
+        except ValueError:
+            pass
+        return None
 
     @property
-    def averagedBm(self) -> str:
-        return self._averagedBm
+    def averagedBm(self) -> int | None:
+        try:
+            n = int(self._averagedBm)
+            if n >= 0 and n < 999:  # noqa: PLR2004
+                return n
+        except ValueError:
+            pass
+        return None
 
     @property
     def device_capability(self) -> str:
         return self._device_capability
+
+    @property
+    def ac_status(self) -> str:
+        return self._ac_status
 
     @property
     def powerg_temperature(self) -> float | None:
@@ -317,20 +341,12 @@ class QolsysZone(QolsysObservable):
     def averagedBm(self, value: str) -> None:
         if self._averagedBm != value:
             self._averagedBm = value
-
-            if value == "":
-                self._averagedBm = 0
-
             self.notify()
 
     @latestdBm.setter
     def latestdBm(self, value: str) -> None:
         if self._latestdBm != value:
             self.latestdBm = value
-
-            if value == "":
-                self._latestdBm = 0
-
             self.notify()
 
     @sensorstatus.setter
@@ -369,7 +385,6 @@ class QolsysZone(QolsysObservable):
     @time.setter
     def time(self, value: str) -> None:
         if self._time != value:
-            #LOGGER.debug("Zone%s (%s) - time: %s", self.zone_id, self.sensorname, value)
             self._time = value
             self.notify()
 
@@ -416,6 +431,17 @@ class QolsysZone(QolsysObservable):
     def to_dict(self) -> dict:
         return {
             "_id": self.id,
+            "ac_status": self.ac_status,
+            "allowdisarming": self._allowdisarming,
+            "averagedBm": self.averagedBm,
+            "battery_status": self.battery_status,
+            "chimetype": self._chimetype,
+            "created_by": self._created_by,
+            "created_date": self._created_date,
+            "current_capability": self._current_capability,
+            "device_capability": self._device_capability,
+            "diag_24hr": self._diag_24hr,
+            "extras": self._extras,
             "sensorid": self._sensor_id,
             "sensorname": self.sensorname,
             "sensorgroup": self.sensorgroup,
@@ -427,36 +453,25 @@ class QolsysZone(QolsysObservable):
             "zone_physical_type": self.zone_physical_type,
             "zone_alarm_type": self.zone_alarm_type,
             "partition_id": self.partition_id,
-            "battery_status": self.battery_status,
             "sensortts": self._sensortts,
             "latestdBm": self.latestdBm,
-            "averagedBm": self.averagedBm,
-            "current_capability": self._current_capability,
             "zone_rf_sensor": self._zone_rf_sensor,
             "zone_supervised": self._zone_supervised,
             "zone_reporting_enabled": self._zone_reporting_enabled,
             "zone_two_way_voice_enabled": self._zone_two_way_voice_enabled,
             "signal_source": self._signal_source,
             "serial_number": self._serial_number,
-            "chimetype": self._chimetype,
             "frame_count": self._frame_count,
             "frame_type": self._frame_type,
             "frame_id": self._frame_id,
-            "allowdisarming": self._allowdisarming,
             "time": self.time,
             "version": self._version,
             "opr": self._opr,
             "zone_equipment_code": self._zone_equipement_code,
-            "created_date": self._created_date,
-            "created_by": self._created_by,
             "updated_by": self._updated_by,
             "updated_date": self._updated_date,
             "shortID": self._shortID,
-            "diag_24hr": self._diag_24hr,
-            "device_capability": self._device_capability,
             "sub_type": self._sub_type,
             "powerg_manufacture_id": self._powerg_manufacture_id,
             "parent_node": self._parent_node,
-            "extras": self._extras,
-            "ac_status": self._ac_status,
         }

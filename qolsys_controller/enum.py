@@ -45,6 +45,13 @@ class ZoneStatus(StrEnum):
     FAILURE = "Failure"
 
 
+class DeviceCapability(StrEnum):
+    SRF = "SRF"
+    WIFI = "WiFi"
+    POWERG = "POWERG"
+    ZWAVE = "Z-Wave"
+
+
 class ZoneSensorType(StrEnum):
     DOOR_WINDOW = "Door_Window"
     DOORBELL = "Doorbell"
