@@ -29,6 +29,7 @@ class QolsysTableDashboardMsgs(QolsysTable):
             "end_time",
             "read",
             "mime_type",
+            "type",
         ]
 
         self._create_table()

@@ -354,7 +354,6 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
-
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
 

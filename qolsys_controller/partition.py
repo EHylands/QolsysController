@@ -206,7 +206,7 @@ class QolsysPartition(QolsysObservable):
     def update_partition(self, data: dict) -> None:
         # Check if we are updating same partition_id
         partition_id_update = data.get("partition_id", "")
-        if int(partition_id_update) != int(self.id):
+        if partition_id_update != self.id:
             LOGGER.error(
                 "Updating Partition%s (%s) with Partition '%s' (different id)", self._id, self._name, partition_id_update)
             return
