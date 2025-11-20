@@ -10,6 +10,8 @@ import random
 import ssl
 import time
 
+from typing import Any
+
 import aiofiles
 import aiomqtt
 
@@ -439,17 +441,17 @@ class QolsysController:
             if self.certificate_exchange_server:
                 self.certificate_exchange_server.close()
 
-    async def command_connect(self) -> dict:
+    async def command_connect(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending connect command")
 
         dhcpInfo = {
-            "ipaddress": "192.168.10.220",
-            "gateway": "192.168.10.1",
-            "netmask": "255.255.2555.0",
-            "dns1": "8.8.8.8",
+            "ipaddress": "",
+            "gateway": "",
+            "netmask": "",
+            "dns1": "",
             "dns2": "4.4.4.4",
-            "dhcpServer": "192.168.10.1",
-            "leaseDuration": "3600",
+            "dhcpServer": "",
+            "leaseDuration": "",
         }
 
         command = MQTTCommand(self,"connect_v204")
@@ -480,7 +482,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving connect command")
         return response
 
-    async def command_pairing_request(self) -> dict:
+    async def command_pairing_request(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending pairing_request command")
         command = MQTTCommand(self,"connect_v204")
 
@@ -510,7 +512,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
-    async def command_pingevent(self) -> dict:
+    async def command_pingevent(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending pingevent command")
         command = MQTTCommand(self,"pingevent")
         command.append("remote_panel_status","Active")
@@ -530,7 +532,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving pingevent command")
         return response
 
-    async def command_timesync(self) -> dict:
+    async def command_timesync(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending timeSync command")
         command = MQTTCommand(self,"timeSync")
         command.append("startTimestamp",int(time.time()))
@@ -538,14 +540,14 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving timeSync command")
         return response
 
-    async def command_sync_database(self) -> dict:
+    async def command_sync_database(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending syncdatabase command")
         command = MQTTCommand(self,"syncdatabase")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving syncdatabase command")
         return response
 
-    async def command_acstatus(self) -> dict:
+    async def command_acstatus(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending acStatus command")
         command = MQTTCommand(self,"acStatus")
         command.append("acStatus","Connected")
@@ -553,21 +555,21 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving acStatus command")
         return response
 
-    async def command_dealer_logo(self) -> dict:
+    async def command_dealer_logo(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending dealerLogo command")
         command = MQTTCommand(self,"dealerLogo")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving dealerLogo command")
         return response
 
-    async def command_pair_status_request(self) -> dict:
+    async def command_pair_status_request(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending pair_status_request command")
         command = MQTTCommand(self,"pair_status_request")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pair_status_request command")
         return response
 
-    async def command_disconnect(self) -> dict:
+    async def command_disconnect(self) -> dict[str,Any]:
         LOGGER.debug("MQTT: Sending disconnect command")
         command = MQTTCommand(self,"disconnect")
         response = await command.send_command()
@@ -575,7 +577,7 @@ class QolsysController:
         return response
 
 
-    async def command_ui_delay(self, partition_id: str,silent_disarming:bool = False) -> dict | None:
+    async def command_ui_delay(self, partition_id: str,silent_disarming:bool = False) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending ui_delay command")
         command = MQTTCommand_Panel(self)
 
@@ -605,7 +607,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving ui_delay command")
         return response
 
-    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict:
+    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str,Any] | None:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.error("MQTT: disarm command error - Unknow Partition")
@@ -617,7 +619,7 @@ class QolsysController:
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
                 LOGGER.debug("MQTT: disarm command error - user_code error")
-                return False
+                return None
 
         async def get_mqtt_disarm_command(silent_disarming:bool) -> str:
             if partition.alarm_state == PartitionAlarmState.ALARM:
@@ -717,7 +719,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving arm command: partition%s",partition_id)
         return response
 
-    async def command_panel_execute_scene(self,scene_id:str) -> dict | None:
+    async def command_panel_execute_scene(self,scene_id:str) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending execute_scene command")
         scene = self.state.scene(scene_id)
         if not scene:
@@ -742,7 +744,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
-    async def command_zwave_switch_binary_set(self,node_id:str, status: bool) -> dict | None:
+    async def command_zwave_switch_binary_set(self,node_id:str, status: bool) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)",node_id,status)
         zwave_node = self.state.zwave_device(node_id)
 
@@ -763,7 +765,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
         return response
 
-    async def command_zwave_switch_multilevel_set(self,node_id: str, level: int) -> dict | None:
+    async def command_zwave_switch_multilevel_set(self,node_id: str, level: int) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)",node_id,level)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -780,7 +782,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving set_zwave_multilevel_switch command")
         return response
 
-    async def command_zwave_doorlock_set(self, node_id: str, locked:bool) -> dict | None:
+    async def command_zwave_doorlock_set(self, node_id: str, locked:bool) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)",node_id,locked)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -798,7 +800,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
         return response
 
-    async def command_zwave_thermostat_setpoint_set(self, node_id: str, mode: ThermostatMode, setpoint: float) -> dict | None:
+    async def command_zwave_thermostat_setpoint_set(self, node_id: str, mode: ThermostatMode, setpoint: float) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s)",node_id,mode,setpoint)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -811,7 +813,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
 
-    async def command_zwave_thermostat_mode_set(self, node_id: str, mode:ThermostatMode) -> dict | None:
+    async def command_zwave_thermostat_mode_set(self, node_id: str, mode:ThermostatMode) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)",node_id,mode)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -824,7 +826,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
 
-    async def command_zwave_thermostat_fan_mode_set(self, node_id: str, fan_mode:ThermostatFanMode) -> dict | None:
+    async def command_zwave_thermostat_fan_mode_set(self, node_id: str, fan_mode:ThermostatFanMode) -> dict[str,Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)",node_id,fan_mode)
 
         zwave_node = self.state.zwave_device(node_id)
