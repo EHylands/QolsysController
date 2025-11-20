@@ -208,9 +208,11 @@ class QolsysController:
                 self._task_manager.run(self.mqtt_ping_task(), self._mqtt_task_ping_label)
 
                 response_connect = await self.command_connect()
+
                 self.panel.imei = response_connect.get("master_imei", "")
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
+                #await self.command_pairing_request()
                 await self.command_pingevent()
                 await self.command_pair_status_request()
 
@@ -441,13 +443,13 @@ class QolsysController:
         LOGGER.debug("MQTT: Sending connect command")
 
         dhcpInfo = {
-            "ipaddress": "",
-            "gateway": "",
-            "netmask": "",
-            "dns1": "",
-            "dns2": "",
-            "dhcpServer": "",
-            "leaseDuration": "",
+            "ipaddress": "192.168.10.220",
+            "gateway": "192.168.10.1",
+            "netmask": "255.255.2555.0",
+            "dns1": "8.8.8.8",
+            "dns2": "4.4.4.4",
+            "dhcpServer": "192.168.10.1",
+            "leaseDuration": "3600",
         }
 
         command = MQTTCommand(self,"connect_v204")
@@ -456,7 +458,7 @@ class QolsysController:
         command.append("macAddress",self.settings.random_mac)
         command.append("remoteClientID",self.settings.mqtt_remote_client_id)
         command.append("softwareVersion","4.4.1")
-        command.append("producType","tab07_rk68")
+        command.append("productType","tab07_rk68")
         command.append("bssid","")
         command.append("lastUpdateChecksum","2132501716")
         command.append("dealerIconsCheckSum","")
@@ -476,6 +478,36 @@ class QolsysController:
 
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving connect command")
+        return response
+
+    async def command_pairing_request(self) -> dict:
+        LOGGER.debug("MQTT: Sending pairing_request command")
+        command = MQTTCommand(self,"connect_v204")
+
+        dhcpInfo = {
+            "ipaddress": "",
+            "gateway": "",
+            "netmask": "",
+            "dns1": "",
+            "dns2": "",
+            "dhcpServer": "",
+            "leaseDuration": "",
+        }
+
+        command.append("pairing_request", True)
+        command.append("ipAddress",self.settings.plugin_ip)
+        command.append("macAddress",self.settings.random_mac)
+        command.append("remoteClientID",self.settings.mqtt_remote_client_id)
+        command.append("softwareVersion","4.4.1")
+        command.append("productType","tab07_rk68")
+        command.append("bssid","")
+        command.append("lastUpdateChecksum","2132501716")
+        command.append("dealerIconsCheckSum","")
+        command.append("remote_feature_support_version","1")
+        command.append("dhcpInfo",json.dumps(dhcpInfo))
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
     async def command_pingevent(self) -> dict:
@@ -542,34 +574,6 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving disconnect command")
         return response
 
-    async def command_pairing_request(self) -> dict:
-        LOGGER.debug("MQTT: Sending pairing_request command")
-        command = MQTTCommand(self,"connect_v204")
-
-        dhcpInfo = {
-            "ipaddress": "",
-            "gateway": "",
-            "netmask": "",
-            "dns1": "",
-            "dns2": "",
-            "dhcpServer": "",
-            "leaseDuration": "",
-        }
-
-        command.append("pairing_request", True)
-        command.append("ipAddress",self.settings.plugin_ip)
-        command.append("macAddress",self.settings.random_mac)
-        command.append("remoteClientID",self.settings.mqtt_remote_client_id)
-        command.append("softwareVersion","4.4.1")
-        command.append("productType","tab07_rk68")
-        command.append("bssid","")
-        command.append("lastUpdateChecksum","2132501716")
-        command.append("dealerIconsCheckSum","")
-        command.append("remote_feature_support_version","1")
-        command.append("dhcpInfo",json.dumps(dhcpInfo))
-        response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving pairing_request command")
-        return response
 
     async def command_ui_delay(self, partition_id: str,silent_disarming:bool = False) -> dict | None:
         LOGGER.debug("MQTT: Sending ui_delay command")
@@ -746,7 +750,7 @@ class QolsysController:
             LOGGER.error("switch_binary_set - Invalid node_id %s",node_id)
             return None
 
-        if zwave_node.generic_device_type is not ZwaveDeviceClass.SwitchBinary:
+        if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchBinary, ZwaveDeviceClass.RemoteSwitchBinary):
             LOGGER.error("switch_binary_set used on invalid %s",zwave_node.generic_device_type)
             return None
 
@@ -767,7 +771,7 @@ class QolsysController:
             LOGGER.error("switch_multilevel_set - Invalid node_id %s",node_id)
             return None
 
-        if zwave_node.generic_device_type is not ZwaveDeviceClass.SwitchMultilevel:
+        if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchMultilevel, ZwaveDeviceClass.RemoteSwitchMultilevel):
             LOGGER.error("switch_multilevel_set used on invalid %s",zwave_node.generic_device_type)
             return None
 
