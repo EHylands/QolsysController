@@ -7,7 +7,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTableHeatMap(QolsysTable):
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.HeatMapContentProvider/heat_map"
@@ -28,4 +27,3 @@ class QolsysTableHeatMap(QolsysTable):
         ]
 
         self._create_table()
-

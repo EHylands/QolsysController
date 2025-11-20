@@ -7,7 +7,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTableShades(QolsysTable):
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.ShadesContentProvider/shades"
@@ -20,4 +19,3 @@ class QolsysTableShades(QolsysTable):
         ]
 
         self._create_table()
-

@@ -31,7 +31,7 @@ class QolsysPKI:
         return self._id
 
     def formatted_id(self) -> str:
-        return ":".join(self.id[i:i+2] for i in range(0, len(self.id), 2))
+        return ":".join(self.id[i : i + 2] for i in range(0, len(self.id), 2))
 
     def set_id(self, pki_id: str) -> None:
         self._id = pki_id.replace(":", "").lower()
@@ -126,7 +126,6 @@ class QolsysPKI:
         return self._subkeys_directory.joinpath(self.id + ".qolsys")
 
     def create(self, mac: str, key_size: int) -> bool:
-
         self.set_id(mac)
 
         # Check if directory exist
@@ -160,48 +159,68 @@ class QolsysPKI:
         self._subkeys_directory.resolve().mkdir(parents=True)
 
         LOGGER.debug("Creating KEY")
-        private_key = rsa.generate_private_key(public_exponent=65537,
-                                               key_size=key_size)
-        private_pem = private_key.private_bytes(encoding=serialization.Encoding.PEM,
-                                                format=serialization.PrivateFormat.PKCS8,
-                                                encryption_algorithm=serialization.NoEncryption())
+        private_key = rsa.generate_private_key(public_exponent=65537, key_size=key_size)
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
         with self._subkeys_directory.joinpath(self.id + ".key").open("wb") as file:
             file.write(private_pem)
 
         LOGGER.debug("Creating CER")
-        subject = issuer = x509.Name([
-            x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
-            x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "SanJose"),
-            x509.NameAttribute(NameOID.LOCALITY_NAME, ""),
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Qolsys Inc."),
-            x509.NameAttribute(NameOID.COMMON_NAME, "www.qolsys.com "),
-        ])
-        cert = x509.CertificateBuilder().subject_name(
-            subject,
-        ).issuer_name(
-            issuer,
-        ).public_key(
-            private_key.public_key(),
-        ).serial_number(
-            x509.random_serial_number(),
-        ).not_valid_before(
-            datetime.now(timezone.utc),  # noqa: UP017
-        ).not_valid_after(
-            datetime.now(timezone.utc) + timedelta(days=3650),  # noqa: UP017
-        ).add_extension(
-            x509.BasicConstraints(ca=False, path_length=None), critical=True,
-        ).sign(private_key, hashes.SHA256())
+        subject = issuer = x509.Name(
+            [
+                x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "SanJose"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, ""),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Qolsys Inc."),
+                x509.NameAttribute(NameOID.COMMON_NAME, "www.qolsys.com "),
+            ]
+        )
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(
+                subject,
+            )
+            .issuer_name(
+                issuer,
+            )
+            .public_key(
+                private_key.public_key(),
+            )
+            .serial_number(
+                x509.random_serial_number(),
+            )
+            .not_valid_before(
+                datetime.now(timezone.utc),  # noqa: UP017
+            )
+            .not_valid_after(
+                datetime.now(timezone.utc) + timedelta(days=3650),  # noqa: UP017
+            )
+            .add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True,
+            )
+            .sign(private_key, hashes.SHA256())
+        )
         cert_pem = cert.public_bytes(encoding=serialization.Encoding.PEM)
 
         with self._subkeys_directory.joinpath(self.id + ".cer").open("wb") as file:
             file.write(cert_pem)
 
         LOGGER.debug("Creating CSR")
-        csr = x509.CertificateSigningRequestBuilder().subject_name(
-            subject,
-        ).add_extension(
-            x509.BasicConstraints(ca=False, path_length=None), critical=True,
-        ).sign(private_key, hashes.SHA256())
+        csr = (
+            x509.CertificateSigningRequestBuilder()
+            .subject_name(
+                subject,
+            )
+            .add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True,
+            )
+            .sign(private_key, hashes.SHA256())
+        )
 
         # Save CSR to file
         csr_pem = csr.public_bytes(encoding=serialization.Encoding.PEM)

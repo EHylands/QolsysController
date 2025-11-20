@@ -7,7 +7,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTableSensor(QolsysTable):
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.SensorContentProvider/sensor"

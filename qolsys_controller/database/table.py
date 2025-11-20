@@ -7,7 +7,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTable:
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         self._db: sqlite3.Connection = db
         self._cursor: sqlite3.Cursor = cursor
@@ -15,7 +14,7 @@ class QolsysTable:
         self._table: str = ""
         self._columns: list[str] = []
         self._abort_on_error: bool = False
-        self._implemented:bool = False
+        self._implemented: bool = False
 
     @property
     def uri(self) -> str:
@@ -42,11 +41,13 @@ class QolsysTable:
             self._db.commit()
 
         except sqlite3.Error as err:
-            error = QolsysSqlError({
-                "table": self.table,
-                "query": query,
-                "columns": self._columns,
-            })
+            error = QolsysSqlError(
+                {
+                    "table": self.table,
+                    "query": query,
+                    "columns": self._columns,
+                }
+            )
 
             if self._abort_on_error:
                 raise error from err
@@ -58,17 +59,18 @@ class QolsysTable:
             self._db.commit()
 
         except sqlite3.Error as err:
-            error = QolsysSqlError({
-                "table": self.table,
-                "query": query,
-                "columns": self._columns,
-            })
+            error = QolsysSqlError(
+                {
+                    "table": self.table,
+                    "query": query,
+                    "columns": self._columns,
+                }
+            )
 
             if self._abort_on_error:
                 raise error from err
 
     def insert(self, data: dict) -> None:
-
         try:
             if not self._implemented and data is not None:
                 LOGGER.warning("New Table format: %s", self.uri)
@@ -99,11 +101,13 @@ class QolsysTable:
             self._db.commit()
 
         except sqlite3.Error as err:
-            error = QolsysSqlError({
-                "table": self.table,
-                "query": query,
-                "columns": self._columns,
-            })
+            error = QolsysSqlError(
+                {
+                    "table": self.table,
+                    "query": query,
+                    "columns": self._columns,
+                }
+            )
 
             if self._abort_on_error:
                 raise error from err
@@ -154,14 +158,16 @@ class QolsysTable:
             self._db.commit()
 
         except sqlite3.Error as err:
-            error = QolsysSqlError({
-                "table": self.table,
-                "query": query,
-                "columns": self._columns,
-                "content_value": content_value,
-                "selection": selection,
-                "selection_argument": selection_argument,
-            })
+            error = QolsysSqlError(
+                {
+                    "table": self.table,
+                    "query": query,
+                    "columns": self._columns,
+                    "content_value": content_value,
+                    "selection": selection,
+                    "selection_argument": selection_argument,
+                }
+            )
 
             if self._abort_on_error:
                 raise error from err
@@ -172,7 +178,7 @@ class QolsysTable:
         # Firmware 4.6.1: selection_argument: ['3','1']
 
         # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
-        if(type(selection_argument) is str):
+        if type(selection_argument) is str:
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
@@ -195,13 +201,15 @@ class QolsysTable:
             self._db.commit()
 
         except sqlite3.Error as err:
-            error = QolsysSqlError({
-                "table": self.table,
-                "query": query,
-                "columns": self._columns,
-                "selection": selection,
-                "selection_argument": selection_argument,
-            })
+            error = QolsysSqlError(
+                {
+                    "table": self.table,
+                    "query": query,
+                    "columns": self._columns,
+                    "selection": selection,
+                    "selection_argument": selection_argument,
+                }
+            )
 
             if self._abort_on_error:
                 raise error from err

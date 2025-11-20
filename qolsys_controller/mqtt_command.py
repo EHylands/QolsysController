@@ -14,38 +14,36 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MQTTCommand:
-
     def __init__(
         self,
         controller: "QolsysController",
         eventName: str,
     ) -> None:
-        self._controller:QolsysController = controller
-        self._client:aiomqtt.Client = controller.aiomqtt
+        self._controller: QolsysController = controller
+        self._client: aiomqtt.Client = controller.aiomqtt
         self._topic: str = "mastermeid"
         self._eventName: str = eventName
-        self._payload: dict[str,Any] = {}
+        self._payload: dict[str, Any] = {}
         self._requestID = str(uuid.uuid4())
-        self._qos:int = self._controller.settings.mqtt_qos
+        self._qos: int = self._controller.settings.mqtt_qos
         self._responseTopic = "response_" + self._controller.settings.random_mac
 
         self.append("requestID", self._requestID)
         self.append("responseTopic", self._responseTopic)
         self.append("eventName", self._eventName)
-        self.append("remoteMacAddess",self._controller.settings.random_mac)
+        self.append("remoteMacAddess", self._controller.settings.random_mac)
 
-
-    def append(self, argument:str, value: str | dict | int | bool | list) -> None:
+    def append(self, argument: str, value: str | dict | int | bool | list) -> None:
         self._payload[argument] = value
 
-    async def send_command(self) -> dict[str,Any]:
-
+    async def send_command(self) -> dict[str, Any]:
         if self._client is None:
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
         await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
         return await self._controller.mqtt_command_queue.wait_for_response(self._requestID)
+
 
 class MQTTCommand_IpcCall(MQTTCommand):
     def __init__(
@@ -55,13 +53,14 @@ class MQTTCommand_IpcCall(MQTTCommand):
         ipc_interface_name: str,
         ipc_transaction_id: int,
     ) -> None:
-        super().__init__(controller,"ipcCall")
-        self.append("ipcServiceName",ipc_service_name)
-        self.append("ipcInterfaceName",ipc_interface_name)
-        self.append("ipcTransactionID",ipc_transaction_id)
+        super().__init__(controller, "ipcCall")
+        self.append("ipcServiceName", ipc_service_name)
+        self.append("ipcInterfaceName", ipc_interface_name)
+        self.append("ipcTransactionID", ipc_transaction_id)
 
     def append_ipc_request(self, ipc_request: list[object]) -> None:
-        self.append("ipcRequest",ipc_request)
+        self.append("ipcRequest", ipc_request)
+
 
 class MQTTCommand_Panel(MQTTCommand_IpcCall):
     def __init__(
@@ -72,8 +71,9 @@ class MQTTCommand_Panel(MQTTCommand_IpcCall):
             controller=controller,
             ipc_service_name="qinternalservice",
             ipc_interface_name="android.os.IQInternalService",
-            ipc_transaction_id = 7,
+            ipc_transaction_id=7,
         )
+
 
 class MQTTCommand_ZWave(MQTTCommand_IpcCall):
     def __init__(
@@ -86,10 +86,11 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
             controller=controller,
             ipc_service_name="qzwaveservice",
             ipc_interface_name="android.os.IQZwaveService",
-            ipc_transaction_id= 47,
+            ipc_transaction_id=47,
         )
 
-        ipc_request = [{
+        ipc_request = [
+            {
                 "dataType": "int",
                 "dataValue": int(node_id),
             },

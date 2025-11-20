@@ -37,9 +37,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysController:
-
     def __init__(self) -> None:
-
         # QolsysController
         self._state = QolsysState(self)
         self._settings = QolsysSettings(self)
@@ -81,14 +79,15 @@ class QolsysController:
 
     def is_paired(self) -> bool:
         return (
-            self._pki.id != "" and
-            self._pki.check_key_file() and
-            self._pki.check_cer_file() and
-            self._pki.check_qolsys_cer_file() and
-            self._pki.check_secure_file() and
-            self.settings.check_panel_ip() and
-            self.settings.check_plugin_ip()
+            self._pki.id != ""
+            and self._pki.check_key_file()
+            and self._pki.check_cer_file()
+            and self._pki.check_qolsys_cer_file()
+            and self._pki.check_secure_file()
+            and self.settings.check_panel_ip()
+            and self.settings.check_plugin_ip()
         )
+
     async def config(self, start_pairing: bool) -> bool:
         return await self._task_manager.run(self.config_task(start_pairing), self._mqtt_task_config_label)
 
@@ -181,7 +180,7 @@ class QolsysController:
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
-                    identifier= self.settings.mqtt_remote_client_id,
+                    identifier=self.settings.mqtt_remote_client_id,
                 )
 
                 await self.aiomqtt.__aenter__()
@@ -213,13 +212,13 @@ class QolsysController:
                 self.panel.imei = response_connect.get("master_imei", "")
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
-                #await self.command_pairing_request()
+                # await self.command_pairing_request()
                 await self.command_pingevent()
                 await self.command_pair_status_request()
 
                 response_database = await self.command_sync_database()
                 LOGGER.debug("MQTT: Updating State from syncdatabase")
-                self.panel.load_database(response_database.get("fulldbdata")) # type: ignore[arg-type]
+                self.panel.load_database(response_database.get("fulldbdata"))  # type: ignore[arg-type]
                 self.panel.dump()
                 self.state.dump()
 
@@ -231,7 +230,7 @@ class QolsysController:
                     self.connected_observer.notify()
                     self._task_manager.cancel(self._mqtt_task_listen_label)
                     self._task_manager.cancel(self._mqtt_task_ping_label)
-                    await self.aiomqtt.__aexit__(None,None,None)
+                    await self.aiomqtt.__aexit__(None, None, None)
 
                 break
 
@@ -266,8 +265,7 @@ class QolsysController:
 
     async def mqtt_listen_task(self) -> None:
         try:
-            async for message in self.aiomqtt.messages: # type: ignore[union-attr]
-
+            async for message in self.aiomqtt.messages:  # type: ignore[union-attr]
                 if self.settings.log_mqtt_mesages:  # noqa: SIM102
                     if isinstance(message.payload, bytes):
                         LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
@@ -288,9 +286,14 @@ class QolsysController:
                 if message.topic.matches("ZWAVE_RESPONSE"):  # noqa: SIM102
                     if isinstance(message.payload, bytes):
                         data = json.loads(message.payload.decode())
-                        zwave = data.get("ZWAVE_RESPONSE","")
-                        decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD","")).hex()
-                        LOGGER.debug("Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",zwave.get("NODE_ID",""),zwave.get("ZWAVE_COMMAND_STATUS",""),decoded_payload)
+                        zwave = data.get("ZWAVE_RESPONSE", "")
+                        decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
+                        LOGGER.debug(
+                            "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
+                            zwave.get("NODE_ID", ""),
+                            zwave.get("ZWAVE_COMMAND_STATUS", ""),
+                            decoded_payload,
+                        )
 
         except aiomqtt.MqttError as err:
             self.connected = False
@@ -310,11 +313,7 @@ class QolsysController:
         # Check if PKI is valid
         self._pki.set_id(self.settings.random_mac)
         LOGGER.debug("Checking PKI")
-        if not (
-            self._pki.check_key_file() and
-            self._pki.check_cer_file() and
-            self._pki.check_csr_file()
-        ):
+        if not (self._pki.check_key_file() and self._pki.check_cer_file() and self._pki.check_csr_file()):
             LOGGER.error("PKI Error")
             return False
 
@@ -326,7 +325,6 @@ class QolsysController:
 
         # If we dont allready have client signed certificate, start the pairing server
         if not self._pki.check_secure_file() or not self._pki.check_qolsys_cer_file() or not self.settings.check_panel_ip():
-
             # High Level Random Pairing Port
             pairing_port = random.randint(50000, 55000)
 
@@ -339,8 +337,9 @@ class QolsysController:
             LOGGER.debug("Starting Certificate Exchange Server")
             context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             context.load_cert_chain(certfile=self._pki.cer_file_path, keyfile=self._pki.key_file_path)
-            self.certificate_exchange_server = await asyncio.start_server(self.handle_key_exchange_client,
-                                                                          self.settings.plugin_ip, pairing_port, ssl=context)
+            self.certificate_exchange_server = await asyncio.start_server(
+                self.handle_key_exchange_client, self.settings.plugin_ip, pairing_port, ssl=context
+            )
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
 
@@ -363,7 +362,6 @@ class QolsysController:
         return True
 
     async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
-
         received_panel_mac = False
         received_signed_client_certificate = False
         received_qolsys_cer = False
@@ -371,11 +369,9 @@ class QolsysController:
         try:
             continue_pairing = True
             while continue_pairing:
-
                 # Plugin is receiving panel_mac from panel
-                if (not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
-
-                    request = (await reader.read(2048))
+                if not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
+                    request = await reader.read(2048)
                     mac = request.decode()
 
                     address, port = writer.get_extra_info("peername")
@@ -404,7 +400,7 @@ class QolsysController:
                     continue
 
                 # Read signed certificate data
-                if (received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer):
+                if received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
                     request = await reader.readuntil(b"sent")
                     if request.endswith(b"sent"):
                         request = request[:-4]
@@ -415,7 +411,7 @@ class QolsysController:
                         received_signed_client_certificate = True
 
                 # Read qolsys certificate data
-                if (received_panel_mac and received_signed_client_certificate and not received_qolsys_cer):
+                if received_panel_mac and received_signed_client_certificate and not received_qolsys_cer:
                     request = await reader.readuntil(b"sent")
                     if request.endswith(b"sent"):
                         request = request[:-4]
@@ -440,7 +436,7 @@ class QolsysController:
             if self.certificate_exchange_server:
                 self.certificate_exchange_server.close()
 
-    async def command_connect(self) -> dict[str,Any]:
+    async def command_connect(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending connect command")
 
         dhcpInfo = {
@@ -453,37 +449,37 @@ class QolsysController:
             "leaseDuration": "",
         }
 
-        command = MQTTCommand(self,"connect_v204")
-        command.append("ipAddress",self.settings.plugin_ip)
-        command.append("pairing_request",True)
-        command.append("macAddress",self.settings.random_mac)
-        command.append("remoteClientID",self.settings.mqtt_remote_client_id)
-        command.append("softwareVersion","4.4.1")
-        command.append("productType","tab07_rk68")
-        command.append("bssid","")
-        command.append("lastUpdateChecksum","2132501716")
-        command.append("dealerIconsCheckSum","")
-        command.append("remote_feature_support_version","1")
-        command.append("current_battery_status","Normal")
-        command.append("remote_panel_battery_percentage",100)
-        command.append("remote_panel_battery_temperature",430)
-        command.append("remote_panel_battery_status",3)
-        command.append("remote_panel_battery_scale",100)
-        command.append("remote_panel_battery_voltage",4102)
-        command.append("remote_panel_battery_present",True)
-        command.append("remote_panel_battery_technology","")
-        command.append("remote_panel_battery_level ",100)
-        command.append("remote_panel_battery_health",2)
-        command.append("remote_panel_plugged",1)
-        command.append("dhcpInfo",json.dumps(dhcpInfo))
+        command = MQTTCommand(self, "connect_v204")
+        command.append("ipAddress", self.settings.plugin_ip)
+        command.append("pairing_request", True)
+        command.append("macAddress", self.settings.random_mac)
+        command.append("remoteClientID", self.settings.mqtt_remote_client_id)
+        command.append("softwareVersion", "4.4.1")
+        command.append("productType", "tab07_rk68")
+        command.append("bssid", "")
+        command.append("lastUpdateChecksum", "2132501716")
+        command.append("dealerIconsCheckSum", "")
+        command.append("remote_feature_support_version", "1")
+        command.append("current_battery_status", "Normal")
+        command.append("remote_panel_battery_percentage", 100)
+        command.append("remote_panel_battery_temperature", 430)
+        command.append("remote_panel_battery_status", 3)
+        command.append("remote_panel_battery_scale", 100)
+        command.append("remote_panel_battery_voltage", 4102)
+        command.append("remote_panel_battery_present", True)
+        command.append("remote_panel_battery_technology", "")
+        command.append("remote_panel_battery_level ", 100)
+        command.append("remote_panel_battery_health", 2)
+        command.append("remote_panel_plugged", 1)
+        command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving connect command")
         return response
 
-    async def command_pairing_request(self) -> dict[str,Any]:
+    async def command_pairing_request(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending pairing_request command")
-        command = MQTTCommand(self,"connect_v204")
+        command = MQTTCommand(self, "connect_v204")
 
         dhcpInfo = {
             "ipaddress": "",
@@ -496,94 +492,93 @@ class QolsysController:
         }
 
         command.append("pairing_request", True)
-        command.append("ipAddress",self.settings.plugin_ip)
-        command.append("macAddress",self.settings.random_mac)
-        command.append("remoteClientID",self.settings.mqtt_remote_client_id)
-        command.append("softwareVersion","4.4.1")
-        command.append("productType","tab07_rk68")
-        command.append("bssid","")
-        command.append("lastUpdateChecksum","2132501716")
-        command.append("dealerIconsCheckSum","")
-        command.append("remote_feature_support_version","1")
-        command.append("dhcpInfo",json.dumps(dhcpInfo))
+        command.append("ipAddress", self.settings.plugin_ip)
+        command.append("macAddress", self.settings.random_mac)
+        command.append("remoteClientID", self.settings.mqtt_remote_client_id)
+        command.append("softwareVersion", "4.4.1")
+        command.append("productType", "tab07_rk68")
+        command.append("bssid", "")
+        command.append("lastUpdateChecksum", "2132501716")
+        command.append("dealerIconsCheckSum", "")
+        command.append("remote_feature_support_version", "1")
+        command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pairing_request command")
         return response
 
-    async def command_pingevent(self) -> dict[str,Any]:
+    async def command_pingevent(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending pingevent command")
-        command = MQTTCommand(self,"pingevent")
-        command.append("remote_panel_status","Active")
-        command.append("ipAddress",self.settings.plugin_ip)
-        command.append("current_battery_status","Normal")
-        command.append("remote_panel_battery_percentage",100)
-        command.append("remote_panel_battery_temperature",430)
-        command.append("remote_panel_battery_status",3)
-        command.append("remote_panel_battery_scale",100)
-        command.append("remote_panel_battery_voltage",4102)
-        command.append("remote_panel_battery_present",True)
-        command.append("remote_panel_battery_technology","")
-        command.append("remote_panel_battery_level ",100)
-        command.append("remote_panel_battery_health",2)
-        command.append("remote_panel_plugged",1)
+        command = MQTTCommand(self, "pingevent")
+        command.append("remote_panel_status", "Active")
+        command.append("ipAddress", self.settings.plugin_ip)
+        command.append("current_battery_status", "Normal")
+        command.append("remote_panel_battery_percentage", 100)
+        command.append("remote_panel_battery_temperature", 430)
+        command.append("remote_panel_battery_status", 3)
+        command.append("remote_panel_battery_scale", 100)
+        command.append("remote_panel_battery_voltage", 4102)
+        command.append("remote_panel_battery_present", True)
+        command.append("remote_panel_battery_technology", "")
+        command.append("remote_panel_battery_level ", 100)
+        command.append("remote_panel_battery_health", 2)
+        command.append("remote_panel_plugged", 1)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pingevent command")
         return response
 
-    async def command_timesync(self) -> dict[str,Any]:
+    async def command_timesync(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending timeSync command")
-        command = MQTTCommand(self,"timeSync")
-        command.append("startTimestamp",int(time.time()))
+        command = MQTTCommand(self, "timeSync")
+        command.append("startTimestamp", int(time.time()))
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving timeSync command")
         return response
 
-    async def command_sync_database(self) -> dict[str,Any]:
+    async def command_sync_database(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending syncdatabase command")
-        command = MQTTCommand(self,"syncdatabase")
+        command = MQTTCommand(self, "syncdatabase")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving syncdatabase command")
         return response
 
-    async def command_acstatus(self) -> dict[str,Any]:
+    async def command_acstatus(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending acStatus command")
-        command = MQTTCommand(self,"acStatus")
-        command.append("acStatus","Connected")
+        command = MQTTCommand(self, "acStatus")
+        command.append("acStatus", "Connected")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving acStatus command")
         return response
 
-    async def command_dealer_logo(self) -> dict[str,Any]:
+    async def command_dealer_logo(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending dealerLogo command")
-        command = MQTTCommand(self,"dealerLogo")
+        command = MQTTCommand(self, "dealerLogo")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving dealerLogo command")
         return response
 
-    async def command_pair_status_request(self) -> dict[str,Any]:
+    async def command_pair_status_request(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending pair_status_request command")
-        command = MQTTCommand(self,"pair_status_request")
+        command = MQTTCommand(self, "pair_status_request")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pair_status_request command")
         return response
 
-    async def command_disconnect(self) -> dict[str,Any]:
+    async def command_disconnect(self) -> dict[str, Any]:
         LOGGER.debug("MQTT: Sending disconnect command")
-        command = MQTTCommand(self,"disconnect")
+        command = MQTTCommand(self, "disconnect")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving disconnect command")
         return response
 
-
-    async def command_ui_delay(self, partition_id: str,silent_disarming:bool = False) -> dict[str,Any] | None:
+    async def command_ui_delay(self, partition_id: str, silent_disarming: bool = False) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending ui_delay command")
         command = MQTTCommand_Panel(self)
 
         # partition state needs to be sent for ui_delay to work
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.error("command_ui_delay error: invalid partition %s",partition_id)
+            LOGGER.error("command_ui_delay error: invalid partition %s", partition_id)
             return None
 
         arming_command = {
@@ -591,22 +586,26 @@ class QolsysController:
             "panel_status": partition.system_status,
             "userID": 0,
             "partitionID": partition_id,  # STR EXPECTED
-            "silentDisarming":silent_disarming,
+            "silentDisarming": silent_disarming,
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
 
-        ipcRequest = [{
-            "dataType": "string",
-            "dataValue":  json.dumps(arming_command),
-        }]
+        ipcRequest = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(arming_command),
+            }
+        ]
 
-        command.append("ipcRequest",ipcRequest)
+        command.append("ipcRequest", ipcRequest)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving ui_delay command")
         return response
 
-    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str,Any] | None:
+    async def command_disarm(
+        self, partition_id: str, user_code: str = "", silent_disarming: bool = False
+    ) -> dict[str, Any] | None:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.error("MQTT: disarm command error - Unknow Partition")
@@ -620,17 +619,21 @@ class QolsysController:
                 LOGGER.debug("MQTT: disarm command error - user_code error")
                 return None
 
-        async def get_mqtt_disarm_command(silent_disarming:bool) -> str:
+        async def get_mqtt_disarm_command(silent_disarming: bool) -> str:
             if partition.alarm_state == PartitionAlarmState.ALARM:
                 return "disarm_from_emergency"
-            if partition.system_status in {PartitionSystemStatus.ARM_AWAY_EXIT_DELAY,
-                                           PartitionSystemStatus.ARM_STAY_EXIT_DELAY,
-                                           PartitionSystemStatus.ARM_NIGHT_EXIT_DELAY}:
+            if partition.system_status in {
+                PartitionSystemStatus.ARM_AWAY_EXIT_DELAY,
+                PartitionSystemStatus.ARM_STAY_EXIT_DELAY,
+                PartitionSystemStatus.ARM_NIGHT_EXIT_DELAY,
+            }:
                 return "disarm_from_openlearn_sensor"
-            if partition.system_status in {PartitionSystemStatus.ARM_AWAY,
-                                           PartitionSystemStatus.ARM_STAY,
-                                           PartitionSystemStatus.ARM_NIGHT}:
-                await self.command_ui_delay(partition_id,silent_disarming)
+            if partition.system_status in {
+                PartitionSystemStatus.ARM_AWAY,
+                PartitionSystemStatus.ARM_STAY,
+                PartitionSystemStatus.ARM_NIGHT,
+            }:
+                await self.command_ui_delay(partition_id, silent_disarming)
                 return "disarm_the_panel_from_entry_delay"
 
             return "disarm_from_openlearn_sensor"
@@ -646,10 +649,12 @@ class QolsysController:
             "macAddress": self.settings.random_mac,
         }
 
-        ipc_request = [{
-            "dataType": "string",
-            "dataValue":  json.dumps(disarm_command),
-        }]
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(disarm_command),
+            }
+        ]
 
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
@@ -658,17 +663,22 @@ class QolsysController:
         return response
 
     async def command_arm(  # noqa: PLR0913
-            self,
-            partition_id: str,
-            arming_type: PartitionArmingType,
-            user_code: str = "",
-            exit_sounds: bool = False,
-            instant_arm: bool = False,
-            entry_delay: bool = True,
+        self,
+        partition_id: str,
+        arming_type: PartitionArmingType,
+        user_code: str = "",
+        exit_sounds: bool = False,
+        instant_arm: bool = False,
+        entry_delay: bool = True,
     ) -> bool:
-
-        LOGGER.debug("MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
-                     partition_id, arming_type,exit_sounds,instant_arm,entry_delay)
+        LOGGER.debug(
+            "MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+            partition_id,
+            arming_type,
+            exit_sounds,
+            instant_arm,
+            entry_delay,
+        )
 
         user_id = 0
 
@@ -696,8 +706,8 @@ class QolsysController:
             "operation_name": arming_type,
             "bypass_zoneid_set": "[]",
             "userID": user_id,
-            "partitionID": int(partition_id), # Expect Int
-            "exitSoundValue":  exitSoundValue,
+            "partitionID": int(partition_id),  # Expect Int
+            "exitSoundValue": exitSoundValue,
             "entryDelayValue": entryDelay,
             "multiplePartitionsSelected": False,
             "instant_arming": instant_arm,
@@ -707,18 +717,20 @@ class QolsysController:
             "macAddress": self.settings.random_mac,
         }
 
-        ipc_request = [{
-            "dataType": "string",
-            "dataValue":  json.dumps(arming_command),
-        }]
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(arming_command),
+            }
+        ]
 
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving arm command: partition%s",partition_id)
+        LOGGER.debug("MQTT: Receiving arm command: partition%s", partition_id)
         return response
 
-    async def command_panel_execute_scene(self,scene_id:str) -> dict[str,Any] | None:
+    async def command_panel_execute_scene(self, scene_id: str) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending execute_scene command")
         scene = self.state.scene(scene_id)
         if not scene:
@@ -732,10 +744,12 @@ class QolsysController:
             "macAddress": self.settings.random_mac,
         }
 
-        ipc_request = [{
+        ipc_request = [
+            {
                 "dataType": "string",
-                "dataValue":  json.dumps(scene_command),
-            }]
+                "dataValue": json.dumps(scene_command),
+            }
+        ]
 
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
@@ -743,50 +757,50 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
-    async def command_zwave_switch_binary_set(self,node_id:str, status: bool) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)",node_id,status)
+    async def command_zwave_switch_binary_set(self, node_id: str, status: bool) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
         zwave_node = self.state.zwave_device(node_id)
 
         if not zwave_node:
-            LOGGER.error("switch_binary_set - Invalid node_id %s",node_id)
+            LOGGER.error("switch_binary_set - Invalid node_id %s", node_id)
             return None
 
         if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchBinary, ZwaveDeviceClass.RemoteSwitchBinary):
-            LOGGER.error("switch_binary_set used on invalid %s",zwave_node.generic_device_type)
+            LOGGER.error("switch_binary_set used on invalid %s", zwave_node.generic_device_type)
             return None
 
         level = 0
         if status:
             level = 255
 
-        command = MQTTCommand_ZWave(self,node_id,[ZwaveCommand.SwitchBinary,1,level])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.SwitchBinary, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
         return response
 
-    async def command_zwave_switch_multilevel_set(self,node_id: str, level: int) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)",node_id,level)
+    async def command_zwave_switch_multilevel_set(self, node_id: str, level: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
-            LOGGER.error("switch_multilevel_set - Invalid node_id %s",node_id)
+            LOGGER.error("switch_multilevel_set - Invalid node_id %s", node_id)
             return None
 
         if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchMultilevel, ZwaveDeviceClass.RemoteSwitchMultilevel):
-            LOGGER.error("switch_multilevel_set used on invalid %s",zwave_node.generic_device_type)
+            LOGGER.error("switch_multilevel_set used on invalid %s", zwave_node.generic_device_type)
             return None
 
-        command = MQTTCommand_ZWave(self,node_id,[ZwaveCommand.SwitchMultilevel,1,level])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.SwitchMultilevel, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_multilevel_switch command")
         return response
 
-    async def command_zwave_doorlock_set(self, node_id: str, locked:bool) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)",node_id,locked)
+    async def command_zwave_doorlock_set(self, node_id: str, locked: bool) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
-            LOGGER.error("doorlock_set - Invalid node_id %s",node_id)
+            LOGGER.error("doorlock_set - Invalid node_id %s", node_id)
             return None
 
         # 0 unlocked, 255 locked
@@ -794,46 +808,50 @@ class QolsysController:
         if locked:
             lock_mode = 255
 
-        command = MQTTCommand_ZWave(self,node_id,[ZwaveCommand.DoorLock,1,lock_mode])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.DoorLock, 1, lock_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
         return response
 
-    async def command_zwave_thermostat_setpoint_set(self, node_id: str, mode: ThermostatMode, setpoint: float) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s)",node_id,mode,setpoint)
+    async def command_zwave_thermostat_setpoint_set(
+        self, node_id: str, mode: ThermostatMode, setpoint: float
+    ) -> dict[str, Any] | None:
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s)", node_id, mode, setpoint
+        )
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
-            LOGGER.error("thermostat_setpoint_set - Invalid node_id %s",node_id)
+            LOGGER.error("thermostat_setpoint_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id,[ZwaveCommand.ThermostatSetPoint,1,mode,setpoint])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatSetPoint, 1, mode, setpoint])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
 
-    async def command_zwave_thermostat_mode_set(self, node_id: str, mode:ThermostatMode) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)",node_id,mode)
+    async def command_zwave_thermostat_mode_set(self, node_id: str, mode: ThermostatMode) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode)
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
-            LOGGER.error("thermostat_mode_set - Invalid node_id %s",node_id)
+            LOGGER.error("thermostat_mode_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self,node_id,[ZwaveCommand.ThermostatMode,1,mode])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatMode, 1, mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
 
-    async def command_zwave_thermostat_fan_mode_set(self, node_id: str, fan_mode:ThermostatFanMode) -> dict[str,Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)",node_id,fan_mode)
+    async def command_zwave_thermostat_fan_mode_set(self, node_id: str, fan_mode: ThermostatFanMode) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode)
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
-            LOGGER.error("thermostat_fan_mode_set - Invalid node_id %s",node_id)
+            LOGGER.error("thermostat_fan_mode_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self,node_id,[ZwaveCommand.ThermostatFanMode,1,fan_mode])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatFanMode, 1, fan_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
         return response

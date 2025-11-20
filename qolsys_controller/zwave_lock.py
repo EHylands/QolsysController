@@ -6,11 +6,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysLock(QolsysZWaveDevice):
-
     LOCK_STATUS_ARRAY = ["Locked"]  # noqa: RUF012
 
     def __init__(self, lock_dict: dict, zwave_dict: dict) -> None:
-
         super().__init__(zwave_dict)
 
         self._lock_id: str = lock_dict.get("_id")
@@ -76,39 +74,40 @@ class QolsysLock(QolsysZWaveDevice):
         node_id_update = data.get("node_id", "")
         if node_id_update != self.lock_node_id:
             LOGGER.error(
-                "Updating Lock %s (%s) with Lock '%s' (different id)", self.lock_node_id, self.lock_name, node_id_update)
+                "Updating Lock %s (%s) with Lock '%s' (different id)", self.lock_node_id, self.lock_name, node_id_update
+            )
             return
 
         self.start_batch_update()
 
         if "version" in data:
-            self._lock_version = data.get("version","")
+            self._lock_version = data.get("version", "")
         if "opr" in data:
-            self._lock_opr = data.get("opr","")
+            self._lock_opr = data.get("opr", "")
         if "partition_id" in data:
-            self._lock_partition_id = data.get("partition_id","")
+            self._lock_partition_id = data.get("partition_id", "")
         if "lock_name" in data:
-            self.lock_name = data.get("lock_name","")
+            self.lock_name = data.get("lock_name", "")
         if "status" in data:
-            self.lock_status = data.get("status","")
+            self.lock_status = data.get("status", "")
         if "created_by" in data:
-            self._lock_created_by = data.get("created_by","")
+            self._lock_created_by = data.get("created_by", "")
         if "created_date" in data:
-            self._lock_created_date = data.get("created_date","")
+            self._lock_created_date = data.get("created_date", "")
         if "updated_by" in data:
-            self._lock_updated_by = data.get("updated_by","")
+            self._lock_updated_by = data.get("updated_by", "")
         if "last_updated_date" in data:
-            self._lock_last_updated_date = data.get("last_updated_date","")
+            self._lock_last_updated_date = data.get("last_updated_date", "")
         if "remote_arming" in data:
-            self._lock_remote_arming = data.get("remote_arming","")
+            self._lock_remote_arming = data.get("remote_arming", "")
         if "keyfob_arming" in data:
-            self._lock_keyfob_arming = data.get("keyfob_arming","")
+            self._lock_keyfob_arming = data.get("keyfob_arming", "")
         if "panel_arming" in data:
-            self._lock_panel_arming = data.get("panel_arming","")
+            self._lock_panel_arming = data.get("panel_arming", "")
         if "endpoint" in data:
-            self._lock_endpoint = data.get("endpoint","")
+            self._lock_endpoint = data.get("endpoint", "")
         if "paired_status" in data:
-            self._lock_paired_status = data.get("paired_status","")
+            self._lock_paired_status = data.get("paired_status", "")
 
         self.end_batch_update()
 

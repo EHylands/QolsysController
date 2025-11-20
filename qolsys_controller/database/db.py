@@ -42,9 +42,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysDB:
-
     def __init__(self) -> None:  # noqa: PLR0915
-
         self._db: sqlite3.Connection = sqlite3.connect(":memory:")
         self._cursor: sqlite3.Cursor = self._db.cursor()
 
@@ -251,7 +249,7 @@ class QolsysDB:
 
     def get_powerg(self, short_id: str) -> dict | None:
         try:
-            self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?",(short_id,))
+            self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?", (short_id,))
             self.db.commit()
 
             row = self.cursor.fetchone()
@@ -261,16 +259,18 @@ class QolsysDB:
                 return None
 
             columns = [description[0] for description in self.cursor.description]
-            return  dict(zip(columns, row, strict=True))
+            return dict(zip(columns, row, strict=True))
 
         except sqlite3.Error:
             LOGGER.exception("Error getting PowerG device info for shortID %s", short_id)
             return None
 
-
     def get_setting_panel(self, setting: str) -> str:
-        self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
-                             WHERE name = ? and partition_id  = ? """, (setting, "0"))
+        self.cursor.execute(
+            f"""SELECT value FROM {self.table_qolsyssettings.table}
+                             WHERE name = ? and partition_id  = ? """,
+            (setting, "0"),
+        )
         row = self.cursor.fetchone()
 
         if row is None:
@@ -280,8 +280,11 @@ class QolsysDB:
         return row[0]
 
     def get_setting_partition(self, setting: str, partition_id: str) -> str:
-        self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
-                             WHERE name = ? and partition_id  = ? """, (setting, partition_id))
+        self.cursor.execute(
+            f"""SELECT value FROM {self.table_qolsyssettings.table}
+                             WHERE name = ? and partition_id  = ? """,
+            (setting, partition_id),
+        )
         row = self.cursor.fetchone()
 
         if row is None:
@@ -292,7 +295,8 @@ class QolsysDB:
 
     def get_state_partition(self, state: str, partition_id: str) -> str | None:
         self.cursor.execute(
-            f"""SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? """, (state, partition_id))
+            f"""SELECT value FROM {self.table_state.table} WHERE name = ? and partition_id  = ? """, (state, partition_id)
+        )
         row = self.cursor.fetchone()
 
         if row is None:
@@ -323,7 +327,6 @@ class QolsysDB:
         return None
 
     def load_db(self, database: dict) -> None:
-
         self.clear_db()
 
         if not database:

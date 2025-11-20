@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
 class QolsysPanel(QolsysObservable):
     def __init__(self, controller: QolsysController) -> None:
-
         self._controller = controller
         self._db = QolsysDB()
 
@@ -41,14 +40,46 @@ class QolsysPanel(QolsysObservable):
         # Panel settings
         self.settings_panel_observer = QolsysObservable()
         self.settings_panel = [
-            "PANEL_TAMPER_STATE", "AC_STATUS", "BATTERY_STATUS", "FAIL_TO_COMMUNICATE", "SECURE_ARMING", "AUTO_BYPASS",
-            "AUTO_STAY", "AUTO_ARM_STAY", "AUTO_EXIT_EXTENSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY",
-            "TEMPFORMAT", "LANGUAGE", "COUNTRY", "SYSTEM_TIME", "GSM_CONNECTION_STATUS", "GSM_SIGNAL_STRENGTH",
-            "ANDROID_VERSION", "HARDWARE_VERSION", "TIMER_NORMAL_ENTRY_DELAY", "TIMER_NORMAL_EXIT_DELAY",
-            "TIMER_LONG_ENTRY_DELAY", "TIMER_LONG_EXIT_DELAY", "ZWAVE_CONTROLLER", "ZWAVE_CARD", "POLICE_PANIC_ENABLED",
-            "FIRE_PANIC_ENABLED", "AUXILIARY_PANIC_ENABLED", "NIGHTMODE_SETTINGS", "NIGHT_SETTINGS_STATE", "PARTITIONS",
-            "SIX_DIGIT_USER_CODE", "SHOW_SECURITY_SENSORS", "SYSTEM_LOGGED_IN_USER", "PANEL_SCENES_SETTING", "CONTROL_4",
-            "ZWAVE_FIRM_WARE_VERSION", "FINAL_EXIT_DOOR_ARMING", "NO_ARM_LOW_BATTERY", "MAC_ADDRESS",
+            "PANEL_TAMPER_STATE",
+            "AC_STATUS",
+            "BATTERY_STATUS",
+            "FAIL_TO_COMMUNICATE",
+            "SECURE_ARMING",
+            "AUTO_BYPASS",
+            "AUTO_STAY",
+            "AUTO_ARM_STAY",
+            "AUTO_EXIT_EXTENSION",
+            "FINAL_EXIT_DOOR_ARMING",
+            "NO_ARM_LOW_BATTERY",
+            "TEMPFORMAT",
+            "LANGUAGE",
+            "COUNTRY",
+            "SYSTEM_TIME",
+            "GSM_CONNECTION_STATUS",
+            "GSM_SIGNAL_STRENGTH",
+            "ANDROID_VERSION",
+            "HARDWARE_VERSION",
+            "TIMER_NORMAL_ENTRY_DELAY",
+            "TIMER_NORMAL_EXIT_DELAY",
+            "TIMER_LONG_ENTRY_DELAY",
+            "TIMER_LONG_EXIT_DELAY",
+            "ZWAVE_CONTROLLER",
+            "ZWAVE_CARD",
+            "POLICE_PANIC_ENABLED",
+            "FIRE_PANIC_ENABLED",
+            "AUXILIARY_PANIC_ENABLED",
+            "NIGHTMODE_SETTINGS",
+            "NIGHT_SETTINGS_STATE",
+            "PARTITIONS",
+            "SIX_DIGIT_USER_CODE",
+            "SHOW_SECURITY_SENSORS",
+            "SYSTEM_LOGGED_IN_USER",
+            "PANEL_SCENES_SETTING",
+            "CONTROL_4",
+            "ZWAVE_FIRM_WARE_VERSION",
+            "FINAL_EXIT_DOOR_ARMING",
+            "NO_ARM_LOW_BATTERY",
+            "MAC_ADDRESS",
             "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N",
         ]
 
@@ -350,7 +381,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self, database: dict ) -> None:
+    def load_database(self, database: dict) -> None:
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -360,13 +391,11 @@ class QolsysPanel(QolsysObservable):
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
-
         eventName = data.get("eventName")
-        dbOperation = data.get("dbOperation","")
+        dbOperation = data.get("dbOperation", "")
         uri = data.get("uri")
 
         match eventName:
-
             case "stopScreenCapture":
                 pass
 
@@ -374,16 +403,13 @@ class QolsysPanel(QolsysObservable):
                 LOGGER.info("Main Panel Disconnect")
 
             case "dbChanged":
-
                 match dbOperation:
-
                     case "update":
-                        content_values = data.get("contentValues","")
+                        content_values = data.get("contentValues", "")
                         selection = data.get("selection")
                         selection_argument = data.get("selectionArgs")
 
                         match uri:
-
                             # Update Settings Content Provider
                             case self.db.table_qolsyssettings.uri:
                                 name = content_values.get("name", "")
@@ -515,15 +541,15 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Trouble Conditions
                             case self.db.table_trouble_conditions.uri:
-                                self.db.table_trouble_conditions.update(selection,selection_argument,content_values)
+                                self.db.table_trouble_conditions.update(selection, selection_argument, content_values)
 
                             # Update EU_EVENT:
                             case self.db.table_eu_event.uri:
-                                self.db.table_eu_event.update(selection,selection_argument,content_values)
+                                self.db.table_eu_event.update(selection, selection_argument, content_values)
 
                             # Update PowerG Device
                             case self.db.table_powerg_device.uri:
-                                self.db.table_powerg_device.update(selection,selection_argument,content_values)
+                                self.db.table_powerg_device.update(selection, selection_argument, content_values)
                                 short_id = content_values.get("shortID", "")
                                 zone = self._controller.state.zone_from_short_id(short_id)
                                 if zone is not None:
@@ -531,12 +557,12 @@ class QolsysPanel(QolsysObservable):
 
                             # Update Weather
                             case self.db.table_weather.uri:
-                                self.db.table_weather.update(selection,selection_argument,content_values)
+                                self.db.table_weather.update(selection, selection_argument, content_values)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
 
                             # Update Zwave Association Group
                             case self.db.table_zwave_association_goup.uri:
-                                self.db.table_zwave_association_goup.update(selection,selection_argument,content_values)
+                                self.db.table_zwave_association_goup.update(selection, selection_argument, content_values)
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -547,7 +573,6 @@ class QolsysPanel(QolsysObservable):
                         selection_argument = data.get("selectionArgs")
 
                         match uri:
-
                             case self.db.table_sensor.uri:
                                 self.db.table_sensor.delete(selection, selection_argument)
                                 self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -604,28 +629,26 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_dashboard_msgs.delete(selection, selection_argument)
 
                             case self.db.table_eu_event.uri:
-                                self.db.table_eu_event.delete(selection,selection_argument)
+                                self.db.table_eu_event.delete(selection, selection_argument)
 
                             case self.db.table_powerg_device.uri:
-                                self.db.table_powerg_device.delete(selection,selection_argument)
+                                self.db.table_powerg_device.delete(selection, selection_argument)
 
                             case self.db.table_weather.uri:
-                                self.db.table_weather.delete(selection,selection_argument)
+                                self.db.table_weather.delete(selection, selection_argument)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
 
                             case self.db.table_zwave_association_goup.uri:
-                                self.db.table_zwave_association_goup.delete(selection,selection_argument)
-
+                                self.db.table_zwave_association_goup.delete(selection, selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
                                 LOGGER.debug(data)
 
                     case "insert":
-                        content_values = data.get("contentValues",{})
+                        content_values = data.get("contentValues", {})
 
                         match uri:
-
                             # Inser State Content Provider
                             case self.db.table_state.uri:
                                 self.db.table_state.insert(data=content_values)
@@ -712,7 +735,6 @@ class QolsysPanel(QolsysObservable):
 
                             # AlarmedSensorProvider
                             case self.db.table_alarmedsensor.uri:
-
                                 partition_id = content_values.get("partition_id", "")
                                 self.db.table_alarmedsensor.insert(data=content_values)
 
@@ -779,7 +801,6 @@ class QolsysPanel(QolsysObservable):
         locks_list = self.db.get_locks()
 
         for device in devices_list:
-
             device_added = False
 
             zwave_node_id = device.get("node_id", "")
@@ -856,11 +877,11 @@ class QolsysPanel(QolsysObservable):
 
         # Create sensors array
         for zone_info in zones_list:
-            new_zone = QolsysZone(zone_info,self._controller.settings)
+            new_zone = QolsysZone(zone_info, self._controller.settings)
 
             if new_zone.current_capability == "POWERG":
                 LOGGER.debug("Loading PowerG device info for zone %s", new_zone.zone_id)
-                powerg_dict = self.db.get_powerg(short_id= new_zone.shortID)
+                powerg_dict = self.db.get_powerg(short_id=new_zone.shortID)
                 LOGGER.debug("PowerG device info: %s", powerg_dict)
                 if powerg_dict is not None:
                     new_zone.update_powerg(powerg_dict)
@@ -870,13 +891,11 @@ class QolsysPanel(QolsysObservable):
         return zones
 
     def get_partitions_from_db(self) -> list[QolsysPartition]:
-
         partitions = []
         partition_list: list[dict] = self.db.get_partitions()
 
         # Create partitions array
         for partition_dict in partition_list:
-
             partition_id = partition_dict["partition_id"]
 
             settings_dict = {

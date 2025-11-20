@@ -7,9 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysThermostat(QolsysZWaveDevice):
-
-    def __init__(self, thermostat_dict: dict[str,str], zwave_dict: dict[str,str]) -> None:
-
+    def __init__(self, thermostat_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
         super().__init__(zwave_dict)
 
         self._thermostat_id: str = thermostat_dict.get("_id")
@@ -165,68 +163,70 @@ class QolsysThermostat(QolsysZWaveDevice):
         if node_id_update != self.thermostat_node_id:
             LOGGER.error(
                 "Updating Thermostat '%s' (%s) with Thermostat '%s' (different id)",
-                self.thermostat_node_id, self.thermostat_name, node_id_update,
+                self.thermostat_node_id,
+                self.thermostat_name,
+                node_id_update,
             )
             return
 
         self.start_batch_update()
 
         if "version" in data:
-            self._thermostat_version = data.get("version","")
+            self._thermostat_version = data.get("version", "")
         if "opr" in data:
-            self._thermostat_opr = data.get("opr","")
+            self._thermostat_opr = data.get("opr", "")
         if "partition_id" in data:
-            self._thermostat_partition_id = data.get("partition_id","")
+            self._thermostat_partition_id = data.get("partition_id", "")
         if "thermostat_name" in data:
-            self.thermostat_name = data.get("thermostat_name","")
+            self.thermostat_name = data.get("thermostat_name", "")
         if "device_temp_unit" in data:
-            self.thermostat_device_temp_unit = data.get("device_temp_unit","")
+            self.thermostat_device_temp_unit = data.get("device_temp_unit", "")
         if "current_temp" in data:
-            self.thermostat_current_temp = data.get("current_temp","")
+            self.thermostat_current_temp = data.get("current_temp", "")
         if "target_cool_temp" in data:
-            self.thermostat_target_cool_temp = data.get("target_cool_temp","")
+            self.thermostat_target_cool_temp = data.get("target_cool_temp", "")
         if "target_heat_temp" in data:
-            self.thermostat_target_heat_temp = data.get("target_heat_temp","")
+            self.thermostat_target_heat_temp = data.get("target_heat_temp", "")
         if "target_temp" in data:
-            self.thermostat_target_temp = data.get("target_temp","")
+            self.thermostat_target_temp = data.get("target_temp", "")
         if "power_usage" in data:
-            self._thermostat_power_usage = data.get("power_usage","")
+            self._thermostat_power_usage = data.get("power_usage", "")
         if "thermostat_mode" in data:
-            self.thermostat_mode = data.get("thermostat_mode","")
+            self.thermostat_mode = data.get("thermostat_mode", "")
         if "thermostat_mode_bitmask" in data:
-            self._thermostat_mode_bitmask = data.get("thermostat_mode_bitmask","")
+            self._thermostat_mode_bitmask = data.get("thermostat_mode_bitmask", "")
         if "fan_mode" in data:
-            self.thermostat_fan_mode = data.get("fan_mode","")
+            self.thermostat_fan_mode = data.get("fan_mode", "")
         if "fan_mode_bitmask" in data:
-            self._thermostat_fan_mode_bitmask = data.get("fan_mode_bitmask","")
+            self._thermostat_fan_mode_bitmask = data.get("fan_mode_bitmask", "")
         if "set_point_mode" in data:
-            self.thermostat_set_point_mode = data.get("set_point_mode","")
+            self.thermostat_set_point_mode = data.get("set_point_mode", "")
         if "set_point_mode_bitmask" in data:
-            self._thermostat_set_point_mode_bitmask = data.get("set_point_mode_bitmask","")
+            self._thermostat_set_point_mode_bitmask = data.get("set_point_mode_bitmask", "")
         if "created_by" in data:
-            self._thermostat_created_by = data.get("created_by","")
+            self._thermostat_created_by = data.get("created_by", "")
         if "updated_by" in data:
-            self._thermostat_updated_by = data.get("updated_by","")
+            self._thermostat_updated_by = data.get("updated_by", "")
         if "last_updated_date" in data:
-            self._thermostat_last_updated_date = data.get("last_updated_date","")
+            self._thermostat_last_updated_date = data.get("last_updated_date", "")
         if "thermostat_mode_updated_time" in data:
-            self._thermostat_mode_updated_time = data.get("thermostat_mode_updated_time","")
+            self._thermostat_mode_updated_time = data.get("thermostat_mode_updated_time", "")
         if "fan_mode_updated_time" in data:
-            self._thermostat_fan_mode_updated_time = data.get("fan_mode_updated_time","")
+            self._thermostat_fan_mode_updated_time = data.get("fan_mode_updated_time", "")
         if "set_point_mode_updated_time" in data:
-            self._thermostat_set_point_mode_updated_time = data.get("set_point_mode_updated_time","")
+            self._thermostat_set_point_mode_updated_time = data.get("set_point_mode_updated_time", "")
         if "target_cool_temp_updated_time" in data:
-            self._thermostat_target_cool_temp_updated_time = data.get("target_cool_temp_updated_time","")
+            self._thermostat_target_cool_temp_updated_time = data.get("target_cool_temp_updated_time", "")
         if "target_heat_temp_updated_time" in data:
-            self._thermostat_target_heat_temp_updated_time = data.get("target_heat_temp_updated_time","")
+            self._thermostat_target_heat_temp_updated_time = data.get("target_heat_temp_updated_time", "")
         if "current_temp_updated_time" in data:
-            self._thermostat_current_temp_updated_time = data.get("current_temp_updated_time","")
+            self._thermostat_current_temp_updated_time = data.get("current_temp_updated_time", "")
         if "paired_status" in data:
-            self._thermostat_paired_status = data.get("paired_status","")
+            self._thermostat_paired_status = data.get("paired_status", "")
         if "endpoint" in data:
-            self._thermostat_endpoint = data.get("endpoint","")
+            self._thermostat_endpoint = data.get("endpoint", "")
         if "configuration_parameter" in data:
-            self._thermostat_configuration_parameter = data.get("configuration_parameter","")
+            self._thermostat_configuration_parameter = data.get("configuration_parameter", "")
 
         self.end_batch_update()
 
@@ -264,7 +264,6 @@ class QolsysThermostat(QolsysZWaveDevice):
         }
 
     def available_thermostat_mode(self) -> list[ThermostatMode]:
-
         int_list = [int(x) for x in self._thermostat_mode_bitmask.split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
@@ -277,7 +276,6 @@ class QolsysThermostat(QolsysZWaveDevice):
         return mode_array
 
     def available_thermostat_fan_mode(self) -> list[ThermostatFanMode]:
-
         int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
@@ -290,7 +288,6 @@ class QolsysThermostat(QolsysZWaveDevice):
         return fan_mode_array
 
     def available_thermostat_set_point_mode(self) -> list[ThermostatMode]:
-
         int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
@@ -301,4 +298,3 @@ class QolsysThermostat(QolsysZWaveDevice):
                 set_point_mode_array.append(mode)
 
         return set_point_mode_array
-

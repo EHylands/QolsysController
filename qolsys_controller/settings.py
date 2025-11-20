@@ -11,15 +11,13 @@ if TYPE_CHECKING:
 
 
 class QolsysSettings:
-
     def __init__(self, controller: QolsysController) -> None:
-
         self._controller = controller
 
         # Plugin
         self._plugin_ip: str = ""
         self._random_mac: str = ""
-        self._panel_mac: str  = ""
+        self._panel_mac: str = ""
         self._panel_ip: str = ""
 
         # Path
@@ -193,7 +191,7 @@ class QolsysSettings:
         return self._mqtt_remote_client_id
 
     @mqtt_remote_client_id.setter
-    def mqtt_remote_client_id(self,client_id: str) -> None:
+    def mqtt_remote_client_id(self, client_id: str) -> None:
         self._mqtt_remote_client_id = client_id
 
     def check_config_directory(self, create: bool = True) -> bool:  # noqa: PLR0911

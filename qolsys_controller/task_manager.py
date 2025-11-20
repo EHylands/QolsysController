@@ -7,32 +7,31 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTaskManager:
     def __init__(self) -> None:
-        self._tasks:set[asyncio.Task] = set()
+        self._tasks: set[asyncio.Task] = set()
 
     def run(self, coro: Coroutine, label: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=label)
         self._tasks.add(task)
 
         def _done_callback(task: asyncio.Task) -> None:
-
             try:
                 task.result()
 
             except asyncio.CancelledError:
-                LOGGER.debug("Task Cancelled: %s",task.get_name())
+                LOGGER.debug("Task Cancelled: %s", task.get_name())
 
             except Exception as e:  # noqa: BLE001
-                LOGGER.debug("[Callback] Task failed with: %s",e)
+                LOGGER.debug("[Callback] Task failed with: %s", e)
 
             self._tasks.discard(task)
 
         task.add_done_callback(_done_callback)
         return task
 
-    def get_task(self, label:str) -> asyncio.Task | None:
+    def get_task(self, label: str) -> asyncio.Task | None:
         for task in self._tasks:
-             if task.get_name() == label:
-                 return task
+            if task.get_name() == label:
+                return task
         return None
 
     def cancel(self, label: str) -> None:

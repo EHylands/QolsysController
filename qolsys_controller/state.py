@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 class QolsysState(QolsysObservable):
-
     def __init__(self, controller: QolsysController) -> None:
         super().__init__()
         self._controller: QolsysController = controller
@@ -55,7 +54,6 @@ class QolsysState(QolsysObservable):
     @property
     def weather(self) -> QolsysWeather:
         return self._weather
-
 
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
@@ -110,8 +108,11 @@ class QolsysState(QolsysObservable):
     def partition_add(self, new_partition: QolsysPartition) -> None:
         for partition in self.partitions:
             if new_partition.id == partition.id:
-                LOGGER.debug("Adding Partition to State, Partition%s (%s) - Allready in Partitions List",
-                             new_partition.id, partition.name)
+                LOGGER.debug(
+                    "Adding Partition to State, Partition%s (%s) - Allready in Partitions List",
+                    new_partition.id,
+                    partition.name,
+                )
                 return
 
         self.partitions.append(new_partition)
@@ -138,7 +139,7 @@ class QolsysState(QolsysObservable):
     def scene_add(self, new_scene: QolsysScene) -> None:
         for scene in self.scenes:
             if new_scene.scene_id == scene.scene_id:
-                LOGGER.debug("Adding Scene to State, Scene%s (%s) - Allready in Scene List", new_scene.scene_id, scene.name )
+                LOGGER.debug("Adding Scene to State, Scene%s (%s) - Allready in Scene List", new_scene.scene_id, scene.name)
                 return
 
         self.scenes.append(new_scene)
@@ -171,7 +172,9 @@ class QolsysState(QolsysObservable):
     def zone_add(self, new_zone: QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
-                LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, new_zone.sensorname)
+                LOGGER.debug(
+                    "Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, new_zone.sensorname
+                )
                 return
 
         self.zones.append(new_zone)
@@ -198,8 +201,9 @@ class QolsysState(QolsysObservable):
     def zwave_add(self, new_zwave: QolsysZWaveDevice) -> None:
         for zwave_device in self.zwave_devices:
             if new_zwave.node_id == zwave_device.node_id:
-                LOGGER.debug("Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List",
-                             new_zwave.node_id, zwave_device.node_name)
+                LOGGER.debug(
+                    "Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List", new_zwave.node_id, zwave_device.node_name
+                )
                 return
 
         self.zwave_devices.append(new_zwave)
@@ -217,7 +221,6 @@ class QolsysState(QolsysObservable):
         self.state_zwave_observer.notify()
 
     def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
-
         db_zwave_list = []
         for db_zwave in db_zwaves:
             db_zwave_list.append(db_zwave.node_id)
@@ -439,7 +442,13 @@ class QolsysState(QolsysObservable):
         for scene in self.scenes:
             sid = scene.scene_id
             name = scene.name
-            LOGGER.debug("Scene%s (%s)",sid, name)
+            LOGGER.debug("Scene%s (%s)", sid, name)
 
         for forecast in self.weather.forecasts:
-            LOGGER.debug("Weather - %s - High: %s, Low:%s, Condition: %s", forecast.day_of_week[0:3],forecast.high_temp,forecast.low_temp,forecast.condition)
+            LOGGER.debug(
+                "Weather - %s - High: %s, Low:%s, Condition: %s",
+                forecast.day_of_week[0:3],
+                forecast.high_temp,
+                forecast.low_temp,
+                forecast.condition,
+            )

@@ -7,16 +7,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysZWaveDevice(QolsysObservable):
-
     def __init__(self, zwave_dict: dict) -> None:
         super().__init__()
 
-        self._id: str = zwave_dict.get("_id","")
+        self._id: str = zwave_dict.get("_id", "")
         self._node_id: str = zwave_dict.get("node_id", "")
         self._node_name: str = zwave_dict.get("node_name", "")
         self._node_type: str = zwave_dict.get("node_type", "")
-        self._node_status:str = zwave_dict.get("node_status", "")
-        self._partition_id:str = zwave_dict.get("partition_id", "")
+        self._node_status: str = zwave_dict.get("node_status", "")
+        self._partition_id: str = zwave_dict.get("partition_id", "")
         self._node_secure_cmd_cls: str = zwave_dict.get("node_secure_cmd_cls", "")
         self._node_battery_level: str = zwave_dict.get("node_battery_level", "")
         self._node_battery_level_value: str = zwave_dict.get("node_battery_level_value", "")
@@ -38,65 +37,67 @@ class QolsysZWaveDevice(QolsysObservable):
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
 
     def update_base(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
-
         # Check if we are updating same node_id
         node_id_update = data.get("node_id", "")
         if node_id_update != self._node_id:
             LOGGER.error(
-                "Updating ZWave%s (%s) with ZWave%s (different node_id)", self.node_id, self.node_name, node_id_update,
+                "Updating ZWave%s (%s) with ZWave%s (different node_id)",
+                self.node_id,
+                self.node_name,
+                node_id_update,
             )
             return
 
         self.start_batch_update()
 
         if "paired_status" in data:
-            self.paired_status = data.get("paired_status","")
+            self.paired_status = data.get("paired_status", "")
         if "node_battery_level" in data:
-            self.node_battery_level = data.get("node_battery_level","")
+            self.node_battery_level = data.get("node_battery_level", "")
         if "node_battery_level_value" in data:
-            self.node_battery_level_value = data.get("node_battery_level_value","")
+            self.node_battery_level_value = data.get("node_battery_level_value", "")
         if "node_status" in data:
-            self.node_status = data.get("node_status","")
+            self.node_status = data.get("node_status", "")
         if "node_name" in data:
-            self.node_name = data.get("node_name","")
+            self.node_name = data.get("node_name", "")
         if "node_type" in data:
-            self.node_type = data.get("node_type","")
+            self.node_type = data.get("node_type", "")
         if "partition_id" in data:
-            self.partition_id = data.get("partition_id","")
+            self.partition_id = data.get("partition_id", "")
         if "node_secure_cmd_cls" in data:
-            self._node_secure_cmd_cls = data.get("node_secure_cmd_cls","")
+            self._node_secure_cmd_cls = data.get("node_secure_cmd_cls", "")
         if "is_node_listening_node" in data:
-            self._is_node_listening_node = data.get("is_node_listening_node","")
+            self._is_node_listening_node = data.get("is_node_listening_node", "")
         if "basic_report_value" in data:
-            self._basic_report_value = data.get("basic_report_value","")
+            self._basic_report_value = data.get("basic_report_value", "")
         if "switch_multilevel_report_value" in data:
-            self._switch_multilevel_report_value = data.get("switch_multilevel_report_value","")
+            self._switch_multilevel_report_value = data.get("switch_multilevel_report_value", "")
         if "basic_device_type" in data:
-            self._basic_device_type = data.get("basic_device_type","")
+            self._basic_device_type = data.get("basic_device_type", "")
         if "generic_device_type" in data:
-            self._generic_device_type = data.get("generic_device_type","")
+            self._generic_device_type = data.get("generic_device_type", "")
         if "specific_device_type" in data:
-            self._specific_device_type = data.get("specific_device_type","")
+            self._specific_device_type = data.get("specific_device_type", "")
         if "num_secure_command_class" in data:
-            self._num_secure_command_class = data.get("num_secure_command_class","")
+            self._num_secure_command_class = data.get("num_secure_command_class", "")
         if "secure_command_class" in data:
-            self._secure_command_class = data.get("secure_command_class","")
+            self._secure_command_class = data.get("secure_command_class", "")
         if "manufacture_id" in data:
-            self._manufacture_id = data.get("manufacture_id","")
+            self._manufacture_id = data.get("manufacture_id", "")
         if "product_type" in data:
-            self._product_type = data.get("product_type","")
+            self._product_type = data.get("product_type", "")
         if "device_protocol" in data:
-            self._device_protocol = data.get("device_protocol","")
+            self._device_protocol = data.get("device_protocol", "")
         if "paired_status" in data:
-            self.paired_status = data.get("paired_status","")
+            self.paired_status = data.get("paired_status", "")
         if "is_device_sleeping" in data:
-            self._is_device_sleeping = data.get("is_device_sleeping","")
+            self._is_device_sleeping = data.get("is_device_sleeping", "")
         if "is_device_hidden" in data:
-            self._is_device_hidden = data.get("is_device_hidden","")
+            self._is_device_hidden = data.get("is_device_hidden", "")
         if "last_updated_date" in data:
-            self._last_updated_date = data.get("last_updated_date","")
+            self._last_updated_date = data.get("last_updated_date", "")
         if "command_class_list" in data:
-            self._last_updated_date = data.get("command_class_list","")
+            self._last_updated_date = data.get("command_class_list", "")
 
         self.end_batch_update()
 
@@ -195,23 +196,6 @@ class QolsysZWaveDevice(QolsysObservable):
             return ZwaveDeviceClass(int(self._generic_device_type))
         except ValueError:
             return ZwaveDeviceClass.Unknown
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def to_dict_base(self) -> dict:
         return {

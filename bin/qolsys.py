@@ -11,7 +11,6 @@ from qolsys_controller.errors import QolsysMqttError, QolsysSqlError, QolsysSslE
 
 
 async def main() -> None:  # noqa: D103
-
     cli_parser = argparse.ArgumentParser()
     cli_parser.add_argument("--panel-ip", help="Qolsys Panel IP", default="")
     cli_parser.add_argument("--plugin-ip", help="Plugin IP", default="")
@@ -64,12 +63,14 @@ async def main() -> None:  # noqa: D103
     stop_event = asyncio.Event()
     await stop_event.wait()
 
+
 # Change to the "Selector" event loop if platform is Windows
 if sys.platform.lower() == "win32" or os.name.lower() == "nt":
     from asyncio import (  # type: ignore[attr-defined]
         WindowsSelectorEventLoopPolicy,
         set_event_loop_policy,
     )
+
     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 asyncio.run(main())

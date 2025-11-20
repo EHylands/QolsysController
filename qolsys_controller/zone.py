@@ -9,12 +9,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysZone(QolsysObservable):
-
     def __init__(self, data: dict, settings: QolsysSettings) -> None:  # noqa: PLR0915
         super().__init__()
 
         self._settings = settings
-        self._delay_task:asyncio.Task | None = None
+        self._delay_task: asyncio.Task | None = None
 
         self._zone_id: str = data.get("zoneid", "")
         self._sensorname: str = data.get("sensorname", "")
@@ -97,37 +96,42 @@ class QolsysZone(QolsysObservable):
     def update_powerg(self, data: dict) -> None:
         short_id_update = data.get("shortID", "")
         if short_id_update != self.shortID:
-            LOGGER.error("Updating Zone%s PowerG Attribute (%s) with Zone%s (different shortID)", self._zone_id, self.sensorname, short_id_update)
+            LOGGER.error(
+                "Updating Zone%s PowerG Attribute (%s) with Zone%s (different shortID)",
+                self._zone_id,
+                self.sensorname,
+                short_id_update,
+            )
             return
 
         self.start_batch_update()
 
         if "longID" in data:
-            self._powerg_long_id = data.get("longID","")
+            self._powerg_long_id = data.get("longID", "")
 
         if "status_data" in data:
-            self.powerg_status_data = data.get("status_data","")
+            self.powerg_status_data = data.get("status_data", "")
 
         if "temperature" in data:
-            self.powerg_temperature = data.get("temperature","")
+            self.powerg_temperature = data.get("temperature", "")
 
         if "light" in data:
-            self.powerg_light = data.get("light","")
+            self.powerg_light = data.get("light", "")
 
         if "notification_period" in data:
-            self._powerg_notification_period = data.get("notification_period","")
+            self._powerg_notification_period = data.get("notification_period", "")
 
         if "average_link_quality" in data:
-            self._powerg_average_link_quality = data.get("average_link_quality","")
+            self._powerg_average_link_quality = data.get("average_link_quality", "")
 
         if "link_quality" in data:
-            self._powerg_link_quality = data.get("link_quality","")
+            self._powerg_link_quality = data.get("link_quality", "")
 
         if "link_status" in data:
-            self._powerg_link_status = data.get("link_status","")
+            self._powerg_link_status = data.get("link_status", "")
 
         if "battery_voltage" in data:
-            self._powerg_battery_voltage = data.get("battery_voltage","")
+            self._powerg_battery_voltage = data.get("battery_voltage", "")
 
         self.end_batch_update()
 
@@ -140,83 +144,83 @@ class QolsysZone(QolsysObservable):
         self.start_batch_update()
 
         if "sensorname" in data:
-            self.sensorname = data.get("sensorname","")
+            self.sensorname = data.get("sensorname", "")
 
         if "sensorstatus" in data:
-            self.sensorstatus = ZoneStatus(data.get("sensorstatus",""))
+            self.sensorstatus = ZoneStatus(data.get("sensorstatus", ""))
 
         if "battery_status" in data:
-            self.battery_status = data.get("battery_status","")
+            self.battery_status = data.get("battery_status", "")
 
         if "time" in data:
-            self.time = data.get("time","")
+            self.time = data.get("time", "")
 
         if "partition_id" in data:
-            self._partition_id = data.get("partition_id","")
+            self._partition_id = data.get("partition_id", "")
 
         if "lastestdBm" in data:
-            self.latestdBm = data.get("latestdBm","")
+            self.latestdBm = data.get("latestdBm", "")
 
         if "averagedBm" in data:
-            self.averagedBm = data.get("averagedBm","")
+            self.averagedBm = data.get("averagedBm", "")
 
         if "sensorgroup" in data:
-            self.sensorgroup = data.get("sensorgroup","")
+            self.sensorgroup = data.get("sensorgroup", "")
 
         if "sensorstate" in data:
-            self._sensorstate = data.get("sensorstate","")
+            self._sensorstate = data.get("sensorstate", "")
 
         if "sensortype" in data:
-            self.sensortype = ZoneSensorType(data.get("sensortype",""))
+            self.sensortype = ZoneSensorType(data.get("sensortype", ""))
 
         if "zone_type" in data:
-            self._zone_type = data.get("zone_type","")
+            self._zone_type = data.get("zone_type", "")
 
         if "zone_physical_type" in data:
-            self._zone_physical_type = data.get("zone_physical_type","")
+            self._zone_physical_type = data.get("zone_physical_type", "")
 
         if "zone_alarm_type" in data:
-            self._zone_alarm_type = data.get("zone_alarm_type","")
+            self._zone_alarm_type = data.get("zone_alarm_type", "")
 
         if "sensorttss" in data:
-            self._sensortts = data.get("sensortts","")
+            self._sensortts = data.get("sensortts", "")
 
         if "current_capability" in data:
-            self._current_capability = data.get("current_capability","")
+            self._current_capability = data.get("current_capability", "")
 
         if "zone_rf_sensor" in data:
-            self._zone_rf_sensor = data.get("zone_rf_sensor","")
+            self._zone_rf_sensor = data.get("zone_rf_sensor", "")
 
         if "zone_supervised" in data:
-            self._zone_supervised = data.get("zone_supervised","")
+            self._zone_supervised = data.get("zone_supervised", "")
 
         if "zone_reporting_enabled" in data:
-            self._zone_reporting_enabled = data.get("zone_reporting_enabled","")
+            self._zone_reporting_enabled = data.get("zone_reporting_enabled", "")
 
         if "zone_two_way_voice_enabled" in data:
-            self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled","")
+            self._zone_two_way_voice_enabled = data.get("zone_two_way_voice_enabled", "")
 
         if "signal_source" in data:
-            self._signal_source = data.get("signal_source","")
+            self._signal_source = data.get("signal_source", "")
 
         if "serial_number" in data:
-            self._serial_number = data.get("serial_number","")
+            self._serial_number = data.get("serial_number", "")
 
         if "chimetype" in data:
-            self._chimetype = data.get("chimetype","")
+            self._chimetype = data.get("chimetype", "")
 
         if "frame_count" in data:
-            self._frame_count = data.get("frame_count","")
+            self._frame_count = data.get("frame_count", "")
 
         if "frame_type" in data:
-            self._frame_type = data.get("frame_type","")
+            self._frame_type = data.get("frame_type", "")
 
         if "allowdisarming" in data:
-            self._allowdisarming = data.get("allowdisarming","")
+            self._allowdisarming = data.get("allowdisarming", "")
 
         self.end_batch_update()
 
-    async def delay_zone(self,next_status: ZoneStatus) -> None:
+    async def delay_zone(self, next_status: ZoneStatus) -> None:
         await asyncio.sleep(self._settings.motion_sensor_delay_sec)
         self._sensorstatus = next_status
         LOGGER.debug("Zone%s (%s) - sensorstatus: %s", self._zone_id, self.sensorname, next_status)
@@ -247,7 +251,6 @@ class QolsysZone(QolsysObservable):
     @sensorgroup.setter
     def sensorgroup(self, new_value: str) -> None:
         if self._sensorgroup != new_value:
-
             # Report new values
             try:
                 ZoneSensorGroup(new_value)
@@ -395,9 +398,9 @@ class QolsysZone(QolsysObservable):
     @powerg_temperature.setter
     def powerg_temperature(self, value: str) -> None:
         if self._powerg_temperature != value:
-                LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", self._zone_id, self.sensorname, value)
-                self._powerg_temperature = value
-                self.notify()
+            LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", self._zone_id, self.sensorname, value)
+            self._powerg_temperature = value
+            self.notify()
 
     @property
     def powerg_light(self) -> float | None:

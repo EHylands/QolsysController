@@ -11,19 +11,22 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysPartition(QolsysObservable):
-
     EXIT_SOUNDS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
     ENTRY_DELAYS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
 
-    def __init__(self, partition_dict: dict[str,str], settings_dict: dict[str,str], alarm_state: PartitionAlarmState,
-                 alarm_type_array: list[PartitionAlarmType]) -> None:
-
+    def __init__(
+        self,
+        partition_dict: dict[str, str],
+        settings_dict: dict[str, str],
+        alarm_state: PartitionAlarmState,
+        alarm_type_array: list[PartitionAlarmType],
+    ) -> None:
         super().__init__()
 
         # Partition info (partition table)
-        self._id: str = partition_dict.get("partition_id","")
-        self._name: str = partition_dict.get("name","")
-        self._devices = partition_dict.get("devices","")
+        self._id: str = partition_dict.get("partition_id", "")
+        self._name: str = partition_dict.get("name", "")
+        self._devices = partition_dict.get("devices", "")
 
         # Partition Settings (qolsyssettings table)
         self._system_status: PartitionSystemStatus = PartitionSystemStatus(settings_dict.get("SYSTEM_STATUS", ""))
@@ -43,45 +46,45 @@ class QolsysPartition(QolsysObservable):
         self._command_arm_stay_silent_disarming: bool = False
         self._command_arm_entry_delay: bool = True
 
-    def update_partition(self, data: dict[str,str]) -> None:
+    def update_partition(self, data: dict[str, str]) -> None:
         # Check if we are updating same partition_id
         partition_id_update = data.get("partition_id", "")
         if partition_id_update != self.id:
             LOGGER.error(
-                "Updating Partition%s (%s) with Partition '%s' (different id)", self._id, self._name, partition_id_update)
+                "Updating Partition%s (%s) with Partition '%s' (different id)", self._id, self._name, partition_id_update
+            )
             return
 
         self.start_batch_update()
 
         # Update Partition Name
         if "name" in data:
-            self.name = data.get("name","")
+            self.name = data.get("name", "")
 
         # Update Partition Devices
         if "devices" in data:
-            self._devices = data.get("devices","")
+            self._devices = data.get("devices", "")
 
         self.end_batch_update()
 
     def update_settings(self, data: dict) -> None:
-
         self.start_batch_update()
 
         # Update system_status
         if "SYSTEM_STATUS" in data:
-            self.system_status = data.get("SYSTEM_STATUS","")
+            self.system_status = data.get("SYSTEM_STATUS", "")
 
         # Update system_status_changed_time
         if "SYSTEM_STATUS_CHANGED_TIME" in data:
-            self.system_status_changed_time = data.get("SYSTEM_STATUS_CHANGED_TIME","")
+            self.system_status_changed_time = data.get("SYSTEM_STATUS_CHANGED_TIME", "")
 
         # Update exit_sounds
         if "EXIT_SOUNDS" in data:
-            self.exit_sounds = data.get("EXIT_SOUNDS","")
+            self.exit_sounds = data.get("EXIT_SOUNDS", "")
 
         # Update entry_delays
         if "ENTRY_DELAYS" in data:
-            self.entry_delays = data.get("ENTRY_DELAYS","")
+            self.entry_delays = data.get("ENTRY_DELAYS", "")
 
         self.end_batch_update()
 
@@ -158,7 +161,6 @@ class QolsysPartition(QolsysObservable):
 
     @alarm_type_array.setter
     def alarm_type_array(self, new_alarm_type_array: list[PartitionAlarmType]) -> None:
-
         # If no changes are detected: return without notification
         if sorted(new_alarm_type_array, key=lambda c: c.value) == sorted(self.alarm_type_array, key=lambda c: c.value):
             return
@@ -239,17 +241,15 @@ class QolsysPartition(QolsysObservable):
         return self._command_arm_entry_delay
 
     @command_arm_entry_delay.setter
-    def command_arm_entry_delay(self, value:bool) -> None:
+    def command_arm_entry_delay(self, value: bool) -> None:
         self._command_arm_entry_delay = value
         LOGGER.debug("Partition%s (%s) - command_arm_entry_delay: %s", self._id, self._name, value)
         self.notify()
 
     def append_alarm_type(self, new_alarm_type_array: list[PartitionAlarmType]) -> None:
-
         data_changed = False
 
         for new_alarm_type in new_alarm_type_array:
-
             # Value already in array
             if new_alarm_type in self._alarm_type_array:
                 continue

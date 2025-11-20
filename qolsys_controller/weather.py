@@ -6,7 +6,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysForecast:
-    def __init__(self, data: dict[str,str]) -> None:
+    def __init__(self, data: dict[str, str]) -> None:
         self._high_temp: str = data.get("high_temp", "")
         self._low_temp: str = data.get("low_temp", "")
         self._day_of_week: str = data.get("day_of_week", "")

@@ -7,7 +7,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTableTroubleConditions(QolsysTable):
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.TroubleConditionsContentProvider/trouble_conditions"
@@ -28,4 +27,3 @@ class QolsysTableTroubleConditions(QolsysTable):
         ]
 
         self._create_table()
-

@@ -7,14 +7,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysTableDashboardMsgs(QolsysTable):
-
     def __init__(self, db: sqlite3.Connection, cursor: sqlite3.Cursor) -> None:
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.DashboardMessagesContentProvider/dashboard_msgs"
         self._table = "dashboard_msgs"
         self._abort_on_error = False
         self._implemented = True
-
 
         self._columns = [
             "_id",
