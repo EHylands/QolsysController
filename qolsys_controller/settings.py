@@ -14,7 +14,6 @@ class QolsysSettings:
 
     def __init__(self, controller: QolsysController) -> None:
 
-        # Main controller
         self._controller = controller
 
         # Plugin
@@ -31,16 +30,40 @@ class QolsysSettings:
 
         # Pki
         self._key_size: int = 2048
+        self._auto_discover_pki: bool = True
 
         # MQTT
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 600
         self._mqtt_qos: int = 0
         self._mqtt_remote_client_id: str = ""
+        self._log_mqtt_message: bool = False
 
         # Operation
         self._motion_sensor_delay: bool = True
         self._motion_sensor_delay_sec: int = 310
+        self._check_user_code_on_arm: bool = False
+        self._check_user_code_on_disarm: bool = True
+
+    def check_panel_ip(self) -> bool:
+        if self._panel_ip == "":
+            LOGGER.debug("Invalid Panel IP:  %s", self._panel_ip)
+            return False
+
+        LOGGER.debug("Found Panel IP: %s", self._panel_ip)
+        return True
+
+    def check_plugin_ip(self) -> bool:
+        if self._plugin_ip == "":
+            LOGGER.debug("Invalid Plugin IP:  %s", self._plugin_ip)
+            return False
+
+        LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
+        return True
+
+    # -----------------------------
+    # properties + setters
+    # -----------------------------
 
     @property
     def random_mac(self) -> str:
@@ -54,6 +77,10 @@ class QolsysSettings:
     def plugin_ip(self) -> str:
         return self._plugin_ip
 
+    @plugin_ip.setter
+    def plugin_ip(self, plugin_ip: str) -> None:
+        self._plugin_ip = plugin_ip
+
     @property
     def panel_mac(self) -> str:
         return self._panel_mac
@@ -66,37 +93,73 @@ class QolsysSettings:
     def panel_ip(self) -> str:
         return self._panel_ip
 
+    @panel_ip.setter
+    def panel_ip(self, panel_ip: str) -> None:
+        self._panel_ip = panel_ip
+
+    @property
+    def log_mqtt_mesages(self) -> bool:
+        return self._log_mqtt_messages
+
+    @log_mqtt_mesages.setter
+    def log_mqtt_mesages(self, log_mqtt_mesages: bool) -> None:
+        self._log_mqtt_messages = log_mqtt_mesages
+
+    @property
+    def check_user_code_on_disarm(self) -> bool:
+        return self._check_user_code_on_disarm
+
+    @check_user_code_on_disarm.setter
+    def check_user_code_on_disarm(self, check_user_code_on_disarm: bool) -> None:
+        self._check_user_code_on_disarm = check_user_code_on_disarm
+
+    @property
+    def check_user_code_on_arm(self) -> bool:
+        return self._check_user_code_on_arm
+
+    @check_user_code_on_arm.setter
+    def check_user_code_on_arm(self, check_user_code_on_arm: bool) -> None:
+        self._check_user_code_on_arm = check_user_code_on_arm
+
+    @property
+    def auto_discover_pki(self) -> bool:
+        return self._auto_discover_pki
+
+    @auto_discover_pki.setter
+    def auto_discover_pki(self, value: bool) -> None:
+        self._auto_discover_pki = value
+
     @property
     def mqtt_timeout(self) -> int:
         return self._mqtt_timeout
+
+    @mqtt_timeout.setter
+    def mqtt_timeout(self, value: int) -> None:
+        self._mqtt_timeout = value
 
     @property
     def mqtt_ping(self) -> int:
         return self._mqtt_ping
 
+    @mqtt_ping.setter
+    def mqtt_ping(self, value: int) -> None:
+        self._mqtt_ping = value
+
     @property
     def motion_sensor_delay(self) -> bool:
         return self._motion_sensor_delay
-
-    @property
-    def motion_sensor_delay_sec(self) -> int:
-        return self._motion_sensor_delay_sec
 
     @motion_sensor_delay.setter
     def motion_sensor_delay(self, value: bool) -> None:
         self._motion_sensor_delay = value
 
+    @property
+    def motion_sensor_delay_sec(self) -> int:
+        return self._motion_sensor_delay_sec
+
     @motion_sensor_delay_sec.setter
     def motion_sensor_delay_sec(self, value: int) -> None:
         self._motion_sensor_delay_sec = value
-
-    @panel_ip.setter
-    def panel_ip(self, panel_ip: str) -> None:
-        self._panel_ip = panel_ip
-
-    @plugin_ip.setter
-    def plugin_ip(self, plugin_ip: str) -> None:
-        self._plugin_ip = plugin_ip
 
     @property
     def config_directory(self) -> Path:
@@ -121,14 +184,6 @@ class QolsysSettings:
     def key_size(self) -> int:
         return self._key_size
 
-    @mqtt_timeout.setter
-    def mqtt_timeout(self, value: int) -> None:
-        self._mqtt_timeout = value
-
-    @mqtt_ping.setter
-    def mqtt_ping(self, value: int) -> None:
-        self._mqtt_ping = value
-
     @property
     def mqtt_qos(self) -> int:
         return self._mqtt_qos
@@ -140,22 +195,6 @@ class QolsysSettings:
     @mqtt_remote_client_id.setter
     def mqtt_remote_client_id(self,client_id: str) -> None:
         self._mqtt_remote_client_id = client_id
-
-    def check_panel_ip(self) -> bool:
-        if self._panel_ip == "":
-            LOGGER.debug("Invalid Panel IP:  %s", self._panel_ip)
-            return False
-
-        LOGGER.debug("Found Panel IP: %s", self._panel_ip)
-        return True
-
-    def check_plugin_ip(self) -> bool:
-        if self._plugin_ip == "":
-            LOGGER.debug("Invalid Plugin IP:  %s", self._plugin_ip)
-            return False
-
-        LOGGER.debug("Found Plugin IP: %s", self._plugin_ip)
-        return True
 
     def check_config_directory(self, create: bool = True) -> bool:  # noqa: PLR0911
         if not self.config_directory.is_dir():

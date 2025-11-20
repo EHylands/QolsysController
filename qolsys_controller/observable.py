@@ -17,12 +17,12 @@ class QolsysObservable:
     def unregister(self, observer: Callable[[], None]) -> None:
         self._observers.remove(observer)
 
-    def notify(self, **payload) -> None:  # noqa: ANN003
+    def notify(self) -> None:
         if self._batch_update_active:
             self._batch_update_change_detected = True
         else:
             for observer in self._observers:
-                observer(self, **payload)
+                observer()
 
     def start_batch_update(self) -> None:
         self._batch_update_change_detected = False

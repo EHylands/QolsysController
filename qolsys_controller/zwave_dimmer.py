@@ -27,6 +27,13 @@ class QolsysDimmer(QolsysZWaveDevice):
         self._dimmer_power_details = dimmer_dict.get("power_details", "")
         self._dimmer_paired_status = dimmer_dict.get("paired_status", "")
 
+    def is_on(self) -> bool:
+        return self.dimmer_status == "On"
+
+    # -----------------------------
+    # properties + setters
+    # -----------------------------
+
     @property
     def dimmer_node_id(self) -> str:
         return self._dimmer_node_id
@@ -35,9 +42,23 @@ class QolsysDimmer(QolsysZWaveDevice):
     def dimmer_status(self) -> str:
         return self._dimmer_status
 
+    @dimmer_status.setter
+    def dimmer_status(self, value: str) -> None:
+        if self._dimmer_status != value:
+            LOGGER.debug("Dimmer%s (%s) - status: %s", self.node_id, self.dimmer_name, value)
+            self._dimmer_status = value
+            self.notify()
+
     @property
     def dimmer_name(self) -> str:
         return self._dimmer_name
+
+    @dimmer_name.setter
+    def dimmer_name(self, value: str) -> None:
+        if self._dimmer_name != value:
+            LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name, value)
+            self._dimmer_name = value
+            self.notify()
 
     @property
     def dimmer_level(self) -> str:
@@ -50,24 +71,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_level = value
             self.notify()
 
-    @dimmer_status.setter
-    def dimmer_status(self, value: str) -> None:
-        if self._dimmer_status != value:
-            LOGGER.debug("Dimmer%s (%s) - status: %s", self.node_id, self.dimmer_name, value)
-            self._dimmer_status = value
-            self.notify()
-
-    @dimmer_name.setter
-    def dimmer_name(self, value: str) -> None:
-        if self._dimmer_name != value:
-            LOGGER.debug("Dimmer%s (%s) - name: %s", self.node_id, self.dimmer_name, value)
-            self._dimmer_name = value
-            self.notify()
-
-    def is_on(self) -> bool:
-        return self.dimmer_status == "On"
-
-    def update_dimmer(self, content_values: dict) -> None:  # noqa: C901
+    def update_dimmer(self, content_values: dict) -> None:  # noqa: PLR0912
         # Check if we are updating same none_id
         node_id_update = content_values.get("node_id", "")
         if node_id_update != self._dimmer_node_id:
@@ -78,31 +82,31 @@ class QolsysDimmer(QolsysZWaveDevice):
         self.start_batch_update()
 
         if "status" in content_values:
-            self.dimmer_status = content_values.get("status")
+            self.dimmer_status = content_values.get("status","")
         if "level" in content_values:
-            self.dimmer_level = content_values.get("level")
+            self.dimmer_level = content_values.get("level","")
         if "dimmer_name" in content_values:
-            self.dimmer_name = content_values.get("dimmer_name")
+            self.dimmer_name = content_values.get("dimmer_name","")
         if "created_by" in content_values:
-            self._dimmer_created_by = content_values.get("created_by")
+            self._dimmer_created_by = content_values.get("created_by","")
         if "created_date" in content_values:
-            self._dimmer_created_date = content_values.get("created_date")
+            self._dimmer_created_date = content_values.get("created_date","")
         if "version" in content_values:
-            self._dimmer_version = content_values.get("version")
+            self._dimmer_version = content_values.get("version","")
         if "opr" in content_values:
-            self._dimmer_opr = content_values.get("opr")
+            self._dimmer_opr = content_values.get("opr","")
         if "partition_id" in content_values:
-            self.partition_id = content_values.get("partition_id")
+            self.partition_id = content_values.get("partition_id","")
         if "updated_by" in content_values:
-            self._dimmer_updated_by = content_values.get("updated_by")
+            self._dimmer_updated_by = content_values.get("updated_by","")
         if "last_updated_date" in content_values:
-            self._last_updated_date = content_values.get("last_updated_date")
+            self._last_updated_date = content_values.get("last_updated_date","")
         if "endpoint" in content_values:
-            self._dimmer_endpoint = content_values.get("endpoint")
+            self._dimmer_endpoint = content_values.get("endpoint","")
         if "power_details" in content_values:
-            self._dimmer_power_details = content_values.get("power_details")
+            self._dimmer_power_details = content_values.get("power_details","")
         if "paired_status" in content_values:
-            self._dimmer_paired_status = content_values.get("paired_status")
+            self._dimmer_paired_status = content_values.get("paired_status","")
 
         self.end_batch_update()
 

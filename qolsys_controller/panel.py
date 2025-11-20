@@ -13,6 +13,7 @@ from .enum import (
 from .observable import QolsysObservable
 from .partition import QolsysPartition
 from .scene import QolsysScene
+from .users import QolsysUser
 from .weather import QolsysForecast, QolsysWeather
 from .zone import QolsysZone
 from .zwave_dimmer import QolsysDimmer
@@ -51,51 +52,51 @@ class QolsysPanel(QolsysObservable):
             "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N",
         ]
 
-        self._PANEL_TAMPER_STATE = ""
-        self._AC_STATUS = ""
-        self._BATTERY_STATUS = ""
-        self._FAIL_TO_COMMUNICATE = ""
-        self._SECURE_ARMING = ""
-        self._AUTO_BYPASS = ""
-        self._AUTO_STAY = ""
-        self._AUTO_ARM_STAY = ""
-        self._AUTO_EXIT_EXTENSION = ""
-        self._FINAL_EXIT_DOOR_ARMING = ""
-        self._NO_ARM_LOW_BATTERY = ""
-        self._TEMPFORMAT = ""
-        self._LANGUAGE = ""
-        self._COUNTRY = ""
-        self._SYSTEM_TIME = ""
-        self._GSM_CONNECTION_STATUS = ""
-        self._GSM_SIGNAL_STRENGTH = ""
-        self._ANDROID_VERSION = ""
-        self._HARDWARE_VERSION = ""
-        self._TIMER_NORMAL_ENTRY_DELAY = ""
-        self._TIMER_NORMAL_EXIT_DELAY = ""
-        self._TIMER_LONG_ENTRY_DELAY = ""
-        self._TIMER_LONG_EXIT_DELAY = ""
-        self._ZWAVE_FIRM_WARE_VERSION = ""
-        self._ZWAVE_CONTROLLER = ""
-        self._ZWAVE_CARD = ""
-        self._POLICE_PANIC_ENABLED = ""
-        self._FIRE_PANIC_ENABLED = ""
-        self._AUXILIARY_PANIC_ENABfLED = ""
-        self._NIGHTMODE_SETTINGS = ""
-        self._NIGHT_SETTINGS_STATE = ""
-        self._PARTITIONS = ""
-        self._SIX_DIGIT_USER_CODE = ""
-        self._SHOW_SECURITY_SENSORS = ""
-        self._CONTROL_4 = ""
-        self._MAC_ADDRESS = ""
-        self._SYSTEM_LOGGED_IN_USER = ""
-        self._PANEL_SCENES_SETTING = ""
-        self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = ""
+        self._PANEL_TAMPER_STATE: str = ""
+        self._AC_STATUS: str = ""
+        self._BATTERY_STATUS: str = ""
+        self._FAIL_TO_COMMUNICATE: str = ""
+        self._SECURE_ARMING: str = ""
+        self._AUTO_BYPASS: str = ""
+        self._AUTO_STAY: str = ""
+        self._AUTO_ARM_STAY: str = ""
+        self._AUTO_EXIT_EXTENSION: str = ""
+        self._FINAL_EXIT_DOOR_ARMING: str = ""
+        self._NO_ARM_LOW_BATTERY: str = ""
+        self._TEMPFORMAT: str = ""
+        self._LANGUAGE: str = ""
+        self._COUNTRY: str = ""
+        self._SYSTEM_TIME: str = ""
+        self._GSM_CONNECTION_STATUS: str = ""
+        self._GSM_SIGNAL_STRENGTH: str = ""
+        self._ANDROID_VERSION: str = ""
+        self._HARDWARE_VERSION: str = ""
+        self._TIMER_NORMAL_ENTRY_DELAY: str = ""
+        self._TIMER_NORMAL_EXIT_DELAY: str = ""
+        self._TIMER_LONG_ENTRY_DELAY: str = ""
+        self._TIMER_LONG_EXIT_DELAY: str = ""
+        self._ZWAVE_FIRM_WARE_VERSION: str = ""
+        self._ZWAVE_CONTROLLER: str = ""
+        self._ZWAVE_CARD: str = ""
+        self._POLICE_PANIC_ENABLED: str = ""
+        self._FIRE_PANIC_ENABLED: str = ""
+        self._AUXILIARY_PANIC_ENABfLED: str = ""
+        self._NIGHTMODE_SETTINGS: str = ""
+        self._NIGHT_SETTINGS_STATE: str = ""
+        self._PARTITIONS: str = ""
+        self._SIX_DIGIT_USER_CODE: str = ""
+        self._SHOW_SECURITY_SENSORS: str = ""
+        self._CONTROL_4: str = ""
+        self._MAC_ADDRESS: str = ""
+        self._SYSTEM_LOGGED_IN_USER: str = ""
+        self._PANEL_SCENES_SETTING: str = ""
+        self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N: str = ""
 
-        self._users = []
-        self._unique_id = ""
+        self._users: list[QolsysUser] = []
+        self._unique_id: str = ""
 
-        self._imei = ""
-        self._product_type = ""
+        self._imei: str = ""
+        self._product_type: str = ""
 
     def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file if exists
@@ -106,7 +107,10 @@ class QolsysPanel(QolsysObservable):
                     try:
                         users = json.load(file)
                         for user in users:
-                            self._users.append(user)
+                            qolsys_user = QolsysUser()
+                            qolsys_user.id = user.get("id")
+                            qolsys_user.user_code = user.get("user_code")
+                            self._users.append(qolsys_user)
 
                     except json.JSONDecodeError:
                         LOGGER.exception("users.conf file json error")
@@ -346,7 +350,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self, database: dict) -> None:
+    def load_database(self, database: dict ) -> None:
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -355,7 +359,7 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
     # Parse panel update to database
-    def parse_iq2meid_message(self, data: dict) -> bool:  # noqa: C901, PLR0912, PLR0915
+    def parse_iq2meid_message(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
 
         eventName = data.get("eventName")
         dbOperation = data.get("dbOperation","")
@@ -506,7 +510,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_scene.update(selection, selection_argument, content_values)
                                 scene_id = content_values.get("scene_id", "")
                                 scene = self._controller.state.scene(scene_id)
-                                if scene is not None and isinstance(node, QolsysScene):
+                                if scene is not None and isinstance(scene, QolsysScene):
                                     scene.update(content_values)
 
                             # Update Trouble Conditions
@@ -529,6 +533,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_weather.uri:
                                 self.db.table_weather.update(selection,selection_argument,content_values)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
+
+                            # Update Zwave Association Group
+                            case self.db.table_zwave_association_goup.uri:
+                                self.db.table_zwave_association_goup.update(selection,selection_argument,content_values)
 
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
@@ -605,12 +613,16 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_weather.delete(selection,selection_argument)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
 
+                            case self.db.table_zwave_association_goup.uri:
+                                self.db.table_zwave_association_goup.delete(selection,selection_argument)
+
+
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
                                 LOGGER.debug(data)
 
                     case "insert":
-                        content_values = data.get("contentValues")
+                        content_values = data.get("contentValues",{})
 
                         match uri:
 
@@ -737,6 +749,9 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_weather.insert(data=content_values)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
 
+                            case self.db.table_zwave_association_goup.uri:
+                                self.db.table_zwave_association_goup.insert(data=content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -750,14 +765,14 @@ class QolsysPanel(QolsysObservable):
 
     def check_user(self, user_code: str) -> int:
         for user in self._users:
-            if user["user_code"] == user_code:
-                return user["id"]
+            if user.user_code == user_code:
+                return user.id
 
         # No valid user code found
         return -1
 
     def get_zwave_devices_from_db(self) -> list[QolsysZWaveDevice]:
-        devices = []
+        devices: list[QolsysZWaveDevice] = []
         devices_list = self.db.get_zwave_devices()
         dimmers_list = self.db.get_dimmers()
         thermostats_list = self.db.get_thermostats()
@@ -927,7 +942,7 @@ class QolsysPanel(QolsysObservable):
 
         LOGGER.debug("Users list:")
         for user in self._users:
-            LOGGER.debug("User: %s", user["id"])
+            LOGGER.debug("User: %s", user.id)
 
         LOGGER.debug("*** Plugin Information ***")
         LOGGER.debug("Motion Delay Enabled: %s", self._controller.settings.motion_sensor_delay)

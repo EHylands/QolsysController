@@ -19,22 +19,34 @@ class QolsysScene(QolsysObservable):
 
         scene_id_update = data.get("scene_id", "")
         if scene_id_update != self._scene_id:
-            LOGGER.error("Updating Scene%s (%s) with Scene%s (different id)", self._scene_id, self.sensorname, scene_id_update)
+            LOGGER.error("Updating Scene%s (%s) with Scene%s (different id)", self._scene_id, self.name, scene_id_update)
             return
 
         self.start_batch_update()
 
         # Update name
         if "name" in data:
-            self.sensorname = data.get("name")
+            self.sensorname = data.get("name","")
 
         if "color" in data:
-            self.color = data.get("color")
+            self.color = data.get("color","")
 
         if "icon" in data:
-            self.icon = data.get("icon")
+            self.icon = data.get("icon","")
 
         self.end_batch_update()
+
+    def to_dict(self) -> dict:
+        return {
+            "scene_id": self.scene_id,
+            "name": self.name,
+            "color": self.color,
+            "icon": self.icon,
+        }
+
+    # -----------------------------
+    # properties + setters
+    # -----------------------------
 
     @property
     def scene_id(self) -> str:
@@ -44,19 +56,15 @@ class QolsysScene(QolsysObservable):
     def name(self) -> str:
         return self._name
 
-    @property
-    def icon(self) -> str:
-        return self._icon
-
-    @property
-    def color(self) -> str:
-        return self._color
-
     @name.setter
     def name(self, value: str) -> None:
         if self._name != value:
             self._name = value
             self.notify()
+
+    @property
+    def icon(self) -> str:
+        return self._icon
 
     @icon.setter
     def icon(self, value: str) -> None:
@@ -64,16 +72,13 @@ class QolsysScene(QolsysObservable):
             self._icon = value
             self.notify()
 
+    @property
+    def color(self) -> str:
+        return self._color
+
     @color.setter
     def color(self, value: str) -> None:
         if self._color != value:
             self._color = value
             self.notify()
 
-    def to_dict(self) -> dict:
-        return {
-            "scene_id": self.scene_id,
-            "name": self.name,
-            "color": self.color,
-            "icon": self.icon,
-        }

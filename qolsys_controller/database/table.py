@@ -108,43 +108,49 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def update(self, selection: str | None, selection_argument: list | str | None, content_value: str | None) -> None:
+    def update(self, selection: str | None, selection_argument: list[str] | str | None, content_value: dict | None) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
-        # contentValues:{"partition_id":"0","sensorgroup":"safetymotion","sensorstatus":"Idle"}"
 
         # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
-        if(type(selection_argument) is str):
+        if isinstance(selection_argument, str):
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
+
+        if selection_argument is None:
+            selection_argument = []
 
         try:
             full_data = {}
             new_columns = []
 
-            for key, value in content_value.items():
-                if key in self._columns:
-                    full_data[key] = value
-                else:
-                    new_columns.append(key)
+            # Separate valid and unknown columns
+            if content_value is not None:
+                for key, value in content_value.items():
+                    if key in self._columns:
+                        full_data[key] = value
+                    else:
+                        new_columns.append(key)
 
-            db_value = ",".join([f"{key}='{value}'" for key, value in full_data.items()])
-
-            # Warn if new column found in iq2meid database
+            # Warn for unknown columns
             if new_columns:
                 LOGGER.warning("New column found in iq2meid database")
                 LOGGER.warning("Table: %s", self.table)
                 LOGGER.warning("New Columns: %s", new_columns)
                 LOGGER.warning("Please Report")
 
-            if selection:
-                query = f"UPDATE {self.table} SET {db_value} WHERE {selection}"
-                self._cursor.execute(query, selection_argument)
-            else:
-                query = f"UPDATE {self.table} SET {db_value}"
-                self._cursor.execute(query)
+            set_clause = ", ".join([f"{key} = ?" for key in full_data])
+            set_values = list(full_data.values())
 
+            if selection:
+                query = f"UPDATE {self.table} SET {set_clause} WHERE {selection}"
+                params = set_values + selection_argument
+            else:
+                query = f"UPDATE {self.table} SET {set_clause}"
+                params = set_values
+
+            self._cursor.execute(query, params)
             self._db.commit()
 
         except sqlite3.Error as err:
@@ -160,7 +166,7 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def delete(self, selection: str | None, selection_argument: list | str | None) -> None:
+    def delete(self, selection: str | None, selection_argument: list[str] | str | None) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
@@ -170,10 +176,19 @@ class QolsysTable:
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
 
+        if selection_argument is None:
+            selection_argument = []
+
         try:
             if selection:
                 query = f"DELETE FROM {self.table} WHERE {selection}"
-                self._cursor.execute(query, selection_argument)
+
+                if "?" in selection:
+                    # Query expects parameters → must pass the list
+                    self._cursor.execute(query, selection_argument)
+                else:
+                    # Query has no ? , do not pass arguments
+                    self._cursor.execute(query)
             else:
                 self.clear()
 

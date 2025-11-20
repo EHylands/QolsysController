@@ -24,7 +24,6 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                        | Home Silent Disarming (Firmware 4.6.1)| ✅     |
 |                        | Set Exit Sounds                      | ✅     |
 |                        | Set Entry Delay                      | ✅            |
-|                        | Disarm Photos                        | 🛠️     |
 |                        | TTS                                  | 🛠️     |
 | **Zones**              | Sensor Status                        | ✅     |
 |                        | Tamper State                         | ✅     |
@@ -36,7 +35,8 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 | **Z-Wave Devices**     | Battery Level                        | ✅     |
 |                        | Node Status                          | ✅     |
 |                        | Control Generic Devices              | TBD    |
-| **Z-Wave Dimmers**     | Light Status and Level Control       | ✅     |
+| **Z-Wave Dimmers**     | Binary Switch                        | ✅     |
+|                        | Multi Level Dimmer                   | ✅     |
 | **Z-Wave Door Locks**  | Lock, Unlock                         | ✅     |
 | **Z-Wave Thermostats** | Read device status                   | ✅     |
 |                        | Write device status                  | ✅     |

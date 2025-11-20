@@ -25,16 +25,12 @@ class QolsysState(QolsysObservable):
 
     def __init__(self, controller: QolsysController) -> None:
         super().__init__()
-
-        self._controller = controller
-
-        self._weather = QolsysWeather()
-
-        self._partitions = []
-        self._zones = []
-        self._zwave_devices = []
-        self._scenes = []
-
+        self._controller: QolsysController = controller
+        self._weather: QolsysWeather = QolsysWeather()
+        self._partitions: list[QolsysPartition] = []
+        self._zones: list[QolsysZone] = []
+        self._zwave_devices: list[QolsysZWaveDevice] = []
+        self._scenes: list[QolsysScene] = []
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
         self._state_zwave_observer = QolsysObservable()
@@ -43,10 +39,6 @@ class QolsysState(QolsysObservable):
     @property
     def partitions(self) -> list[QolsysPartition]:
         return self._partitions
-
-    @property
-    def weather(self) -> QolsysWeather:
-        return self._weather
 
     @property
     def zwave_devices(self) -> list[QolsysZWaveDevice]:
@@ -59,6 +51,11 @@ class QolsysState(QolsysObservable):
     @property
     def scenes(self) -> list[QolsysScene]:
         return self._scenes
+
+    @property
+    def weather(self) -> QolsysWeather:
+        return self._weather
+
 
     @property
     def zwave_dimmers(self) -> list[QolsysDimmer]:
@@ -103,7 +100,7 @@ class QolsysState(QolsysObservable):
     def state_scene_observer(self) -> QolsysObservable:
         return self._state_scene_observer
 
-    def partition(self, partition_id: str) -> QolsysPartition:
+    def partition(self, partition_id: str) -> QolsysPartition | None:
         for partition in self.partitions:
             if partition.id == partition_id:
                 return partition
@@ -131,7 +128,7 @@ class QolsysState(QolsysObservable):
         self.partitions.remove(partition)
         self.state_partition_observer.notify()
 
-    def scene(self, scene_id: str) -> QolsysScene:
+    def scene(self, scene_id: str) -> QolsysScene | None:
         for scene in self.scenes:
             if scene.scene_id == scene_id:
                 return scene
@@ -159,7 +156,7 @@ class QolsysState(QolsysObservable):
         self.scenes.remove(scene)
         self.state_scene_observer.notify()
 
-    def zone(self, zone_id: str) -> QolsysZone:
+    def zone(self, zone_id: str) -> QolsysZone | None:
         for zone in self.zones:
             if zone.zone_id == zone_id:
                 return zone
@@ -174,7 +171,7 @@ class QolsysState(QolsysObservable):
     def zone_add(self, new_zone: QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
-                LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, self.sensorname)
+                LOGGER.debug("Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, new_zone.sensorname)
                 return
 
         self.zones.append(new_zone)
@@ -191,7 +188,7 @@ class QolsysState(QolsysObservable):
         self.zones.remove(zone)
         self.state_zone_observer.notify()
 
-    def zwave_device(self, node_id: str) -> QolsysZWaveDevice:
+    def zwave_device(self, node_id: str) -> QolsysZWaveDevice | None:
         for zwave_device in self.zwave_devices:
             if zwave_device.node_id == node_id:
                 return zwave_device
@@ -245,13 +242,13 @@ class QolsysState(QolsysObservable):
                         # Update Thermostat
                         if isinstance(state_zwave, QolsysThermostat) and isinstance(db_zwave, QolsysThermostat):
                             state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_thermostat(db_zwave.to_dict_thermostat)
+                            state_zwave.update_thermostat(db_zwave.to_dict_thermostat())
                             break
 
                         # Update Lock
                         if isinstance(state_zwave, QolsysLock) and isinstance(db_zwave, QolsysLock):
                             state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_lock(db_zwave.to_dict_lock)
+                            state_zwave.update_lock(db_zwave.to_dict_lock())
                             break
 
                         # Generic Z-Wave Device
@@ -268,7 +265,7 @@ class QolsysState(QolsysObservable):
         # Delete zwave device
         for state_zwave in self.zwave_devices:
             if state_zwave.node_id not in db_zwave_list:
-                LOGGER.debug("sync_data - delete ZWave%s", state_zwave.none_id)
+                LOGGER.debug("sync_data - delete ZWave%s", state_zwave.node_id)
                 self.zwave_delete(state_zwave.node_id)
 
     def sync_weather_data(self, db_weather: QolsysWeather) -> None:

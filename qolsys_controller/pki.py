@@ -1,13 +1,12 @@
 import logging
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509 import load_pem_x509_csr
 from cryptography.x509.oid import NameOID
 
 from .settings import QolsysSettings
@@ -18,13 +17,12 @@ LOGGER = logging.getLogger(__name__)
 class QolsysPKI:
     def __init__(self, settings: QolsysSettings) -> None:
         self._id = ""
-        self._subkeys_directory: Path = Path
-
-        self._key = None
-        self._cer = None
-        self._csr = None
-        self._secure = None
-        self._qolsys = None
+        self._subkeys_directory: Path = Path()
+        self._key: Path = Path()
+        self._cer: Path = Path()
+        self._csr: Path = Path()
+        self._secure: Path = Path()
+        self._qolsys: Path = Path()
 
         self._settings = settings
 
@@ -41,23 +39,23 @@ class QolsysPKI:
         self._subkeys_directory = self._settings.pki_directory.joinpath(Path(self.id))
 
     @property
-    def key(self) -> str:
+    def key(self) -> Path:
         return self._key
 
     @property
-    def cer(self) -> str:
+    def cer(self) -> Path:
         return self._cer
 
     @property
-    def csr(self) -> str:
+    def csr(self) -> Path:
         return self._csr
 
     @property
-    def secure(self) -> str:
+    def secure(self) -> Path:
         return self._secure
 
     @property
-    def qolsys(self) -> str:
+    def qolsys(self) -> Path:
         return self._qolsys
 
     def auto_discover_pki(self) -> bool:
@@ -71,51 +69,6 @@ class QolsysPKI:
                     return True
 
         return False
-
-    def load_private_key(self, key: str) -> bool:
-        try:
-            self._key = serialization.load_pem_private_key(key.encode(), password=None)
-        except ValueError:
-            LOGGER.debug("Private Key Value Error")
-            return False
-
-        return True
-
-    def load_certificate(self, cer: str) -> bool:
-        try:
-            self._cer = x509.load_pem_x509_certificate(cer.encode(), None)
-        except ValueError:
-            LOGGER.debug("Certificate Value Error")
-            return False
-
-        return True
-
-    def load_certificate_signing_request(self, csr: str) -> bool:
-        try:
-            self._csr = load_pem_x509_csr(csr.encode())
-        except ValueError:
-            LOGGER.debug("Certificate Signing Request Value Error")
-            return False
-
-        return True
-
-    def load_qolsys_certificate(self, qolsys: str) -> bool:
-        try:
-            self._qolsys = x509.load_pem_x509_certificate(qolsys.encode(), None)
-        except ValueError:
-            LOGGER.debug("Qolsys Certificate Value Error")
-            return False
-
-        return True
-
-    def load_signed_client_certificate(self, secure: str) -> bool:
-        try:
-            self._secure = x509.load_pem_x509_certificate(secure.encode(), None)
-        except ValueError:
-            LOGGER.debug("Client Signed Certificate Value Error")
-            return False
-
-        return True
 
     def check_key_file(self) -> bool:
         if self._subkeys_directory.joinpath(self.id + ".key").resolve().exists():
@@ -157,19 +110,19 @@ class QolsysPKI:
         return self._subkeys_directory.joinpath(self.id + ".key")
 
     @property
-    def csr_file_path(self) -> str:
+    def csr_file_path(self) -> Path:
         return self._subkeys_directory.joinpath(self.id + ".csr")
 
     @property
-    def cer_file_path(self) -> str:
+    def cer_file_path(self) -> Path:
         return self._subkeys_directory.joinpath(self.id + ".cer")
 
     @property
-    def secure_file_path(self) -> str:
+    def secure_file_path(self) -> Path:
         return self._subkeys_directory.joinpath(self.id + ".secure")
 
     @property
-    def qolsys_cer_file_path(self) -> str:
+    def qolsys_cer_file_path(self) -> Path:
         return self._subkeys_directory.joinpath(self.id + ".qolsys")
 
     def create(self, mac: str, key_size: int) -> bool:
@@ -232,9 +185,9 @@ class QolsysPKI:
         ).serial_number(
             x509.random_serial_number(),
         ).not_valid_before(
-            datetime.utcnow(),
+            datetime.now(timezone.utc),  # noqa: UP017
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365),
+            datetime.now(timezone.utc) + timedelta(days=3650),  # noqa: UP017
         ).add_extension(
             x509.BasicConstraints(ca=False, path_length=None), critical=True,
         ).sign(private_key, hashes.SHA256())

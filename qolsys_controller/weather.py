@@ -69,6 +69,3 @@ class QolsysWeather(QolsysObservable):
     @property
     def forecasts(self) -> list[QolsysForecast]:
         return self._forecasts
-
-    def to_dict(self) -> dict:
-        pass

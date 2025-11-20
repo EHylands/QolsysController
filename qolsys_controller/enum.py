@@ -12,6 +12,12 @@ class PartitionSystemStatus(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class PartitionArmingType(StrEnum):
+    ARM_STAY = "ui_armstay"
+    ARM_AWAY = "ui_armaway"
+    ARM_NIGHT = "ui_armnight"
+
+
 class PartitionAlarmState(StrEnum):
     NONE = "None"
     DELAY = "Delay"
@@ -27,6 +33,7 @@ class PartitionAlarmType(StrEnum):
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
     GLASS_BREAK = "glassbreak"
+
 
 class ZoneStatus(StrEnum):
     ALARMED = "Alarmed"

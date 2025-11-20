@@ -84,7 +84,7 @@ class QolsysDB:
         self.table_shades = QolsysTableShades(self.db, self.cursor)
         self.table_nest_device = QolsysTableNestDevice(self.db, self.cursor)
 
-        self._table_array = []
+        self._table_array: list[QolsysTable] = []
         self._table_array.append(self.table_sensor)
         self._table_array.append(self.table_partition)
         self._table_array.append(self.table_qolsyssettings)
@@ -249,7 +249,7 @@ class QolsysDB:
 
         return weather_list
 
-    def get_powerg(self, short_id: str) -> dict:
+    def get_powerg(self, short_id: str) -> dict | None:
         try:
             self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?",(short_id,))
             self.db.commit()
@@ -275,18 +275,18 @@ class QolsysDB:
 
         if row is None:
             LOGGER.debug("%s value not found", setting)
-            return None
+            return ""
 
         return row[0]
 
-    def get_setting_partition(self, setting: str, partition_id: str) -> str | None:
+    def get_setting_partition(self, setting: str, partition_id: str) -> str:
         self.cursor.execute(f"""SELECT value FROM {self.table_qolsyssettings.table}
                              WHERE name = ? and partition_id  = ? """, (setting, partition_id))
         row = self.cursor.fetchone()
 
         if row is None:
             LOGGER.debug("%s value not found", setting)
-            return None
+            return ""
 
         return row[0]
 

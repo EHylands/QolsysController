@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTaskManager:
     def __init__(self) -> None:
-        self._tasks = set()
+        self._tasks:set[asyncio.Task] = set()
 
     def run(self, coro: Coroutine, label: str) -> asyncio.Task:
         task = asyncio.create_task(coro, name=label)
@@ -48,9 +48,6 @@ class QolsysTaskManager:
     async def wait_all(self) -> None:
         if self._tasks:
             await asyncio.gather(*self._tasks, return_exceptions=True)
-
-    def pending(self) -> None:
-        return {t for t in self._tasks if not t.done()}
 
     def dump(self) -> None:
         for task in self._tasks:

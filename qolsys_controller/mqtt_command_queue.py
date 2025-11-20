@@ -19,7 +19,7 @@ class QolsysMqttCommandQueue:
         if future and not future.done():
             future.set_result(response)
 
-    async def wait_for_response(self, request_id: str) -> None:
+    async def wait_for_response(self, request_id: str) -> dict:
         if request_id in self.waiters:
             msg = f"Duplicate waiter for request_id: {request_id}"
             raise ValueError(msg)
