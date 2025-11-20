@@ -18,7 +18,7 @@ class MQTTCommand:
     def __init__(
         self,
         controller: "QolsysController",
-        eventName: str,  # noqa: N803
+        eventName: str,
     ) -> None:
         self._controller:QolsysController = controller
         self._client:aiomqtt.Client = controller.aiomqtt
@@ -38,7 +38,7 @@ class MQTTCommand:
     def append(self, argument:str, value: str | dict | int | bool | list) -> None:
         self._payload[argument] = value
 
-    async def send_command(self) -> dict:
+    async def send_command(self) -> dict[str,Any]:
 
         if self._client is None:
             LOGGER.error("MQTT Client not configured")
@@ -47,7 +47,7 @@ class MQTTCommand:
         await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
         return await self._controller.mqtt_command_queue.wait_for_response(self._requestID)
 
-class MQTTCommand_IpcCall(MQTTCommand):  # noqa: N801
+class MQTTCommand_IpcCall(MQTTCommand):
     def __init__(
         self,
         controller: "QolsysController",
@@ -63,7 +63,7 @@ class MQTTCommand_IpcCall(MQTTCommand):  # noqa: N801
     def append_ipc_request(self, ipc_request: list[object]) -> None:
         self.append("ipcRequest",ipc_request)
 
-class MQTTCommand_Panel(MQTTCommand_IpcCall):  # noqa: N801
+class MQTTCommand_Panel(MQTTCommand_IpcCall):
     def __init__(
         self,
         controller: "QolsysController",
@@ -75,7 +75,7 @@ class MQTTCommand_Panel(MQTTCommand_IpcCall):  # noqa: N801
             ipc_transaction_id = 7,
         )
 
-class MQTTCommand_ZWave(MQTTCommand_IpcCall):  # noqa: N801
+class MQTTCommand_ZWave(MQTTCommand_IpcCall):
     def __init__(
         self,
         controller: "QolsysController",

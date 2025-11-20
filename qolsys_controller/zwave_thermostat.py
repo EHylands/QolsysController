@@ -8,41 +8,41 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysThermostat(QolsysZWaveDevice):
 
-    def __init__(self, thermostat_dict: dict, zwave_dict: dict) -> None:
+    def __init__(self, thermostat_dict: dict[str,str], zwave_dict: dict[str,str]) -> None:
 
         super().__init__(zwave_dict)
 
-        self._thermostat_id = thermostat_dict.get("_id")
-        self._thermostat_version = thermostat_dict.get("version", "")
-        self._thermostat_opr = thermostat_dict.get("opr", "")
-        self._thermostat_partition_id = thermostat_dict.get("partition_id", "")
-        self._thermostat_name = thermostat_dict.get("thermostat_name", "")
-        self._thermostat_node_id = thermostat_dict.get("node_id", "")
-        self._thermostat_device_temp_unit = thermostat_dict.get("device_temp_unit", "")  # 'F'
-        self._thermostat_current_temp = thermostat_dict.get("current_temp", "")  # "78.0"
-        self._thermostat_target_cool_temp = thermostat_dict.get("target_cool_temp", "")  # "78"
-        self._thermostat_target_heat_temp = thermostat_dict.get("target_heat_temp", "")  # "65"
-        self._thermostat_target_temp = thermostat_dict.get("target_temp", "")
-        self._thermostat_power_usage = thermostat_dict.get("power_usage", "")
-        self._thermostat_mode = thermostat_dict.get("thermostat_mode", "")  # "2"
-        self._thermostat_mode_bitmask = thermostat_dict.get("thermostat_mode_bitmask", "")  # "7,24"
-        self._thermostat_fan_mode = thermostat_dict.get("fan_mode", "")  # "0"
-        self._thermostat_fan_mode_bitmask = thermostat_dict.get("fan_mode_bitmask", "")  # "67"
-        self._thermostat_set_point_mode = thermostat_dict.get("set_point_mode", "")
-        self._thermostat_set_point_mode_bitmask = thermostat_dict.get("set_point_mode_bitmask", "")  # "-122,1"
-        self._thermostat_created_by = thermostat_dict.get("created_by", "")
-        self._thermostat_created_date = thermostat_dict.get("created_date", "")
-        self._thermostat_updated_by = thermostat_dict.get("updated_by", "")
-        self._thermostat_last_updated_date = thermostat_dict.get("last_updated_date", "")
-        self._thermostat_mode_updated_time = thermostat_dict.get("thermostat_mode_updated_time", "")
-        self._thermostat_fan_mode_updated_time = thermostat_dict.get("fan_mode_updated_time", "")
-        self._thermostat_set_point_mode_updated_time = thermostat_dict.get("set_point_mode_updated_time", "")
-        self._thermostat_target_cool_temp_updated_time = thermostat_dict.get("target_cool_temp_updated_time", "")
-        self._thermostat_target_heat_temp_updated_time = thermostat_dict.get("target_heat_temp_updated_time", "")
-        self._thermostat_current_temp_updated_time = thermostat_dict.get("current_temp_updated_time", "")
-        self._thermostat_endpoint = thermostat_dict.get("endpoint", "")
-        self._thermostat_paired_status = thermostat_dict.get("paired_status", "")
-        self._thermostat_configuration_parameter = thermostat_dict.get("configuration_parameter", "")
+        self._thermostat_id: str = thermostat_dict.get("_id")
+        self._thermostat_version: str = thermostat_dict.get("version", "")
+        self._thermostat_opr: str = thermostat_dict.get("opr", "")
+        self._thermostat_partition_id: str = thermostat_dict.get("partition_id", "")
+        self._thermostat_name: str = thermostat_dict.get("thermostat_name", "")
+        self._thermostat_node_id: str = thermostat_dict.get("node_id", "")
+        self._thermostat_device_temp_unit: str = thermostat_dict.get("device_temp_unit", "")  # 'F'
+        self._thermostat_current_temp: str = thermostat_dict.get("current_temp", "")  # "78.0"
+        self._thermostat_target_cool_temp: str = thermostat_dict.get("target_cool_temp", "")  # "78"
+        self._thermostat_target_heat_temp: str = thermostat_dict.get("target_heat_temp", "")  # "65"
+        self._thermostat_target_temp: str = thermostat_dict.get("target_temp", "")
+        self._thermostat_power_usage: str = thermostat_dict.get("power_usage", "")
+        self._thermostat_mode: str = thermostat_dict.get("thermostat_mode", "")  # "2"
+        self._thermostat_mode_bitmask: str = thermostat_dict.get("thermostat_mode_bitmask", "")  # "7,24"
+        self._thermostat_fan_mode: str = thermostat_dict.get("fan_mode", "")  # "0"
+        self._thermostat_fan_mode_bitmask: str = thermostat_dict.get("fan_mode_bitmask", "")  # "67"
+        self._thermostat_set_point_mode: str = thermostat_dict.get("set_point_mode", "")
+        self._thermostat_set_point_mode_bitmask: str = thermostat_dict.get("set_point_mode_bitmask", "")  # "-122,1"
+        self._thermostat_created_by: str = thermostat_dict.get("created_by", "")
+        self._thermostat_created_date: str = thermostat_dict.get("created_date", "")
+        self._thermostat_updated_by: str = thermostat_dict.get("updated_by", "")
+        self._thermostat_last_updated_date: str = thermostat_dict.get("last_updated_date", "")
+        self._thermostat_mode_updated_time: str = thermostat_dict.get("thermostat_mode_updated_time", "")
+        self._thermostat_fan_mode_updated_time: str = thermostat_dict.get("fan_mode_updated_time", "")
+        self._thermostat_set_point_mode_updated_time: str = thermostat_dict.get("set_point_mode_updated_time", "")
+        self._thermostat_target_cool_temp_updated_time: str = thermostat_dict.get("target_cool_temp_updated_time", "")
+        self._thermostat_target_heat_temp_updated_time: str = thermostat_dict.get("target_heat_temp_updated_time", "")
+        self._thermostat_current_temp_updated_time: str = thermostat_dict.get("current_temp_updated_time", "")
+        self._thermostat_endpoint: str = thermostat_dict.get("endpoint", "")
+        self._thermostat_paired_status: str = thermostat_dict.get("paired_status", "")
+        self._thermostat_configuration_parameter: str = thermostat_dict.get("configuration_parameter", "")
 
     # -----------------------------
     # properties + setters

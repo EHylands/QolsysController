@@ -15,7 +15,7 @@ class QolsysPartition(QolsysObservable):
     EXIT_SOUNDS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
     ENTRY_DELAYS_ARRAY = ["ON", "OFF", ""]  # noqa: RUF012
 
-    def __init__(self, partition_dict: dict, settings_dict: dict, alarm_state: PartitionAlarmState,
+    def __init__(self, partition_dict: dict[str,str], settings_dict: dict[str,str], alarm_state: PartitionAlarmState,
                  alarm_type_array: list[PartitionAlarmType]) -> None:
 
         super().__init__()
@@ -43,7 +43,7 @@ class QolsysPartition(QolsysObservable):
         self._command_arm_stay_silent_disarming: bool = False
         self._command_arm_entry_delay: bool = True
 
-    def update_partition(self, data: dict) -> None:
+    def update_partition(self, data: dict[str,str]) -> None:
         # Check if we are updating same partition_id
         partition_id_update = data.get("partition_id", "")
         if partition_id_update != self.id:

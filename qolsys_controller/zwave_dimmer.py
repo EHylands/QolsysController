@@ -7,25 +7,25 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysDimmer(QolsysZWaveDevice):
 
-    def __init__(self, dimmer_dict: dict, zwave_dict: dict) -> None:
+    def __init__(self, dimmer_dict: dict[str,str], zwave_dict: dict[str,str]) -> None:
 
         super().__init__(zwave_dict)
 
-        self._dimmer_id = dimmer_dict.get("_id")
-        self._dimmer_version = dimmer_dict.get("version", "")
-        self._dimmer_opr = dimmer_dict.get("opr", "")
-        self._dimmer_partition_id = dimmer_dict.get("partition_id", "")
-        self._dimmer_name = dimmer_dict.get("dimmer_name", "")
-        self._dimmer_status = dimmer_dict.get("status", "")
-        self._dimmer_level = dimmer_dict.get("level", "")
-        self._dimmer_node_id = dimmer_dict.get("node_id", "")
-        self._dimmer_created_by = dimmer_dict.get("created_by", "")
-        self._dimmer_created_date = dimmer_dict.get("created_date", "")
-        self._dimmer_updated_by = dimmer_dict.get("updated_by", "")
-        self._dimmer_last_updated_date = dimmer_dict.get("last_updated_date", "")
-        self._dimmer_endpoint = dimmer_dict.get("endpoint", "")
-        self._dimmer_power_details = dimmer_dict.get("power_details", "")
-        self._dimmer_paired_status = dimmer_dict.get("paired_status", "")
+        self._dimmer_id: str = dimmer_dict.get("_id")
+        self._dimmer_version: str = dimmer_dict.get("version", "")
+        self._dimmer_opr: str = dimmer_dict.get("opr", "")
+        self._dimmer_partition_id: str = dimmer_dict.get("partition_id", "")
+        self._dimmer_name: str = dimmer_dict.get("dimmer_name", "")
+        self._dimmer_status: str = dimmer_dict.get("status", "")
+        self._dimmer_level: str = dimmer_dict.get("level", "")
+        self._dimmer_node_id: str = dimmer_dict.get("node_id", "")
+        self._dimmer_created_by: str = dimmer_dict.get("created_by", "")
+        self._dimmer_created_date: str = dimmer_dict.get("created_date", "")
+        self._dimmer_updated_by: str = dimmer_dict.get("updated_by", "")
+        self._dimmer_last_updated_date: str = dimmer_dict.get("last_updated_date", "")
+        self._dimmer_endpoint: str = dimmer_dict.get("endpoint", "")
+        self._dimmer_power_details: str = dimmer_dict.get("power_details", "")
+        self._dimmer_paired_status: str = dimmer_dict.get("paired_status", "")
 
     def is_on(self) -> bool:
         return self.dimmer_status == "On"

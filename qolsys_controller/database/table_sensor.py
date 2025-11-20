@@ -65,6 +65,7 @@ class QolsysTableSensor(QolsysTable):
             "secondary_panel_mac_address",
             "extras",
             "allowspeaker",
+            "firmware_version",
         ]
 
         self._create_table()

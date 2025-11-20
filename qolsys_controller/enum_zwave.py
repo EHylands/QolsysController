@@ -35,6 +35,7 @@ class ThermostatFanMode(IntEnum):
     EXTERNAL_CIRCULATION = 0x0800
     MANUFACTURER_SPECEFIC = 0x1000
 
+
 class ZwaveCommand(IntEnum):
     SwitchBinary = 0x25
     SwitchMultilevel = 0x26

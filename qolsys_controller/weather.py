@@ -6,14 +6,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysForecast:
-    def __init__(self, data: dict) -> None:
-        self._high_temp = data.get("high_temp", "")
-        self._low_temp = data.get("low_temp", "")
-        self._day_of_week = data.get("day_of_week", "")
-        self._condition = data.get("condition", "")
-        self._icon = data.get("icon", "")
-        self._precipitation = data.get("precipitation", "")
-        self._current_weather_date = data.get("current_weather_date", "")
+    def __init__(self, data: dict[str,str]) -> None:
+        self._high_temp: str = data.get("high_temp", "")
+        self._low_temp: str = data.get("low_temp", "")
+        self._day_of_week: str = data.get("day_of_week", "")
+        self._condition: str = data.get("condition", "")
+        self._icon: str = data.get("icon", "")
+        self._precipitation: str = data.get("precipitation", "")
+        self._current_weather_date: str = data.get("current_weather_date", "")
 
     @property
     def high_temp(self) -> float | None:

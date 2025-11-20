@@ -34,9 +34,9 @@ async def main() -> None:  # noqa: D103
     Panel.settings.random_mac = ""
 
     # Additionnal remote plugin config
-    Panel.check_user_code_on_disarm = False
-    Panel.log_mqtt_mesages = args.debug
-    Panel.auto_discover_pki = args.pki_autodiscovery
+    Panel.settings.check_user_code_on_disarm = False
+    Panel.settings.log_mqtt_mesages = args.debug
+    Panel.settings.auto_discover_pki = args.pki_autodiscovery
 
     # Configure remote plugin
     if not await Panel.config(start_pairing=True):
