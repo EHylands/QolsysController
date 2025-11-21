@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import contextlib
+from difflib import restore
 import json
 import logging
 import random
@@ -212,9 +213,8 @@ class QolsysController:
                 self.panel.imei = response_connect.get("master_imei", "")
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
-                # await self.command_pairing_request()
                 await self.command_pingevent()
-                await self.command_pair_status_request()
+                #await self.command_pair_status_request()
 
                 response_database = await self.command_sync_database()
                 LOGGER.debug("MQTT: Updating State from syncdatabase")
@@ -444,7 +444,7 @@ class QolsysController:
             "gateway": "",
             "netmask": "",
             "dns1": "",
-            "dns2": "4.4.4.4",
+            "dns2": "",
             "dhcpServer": "",
             "leaseDuration": "",
         }
@@ -468,13 +468,14 @@ class QolsysController:
         command.append("remote_panel_battery_voltage", 4102)
         command.append("remote_panel_battery_present", True)
         command.append("remote_panel_battery_technology", "")
-        command.append("remote_panel_battery_level ", 100)
+        command.append("remote_panel_battery_level", 100)
         command.append("remote_panel_battery_health", 2)
         command.append("remote_panel_plugged", 1)
         command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving connect command")
+        print(response)
         return response
 
     async def command_pairing_request(self) -> dict[str, Any]:
@@ -520,9 +521,10 @@ class QolsysController:
         command.append("remote_panel_battery_voltage", 4102)
         command.append("remote_panel_battery_present", True)
         command.append("remote_panel_battery_technology", "")
-        command.append("remote_panel_battery_level ", 100)
+        command.append("remote_panel_battery_level", 100)
         command.append("remote_panel_battery_health", 2)
         command.append("remote_panel_plugged", 1)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pingevent command")
         return response
@@ -562,6 +564,7 @@ class QolsysController:
         command = MQTTCommand(self, "pair_status_request")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pair_status_request command")
+        print(response)
         return response
 
     async def command_disconnect(self) -> dict[str, Any]:

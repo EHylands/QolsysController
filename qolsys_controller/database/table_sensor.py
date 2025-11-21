@@ -11,7 +11,7 @@ class QolsysTableSensor(QolsysTable):
         super().__init__(db, cursor)
         self._uri = "content://com.qolsys.qolsysprovider.SensorContentProvider/sensor"
         self._table = "sensor"
-        self._abort_on_error = True
+        self._abort_on_error = False
         self._implemented = True
 
         self._columns = [

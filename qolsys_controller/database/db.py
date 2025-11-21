@@ -23,6 +23,7 @@ from .table_powerg_device import QolsysTablePowerGDevice
 from .table_qolsyssettings import QolsysTableQolsysSettings
 from .table_scene import QolsysTableScene
 from .table_sensor import QolsysTableSensor
+from .table_sensor_group import QolsysTableSensorGroup
 from .table_shades import QolsysTableShades
 from .table_smartsocket import QolsysTableSmartSocket
 from .table_state import QolsysTableState
@@ -62,6 +63,7 @@ class QolsysDB:
         self.table_partition = QolsysTablePartition(self.db, self.cursor)
         self.table_powerg_device = QolsysTablePowerGDevice(self.db, self.cursor)
         self.table_sensor = QolsysTableSensor(self.db, self.cursor)
+        self.table_sensor_group = QolsysTableSensorGroup(self.db,self.cursor)
         self.table_smartsocket = QolsysTableSmartSocket(self.db, self.cursor)
         self.table_qolsyssettings = QolsysTableQolsysSettings(self.db, self.cursor)
         self.table_scene = QolsysTableScene(self.db, self.cursor)
@@ -84,6 +86,7 @@ class QolsysDB:
 
         self._table_array: list[QolsysTable] = []
         self._table_array.append(self.table_sensor)
+        self._table_array.append(self.table_sensor_group)
         self._table_array.append(self.table_partition)
         self._table_array.append(self.table_qolsyssettings)
         self._table_array.append(self.table_alarmedsensor)
