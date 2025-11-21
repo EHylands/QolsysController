@@ -31,7 +31,7 @@ class MQTTCommand:
         self.append("requestID", self._requestID)
         self.append("responseTopic", self._responseTopic)
         self.append("eventName", self._eventName)
-        self.append("remoteMacAddess", self._controller.settings.random_mac)
+        self.append("remoteMacAddress", self._controller.settings.random_mac)
 
     def append(self, argument: str, value: str | dict | int | bool | list) -> None:
         self._payload[argument] = value

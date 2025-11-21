@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import base64
 import contextlib
-from difflib import restore
 import json
 import logging
 import random
@@ -214,7 +213,7 @@ class QolsysController:
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
                 await self.command_pingevent()
-                #await self.command_pair_status_request()
+                await self.command_pair_status_request()
 
                 response_database = await self.command_sync_database()
                 LOGGER.debug("MQTT: Updating State from syncdatabase")
@@ -475,7 +474,6 @@ class QolsysController:
 
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving connect command")
-        print(response)
         return response
 
     async def command_pairing_request(self) -> dict[str, Any]:
@@ -512,6 +510,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Sending pingevent command")
         command = MQTTCommand(self, "pingevent")
         command.append("remote_panel_status", "Active")
+        command.append("macAddress", self.settings.random_mac)
         command.append("ipAddress", self.settings.plugin_ip)
         command.append("current_battery_status", "Normal")
         command.append("remote_panel_battery_percentage", 100)
@@ -564,7 +563,6 @@ class QolsysController:
         command = MQTTCommand(self, "pair_status_request")
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving pair_status_request command")
-        print(response)
         return response
 
     async def command_disconnect(self) -> dict[str, Any]:
