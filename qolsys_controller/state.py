@@ -165,7 +165,7 @@ class QolsysState(QolsysObservable):
 
     def zone_from_short_id(self, short_id: int) -> QolsysZone | None:
         for zone in self.zones:
-            if zone.shortID == short_id:
+            if zone.shortID == str(short_id):
                 return zone
         return None
 

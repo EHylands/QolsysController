@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .database.db import QolsysDB
 from .enum import (
@@ -381,7 +381,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self, database: dict) -> None:
+    def load_database(self, database: list[dict[str, Any]]) -> None:
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -390,7 +390,7 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
     # Parse panel update to database
-    def parse_iq2meid_message(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915
         eventName = data.get("eventName")
         dbOperation = data.get("dbOperation", "")
         uri = data.get("uri")
@@ -850,7 +850,7 @@ class QolsysPanel(QolsysObservable):
 
     def get_scenes_from_db(self) -> list[QolsysScene]:
         scenes = []
-        scenes_list: list[dict] = self.db.get_scenes()
+        scenes_list: list[dict[str, str]] = self.db.get_scenes()
 
         # Create scenes array
         for scene_info in scenes_list:
@@ -860,7 +860,7 @@ class QolsysPanel(QolsysObservable):
 
     def get_weather_from_db(self) -> QolsysWeather:
         weather = QolsysWeather()
-        forecast_dic_list: list[dict] = self.db.get_weather()
+        forecast_dic_list: list[dict[str, str]] = self.db.get_weather()
 
         forecast_obj_list = []
         for forecast in forecast_dic_list:
@@ -873,7 +873,7 @@ class QolsysPanel(QolsysObservable):
 
     def get_zones_from_db(self) -> list[QolsysZone]:
         zones = []
-        zones_list: list[dict] = self.db.get_zones()
+        zones_list: list[dict[str, str]] = self.db.get_zones()
 
         # Create sensors array
         for zone_info in zones_list:
@@ -892,7 +892,7 @@ class QolsysPanel(QolsysObservable):
 
     def get_partitions_from_db(self) -> list[QolsysPartition]:
         partitions = []
-        partition_list: list[dict] = self.db.get_partitions()
+        partition_list: list[dict[str, str]] = self.db.get_partitions()
 
         # Create partitions array
         for partition_dict in partition_list:

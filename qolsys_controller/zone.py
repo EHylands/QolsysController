@@ -9,11 +9,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysZone(QolsysObservable):
-    def __init__(self, data: dict, settings: QolsysSettings) -> None:  # noqa: PLR0915
+    def __init__(self, data: dict[str, str], settings: QolsysSettings) -> None:
         super().__init__()
 
         self._settings = settings
-        self._delay_task: asyncio.Task | None = None
+        self._delay_task: asyncio.Task[None] | None = None
 
         self._zone_id: str = data.get("zoneid", "")
         self._sensorname: str = data.get("sensorname", "")
@@ -93,7 +93,7 @@ class QolsysZone(QolsysObservable):
     def is_ac_enabled(self) -> bool:
         return self.ac_status != ""
 
-    def update_powerg(self, data: dict) -> None:
+    def update_powerg(self, data: dict[str, str]) -> None:
         short_id_update = data.get("shortID", "")
         if short_id_update != self.shortID:
             LOGGER.error(
@@ -135,7 +135,7 @@ class QolsysZone(QolsysObservable):
 
         self.end_batch_update()
 
-    def update(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def update(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         zone_id_update = data.get("zoneid", "")
         if zone_id_update != self._zone_id:
             LOGGER.error("Updating Zone%s (%s) with Zone%s (different id)", self._zone_id, self.sensorname, zone_id_update)
@@ -427,7 +427,7 @@ class QolsysZone(QolsysObservable):
             self._powerg_status_data = value
             self.notify()
 
-    def to_powerg_dict(self) -> dict:
+    def to_powerg_dict(self) -> dict[str, str]:
         return {
             "shortID": self.shortID,
             "longID": self._powerg_long_id,
@@ -441,7 +441,7 @@ class QolsysZone(QolsysObservable):
             "battery_voltage": self._powerg_battery_voltage,
         }
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str]:
         return {
             "_id": self.id,
             "ac_status": self.ac_status,

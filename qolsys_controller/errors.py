@@ -1,10 +1,11 @@
 import logging
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 
 
 class QolsysError(Exception):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -19,7 +20,7 @@ class QolsysMqttError(QolsysError):
 
 
 class QolsysSqlError(QolsysError):
-    def __init__(self, operation: dict) -> None:
+    def __init__(self, operation: dict[str, Any]) -> None:
         super().__init__("QolsysSqlError")
 
         table = f"QolsysSqlError - table:{operation.get('table', '')}"

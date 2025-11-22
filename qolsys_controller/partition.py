@@ -67,12 +67,12 @@ class QolsysPartition(QolsysObservable):
 
         self.end_batch_update()
 
-    def update_settings(self, data: dict) -> None:
+    def update_settings(self, data: dict[str, str]) -> None:
         self.start_batch_update()
 
         # Update system_status
         if "SYSTEM_STATUS" in data:
-            self.system_status = data.get("SYSTEM_STATUS", "")
+            self.system_status = PartitionSystemStatus[data.get("SYSTEM_STATUS", "")]
 
         # Update system_status_changed_time
         if "SYSTEM_STATUS_CHANGED_TIME" in data:
@@ -88,14 +88,14 @@ class QolsysPartition(QolsysObservable):
 
         self.end_batch_update()
 
-    def to_dict_partition(self) -> dict:
+    def to_dict_partition(self) -> dict[str, str]:
         return {
             "partition_id": self.id,
             "name": self.name,
             "devices": self._devices,
         }
 
-    def to_dict_settings(self) -> dict:
+    def to_dict_settings(self) -> dict[str, str]:
         return {
             "SYSTEM_STATUS": self.system_status.value,
             "SYSTEM_STATUS_CHANGED_TIME": self.system_status_changed_time,

@@ -1,12 +1,13 @@
 import asyncio
+from typing import Any
 
 
 class QolsysMqttCommandQueue:
     def __init__(self) -> None:
         self.lock = asyncio.Lock()
-        self.waiters: dict[str, asyncio.Future] = {}
+        self.waiters: dict[str, asyncio.Future[Any]] = {}
 
-    async def handle_response(self, response: dict) -> None:
+    async def handle_response(self, response: dict[str, str]) -> None:
         requestID = response.get("requestID")
 
         if not requestID:
@@ -19,7 +20,7 @@ class QolsysMqttCommandQueue:
         if future and not future.done():
             future.set_result(response)
 
-    async def wait_for_response(self, request_id: str) -> dict:
+    async def wait_for_response(self, request_id: str) -> dict[str, Any]:
         if request_id in self.waiters:
             msg = f"Duplicate waiter for request_id: {request_id}"
             raise ValueError(msg)
@@ -28,4 +29,4 @@ class QolsysMqttCommandQueue:
         async with self.lock:
             self.waiters[request_id] = future
 
-        return await future
+        return await future  # type: ignore[no-any-return]

@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import uuid
@@ -20,7 +21,7 @@ class MQTTCommand:
         eventName: str,
     ) -> None:
         self._controller: QolsysController = controller
-        self._client: aiomqtt.Client = controller.aiomqtt
+        self._client: aiomqtt.Client | None = controller.aiomqtt
         self._topic: str = "mastermeid"
         self._eventName: str = eventName
         self._payload: dict[str, Any] = {}
@@ -33,7 +34,7 @@ class MQTTCommand:
         self.append("eventName", self._eventName)
         self.append("remoteMacAddress", self._controller.settings.random_mac)
 
-    def append(self, argument: str, value: str | dict | int | bool | list) -> None:
+    def append(self, argument: str, value: str | dict[str, Any] | int | bool | list[dict[str, Any]] | Any) -> None:
         self._payload[argument] = value
 
     async def send_command(self) -> dict[str, Any]:
@@ -58,7 +59,7 @@ class MQTTCommand_IpcCall(MQTTCommand):
         self.append("ipcInterfaceName", ipc_interface_name)
         self.append("ipcTransactionID", ipc_transaction_id)
 
-    def append_ipc_request(self, ipc_request: list[object]) -> None:
+    def append_ipc_request(self, ipc_request: list[dict[str, Any]]) -> None:
         self.append("ipcRequest", ipc_request)
 
 
@@ -89,7 +90,7 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
             ipc_transaction_id=47,
         )
 
-        ipc_request = [
+        ipc_request: list[dict[str, Any]] = [
             {
                 "dataType": "int",
                 "dataValue": int(node_id),

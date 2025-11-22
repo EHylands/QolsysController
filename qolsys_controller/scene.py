@@ -6,15 +6,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysScene(QolsysObservable):
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict[str, str]) -> None:
         super().__init__()
 
-        self._scene_id = data.get("scene_id", "")
-        self._name = data.get("name", "")
-        self._icon = data.get("icon", "")
-        self._color = data.get("color", "")
+        self._scene_id: str = data.get("scene_id", "")
+        self._name: str = data.get("name", "")
+        self._icon: str = data.get("icon", "")
+        self._color: str = data.get("color", "")
 
-    def update(self, data: dict) -> None:
+    def update(self, data: dict[str, str]) -> None:
         scene_id_update = data.get("scene_id", "")
         if scene_id_update != self._scene_id:
             LOGGER.error("Updating Scene%s (%s) with Scene%s (different id)", self._scene_id, self.name, scene_id_update)
@@ -34,7 +34,7 @@ class QolsysScene(QolsysObservable):
 
         self.end_batch_update()
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str]:
         return {
             "scene_id": self.scene_id,
             "name": self.name,

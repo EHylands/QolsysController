@@ -7,13 +7,13 @@ LOGGER = logging.getLogger(__name__)
 
 class QolsysTaskManager:
     def __init__(self) -> None:
-        self._tasks: set[asyncio.Task] = set()
+        self._tasks: set[asyncio.Task] = set()  # type: ignore[type-arg]
 
-    def run(self, coro: Coroutine, label: str) -> asyncio.Task:
+    def run(self, coro: Coroutine, label: str) -> asyncio.Task:  # type: ignore[type-arg]
         task = asyncio.create_task(coro, name=label)
         self._tasks.add(task)
 
-        def _done_callback(task: asyncio.Task) -> None:
+        def _done_callback(task: asyncio.Task) -> None:  # type: ignore[type-arg]
             try:
                 task.result()
 
@@ -28,7 +28,7 @@ class QolsysTaskManager:
         task.add_done_callback(_done_callback)
         return task
 
-    def get_task(self, label: str) -> asyncio.Task | None:
+    def get_task(self, label: str) -> asyncio.Task | None:  # type: ignore[type-arg]
         for task in self._tasks:
             if task.get_name() == label:
                 return task

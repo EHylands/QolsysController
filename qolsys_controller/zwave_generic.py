@@ -6,5 +6,5 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysGeneric(QolsysZWaveDevice):
-    def __init__(self, zwave_dict: dict) -> None:
+    def __init__(self, zwave_dict: dict[str, str]) -> None:
         super().__init__(zwave_dict)

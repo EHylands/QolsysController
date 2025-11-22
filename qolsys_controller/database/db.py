@@ -1,5 +1,6 @@
 import logging  # noqa: INP001
 import sqlite3
+from typing import Any
 
 from .table import QolsysTable
 from .table_alarmedsensor import QolsysTableAlarmedSensor
@@ -63,7 +64,7 @@ class QolsysDB:
         self.table_partition = QolsysTablePartition(self.db, self.cursor)
         self.table_powerg_device = QolsysTablePowerGDevice(self.db, self.cursor)
         self.table_sensor = QolsysTableSensor(self.db, self.cursor)
-        self.table_sensor_group = QolsysTableSensorGroup(self.db,self.cursor)
+        self.table_sensor_group = QolsysTableSensorGroup(self.db, self.cursor)
         self.table_smartsocket = QolsysTableSmartSocket(self.db, self.cursor)
         self.table_qolsyssettings = QolsysTableQolsysSettings(self.db, self.cursor)
         self.table_scene = QolsysTableScene(self.db, self.cursor)
@@ -154,7 +155,7 @@ class QolsysDB:
     def cursor(self) -> sqlite3.Cursor:
         return self._cursor
 
-    def get_scenes(self) -> list[dict]:
+    def get_scenes(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_scene.table} ORDER BY scene_id")
         self.db.commit()
 
@@ -166,7 +167,7 @@ class QolsysDB:
 
         return scenes
 
-    def get_partitions(self) -> list[dict]:
+    def get_partitions(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_partition.table} ORDER BY partition_id")
         self.db.commit()
 
@@ -178,7 +179,7 @@ class QolsysDB:
 
         return partitions
 
-    def get_zwave_devices(self) -> list[dict]:
+    def get_zwave_devices(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY node_id")
         self.db.commit()
 
@@ -190,7 +191,7 @@ class QolsysDB:
 
         return devices
 
-    def get_locks(self) -> list[dict]:
+    def get_locks(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY node_id")
         self.db.commit()
 
@@ -202,7 +203,7 @@ class QolsysDB:
 
         return locks
 
-    def get_thermostats(self) -> list[dict]:
+    def get_thermostats(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_thermostat.table} ORDER BY node_id")
         self.db.commit()
 
@@ -214,7 +215,7 @@ class QolsysDB:
 
         return thermostats
 
-    def get_dimmers(self) -> list[dict]:
+    def get_dimmers(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_dimmer.table} ORDER BY node_id")
         self.db.commit()
 
@@ -226,7 +227,7 @@ class QolsysDB:
 
         return dimmers
 
-    def get_zones(self) -> list[dict]:
+    def get_zones(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_sensor.table} ORDER BY zoneid")
         self.db.commit()
 
@@ -238,7 +239,7 @@ class QolsysDB:
 
         return zones
 
-    def get_weather(self) -> list[dict]:
+    def get_weather(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_weather.table} ORDER BY _id")
         self.db.commit()
 
@@ -250,7 +251,7 @@ class QolsysDB:
 
         return weather_list
 
-    def get_powerg(self, short_id: str) -> dict | None:
+    def get_powerg(self, short_id: str) -> dict[str, str] | None:
         try:
             self.cursor.execute(f"SELECT * FROM {self.table_powerg_device.table} WHERE shortID = ?", (short_id,))
             self.db.commit()
@@ -280,7 +281,7 @@ class QolsysDB:
             LOGGER.debug("%s value not found", setting)
             return ""
 
-        return row[0]
+        return str(row[0])
 
     def get_setting_partition(self, setting: str, partition_id: str) -> str:
         self.cursor.execute(
@@ -294,7 +295,7 @@ class QolsysDB:
             LOGGER.debug("%s value not found", setting)
             return ""
 
-        return row[0]
+        return str(row[0])
 
     def get_state_partition(self, state: str, partition_id: str) -> str | None:
         self.cursor.execute(
@@ -306,7 +307,7 @@ class QolsysDB:
             LOGGER.debug("%s value not found", state)
             return None
 
-        return row[0]
+        return str(row[0])
 
     def get_alarm_type(self, partition_id: str) -> list[str]:
         alarm_type = []
@@ -329,7 +330,7 @@ class QolsysDB:
 
         return None
 
-    def load_db(self, database: dict) -> None:
+    def load_db(self, database: list[dict[str, Any]]) -> None:
         self.clear_db()
 
         if not database:
@@ -337,7 +338,7 @@ class QolsysDB:
             return
 
         for uri in database:
-            table = self.get_table(uri.get("uri"))
+            table = self.get_table(uri.get("uri", ""))
 
             if table is None:
                 LOGGER.error("Please Report")
@@ -345,5 +346,5 @@ class QolsysDB:
                 LOGGER.error(uri)
                 continue
 
-            for u in uri.get("resultSet"):
+            for u in uri.get("resultSet", ""):
                 table.insert(data=u)

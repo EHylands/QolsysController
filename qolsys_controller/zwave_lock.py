@@ -8,10 +8,10 @@ LOGGER = logging.getLogger(__name__)
 class QolsysLock(QolsysZWaveDevice):
     LOCK_STATUS_ARRAY = ["Locked"]  # noqa: RUF012
 
-    def __init__(self, lock_dict: dict, zwave_dict: dict) -> None:
+    def __init__(self, lock_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
         super().__init__(zwave_dict)
 
-        self._lock_id: str = lock_dict.get("_id")
+        self._lock_id: str = lock_dict.get("_id", "")
         self._lock_version: str = lock_dict.get("version", "")
         self._lock_opr: str = lock_dict.get("opr", "")
         self._lock_partition_id: str = lock_dict.get("partition_id", "")
@@ -69,7 +69,7 @@ class QolsysLock(QolsysZWaveDevice):
             self._lock_paired_status = value
             self.notify()
 
-    def update_lock(self, data: dict) -> None:  # noqa: PLR0912
+    def update_lock(self, data: dict[str, str]) -> None:  # noqa: PLR0912
         # Check if we are updating same zoneid
         node_id_update = data.get("node_id", "")
         if node_id_update != self.lock_node_id:
@@ -111,7 +111,7 @@ class QolsysLock(QolsysZWaveDevice):
 
         self.end_batch_update()
 
-    def to_dict_lock(self) -> dict:
+    def to_dict_lock(self) -> dict[str, str]:
         return {
             "_id": self._lock_id,
             "version": self._lock_version,

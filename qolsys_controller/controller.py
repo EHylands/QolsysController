@@ -88,7 +88,7 @@ class QolsysController:
             and self.settings.check_plugin_ip()
         )
 
-    async def config(self, start_pairing: bool) -> bool:
+    async def config(self, start_pairing: bool) -> Any:
         return await self._task_manager.run(self.config_task(start_pairing), self._mqtt_task_config_label)
 
     async def config_task(self, start_pairing: bool) -> bool:
@@ -663,7 +663,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving disarm command")
         return response
 
-    async def command_arm(  # noqa: PLR0913
+    async def command_arm(
         self,
         partition_id: str,
         arming_type: PartitionArmingType,
@@ -671,7 +671,7 @@ class QolsysController:
         exit_sounds: bool = False,
         instant_arm: bool = False,
         entry_delay: bool = True,
-    ) -> bool:
+    ) -> dict[str, str] | None:
         LOGGER.debug(
             "MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
             partition_id,
@@ -686,14 +686,14 @@ class QolsysController:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
-            return False
+            return None
 
         if self.panel.SECURE_ARMING == "true" and self.settings.check_user_code_on_arm:
             # Do local user code verification to arm if secure arming is enabled
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
                 LOGGER.debug("MQTT: arm command error - user_code error")
-                return False
+                return None
 
         exitSoundValue = "ON"
         if not exit_sounds:
@@ -826,7 +826,7 @@ class QolsysController:
             LOGGER.error("thermostat_setpoint_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatSetPoint, 1, mode, setpoint])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatSetPoint, 1, mode, int(setpoint)])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response

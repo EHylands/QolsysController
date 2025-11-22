@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysZWaveDevice(QolsysObservable):
-    def __init__(self, zwave_dict: dict) -> None:
+    def __init__(self, zwave_dict: dict[str, str]) -> None:
         super().__init__()
 
         self._id: str = zwave_dict.get("_id", "")
@@ -36,7 +36,7 @@ class QolsysZWaveDevice(QolsysObservable):
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
 
-    def update_base(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def update_base(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same node_id
         node_id_update = data.get("node_id", "")
         if node_id_update != self._node_id:
@@ -197,7 +197,7 @@ class QolsysZWaveDevice(QolsysObservable):
         except ValueError:
             return ZwaveDeviceClass.Unknown
 
-    def to_dict_base(self) -> dict:
+    def to_dict_base(self) -> dict[str, str]:
         return {
             "_id": self._id,
             "node_id": self.node_id,

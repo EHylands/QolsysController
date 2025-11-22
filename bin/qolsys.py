@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 
-from qolsys_controller import qolsys_controller
+from qolsys_controller import qolsys_controller  # type: ignore[attr-defined]
 from qolsys_controller.errors import QolsysMqttError, QolsysSqlError, QolsysSslError
 
 

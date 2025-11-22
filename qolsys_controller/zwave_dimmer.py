@@ -9,7 +9,7 @@ class QolsysDimmer(QolsysZWaveDevice):
     def __init__(self, dimmer_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
         super().__init__(zwave_dict)
 
-        self._dimmer_id: str = dimmer_dict.get("_id")
+        self._dimmer_id: str = dimmer_dict.get("_id", "")
         self._dimmer_version: str = dimmer_dict.get("version", "")
         self._dimmer_opr: str = dimmer_dict.get("opr", "")
         self._dimmer_partition_id: str = dimmer_dict.get("partition_id", "")
@@ -69,7 +69,7 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_level = value
             self.notify()
 
-    def update_dimmer(self, content_values: dict) -> None:  # noqa: PLR0912
+    def update_dimmer(self, content_values: dict[str, str]) -> None:  # noqa: PLR0912
         # Check if we are updating same none_id
         node_id_update = content_values.get("node_id", "")
         if node_id_update != self._dimmer_node_id:
@@ -109,7 +109,7 @@ class QolsysDimmer(QolsysZWaveDevice):
 
         self.end_batch_update()
 
-    def to_dict_dimmer(self) -> dict:
+    def to_dict_dimmer(self) -> dict[str, str]:
         return {
             "_id": self._dimmer_id,
             "version": self._dimmer_version,

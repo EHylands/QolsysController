@@ -10,7 +10,7 @@ class QolsysThermostat(QolsysZWaveDevice):
     def __init__(self, thermostat_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
         super().__init__(zwave_dict)
 
-        self._thermostat_id: str = thermostat_dict.get("_id")
+        self._thermostat_id: str = thermostat_dict.get("_id", "")
         self._thermostat_version: str = thermostat_dict.get("version", "")
         self._thermostat_opr: str = thermostat_dict.get("opr", "")
         self._thermostat_partition_id: str = thermostat_dict.get("partition_id", "")
@@ -157,7 +157,7 @@ class QolsysThermostat(QolsysZWaveDevice):
             self._thermostat_set_point_mode = value
             self.notify()
 
-    def update_thermostat(self, data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
+    def update_thermostat(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id
         node_id_update = data.get("node_id", "")
         if node_id_update != self.thermostat_node_id:
@@ -230,7 +230,7 @@ class QolsysThermostat(QolsysZWaveDevice):
 
         self.end_batch_update()
 
-    def to_dict_thermostat(self) -> dict:
+    def to_dict_thermostat(self) -> dict[str, str]:
         return {
             "_id": self._thermostat_id,
             "version": self._thermostat_version,

@@ -36,9 +36,11 @@ class QolsysTable:
         column_defs += [f"{col} TEXT" for col in other_columns]
 
         try:
-            query = f"CREATE TABLE {self._table} ({', '.join(column_defs)})"
+            query: str = f"CREATE TABLE {self._table} ({', '.join(column_defs)})"
             self._cursor.execute(query)
             self._db.commit()
+
+            print(query)
 
         except sqlite3.Error as err:
             error = QolsysSqlError(
@@ -70,7 +72,7 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def insert(self, data: dict) -> None:
+    def insert(self, data: dict[str, str]) -> None:
         try:
             if not self._implemented and data is not None:
                 LOGGER.warning("New Table format: %s", self.uri)
@@ -112,7 +114,9 @@ class QolsysTable:
             if self._abort_on_error:
                 raise error from err
 
-    def update(self, selection: str | None, selection_argument: list[str] | str | None, content_value: dict | None) -> None:
+    def update(
+        self, selection: str | None, selection_argument: list[str] | str | None, content_value: dict[str, str] | None
+    ) -> None:
         # selection: 'zone_id=?, parition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
