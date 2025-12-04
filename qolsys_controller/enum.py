@@ -33,6 +33,17 @@ class PartitionAlarmType(StrEnum):
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
     GLASS_BREAK = "glassbreak"
+    ENTRY_EXIT_NORMAL_DELAY = "entryexitdelay"
+    ENTRY_EXIT_LONG_DELAY = "entryexitlongdelay"
+    INSTANT_PERIMETER_DW = "instantperimeter"
+    INSTANT_INTERIOR_DOOR = "instantinterior"
+    AWAY_INSTANT_FOLLOWER_DELAY = "awayinstantfollowerdelay"
+    REPORTING_SAFETY_SENSOR = "reportingsafety"
+    DELAYED_REPORTING_SAFETY_SENSOR = "delayedreportingsafety"
+    AWAY_INSTANT_MOTION = "awayinstantmotion"
+    STAY_INSTANT_MOTION = "stayinstantmotion"
+    STAY_DELAY_MOTION = "staydelaymotion"
+    AWAY_DELAY_MOTION = "awaydelaymotion"
 
 
 class ZoneStatus(StrEnum):
@@ -108,9 +119,6 @@ class ZoneSensorGroup(StrEnum):
     TAMPER_ZONE = "tamperzone"
     SHOCK = "shock"
 
-    # ENTRY_EXIT_NORMAL_DELAY = "" #TBD
-    # ENTRY_EXIT_LONG_DELAY = "" #TBD
-    # INSTANT_PERIMETER_DW = "" #TBD
     # INSTRANT_INTERIOR_DOOR = "" #TBD
     # AWAY_INSTANT_FOLLOWER_DELAY = "" #TBD
     # REPORTING_SAFETY_SENSOR = "" #TBD
