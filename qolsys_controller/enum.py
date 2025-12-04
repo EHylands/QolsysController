@@ -119,6 +119,17 @@ class ZoneSensorGroup(StrEnum):
     SMOKE_HEAT = "smoke_heat"
     TAMPER_ZONE = "tamperzone"
     SHOCK = "shock"
+    ENTRY_EXIT_NORMAL_DELAY = "entryexitdelay"
+    ENTRY_EXIT_LONG_DELAY = "entryexitlongdelay"
+    INSTANT_PERIMETER_DW = "instantperimeter"
+    INSTANT_INTERIOR_DOOR = "instantinterior"
+    AWAY_INSTANT_FOLLOWER_DELAY = "awayinstantfollowerdelay"
+    REPORTING_SAFETY_SENSOR = "reportingsafety"
+    DELAYED_REPORTING_SAFETY_SENSOR = "delayedreportingsafety"
+    AWAY_INSTANT_MOTION = "awayinstantmotion"
+    STAY_INSTANT_MOTION = "stayinstantmotion"
+    STAY_DELAY_MOTION = "staydelaymotion"
+    AWAY_DELAY_MOTION = "awaydelaymotion"
 
     # TAKEOVER = "" #TBD
     # GARAGE_TILT_SAFETY = "" # TBD
