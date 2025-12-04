@@ -119,14 +119,6 @@ class ZoneSensorGroup(StrEnum):
     TAMPER_ZONE = "tamperzone"
     SHOCK = "shock"
 
-    # INSTRANT_INTERIOR_DOOR = "" #TBD
-    # AWAY_INSTANT_FOLLOWER_DELAY = "" #TBD
-    # REPORTING_SAFETY_SENSOR = "" #TBD
-    # DELAYED_REPORTING_SAFETY_SENSOR = "" #TBD
-    # AWAY_INSTANT_MOTION = "" #TBD
-    # STAY_INSTANT_MOTION = "" #TBD
-    # STAY_DELAY_MOTION = "" #TBD
-    # AWAY_DELAY_MOTION = "" #TBD
     # TAKEOVER = "" #TBD
     # GARAGE_TILT_SAFETY = "" # TBD
     # WATER_SENSOR = "" # TBD
