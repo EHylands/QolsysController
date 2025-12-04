@@ -61,6 +61,7 @@ class ZoneStatus(StrEnum):
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     FAILURE = "Failure"
+    NOT_NETWORKED = "Not Networked"
 
 
 class DeviceCapability(StrEnum):
