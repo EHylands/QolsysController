@@ -27,7 +27,7 @@ class QolsysTableHistory(QolsysTable):
             "feature1",
             "feature2",
             "device_id",
-            # "History Bulk Insert",
+            #"History Bulk Insert",
             "Partition",
             # "History Device Names List",
             # "History Bypass Event",

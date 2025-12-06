@@ -40,8 +40,6 @@ class QolsysTable:
             self._cursor.execute(query)
             self._db.commit()
 
-            print(query)
-
         except sqlite3.Error as err:
             error = QolsysSqlError(
                 {
