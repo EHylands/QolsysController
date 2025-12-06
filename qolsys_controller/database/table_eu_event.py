@@ -26,6 +26,7 @@ class QolsysTableEuEvent(QolsysTable):
             "time",
             "ack",
             "type",
+            "feature2",
         ]
 
         self._create_table()
