@@ -44,6 +44,7 @@ class PartitionAlarmType(StrEnum):
     STAY_INSTANT_MOTION = "stayinstantmotion"
     STAY_DELAY_MOTION = "staydelaymotion"
     AWAY_DELAY_MOTION = "awaydelaymotion"
+    EMPTY = ""
 
 
 class ZoneStatus(StrEnum):

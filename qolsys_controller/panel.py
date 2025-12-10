@@ -564,6 +564,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_association_goup.uri:
                                 self.db.table_zwave_association_goup.update(selection, selection_argument, content_values)
 
+                            # Country Locale
+                            case self.db.table_country_locale.uri:
+                                self.db.table_country_locale.update(selection, selection_argument, content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -907,10 +911,7 @@ class QolsysPanel(QolsysObservable):
 
             alarm_type = []
             for alarm in self.db.get_alarm_type(partition_id):
-                if alarm == "":
-                    alarm_type.append(PartitionAlarmType("Police Emergency"))
-                else:
-                    alarm_type.append(PartitionAlarmType(alarm))
+                alarm_type.append(PartitionAlarmType(alarm))
 
             alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE", partition_id) or "UNKNOWN")
 

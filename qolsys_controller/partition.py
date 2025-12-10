@@ -38,7 +38,8 @@ class QolsysPartition(QolsysObservable):
         self._alarm_state: PartitionAlarmState = alarm_state
 
         # Alarm Type (alarmedsensor table)
-        self._alarm_type_array: list[PartitionAlarmType] = alarm_type_array
+        self._alarm_type_array: list[PartitionAlarmType] = []
+        self.append_alarm_type(alarm_type_array)
 
         # Other
         self._command_exit_sounds: bool = True
@@ -72,7 +73,8 @@ class QolsysPartition(QolsysObservable):
 
         # Update system_status
         if "SYSTEM_STATUS" in data:
-            self.system_status = PartitionSystemStatus[data.get("SYSTEM_STATUS", "")]
+            self.system_status = PartitionSystemStatus(data.get("SYSTEM_STATUS", ""))
+
 
         # Update system_status_changed_time
         if "SYSTEM_STATUS_CHANGED_TIME" in data:
@@ -250,6 +252,26 @@ class QolsysPartition(QolsysObservable):
         data_changed = False
 
         for new_alarm_type in new_alarm_type_array:
+
+            # Map values to Police Emergency if needed
+            if  new_alarm_type in {
+                PartitionAlarmType.GLASS_BREAK,
+                PartitionAlarmType.GLASS_BREAK_AWAY_ONLY,
+                PartitionAlarmType.ENTRY_EXIT_LONG_DELAY,
+                PartitionAlarmType.ENTRY_EXIT_NORMAL_DELAY,
+                PartitionAlarmType.INSTANT_PERIMETER_DW,
+                PartitionAlarmType.INSTANT_INTERIOR_DOOR,
+                PartitionAlarmType.AWAY_DELAY_MOTION,
+                PartitionAlarmType.AWAY_INSTANT_MOTION,
+                PartitionAlarmType.REPORTING_SAFETY_SENSOR,
+                PartitionAlarmType.DELAYED_REPORTING_SAFETY_SENSOR,
+                PartitionAlarmType.AWAY_INSTANT_FOLLOWER_DELAY,
+                PartitionAlarmType.STAY_INSTANT_MOTION,
+                PartitionAlarmType.STAY_DELAY_MOTION,
+                PartitionAlarmType.EMPTY
+            }:
+                new_alarm_type = PartitionAlarmType.POLICE_EMERGENCY
+
             # Value already in array
             if new_alarm_type in self._alarm_type_array:
                 continue
