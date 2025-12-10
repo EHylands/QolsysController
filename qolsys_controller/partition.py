@@ -75,7 +75,6 @@ class QolsysPartition(QolsysObservable):
         if "SYSTEM_STATUS" in data:
             self.system_status = PartitionSystemStatus(data.get("SYSTEM_STATUS", ""))
 
-
         # Update system_status_changed_time
         if "SYSTEM_STATUS_CHANGED_TIME" in data:
             self.system_status_changed_time = data.get("SYSTEM_STATUS_CHANGED_TIME", "")
@@ -252,9 +251,8 @@ class QolsysPartition(QolsysObservable):
         data_changed = False
 
         for new_alarm_type in new_alarm_type_array:
-
             # Map values to Police Emergency if needed
-            if  new_alarm_type in {
+            if new_alarm_type in {
                 PartitionAlarmType.GLASS_BREAK,
                 PartitionAlarmType.GLASS_BREAK_AWAY_ONLY,
                 PartitionAlarmType.ENTRY_EXIT_LONG_DELAY,
@@ -268,7 +266,7 @@ class QolsysPartition(QolsysObservable):
                 PartitionAlarmType.AWAY_INSTANT_FOLLOWER_DELAY,
                 PartitionAlarmType.STAY_INSTANT_MOTION,
                 PartitionAlarmType.STAY_DELAY_MOTION,
-                PartitionAlarmType.EMPTY
+                PartitionAlarmType.EMPTY,
             }:
                 new_alarm_type = PartitionAlarmType.POLICE_EMERGENCY
 

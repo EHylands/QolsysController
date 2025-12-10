@@ -26,8 +26,8 @@ class QolsysTableAlarmedSensor(QolsysTable):
             "priority",
             "aseb_type",
             "alarm_time",
-            'version',
-            'opr'
+            "version",
+            "opr",
         ]
 
         self._create_table()
