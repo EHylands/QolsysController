@@ -758,6 +758,96 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
+    async def command_panel_trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending panel_trigger_police command")
+
+        partition = self.state.partition(partition_id)
+        if not partition:
+            LOGGER.debug("MQTT: command_panel_trigger_police Error - Unknow Partition: %s", partition_id)
+            return None
+
+        trigger_command = {
+            "operation_name": "generate_emergency",
+            "partitionID": int(partition_id),
+            "zoneID": 1,
+            "emergencyType": "Silent Police Emergency" if silent else "Police Emergency",
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(trigger_command),
+            }
+        ]
+
+        command = MQTTCommand_Panel(self)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving panel_trigger_police command")
+        return response
+
+    async def command_panel_trigger_auxilliary(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending panel_trigger_auxilliary command")
+
+        partition = self.state.partition(partition_id)
+        if not partition:
+            LOGGER.debug("MQTT: command_panel_trigger_auxilliary Error - Unknow Partition: %s", partition_id)
+            return None
+
+        trigger_command = {
+            "operation_name": "generate_emergency",
+            "partitionID": int(partition_id),
+            "zoneID": 1,
+            "emergencyType": "Silent Auxiliary Emergency" if silent else "Auxiliary Emergency",
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(trigger_command),
+            }
+        ]
+
+        command = MQTTCommand_Panel(self)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving panel_trigger_auxilliary command")
+        return response
+
+    async def command_panel_trigger_fire(self, partition_id: str) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending panel_trigger_fire command")
+
+        partition = self.state.partition(partition_id)
+        if not partition:
+            LOGGER.debug("MQTT: command_panel_trigger_fire Error - Unknow Partition: %s", partition_id)
+            return None
+
+        trigger_command = {
+            "operation_name": "generate_emergency",
+            "partitionID": int(partition_id),
+            "zoneID": 1,
+            "emergencyType": "Fire Emergency",
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(trigger_command),
+            }
+        ]
+
+        command = MQTTCommand_Panel(self)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving panel_trigger_fire command")
+        return response
+
     async def command_zwave_switch_binary_set(self, node_id: str, status: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
         zwave_node = self.state.zwave_device(node_id)
