@@ -604,9 +604,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving ui_delay command")
         return response
 
-    async def command_disarm(
-        self, partition_id: str, user_code: str = "", silent_disarming: bool = False
-    ) -> dict[str, Any] :
+    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str, Any]:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.error("MQTT: disarm command error - Unknow Partition")
@@ -671,7 +669,7 @@ class QolsysController:
         exit_sounds: bool = False,
         instant_arm: bool = False,
         entry_delay: bool = True,
-    ) -> dict[str, str] :
+    ) -> dict[str, str]:
         LOGGER.debug(
             "MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
             partition_id,
@@ -688,7 +686,7 @@ class QolsysController:
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
             return None
 
-        if  self.settings.check_user_code_on_arm:
+        if self.settings.check_user_code_on_arm:
             # Do local user code verification to arm
             user_id = self.panel.check_user(user_code)
             if user_id == -1:

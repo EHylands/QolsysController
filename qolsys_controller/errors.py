@@ -8,9 +8,11 @@ class QolsysError(Exception):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
+
 class QolsysUserCodeError(QolsysError):
     def __init__(self) -> None:
         super().__init__("QolsysUserCodeError")
+
 
 class QolsysSslError(QolsysError):
     def __init__(self) -> None:
