@@ -604,7 +604,9 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving ui_delay command")
         return response
 
-    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str, Any] | None:
+    async def command_disarm(
+        self, partition_id: str, user_code: str = "", silent_disarming: bool = False
+    ) -> dict[str, Any] | None:
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.error("MQTT: disarm command error - Unknow Partition")
