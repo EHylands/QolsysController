@@ -22,7 +22,7 @@ from qolsys_controller.mqtt_command import (
 
 from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ZwaveCommand, ZwaveDeviceClass
-from .errors import QolsysMqttError, QolsysSslError
+from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
 from .mqtt_command_queue import QolsysMqttCommandQueue
 from .observable import QolsysObservable
@@ -606,7 +606,7 @@ class QolsysController:
 
     async def command_disarm(
         self, partition_id: str, user_code: str = "", silent_disarming: bool = False
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any] :
         partition = self.state.partition(partition_id)
         if not partition:
             LOGGER.error("MQTT: disarm command error - Unknow Partition")
@@ -618,7 +618,7 @@ class QolsysController:
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
                 LOGGER.debug("MQTT: disarm command error - user_code error")
-                return None
+                raise QolsysUserCodeError()
 
         async def get_mqtt_disarm_command(silent_disarming: bool) -> str:
             if partition.alarm_state == PartitionAlarmState.ALARM:
@@ -671,7 +671,7 @@ class QolsysController:
         exit_sounds: bool = False,
         instant_arm: bool = False,
         entry_delay: bool = True,
-    ) -> dict[str, str] | None:
+    ) -> dict[str, str] :
         LOGGER.debug(
             "MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
             partition_id,
@@ -688,12 +688,12 @@ class QolsysController:
             LOGGER.debug("MQTT: arm command error - Unknow Partition")
             return None
 
-        if self.panel.SECURE_ARMING == "true" and self.settings.check_user_code_on_arm:
-            # Do local user code verification to arm if secure arming is enabled
+        if  self.settings.check_user_code_on_arm:
+            # Do local user code verification to arm
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
                 LOGGER.debug("MQTT: arm command error - user_code error")
-                return None
+                raise QolsysUserCodeError()
 
         exitSoundValue = "ON"
         if not exit_sounds:
