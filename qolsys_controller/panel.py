@@ -389,6 +389,16 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
+        # Validate all local user match a Qolsys Panel user
+        qolsys_users = self.db.get_users()
+        qolsys_user_list = []
+        for qolsys_user in qolsys_users:
+            qolsys_user_list.append(int(qolsys_user.get("userid", "")))
+
+        for local_user in self._users:
+            if local_user.id not in qolsys_user_list:
+                LOGGER.error("ID %s from users.conf file not found in panel database", local_user.id)
+
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915
         eventName = data.get("eventName")

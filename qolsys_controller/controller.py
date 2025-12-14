@@ -640,6 +640,7 @@ class QolsysController:
             return "disarm_from_openlearn_sensor"
 
         mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
+        LOGGER.debug("Determined MQTT disarm command: %s", mqtt_disarm_command)
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.settings.check_user_code_on_disarm)
 
         disarm_command = {
@@ -649,6 +650,8 @@ class QolsysController:
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
+
+        LOGGER.debug("Disarm Command Payload: %s", disarm_command)
 
         ipc_request = [
             {
