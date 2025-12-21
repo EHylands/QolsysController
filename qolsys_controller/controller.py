@@ -53,7 +53,7 @@ class QolsysController:
         self.certificate_exchange_server: asyncio.Server | None = None
         self._task_manager = QolsysTaskManager()
         self._mqtt_command_queue = QolsysMqttCommandQueue()
-        self._zone_id = 1
+        self._zone_id: str = "1"
 
         # MQTT Client
         self.aiomqtt: aiomqtt.Client | None = None

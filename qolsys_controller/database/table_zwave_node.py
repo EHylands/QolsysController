@@ -79,7 +79,7 @@ class QolsysTableZwaveNode(QolsysTable):
             "sound_switch_info",
             "long_range_nodeid",
             "hide_device_info",
-            "meter_capabilities"
+            "meter_capabilities",
         ]
 
         self._create_table()
