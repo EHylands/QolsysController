@@ -21,9 +21,10 @@ class QolsysTaskManager:
                 LOGGER.debug("Task Cancelled: %s", task.get_name())
 
             except Exception as e:  # noqa: BLE001
-                LOGGER.debug("[Callback] Task failed with: %s", e)
+                LOGGER.exception("[Callback] Task failed: %s", task.get_name())
 
-            self._tasks.discard(task)
+            finally:
+                self._tasks.discard(task)
 
         task.add_done_callback(_done_callback)
         return task

@@ -79,6 +79,7 @@ class QolsysTable:
                 LOGGER.warning("Please Report")
                 return
 
+            # Select only known columns
             full_data = {col: data.get(col, "") for col in self._columns}
 
             new_columns = []

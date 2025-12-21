@@ -393,11 +393,24 @@ class QolsysPanel(QolsysObservable):
         qolsys_users = self.db.get_users()
         qolsys_user_list = []
         for qolsys_user in qolsys_users:
-            qolsys_user_list.append(int(qolsys_user.get("userid", "")))
+            try:
+                userid = int(qolsys_user.get("userid", ""))
+            except ValueError:
+                LOGGER.error("Invalid userid in panel database: %s", qolsys_user.get("userid", ""))
+                userid = -1
+
+            qolsys_user_list.append(userid)
 
         for local_user in self._users:
             if local_user.id not in qolsys_user_list:
                 LOGGER.error("ID %s from users.conf file not found in panel database", local_user.id)
+
+        # Check associated zone_id in master_slave table
+        master_slave_list = self.db.get_master_slave()
+        for master_slave in master_slave_list:
+            if self._controller.settings.random_mac == master_slave.get("mac_address", ""):
+                self._controller._zone_id = master_slave.get("zone_id", "")
+                break
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915

@@ -58,7 +58,7 @@ class ZoneStatus(StrEnum):
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
     TAMPERED = "Tampered"
-    SYNCHONIZING = "Synchonizing"
+    SYNCHRONIZING = "Synchronizing"
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     FAILURE = "Failure"

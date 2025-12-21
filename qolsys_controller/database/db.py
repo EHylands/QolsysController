@@ -167,6 +167,18 @@ class QolsysDB:
 
         return users
 
+    def get_master_slave(self) -> list[dict[str, str]]:
+        self.cursor.execute(f"SELECT * FROM {self.table_master_slave.table}")
+        self.db.commit()
+
+        masterslave = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            masterslave.append(row_dict)
+
+        return masterslave
+
     def get_scenes(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_scene.table} ORDER BY scene_id")
         self.db.commit()

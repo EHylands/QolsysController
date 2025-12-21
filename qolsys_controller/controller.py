@@ -53,6 +53,7 @@ class QolsysController:
         self.certificate_exchange_server: asyncio.Server | None = None
         self._task_manager = QolsysTaskManager()
         self._mqtt_command_queue = QolsysMqttCommandQueue()
+        self._zone_id = 1
 
         # MQTT Client
         self.aiomqtt: aiomqtt.Client | None = None
@@ -208,7 +209,6 @@ class QolsysController:
                 self._task_manager.run(self.mqtt_ping_task(), self._mqtt_task_ping_label)
 
                 response_connect = await self.command_connect()
-
                 self.panel.imei = response_connect.get("master_imei", "")
                 self.panel.product_type = response_connect.get("primary_product_type", "")
 
@@ -640,7 +640,6 @@ class QolsysController:
             return "disarm_from_openlearn_sensor"
 
         mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
-        LOGGER.debug("Determined MQTT disarm command: %s", mqtt_disarm_command)
         LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.settings.check_user_code_on_disarm)
 
         disarm_command = {
@@ -650,8 +649,6 @@ class QolsysController:
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
-
-        LOGGER.debug("Disarm Command Payload: %s", disarm_command)
 
         ipc_request = [
             {
@@ -772,7 +769,7 @@ class QolsysController:
         trigger_command = {
             "operation_name": "generate_emergency",
             "partitionID": int(partition_id),
-            "zoneID": 1,
+            "zoneID": int(self._zone_id),
             "emergencyType": "Silent Police Emergency" if silent else "Police Emergency",
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
@@ -802,7 +799,7 @@ class QolsysController:
         trigger_command = {
             "operation_name": "generate_emergency",
             "partitionID": int(partition_id),
-            "zoneID": 1,
+            "zoneID": int(self._zone_id),
             "emergencyType": "Silent Auxiliary Emergency" if silent else "Auxiliary Emergency",
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
@@ -832,7 +829,7 @@ class QolsysController:
         trigger_command = {
             "operation_name": "generate_emergency",
             "partitionID": int(partition_id),
-            "zoneID": 1,
+            "zoneID": int(self._zone_id),
             "emergencyType": "Fire Emergency",
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
