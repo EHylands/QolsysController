@@ -406,10 +406,16 @@ class QolsysPanel(QolsysObservable):
                 LOGGER.error("ID %s from users.conf file not found in panel database", local_user.id)
 
         # Check associated zone_id in master_slave table
+        LOGGER.debug("Checking master_slave for zone_id matching panel MAC address")
         master_slave_list = self.db.get_master_slave()
+        LOGGER.debug("master_slave_list: %s", master_slave_list)
         for master_slave in master_slave_list:
-            if self._controller.settings.random_mac == master_slave.get("mac_address", ""):
+            if (
+                self._controller.settings.random_mac.replace(":", "").lower()
+                == master_slave.get("mac_address", "").replace(":", "").lower()
+            ):
                 self._controller._zone_id = master_slave.get("zone_id", "")
+                LOGGER.debug("Found matching zone_id: %s", self._controller._zone_id)
                 break
 
     # Parse panel update to database

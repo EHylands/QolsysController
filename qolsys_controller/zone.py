@@ -391,7 +391,8 @@ class QolsysZone(QolsysObservable):
     @property
     def powerg_temperature(self) -> float | None:
         try:
-            return float(self._powerg_temperature)
+            temp = float(self._powerg_temperature)
+            return round(temp, 1)
         except ValueError:
             return None
 
