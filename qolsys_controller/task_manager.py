@@ -20,7 +20,7 @@ class QolsysTaskManager:
             except asyncio.CancelledError:
                 LOGGER.debug("Task Cancelled: %s", task.get_name())
 
-            except Exception as e:  # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 LOGGER.exception("[Callback] Task failed: %s", task.get_name())
 
             finally:
