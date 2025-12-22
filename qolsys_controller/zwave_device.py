@@ -136,7 +136,7 @@ class QolsysZWaveDevice(QolsysObservable):
             self.notify()
 
     @property
-    def node_battery_level_value(self) -> str:
+    def node_battery_level_value(self) -> int | None:
         try:
             value = int(self._node_battery_level_value)
             if value >= 0 and value <= 100:
@@ -214,7 +214,7 @@ class QolsysZWaveDevice(QolsysObservable):
             "node_status": self.node_status,
             "partition_id": self._partition_id,
             "node_battery_level": self.node_battery_level,
-            "node_battery_level_value": self.node_battery_level_value,
+            "node_battery_level_value": self._node_battery_level_value,
             "paired_status": self.paired_status,
             "node_secure_cmd_cls": self._node_secure_cmd_cls,
             "is_node_listening_node": self._is_node_listening_node,

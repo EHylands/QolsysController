@@ -12,7 +12,7 @@ class QolsysTableVirtualDevice(QolsysTable):
         self._uri = "content://com.qolsys.qolsysprovider.VirtualDeviceContentProvider/virtual_device"
         self._table = "virtual_device"
         self._abort_on_error = False
-        self._implemented = False
+        self._implemented = True
 
         self._columns = [
             "_id",

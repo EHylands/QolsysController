@@ -119,21 +119,30 @@ class QolsysThermostat(QolsysZWaveDevice):
     @property
     def thermostat_mode(self) -> ThermostatMode | None:
         LOGGER.debug("Getting thermostat_mode raw value: %s", self._thermostat_mode)
-        value = self._thermostat_mode.strip('[]')
-        value = value.split(',')
+        value = self._thermostat_mode.strip("[]").split(",")
 
         if len(value) > 1:
-            LOGGER.error("Thermostat%s (%s) - thermostat_mode has multiple values: %s", self.thermostat_node_id, self.thermostat_name, value)
+            LOGGER.error(
+                "Thermostat%s (%s) - thermostat_mode has multiple values: %s",
+                self.thermostat_node_id,
+                self.thermostat_name,
+                value,
+            )
             return None
 
         try:
-            value = int(value[0])
+            int_value = int(value[0])
             for mode in ThermostatMode:
-                if value == mode:
+                if int_value == mode.value:
                     return mode
             return None
         except ValueError:
-            LOGGER.error("Thermostat%s (%s) - thermostat_mode value is not an integer: %s", self.thermostat_node_id, self.thermostat_name, value)
+            LOGGER.error(
+                "Thermostat%s (%s) - thermostat_mode value is not an integer: %s",
+                self.thermostat_node_id,
+                self.thermostat_name,
+                value,
+            )
             return None
 
     @thermostat_mode.setter
@@ -146,21 +155,30 @@ class QolsysThermostat(QolsysZWaveDevice):
     @property
     def thermostat_fan_mode(self) -> ThermostatFanMode | None:
         LOGGER.debug("Getting thermostat_fan_mode raw value: %s", self._thermostat_fan_mode)
-        value = self._thermostat_fan_mode.strip('[]')
-        value = value.split(',')
+        value = self._thermostat_fan_mode.strip("[]").split(",")
 
         if len(value) > 1:
-            LOGGER.error("Thermostat%s (%s) - thermostat_fan_mode has multiple values: %s", self.thermostat_node_id, self.thermostat_name, value)
+            LOGGER.error(
+                "Thermostat%s (%s) - thermostat_fan_mode has multiple values: %s",
+                self.thermostat_node_id,
+                self.thermostat_name,
+                value,
+            )
             return None
 
         try:
-            value = int(value[0])
+            int_value = int(value[0])
             for mode in ThermostatFanMode:
-                if value == mode:
+                if int_value == mode.value:
                     return mode
             return None
         except ValueError:
-            LOGGER.error("Thermostat%s (%s) - thermostat_fan_mode value is not an integer: %s", self.thermostat_node_id, self.thermostat_name, value)
+            LOGGER.error(
+                "Thermostat%s (%s) - thermostat_fan_mode value is not an integer: %s",
+                self.thermostat_node_id,
+                self.thermostat_name,
+                value,
+            )
             return None
 
     @thermostat_fan_mode.setter
