@@ -118,11 +118,23 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @property
     def thermostat_mode(self) -> ThermostatMode | None:
-        thermostat_mode = int(self._thermostat_mode)
-        for mode in ThermostatMode:
-            if thermostat_mode == mode:
-                return mode
-        return None
+        LOGGER.debug("Getting thermostat_mode raw value: %s", self._thermostat_mode)
+        value = self._thermostat_mode.strip('[]')
+        value = value.split(',')
+
+        if len(value) > 1:
+            LOGGER.error("Thermostat%s (%s) - thermostat_mode has multiple values: %s", self.thermostat_node_id, self.thermostat_name, value)
+            return None
+
+        try:
+            value = int(value[0])
+            for mode in ThermostatMode:
+                if value == mode:
+                    return mode
+            return None
+        except ValueError:
+            LOGGER.error("Thermostat%s (%s) - thermostat_mode value is not an integer: %s", self.thermostat_node_id, self.thermostat_name, value)
+            return None
 
     @thermostat_mode.setter
     def thermostat_mode(self, value: str) -> None:
@@ -133,11 +145,23 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @property
     def thermostat_fan_mode(self) -> ThermostatFanMode | None:
-        thermostat_fan_mode = int(self._thermostat_fan_mode)
-        for mode in ThermostatFanMode:
-            if thermostat_fan_mode == mode:
-                return mode
-        return None
+        LOGGER.debug("Getting thermostat_fan_mode raw value: %s", self._thermostat_fan_mode)
+        value = self._thermostat_fan_mode.strip('[]')
+        value = value.split(',')
+
+        if len(value) > 1:
+            LOGGER.error("Thermostat%s (%s) - thermostat_fan_mode has multiple values: %s", self.thermostat_node_id, self.thermostat_name, value)
+            return None
+
+        try:
+            value = int(value[0])
+            for mode in ThermostatFanMode:
+                if value == mode:
+                    return mode
+            return None
+        except ValueError:
+            LOGGER.error("Thermostat%s (%s) - thermostat_fan_mode value is not an integer: %s", self.thermostat_node_id, self.thermostat_name, value)
+            return None
 
     @thermostat_fan_mode.setter
     def thermostat_fan_mode(self, value: str) -> None:
@@ -237,6 +261,7 @@ class QolsysThermostat(QolsysZWaveDevice):
             "opr": self._thermostat_opr,
             "partition_id": self._thermostat_partition_id,
             "thermostat_name": self.thermostat_name,
+            "node_id": self.thermostat_node_id,
             "device_temp_unit": self.thermostat_device_temp_unit,
             "current_temp": self.thermostat_current_temp,
             "target_cool_temp": self.thermostat_target_cool_temp,

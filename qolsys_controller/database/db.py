@@ -179,6 +179,18 @@ class QolsysDB:
 
         return masterslave
 
+    def get_iqremote_settings(self) -> list[dict[str, str]]:
+        self.cursor.execute(f"SELECT * FROM {self.table_iqremotesettings.table}")
+        self.db.commit()
+
+        iqremote_settings = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            iqremote_settings.append(row_dict)
+
+        return iqremote_settings
+
     def get_scenes(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_scene.table} ORDER BY scene_id")
         self.db.commit()

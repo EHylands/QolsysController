@@ -118,6 +118,7 @@ class QolsysLock(QolsysZWaveDevice):
             "opr": self._lock_opr,
             "partition_id": self._lock_partition_id,
             "doorlock_name": self.lock_name,
+            "node_id": self.lock_node_id,
             "status": self.lock_status,
             "created_by": self._lock_created_by,
             "created_date": self._lock_created_date,

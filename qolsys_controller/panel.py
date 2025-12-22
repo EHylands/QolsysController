@@ -405,16 +405,16 @@ class QolsysPanel(QolsysObservable):
             if local_user.id not in qolsys_user_list:
                 LOGGER.error("ID %s from users.conf file not found in panel database", local_user.id)
 
-        # Check associated zone_id in master_slave table
-        LOGGER.debug("Checking master_slave for zone_id matching panel MAC address")
-        master_slave_list = self.db.get_master_slave()
-        LOGGER.debug("master_slave_list: %s", master_slave_list)
-        for master_slave in master_slave_list:
+        # Check associated zone_id in iqremotesettins table
+        LOGGER.debug("Checking iqremotesettings table for zone_id matching panel MAC address")
+        iqremote_settings_list = self.db.get_iqremote_settings()
+        LOGGER.debug("iqremotesettings: %s", iqremote_settings_list)
+        for iqremote in iqremote_settings_list:
             if (
                 self._controller.settings.random_mac.replace(":", "").lower()
-                == master_slave.get("mac_address", "").replace(":", "").lower()
+                == iqremote.get("mac_address", "").replace(":", "").lower()
             ):
-                self._controller._zone_id = master_slave.get("zone_id", "")
+                self._controller._zone_id = iqremote.get("zone_id", "")
                 LOGGER.debug("Found matching zone_id: %s", self._controller._zone_id)
                 break
 

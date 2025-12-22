@@ -137,7 +137,15 @@ class QolsysZWaveDevice(QolsysObservable):
 
     @property
     def node_battery_level_value(self) -> str:
-        return self._node_battery_level_value
+        try:
+            value = int(self._node_battery_level_value)
+            if value >= 0 and value <= 100:
+                return value
+            else:
+                return None
+
+        except ValueError:
+            return None
 
     @node_battery_level_value.setter
     def node_battery_level_value(self, value: str) -> None:
