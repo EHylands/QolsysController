@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 class QolsysAdcService:
     def __init__(
         self,
-        parent_device,
+        parent_device: "QolsysAdcDevice",
         id: int,
         func_name: vdFuncName,
         local_control: vdFuncLocalControl,
@@ -67,7 +67,7 @@ class QolsysAdcService:
                 self.func_name,
             )
             LOGGER.debug("Warning - Changing func_name will change device type - Not supported")
-            self.notify()
+            self._parent_device.notify()
 
     @property
     def local_control(self) -> vdFuncLocalControl:
@@ -84,7 +84,7 @@ class QolsysAdcService:
                 self.id,
                 self.local_control,
             )
-            self.notify()
+            self._parent_device.notify()
 
     @property
     def func_type(self) -> vdFuncType:
@@ -102,10 +102,10 @@ class QolsysAdcService:
                 self.func_type,
             )
             LOGGER.debug("Warning - Changing func_type will change device type - Not supported")
-            self.notify()
+            self._parent_device.notify()
 
     @property
-    def func_state(self) -> vdFuncType:
+    def func_state(self) -> vdFuncState:
         return self._func_state
 
     @func_state.setter
@@ -119,7 +119,7 @@ class QolsysAdcService:
                 self.id,
                 self.func_state,
             )
-            self.notify()
+            self._parent_device.notify()
 
     @property
     def timestamp(self) -> str:
@@ -136,4 +136,4 @@ class QolsysAdcService:
                 self.id,
                 self.timestamp,
             )
-            self.notify()
+            self._parent_device.notify()

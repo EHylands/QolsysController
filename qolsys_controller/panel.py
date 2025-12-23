@@ -601,7 +601,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Virtual device
                             case self.db.table_virtual_device.uri:
-                                self.db.table_virtual_device.update(selection,selection_argument,content_values)
+                                self.db.table_virtual_device.update(selection, selection_argument, content_values)
                                 adc_id = content_values.get("device_id", "")
                                 adc_device = self._controller.state.adc_device(adc_id)
                                 if adc_device is not None:
@@ -685,7 +685,7 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_zwave_association_goup.delete(selection, selection_argument)
 
                             case self.db.table_virtual_device.uri:
-                                self.db.table_virtual_device.delete(selection,selection_argument)
+                                self.db.table_virtual_device.delete(selection, selection_argument)
                                 self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
 
                             case _:
@@ -847,7 +847,7 @@ class QolsysPanel(QolsysObservable):
         return -1
 
     def get_adc_devices_from_db(self) -> list[QolsysAdcDevice]:
-        adc_devices:list[QolsysAdcDevice] = []
+        adc_devices: list[QolsysAdcDevice] = []
         devices_list = self.db.get_adc_devices()
 
         for device in devices_list:

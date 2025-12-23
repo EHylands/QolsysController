@@ -87,7 +87,7 @@ class QolsysAdcDevice(QolsysObservable):
 
         # Add generic service if other services have beed identified
         LOGGER.debug("ADC%s (%s) - Adding generic service", self.device_id, self.name)
-        self._services.append(QolsysAdcService(id, func_name, local_control, func_type, func_state, timestamp))
+        self._services.append(QolsysAdcService(self, id, func_name, local_control, func_type, func_state, timestamp))
         self.notify()
         return
 
@@ -114,7 +114,7 @@ class QolsysAdcDevice(QolsysObservable):
     @partition_id.setter
     def partition_id(self, value: str) -> None:
         if self._partition_id != value:
-            LOGGER.debug("ADC%s (%s) - partition_id: %s", self.device_id_id, self.name, value)
+            LOGGER.debug("ADC%s (%s) - partition_id: %s", self.device_id, self.name, value)
             self._partition_id = value
             self.notify()
 
@@ -124,9 +124,9 @@ class QolsysAdcDevice(QolsysObservable):
 
     @name.setter
     def name(self, value: str) -> None:
-        if self._node_name != value:
+        if self._name != value:
             LOGGER.debug("ADC%s (%s) - name: %s", self.device_id, self.name, value)
-            self._node_name = value
+            self._name = value
             self.notify()
 
     @property

@@ -508,11 +508,13 @@ class QolsysState(QolsysObservable):
         for adc in self.adc_devices:
             for service in adc.services:
                 if isinstance(service, QolsysAdcGarageDoorService):
-                    LOGGER.debug("ADC%s GarageDoor%s (%s) - state: %s",adc.device_id, service.id, adc.name, service.func_state)
+                    LOGGER.debug(
+                        "ADC%s GarageDoor%s (%s) - state: %s", adc.device_id, service.id, adc.name, service.func_state
+                    )
                     continue
 
                 if isinstance(service, QolsysAdcService):
-                    LOGGER.debug("ADC%s Service%s (%s) - state: %s",adc.device_id, service.id, adc.name, service.func_state)
+                    LOGGER.debug("ADC%s Service%s (%s) - state: %s", adc.device_id, service.id, adc.name, service.func_state)
 
         for scene in self.scenes:
             sid = scene.scene_id
