@@ -3,6 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from qolsys_controller.adc_service import QolsysAdcService
+from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
+
+from .adc_device import QolsysAdcDevice
 from .observable import QolsysObservable
 from .weather import QolsysWeather
 from .zwave_device import QolsysZWaveDevice
@@ -28,11 +32,14 @@ class QolsysState(QolsysObservable):
         self._weather: QolsysWeather = QolsysWeather()
         self._partitions: list[QolsysPartition] = []
         self._zones: list[QolsysZone] = []
+        self._adc_devices: list[QolsysAdcDevice] = []
         self._zwave_devices: list[QolsysZWaveDevice] = []
         self._scenes: list[QolsysScene] = []
+
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
         self._state_zwave_observer = QolsysObservable()
+        self.state_adc_observer = QolsysObservable()
         self._state_scene_observer = QolsysObservable()
 
     @property
@@ -42,6 +49,10 @@ class QolsysState(QolsysObservable):
     @property
     def zwave_devices(self) -> list[QolsysZWaveDevice]:
         return self._zwave_devices
+
+    @property
+    def adc_devices(self) -> list[QolsysAdcDevice]:
+        return self._adc_devices
 
     @property
     def zones(self) -> list[QolsysZone]:
@@ -219,6 +230,61 @@ class QolsysState(QolsysObservable):
 
         self.zwave_devices.remove(zwave)
         self.state_zwave_observer.notify()
+
+    def adc_device(self, device_id: str) -> QolsysAdcDevice | None:
+        for adc_device in self.adc_devices:
+            if adc_device.device_id == device_id:
+                return adc_device
+        return None
+
+    def adc_add(self, new_adc: QolsysAdcDevice) -> None:
+        for adc_device in self.adc_devices:
+            if new_adc.device_id == adc_device.device_id:
+                LOGGER.debug("Adding ADC to State, ADC%s (%s) - Allready in ADC List", new_adc.device_id, new_adc.name)
+                return
+
+        self.adc_devices.append(new_adc)
+        self.adc_devices.sort(key=lambda x: x.device_id, reverse=False)
+        self.state_adc_observer.notify()
+
+    def adc_delete(self, device_id: str) -> None:
+        adc = self.adc_device(device_id)
+
+        if adc is None:
+            LOGGER.debug("Deleting ADC from State, ADC%s not found", device_id)
+            return
+
+        self.adc_devices.remove(adc)
+        self.state_adc_observer.notify()
+
+    def sync_adc_devices_data(self, db_adcs: list[QolsysAdcDevice]) -> None:
+        db_adc_list = []
+        for db_adc in db_adcs:
+            db_adc_list.append(db_adc.device_id)
+
+        state_adc_list = []
+        for state_adc in self.adc_devices:
+            state_adc_list.append(state_adc.device_id)
+
+        # Update existing ADC devices
+        for state_adc in self.adc_devices:
+            if state_adc.device_id in db_adc_list:
+                for db_adc in db_adcs:
+                    if state_adc.device_id == db_adc.device_id:
+                        LOGGER.debug("sync_data - update ADC%s", state_adc.device_id)
+                        state_adc.update_adc_device(db_adc.to_dict_adc())
+
+        # Add new ADC devices
+        for db_adc in db_adcs:
+            if db_adc.device_id not in state_adc_list:
+                LOGGER.debug("sync_data - add ADC%s", db_adc.device_id)
+                self.adc_add(db_adc)
+
+        # Delete ADC device
+        for state_adc in self.adc_devices:
+            if state_adc.device_id not in db_adc_list:
+                LOGGER.debug("sync_data - delete ADC%s", state_adc.device_id)
+                self.adc_delete(state_adc.device_id)
 
     def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
         db_zwave_list = []
@@ -438,6 +504,15 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Generic%s (%s) - battery_level: %s", zid, name, zwave.node_battery_level)
                 LOGGER.debug("Generic%s (%s) - battery_level_vale: %s", zid, name, zwave.node_battery_level_value)
                 continue
+
+        for adc in self.adc_devices:
+            for service in adc.services:
+                if isinstance(service, QolsysAdcGarageDoorService):
+                    LOGGER.debug("ADC%s GarageDoor%s (%s) - state: %s",adc.device_id, service.id, adc.name, service.func_state)
+                    continue
+
+                if isinstance(service, QolsysAdcService):
+                    LOGGER.debug("ADC%s Service%s (%s) - state: %s",adc.device_id, service.id, adc.name, service.func_state)
 
         for scene in self.scenes:
             sid = scene.scene_id

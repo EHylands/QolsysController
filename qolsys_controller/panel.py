@@ -4,6 +4,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from qolsys_controller.adc_device import QolsysAdcDevice
+
 from .database.db import QolsysDB
 from .enum import (
     PartitionAlarmState,
@@ -386,6 +388,7 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
         self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+        self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
@@ -408,7 +411,6 @@ class QolsysPanel(QolsysObservable):
         # Check associated zone_id in iqremotesettins table
         LOGGER.debug("Checking iqremotesettings table for zone_id matching panel MAC address")
         iqremote_settings_list = self.db.get_iqremote_settings()
-        LOGGER.debug("iqremotesettings: %s", iqremote_settings_list)
         for iqremote in iqremote_settings_list:
             if (
                 self._controller.settings.random_mac.replace(":", "").lower()
@@ -597,6 +599,14 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_country_locale.uri:
                                 self.db.table_country_locale.update(selection, selection_argument, content_values)
 
+                            # Virtual device
+                            case self.db.table_virtual_device.uri:
+                                self.db.table_virtual_device.update(selection,selection_argument,content_values)
+                                adc_id = content_values.get("device_id", "")
+                                adc_device = self._controller.state.adc_device(adc_id)
+                                if adc_device is not None:
+                                    adc_device.update_adc_device(content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -673,6 +683,10 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_zwave_association_goup.uri:
                                 self.db.table_zwave_association_goup.delete(selection, selection_argument)
+
+                            case self.db.table_virtual_device.uri:
+                                self.db.table_virtual_device.delete(selection,selection_argument)
+                                self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -804,8 +818,14 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_weather.insert(data=content_values)
                                 self._controller.state.sync_weather_data(self.get_weather_from_db())
 
+                            # ZWave Association Group
                             case self.db.table_zwave_association_goup.uri:
                                 self.db.table_zwave_association_goup.insert(data=content_values)
+
+                            # Virtual Device
+                            case self.db.table_virtual_device.uri:
+                                self.db.table_virtual_device.insert(data=content_values)
+                                self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
@@ -825,6 +845,15 @@ class QolsysPanel(QolsysObservable):
 
         # No valid user code found
         return -1
+
+    def get_adc_devices_from_db(self) -> list[QolsysAdcDevice]:
+        adc_devices:list[QolsysAdcDevice] = []
+        devices_list = self.db.get_adc_devices()
+
+        for device in devices_list:
+            adc_devices.append(QolsysAdcDevice(device))
+
+        return adc_devices
 
     def get_zwave_devices_from_db(self) -> list[QolsysZWaveDevice]:
         devices: list[QolsysZWaveDevice] = []

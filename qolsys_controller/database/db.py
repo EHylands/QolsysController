@@ -215,6 +215,18 @@ class QolsysDB:
 
         return partitions
 
+    def get_adc_devices(self) -> list[dict[str, str]]:
+        self.cursor.execute(f"SELECT * FROM {self.table_virtual_device.table} ORDER BY device_id")
+        self.db.commit()
+
+        devices = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            devices.append(row_dict)
+
+        return devices
+
     def get_zwave_devices(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY node_id")
         self.db.commit()

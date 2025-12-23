@@ -202,9 +202,6 @@ class QolsysController:
                     # Subscribe to MQTT commands send to panel by other devices
                     await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
-                    # Subscribe to all topics
-                    # await self.aiomqtt.subscribe("#", qos=self.settings.mqtt_qos)
-
                 self._task_manager.run(self.mqtt_listen_task(), self._mqtt_task_listen_label)
                 self._task_manager.run(self.mqtt_ping_task(), self._mqtt_task_ping_label)
 
