@@ -39,11 +39,13 @@ class ThermostatFanMode(IntEnum):
 class ZwaveCommand(IntEnum):
     SwitchBinary = 0x25
     SwitchMultilevel = 0x26
+    SensorMultiLevel = 0x31
     ThermostatMode = 0x40
     ThermostatSetPoint = 0x43
     ThermostatFanMode = 0x44
     ThermostatFanState = 0x45
     DoorLock = 0x62
+    Alarm = 0x71
 
 
 class ZwaveDeviceClass(Enum):

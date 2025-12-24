@@ -42,6 +42,11 @@ class QolsysThermostat(QolsysZWaveDevice):
         self._thermostat_paired_status: str = thermostat_dict.get("paired_status", "")
         self._thermostat_configuration_parameter: str = thermostat_dict.get("configuration_parameter", "")
 
+        LOGGER.debug("Thermostat%s", self._thermostat_node_id)
+        LOGGER.debug("Thermostat Mode: %s", self.available_thermostat_mode())
+        LOGGER.debug("Thermostat Fan Mode: %s", self.available_thermostat_fan_mode())
+        LOGGER.debug("Thermostat Set Point Mode: %s", self.available_thermostat_set_point_mode())
+
     # -----------------------------
     # properties + setters
     # -----------------------------
@@ -118,7 +123,6 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @property
     def thermostat_mode(self) -> ThermostatMode | None:
-        LOGGER.debug("Getting thermostat_mode raw value: %s", self._thermostat_mode)
         value = self._thermostat_mode.strip("[]").split(",")
 
         if len(value) > 1:
@@ -154,7 +158,6 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @property
     def thermostat_fan_mode(self) -> ThermostatFanMode | None:
-        LOGGER.debug("Getting thermostat_fan_mode raw value: %s", self._thermostat_fan_mode)
         value = self._thermostat_fan_mode.strip("[]").split(",")
 
         if len(value) > 1:
@@ -190,7 +193,7 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @property
     def thermostat_set_point_mode(self) -> str:
-        return self._thermostat_set_point_mode
+        return self._thermostat_set_point_mode.strip("[]")
 
     @thermostat_set_point_mode.setter
     def thermostat_set_point_mode(self, value: str) -> None:
@@ -198,6 +201,16 @@ class QolsysThermostat(QolsysZWaveDevice):
             LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_set_point_mode = value
             self.notify()
+
+    def update_raw(self, command: int, command_status: int, command_type: int, payload: list[int]) -> None:
+        LOGGER.debug(
+            "Raw Update (node%s) - command:%s status:%s type:%s payload:%s",
+            self.node_id,
+            command,
+            command_status,
+            command_type,
+            payload,
+        )
 
     def update_thermostat(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id
@@ -307,7 +320,7 @@ class QolsysThermostat(QolsysZWaveDevice):
         }
 
     def available_thermostat_mode(self) -> list[ThermostatMode]:
-        int_list = [int(x) for x in self._thermostat_mode_bitmask.split(",")]
+        int_list = [int(x) for x in self._thermostat_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
@@ -319,7 +332,7 @@ class QolsysThermostat(QolsysZWaveDevice):
         return mode_array
 
     def available_thermostat_fan_mode(self) -> list[ThermostatFanMode]:
-        int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.split(",")]
+        int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
@@ -331,7 +344,7 @@ class QolsysThermostat(QolsysZWaveDevice):
         return fan_mode_array
 
     def available_thermostat_set_point_mode(self) -> list[ThermostatMode]:
-        int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.split(",")]
+        int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 

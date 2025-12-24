@@ -36,6 +36,16 @@ class QolsysZWaveDevice(QolsysObservable):
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
 
+    def update_raw(self, command: int, command_status: int, command_type: int, payload: list[int]) -> None:
+        LOGGER.debug(
+            "Raw Update (node%s) - command:%s status:%s type:%s payload:%s",
+            self.node_id,
+            command,
+            command_status,
+            command_type,
+            payload,
+        )
+
     def update_base(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same node_id
         node_id_update = data.get("node_id", "")
@@ -204,6 +214,9 @@ class QolsysZWaveDevice(QolsysObservable):
             return ZwaveDeviceClass(int(self._generic_device_type))
         except ValueError:
             return ZwaveDeviceClass.Unknown
+
+    def is_battery_enabled(self) -> bool:
+        return self.node_battery_level_value is not None
 
     def to_dict_base(self) -> dict[str, str]:
         return {

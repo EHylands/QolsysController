@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import base64
 import json
 import logging
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.adc_device import QolsysAdcDevice
+from qolsys_controller.zwave_power import QolsysPower
+from qolsys_controller.zwave_thermometer import QolsysThermometer
 
 from .database.db import QolsysDB
 from .enum import (
@@ -419,6 +422,34 @@ class QolsysPanel(QolsysObservable):
                 self._controller._zone_id = iqremote.get("zone_id", "")
                 LOGGER.debug("Found matching zone_id: %s", self._controller._zone_id)
                 break
+
+    # Parse Z-Wave message
+    def parse_zwave_message(self, data: dict[str, Any]) -> None:
+        zwave = data.get("ZWAVE_RESPONSE", "")
+        decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
+
+        LOGGER.debug(
+            "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
+            zwave.get("NODE_ID", ""),
+            zwave.get("ZWAVE_COMMAND_STATUS", ""),
+            decoded_payload,
+        )
+
+        node_id: str = str(zwave.get("NODE_ID", ""))
+        command_status: int = zwave.get("ZWAVE_COMMAND_STATUS", "")
+
+        if len(decoded_payload) % 2 != 0:
+            LOGGER.error("Payload must have even length:%s", decoded_payload)
+            return
+
+        payload_bytes = bytes.fromhex(decoded_payload)
+        command_class = int(payload_bytes[0])
+        command_type = int(payload_bytes[1])
+        value = list(payload_bytes[2:])
+
+        node = self._controller.state.zwave_device(node_id)
+        if node is not None:
+            node.update_raw(command_class, command_status, command_type, value)
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915
@@ -866,6 +897,21 @@ class QolsysPanel(QolsysObservable):
             device_added = False
 
             zwave_node_id = device.get("node_id", "")
+
+            # Check if z-wave device is an Energy Clamp
+            if device.get("node_type", "") == "Energy Clamp":
+                qolsys_power = QolsysPower(zwave_dict=device)
+                devices.append(qolsys_power)
+                device_added = True
+                break
+
+            # Check if z-wave device is a thermometer
+            if device.get("node_type", "") == "Thermometer":
+                qolsys_thermometer = QolsysThermometer(device)
+                devices.append(qolsys_thermometer)
+                device_added = True
+                break
+
             # Check if z-wave device is a Dimmer
             for d in dimmers_list:
                 dimmer_node_id = d.get("node_id", "")

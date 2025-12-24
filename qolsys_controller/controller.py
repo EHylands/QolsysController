@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 import contextlib
 import json
 import logging
@@ -282,14 +281,7 @@ class QolsysController:
                 if message.topic.matches("ZWAVE_RESPONSE"):  # noqa: SIM102
                     if isinstance(message.payload, bytes):
                         data = json.loads(message.payload.decode())
-                        zwave = data.get("ZWAVE_RESPONSE", "")
-                        decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
-                        LOGGER.debug(
-                            "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
-                            zwave.get("NODE_ID", ""),
-                            zwave.get("ZWAVE_COMMAND_STATUS", ""),
-                            decoded_payload,
-                        )
+                        self.panel.parse_zwave_message(data)
 
         except aiomqtt.MqttError as err:
             self.connected = False

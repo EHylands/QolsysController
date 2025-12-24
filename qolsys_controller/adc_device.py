@@ -81,7 +81,6 @@ class QolsysAdcDevice(QolsysObservable):
             self._services.append(
                 QolsysAdcGarageDoorService(self, id, func_name, local_control, func_type, func_state, timestamp)
             )
-            LOGGER.debug(self._services)
             self.notify()
             return
 

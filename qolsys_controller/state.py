@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from qolsys_controller.adc_service import QolsysAdcService
 from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
+from qolsys_controller.zwave_power import QolsysPower
+from qolsys_controller.zwave_thermometer import QolsysThermometer
 
 from .adc_device import QolsysAdcDevice
 from .observable import QolsysObservable
@@ -90,8 +92,23 @@ class QolsysState(QolsysObservable):
         for device in self.zwave_devices:
             if isinstance(device, QolsysThermostat):
                 thermostats.append(device)
-
         return thermostats
+
+    @property
+    def zwave_power(self) -> list[QolsysPower]:
+        power_meter = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysPower):
+                power_meter.append(device)
+        return power_meter
+
+    @property
+    def zwave_thermometer(self) -> list[QolsysThermometer]:
+        thermometer = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysThermometer):
+                thermometer.append(device)
+        return thermometer
 
     @property
     def state_partition_observer(self) -> QolsysObservable:
@@ -495,6 +512,16 @@ class QolsysState(QolsysObservable):
                 name = zwave.lock_name
                 LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
                 continue
+
+            if isinstance(zwave, QolsysPower):
+                nid = zwave.node_id
+                name = zwave.node_name
+                LOGGER.debug("PowerMeter%s (%s)", zid, name)
+
+            if isinstance(zwave, QolsysThermometer):
+                nid = zwave.node_id
+                name = zwave.node_name
+                LOGGER.debug("Thermometer%s (%s)", zid, name)
 
             if isinstance(zwave, QolsysGeneric):
                 zid = zwave.node_id
