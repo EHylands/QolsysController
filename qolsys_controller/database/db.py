@@ -239,6 +239,18 @@ class QolsysDB:
 
         return devices
 
+    def get_zwave_other_devices(self) -> list[dict[str, str]]:
+        self.cursor.execute(f"SELECT * FROM {self.table_zwave_other.table} ORDER BY node_id")
+        self.db.commit()
+
+        devices = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            devices.append(row_dict)
+
+        return devices
+
     def get_locks(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY node_id")
         self.db.commit()

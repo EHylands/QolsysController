@@ -434,20 +434,20 @@ class QolsysPanel(QolsysObservable):
             decoded_payload,
         )
 
-        #node_id: str = str(zwave.get("NODE_ID", ""))
-        #command_status: int = zwave.get("ZWAVE_COMMAND_STATUS", "")
+        # node_id: str = str(zwave.get("NODE_ID", ""))
+        # command_status: int = zwave.get("ZWAVE_COMMAND_STATUS", "")
 
         if len(decoded_payload) % 2 != 0:
             LOGGER.error("Payload must have even length:%s", decoded_payload)
             return
 
-        #payload_bytes = bytes.fromhex(decoded_payload)
-        #command_class = int(payload_bytes[0])
-        #command_type = int(payload_bytes[1])
-        #alue = list(payload_bytes[2:])
+        # payload_bytes = bytes.fromhex(decoded_payload)
+        # command_class = int(payload_bytes[0])
+        # command_type = int(payload_bytes[1])
+        # alue = list(payload_bytes[2:])
 
-        #node = self._controller.state.zwave_device(node_id)
-        #if node is not None:
+        # node = self._controller.state.zwave_device(node_id)
+        # if node is not None:
         #    node.update_raw(command_class, command_status, command_type, value)
 
     # Parse panel update to database
@@ -625,6 +625,10 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_association_goup.uri:
                                 self.db.table_zwave_association_goup.update(selection, selection_argument, content_values)
 
+                            # Update Zwave Other
+                            case self.db.table_zwave_other.uri:
+                                self.db.table_zwave_other.update(selection, selection_argument, content_values)
+
                             # Country Locale
                             case self.db.table_country_locale.uri:
                                 self.db.table_country_locale.update(selection, selection_argument, content_values)
@@ -717,6 +721,9 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_virtual_device.uri:
                                 self.db.table_virtual_device.delete(selection, selection_argument)
                                 self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
+
+                            case self.db.table_zwave_other.uri:
+                                self.db.table_zwave_other.delete(selection, selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -851,6 +858,12 @@ class QolsysPanel(QolsysObservable):
                             # ZWave Association Group
                             case self.db.table_zwave_association_goup.uri:
                                 self.db.table_zwave_association_goup.insert(data=content_values)
+
+                            # Zwave Other
+                            case self.db.table_zwave_other.uri:
+                                self.db.table_zwave_other.insert(data=content_values)
+                                LOGGER.debug("New Z-Wave Other information")
+                                LOGGER.debug(content_values)
 
                             # Virtual Device
                             case self.db.table_virtual_device.uri:

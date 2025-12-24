@@ -16,7 +16,6 @@ from .zwave_dimmer import QolsysDimmer
 from .zwave_generic import QolsysGeneric
 from .zwave_lock import QolsysLock
 from .zwave_thermostat import QolsysThermostat
-from qolsys_controller import zwave_device
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class QolsysState(QolsysObservable):
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
         self._state_zwave_observer = QolsysObservable()
-        self.state_adc_observer = QolsysObservable()
+        self._state_adc_observer = QolsysObservable()
         self._state_scene_observer = QolsysObservable()
 
     @property
@@ -112,6 +111,10 @@ class QolsysState(QolsysObservable):
         return thermometer
 
     @property
+    def zwave_other_devices(self) -> list[dict[str, str]]:
+        return self._controller.panel.db.get_zwave_other_devices()
+
+    @property
     def state_partition_observer(self) -> QolsysObservable:
         return self._state_partition_observer
 
@@ -126,6 +129,10 @@ class QolsysState(QolsysObservable):
     @property
     def state_scene_observer(self) -> QolsysObservable:
         return self._state_scene_observer
+
+    @property
+    def state_adc_observer(self) -> QolsysObservable:
+        return self._state_adc_observer
 
     def partition(self, partition_id: str) -> QolsysPartition | None:
         for partition in self.partitions:
@@ -226,9 +233,9 @@ class QolsysState(QolsysObservable):
                 return zwave_device
         return None
 
-    def zwave_thermostat(self,node_id: str) -> QolsysThermostat | None:
+    def zwave_thermostat(self, node_id: str) -> QolsysThermostat | None:
         thermostat = self.zwave_device(node_id)
-        if isinstance(thermostat,QolsysThermostat):
+        if isinstance(thermostat, QolsysThermostat):
             return thermostat
         return None
 
@@ -537,6 +544,9 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Generic%s (%s) - battery_level: %s", zid, name, zwave.node_battery_level)
                 LOGGER.debug("Generic%s (%s) - battery_level_vale: %s", zid, name, zwave.node_battery_level_value)
                 continue
+
+        LOGGER.debug("Other Z-Wave devices information")
+        LOGGER.debug(self.zwave_other_devices)
 
         for adc in self.adc_devices:
             for service in adc.services:

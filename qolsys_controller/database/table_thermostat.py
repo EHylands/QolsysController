@@ -40,6 +40,7 @@ class QolsysTableThermostat(QolsysTable):
             "thermostat_mode_updated_time",
             "fan_mode_updated_time",
             "set_point_mode_updated_time",
+            "setpoint_capabilites",
             "target_cool_temp_updated_time",
             "target_heat_temp_updated_time",
             "current_temp_updated_time",

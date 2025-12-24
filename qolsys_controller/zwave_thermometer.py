@@ -24,7 +24,10 @@ class QolsysThermometer(QolsysZWaveDevice):
         )
 
         if command == ZwaveCommand.SensorMultiLevel:
-            LOGGER.debug('Received Thermometer sensor update')
+            LOGGER.debug("Received Thermometer sensor update")
 
     def to_dict_thermometer(self) -> dict[str, str]:
-        return {"value": self._value}
+        return {
+            "temperature_value": self._temprature_value,
+            "humidity_value": self._humidity_value,
+        }
