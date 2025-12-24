@@ -895,7 +895,6 @@ class QolsysPanel(QolsysObservable):
 
         for device in devices_list:
             device_added = False
-
             zwave_node_id = device.get("node_id", "")
 
             # Check if z-wave device is an Energy Clamp
@@ -903,14 +902,12 @@ class QolsysPanel(QolsysObservable):
                 qolsys_power = QolsysPower(zwave_dict=device)
                 devices.append(qolsys_power)
                 device_added = True
-                break
 
             # Check if z-wave device is a thermometer
             if device.get("node_type", "") == "Thermometer":
                 qolsys_thermometer = QolsysThermometer(device)
                 devices.append(qolsys_thermometer)
                 device_added = True
-                break
 
             # Check if z-wave device is a Dimmer
             for d in dimmers_list:
