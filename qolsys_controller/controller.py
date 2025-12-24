@@ -913,12 +913,16 @@ class QolsysController:
     async def command_zwave_thermostat_mode_set(self, node_id: str, mode: ThermostatMode) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode)
 
-        zwave_node = self.state.zwave_device(node_id)
-        if not zwave_node:
-            LOGGER.error("thermostat_mode_set - Invalid node_id %s", node_id)
+        thermostat = self.state.zwave_thermostat(node_id)
+        if not thermostat:
+            LOGGER.error("zwave_thermostat_mode_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatMode, 1, mode])
+        LOGGER.debug("thermostat_mode: %s", int(mode))
+        if mode not in thermostat.available_thermostat_mode():
+            LOGGER.error("thermostat_mode_set - Invalid mode %s", mode)
+
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatMode, 1, int(mode)])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response

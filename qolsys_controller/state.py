@@ -16,6 +16,7 @@ from .zwave_dimmer import QolsysDimmer
 from .zwave_generic import QolsysGeneric
 from .zwave_lock import QolsysLock
 from .zwave_thermostat import QolsysThermostat
+from qolsys_controller import zwave_device
 
 LOGGER = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class QolsysState(QolsysObservable):
         return thermostats
 
     @property
-    def zwave_power(self) -> list[QolsysPower]:
+    def zwave_powermeters(self) -> list[QolsysPower]:
         power_meter = []
         for device in self.zwave_devices:
             if isinstance(device, QolsysPower):
@@ -103,7 +104,7 @@ class QolsysState(QolsysObservable):
         return power_meter
 
     @property
-    def zwave_thermometer(self) -> list[QolsysThermometer]:
+    def zwave_thermometers(self) -> list[QolsysThermometer]:
         thermometer = []
         for device in self.zwave_devices:
             if isinstance(device, QolsysThermometer):
@@ -223,7 +224,12 @@ class QolsysState(QolsysObservable):
         for zwave_device in self.zwave_devices:
             if zwave_device.node_id == node_id:
                 return zwave_device
+        return None
 
+    def zwave_thermostat(self,node_id: str) -> QolsysThermostat | None:
+        thermostat = self.zwave_device(node_id)
+        if isinstance(thermostat,QolsysThermostat):
+            return thermostat
         return None
 
     def zwave_add(self, new_zwave: QolsysZWaveDevice) -> None:

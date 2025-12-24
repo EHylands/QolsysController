@@ -427,7 +427,6 @@ class QolsysPanel(QolsysObservable):
     def parse_zwave_message(self, data: dict[str, Any]) -> None:
         zwave = data.get("ZWAVE_RESPONSE", "")
         decoded_payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
-
         LOGGER.debug(
             "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
             zwave.get("NODE_ID", ""),
@@ -435,21 +434,21 @@ class QolsysPanel(QolsysObservable):
             decoded_payload,
         )
 
-        node_id: str = str(zwave.get("NODE_ID", ""))
-        command_status: int = zwave.get("ZWAVE_COMMAND_STATUS", "")
+        #node_id: str = str(zwave.get("NODE_ID", ""))
+        #command_status: int = zwave.get("ZWAVE_COMMAND_STATUS", "")
 
         if len(decoded_payload) % 2 != 0:
             LOGGER.error("Payload must have even length:%s", decoded_payload)
             return
 
-        payload_bytes = bytes.fromhex(decoded_payload)
-        command_class = int(payload_bytes[0])
-        command_type = int(payload_bytes[1])
-        value = list(payload_bytes[2:])
+        #payload_bytes = bytes.fromhex(decoded_payload)
+        #command_class = int(payload_bytes[0])
+        #command_type = int(payload_bytes[1])
+        #alue = list(payload_bytes[2:])
 
-        node = self._controller.state.zwave_device(node_id)
-        if node is not None:
-            node.update_raw(command_class, command_status, command_type, value)
+        #node = self._controller.state.zwave_device(node_id)
+        #if node is not None:
+        #    node.update_raw(command_class, command_status, command_type, value)
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915
