@@ -1,6 +1,6 @@
 [project]
 name = "qolsys-controller"
-version = "0.0.74"
+version = "0.0.75"
 authors = [
   { name="Eric Hylands", email="" },
 ]

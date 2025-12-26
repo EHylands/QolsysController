@@ -69,15 +69,8 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_level = value
             self.notify()
 
-    def update_raw(self, command: int, command_status: int, command_type: int, payload: list[int]) -> None:
-        LOGGER.debug(
-            "Raw Update (node%s) - command:%s status:%s type:%s payload:%s",
-            self.node_id,
-            command,
-            command_status,
-            command_type,
-            payload,
-        )
+    def update_raw(self, payload: bytes) -> None:
+        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
 
     def update_dimmer(self, content_values: dict[str, str]) -> None:  # noqa: PLR0912
         # Check if we are updating same none_id

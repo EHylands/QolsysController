@@ -36,15 +36,8 @@ class QolsysZWaveDevice(QolsysObservable):
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
 
-    def update_raw(self, command: int, command_status: int, command_type: int, payload: list[int]) -> None:
-        LOGGER.debug(
-            "Raw Update (node%s) - command:%s status:%s type:%s payload:%s",
-            self.node_id,
-            command,
-            command_status,
-            command_type,
-            payload,
-        )
+    def update_raw(self, payload: bytes) -> None:
+        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
 
     def update_base(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same node_id

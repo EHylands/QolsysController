@@ -202,15 +202,8 @@ class QolsysThermostat(QolsysZWaveDevice):
             self._thermostat_set_point_mode = value
             self.notify()
 
-    def update_raw(self, command: int, command_status: int, command_type: int, payload: list[int]) -> None:
-        LOGGER.debug(
-            "Raw Update (node%s) - command:%s status:%s type:%s payload:%s",
-            self.node_id,
-            command,
-            command_status,
-            command_type,
-            payload,
-        )
+    def update_raw(self, payload: bytes) -> None:
+        pass
 
     def update_thermostat(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id

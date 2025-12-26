@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import logging
+from enum import IntEnum
 from typing import TYPE_CHECKING
 
 from qolsys_controller.adc_service import QolsysAdcService
 from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
-from qolsys_controller.zwave_power import QolsysPower
+from qolsys_controller.zwave_meter import QolsysMeterDevice
 from qolsys_controller.zwave_thermometer import QolsysThermometer
 
 from .adc_device import QolsysAdcDevice
@@ -95,12 +96,12 @@ class QolsysState(QolsysObservable):
         return thermostats
 
     @property
-    def zwave_powermeters(self) -> list[QolsysPower]:
-        power_meter = []
+    def zwave_meters(self) -> list[QolsysMeterDevice]:
+        meters = []
         for device in self.zwave_devices:
-            if isinstance(device, QolsysPower):
-                power_meter.append(device)
-        return power_meter
+            if isinstance(device, QolsysMeterDevice):
+                meters.append(device)
+        return meters
 
     @property
     def zwave_thermometers(self) -> list[QolsysThermometer]:
@@ -350,6 +351,12 @@ class QolsysState(QolsysObservable):
                             state_zwave.update_lock(db_zwave.to_dict_lock())
                             break
 
+                        # Update Meter
+                        if isinstance(state_zwave, QolsysMeterDevice) and isinstance(db_zwave, QolsysMeterDevice):
+                            # Meter state not store in database
+                            # Keep old value instact
+                            break
+
                         # Generic Z-Wave Device
                         if isinstance(state_zwave, QolsysGeneric) and isinstance(db_zwave, QolsysGeneric):
                             state_zwave.update_base(db_zwave.to_dict_base())
@@ -526,15 +533,26 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
                 continue
 
-            if isinstance(zwave, QolsysPower):
+            if isinstance(zwave, QolsysMeterDevice):
                 nid = zwave.node_id
                 name = zwave.node_name
-                LOGGER.debug("PowerMeter%s (%s)", zid, name)
+                LOGGER.debug("Meter%s (%s)", nid, name)
+
+                for meter_sensor in zwave.meters:
+                    scale_type: type[IntEnum] = zwave.scale_for_meter_type(meter_sensor.meter_type)
+
+                    LOGGER.debug(
+                        " Sensor%s (%s) - value: %s (%s)",
+                        meter_sensor.meter_type,
+                        meter_sensor.meter_type.name,
+                        meter_sensor.value,
+                        scale_type(meter_sensor.scale).name,
+                    )
 
             if isinstance(zwave, QolsysThermometer):
                 nid = zwave.node_id
                 name = zwave.node_name
-                LOGGER.debug("Thermometer%s (%s)", zid, name)
+                LOGGER.debug("Thermometer%s (%s)", nid, name)
 
             if isinstance(zwave, QolsysGeneric):
                 zid = zwave.node_id

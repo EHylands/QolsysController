@@ -20,7 +20,7 @@ from qolsys_controller.mqtt_command import (
 )
 
 from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
-from .enum_zwave import ThermostatFanMode, ThermostatMode, ZwaveCommand, ZwaveDeviceClass
+from .enum_zwave import ThermostatFanMode, ThermostatMode, ZwaveCommandClass, ZwaveDeviceClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
 from .mqtt_command_queue import QolsysMqttCommandQueue
@@ -853,7 +853,7 @@ class QolsysController:
         if status:
             level = 255
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.SwitchBinary, 1, level])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.SwitchBinary, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
         return response
@@ -870,7 +870,7 @@ class QolsysController:
             LOGGER.error("switch_multilevel_set used on invalid %s", zwave_node.generic_device_type)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.SwitchMultilevel, 1, level])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.SwitchMultilevel, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_multilevel_switch command")
         return response
@@ -888,7 +888,7 @@ class QolsysController:
         if locked:
             lock_mode = 255
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.DoorLock, 1, lock_mode])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.DoorLock, 1, lock_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
         return response
@@ -905,7 +905,7 @@ class QolsysController:
             LOGGER.error("thermostat_setpoint_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatSetPoint, 1, mode, int(setpoint)])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.ThermostatSetPoint, 1, mode, int(setpoint)])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
@@ -922,7 +922,7 @@ class QolsysController:
         if mode not in thermostat.available_thermostat_mode():
             LOGGER.error("thermostat_mode_set - Invalid mode %s", mode)
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatMode, 1, int(mode)])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.ThermostatMode, 1, int(mode)])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
@@ -935,7 +935,7 @@ class QolsysController:
             LOGGER.error("thermostat_fan_mode_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommand.ThermostatFanMode, 1, fan_mode])
+        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
         return response

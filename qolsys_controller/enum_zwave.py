@@ -1,6 +1,57 @@
 from enum import Enum, IntEnum
 
 
+class MeterType(IntEnum):
+    UNKNOWN = 0x00
+    ELECTRIC_METER = 0x01
+    GAZ_METER = 0x02
+    WATER_METER = 0x03
+    HEATING = 0x04
+    COOLING = 0x05
+    RESERVED = 0x6
+
+
+class MeterRateType(IntEnum):
+    UNSPECIFIED = 0x00
+    IMPORT = 0x01
+    EXPORT = 0x02
+    RESERVED = 0x03
+
+
+class ZWaveUnknownMeterScale(IntEnum):
+    UNKNOWN = 0
+
+
+class ZWaveElectricMeterScale(IntEnum):
+    KWH = 0
+    KVAH = 1
+    WATTS = 2
+    PULSE_COUNT = 3
+    VOLTS = 4
+    AMPS = 5
+    POWER_FACTOR = 6
+    KVAR = 7
+    KVARH = 8
+
+
+class ZWaveGasMeterScale(IntEnum):
+    CUBIC_METERS = 0  # m³
+    CUBIC_FEET = 1  # ft³
+    PULSE_COUNT = 3
+
+
+class ZWaveWaterMeterScale(IntEnum):
+    CUBIC_METERS = 0  # m³
+    CUBIC_FEET = 1  # ft³
+    US_GALLONS = 2
+    PULSE_COUNT = 3
+
+
+class ZWaveThermalMeterScale(IntEnum):
+    KWH = 0
+    PULSE_COUNT = 3
+
+
 class ThermostatMode(IntEnum):
     OFF = 0x0001
     HEAT = 0x0002
@@ -36,16 +87,22 @@ class ThermostatFanMode(IntEnum):
     MANUFACTURER_SPECEFIC = 0x1000
 
 
-class ZwaveCommand(IntEnum):
+class ZwaveCommandClass(IntEnum):
     SwitchBinary = 0x25
     SwitchMultilevel = 0x26
     SensorMultiLevel = 0x31
+    Meter = 0x32
     ThermostatMode = 0x40
     ThermostatSetPoint = 0x43
     ThermostatFanMode = 0x44
     ThermostatFanState = 0x45
     DoorLock = 0x62
     Alarm = 0x71
+
+
+class ZwaveCommand(IntEnum):
+    SET = 0x01
+    GET = 0x02
 
 
 class ZwaveDeviceClass(Enum):
