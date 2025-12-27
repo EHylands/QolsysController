@@ -1,6 +1,13 @@
 import logging
+from re import L
 
-from .enum_zwave import ThermostatFanMode, ThermostatMode
+from .enum_zwave import (
+    BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE,
+    BITMASK_SUPPORTED_THERMOSTAT_MODE,
+    BITMASK_SUPPORTED_THERMOSTAT_SETPOINT,
+    ThermostatFanMode,
+    ThermostatMode,
+)
 from .zwave_device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
@@ -41,11 +48,16 @@ class QolsysThermostat(QolsysZWaveDevice):
         self._thermostat_endpoint: str = thermostat_dict.get("endpoint", "")
         self._thermostat_paired_status: str = thermostat_dict.get("paired_status", "")
         self._thermostat_configuration_parameter: str = thermostat_dict.get("configuration_parameter", "")
+        self._thermostat_operating_state: str = thermostat_dict.get("operating_state", "")
+        self._thermostat_setpoint_capabilites = thermostat_dict.get("setpoint_capabilites", "")
 
         LOGGER.debug("Thermostat%s", self._thermostat_node_id)
-        LOGGER.debug("Thermostat Mode: %s", self.available_thermostat_mode())
-        LOGGER.debug("Thermostat Fan Mode: %s", self.available_thermostat_fan_mode())
-        LOGGER.debug("Thermostat Set Point Mode: %s", self.available_thermostat_set_point_mode())
+        LOGGER.debug("Thermostat Supported Mode: %s", self.available_thermostat_mode())
+        LOGGER.debug("Thermostat Supported Fan Mode: %s", self.available_thermostat_fan_mode())
+        LOGGER.debug("Thermostat Supported Set Point Mode: %s", self.available_thermostat_set_point_mode())
+        LOGGER.debug("Thermostat Operating State: %s", self._thermostat_operating_state)
+        LOGGER.debug("Thermostat Configuration Parameter: %s", self._thermostat_configuration_parameter)
+        LOGGER.debug("Thermostat Setpoint Capabilites: %s", self._thermostat_setpoint_capabilites)
 
     # -----------------------------
     # properties + setters
@@ -64,6 +76,41 @@ class QolsysThermostat(QolsysZWaveDevice):
         if self._thermostat_name != value:
             LOGGER.debug("Thermostat%s (%s) - name: %s", self.thermostat_node_id, self.thermostat_name, value)
             self._thermostat_name = value
+            self.notify()
+
+    @property
+    def thermostat_operating_state(self) -> str:
+        return self._thermostat_operating_state
+
+    @thermostat_operating_state.setter
+    def thermostat_operating_state(self, value: str) -> None:
+        if self._thermostat_operating_state != value:
+            LOGGER.debug("Thermostat%s (%s) - operating_state: %s", self.thermostat_node_id, self.thermostat_name, value)
+            self._thermostat_operating_state = value
+            self.notify()
+
+    @property
+    def thermostat_configuration_parameter(self) -> str:
+        return self._thermostat_configuration_parameter
+
+    @thermostat_configuration_parameter.setter
+    def thermostat_configuration_parameter(self, value: str) -> None:
+        if self._thermostat_configuration_parameter != value:
+            LOGGER.debug(
+                "Thermostat%s (%s) - configuration_parameter: %s", self.thermostat_node_id, self.thermostat_name, value
+            )
+            self._thermostat_configuration_parameter = value
+            self.notify()
+
+    @property
+    def thermostat_setpoint_capabilites(self) -> str:
+        return self._thermostat_setpoint_capabilites
+
+    @thermostat_setpoint_capabilites.setter
+    def thermostat_setpoint_capabilites(self, value: str) -> None:
+        if self._thermostat_setpoint_capabilites != value:
+            LOGGER.debug("Thermostat%s (%s) - setpoint_capabilites: %s", self.thermostat_node_id, self.thermostat_name, value)
+            self._thermostat_setpoint_capabilites = value
             self.notify()
 
     @property
@@ -275,6 +322,10 @@ class QolsysThermostat(QolsysZWaveDevice):
             self._thermostat_endpoint = data.get("endpoint", "")
         if "configuration_parameter" in data:
             self._thermostat_configuration_parameter = data.get("configuration_parameter", "")
+        if "operating_state" in data:
+            self.thermostat_operating_state = data.get("operating_state", "")
+        if "setpoint_capabilites" in data:
+            self.thermostat_setpoint_capabilites = data.get("setpoint_capabilites", "")
 
         self.end_batch_update()
 
@@ -309,7 +360,9 @@ class QolsysThermostat(QolsysZWaveDevice):
             "current_temp_updated_time": self._thermostat_current_temp_updated_time,
             "paired_status": self._thermostat_paired_status,
             "endpoint": self._thermostat_endpoint,
-            "configuration_parameter": self._thermostat_configuration_parameter,
+            "configuration_parameter": self.thermostat_configuration_parameter,
+            "operating_state": self.thermostat_operating_state,
+            "setpoint_capabilites": self._thermostat_setpoint_capabilites,
         }
 
     def available_thermostat_mode(self) -> list[ThermostatMode]:
@@ -317,33 +370,33 @@ class QolsysThermostat(QolsysZWaveDevice):
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
-        mode_array = []
-        for mode in ThermostatMode:
-            if mode.value & bitmask:
-                mode_array.append(mode)
+        supported = []
+        for bit, mode in BITMASK_SUPPORTED_THERMOSTAT_MODE.items():
+            if bitmask & (1 << bit):
+                supported.append(mode)
 
-        return mode_array
+        return supported
 
     def available_thermostat_fan_mode(self) -> list[ThermostatFanMode]:
         int_list = [int(x) for x in self._thermostat_fan_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
-        fan_mode_array = []
-        for mode in ThermostatFanMode:
-            if mode.value & bitmask:
-                fan_mode_array.append(mode)
+        supported = []
+        for bit, mode in BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE.items():
+            if bitmask & (1 << bit):
+                supported.append(mode)
 
-        return fan_mode_array
+        return supported
 
     def available_thermostat_set_point_mode(self) -> list[ThermostatMode]:
         int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
-        set_point_mode_array = []
-        for mode in ThermostatMode:
-            if mode.value & bitmask:
-                set_point_mode_array.append(mode)
+        supported = []
+        for bit, mode in BITMASK_SUPPORTED_THERMOSTAT_SETPOINT.items():
+            if bitmask & (1 << bit):
+                supported.append(mode)
 
-        return set_point_mode_array
+        return supported

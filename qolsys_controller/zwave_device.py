@@ -35,6 +35,8 @@ class QolsysZWaveDevice(QolsysObservable):
         self._is_device_hidden: str = zwave_dict.get("is_device_hidden", "")
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
+        self._multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
+        self._meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
 
     def update_raw(self, payload: bytes) -> None:
         LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
@@ -101,6 +103,10 @@ class QolsysZWaveDevice(QolsysObservable):
             self._last_updated_date = data.get("last_updated_date", "")
         if "command_class_list" in data:
             self._last_updated_date = data.get("command_class_list", "")
+        if "multisensor_capabilities" in data:
+            self.multisensor_capabilities = data.get("multisensor_capabilities", "")
+        if "meter_capabilities" in data:
+            self._meter_capabilities = data.get("meter_capabilities", "") 
 
         self.end_batch_update()
 
@@ -136,6 +142,28 @@ class QolsysZWaveDevice(QolsysObservable):
         if self._node_battery_level != value:
             LOGGER.debug("ZWave%s (%s) - node_battery_level: %s", self.node_id, self.node_name, value)
             self._node_battery_level = value
+            self.notify()
+
+    @property
+    def meter_capabilities(self) -> str:
+        return self._meter_capabilities
+
+    @meter_capabilities.setter
+    def meter_capabilities(self, value: str) -> None:
+        if self._meter_capabilities != value:
+            LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
+            self._meter_capabilities = value
+            self.notify()
+
+    @property
+    def multisensor_capabilities(self) -> str:
+        return self._multisensor_capabilities
+
+    @multisensor_capabilities.setter
+    def multisensor_capabilities(self, value: str) -> None:
+        if self._multisensor_capabilities != value:
+            LOGGER.debug("ZWave%s (%s) - multisensor_capabilities: %s", self.node_id, self.node_name, value)
+            self._multisensor_capabilities = value
             self.notify()
 
     @property
@@ -238,4 +266,6 @@ class QolsysZWaveDevice(QolsysObservable):
             "is_device_hidden": self._is_device_hidden,
             "last_updated_date": self._last_updated_date,
             "command_class_list": self._command_class_list,
+            "multisensor_capabilities": self.multisensor_capabilities,
+            "meter_capabilities": self.meter_capabilities,
         }

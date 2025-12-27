@@ -53,38 +53,78 @@ class ZWaveThermalMeterScale(IntEnum):
 
 
 class ThermostatMode(IntEnum):
-    OFF = 0x0001
-    HEAT = 0x0002
-    COOL = 0x0004
-    AUTO = 0x0008
-    AUX_HEAT = 0x0010
-    RESUME = 0x0020
-    FAN_ONLY = 0x0040
-    FURNACE = 0x0080
-    DRY_AIR = 0x0100
-    MOIST_AIR = 0x0200
-    AUTO_CHANGEOVER = 0x0400
-    ENERGY_SAVE_HEAT = 0x0800
-    ENERGY_SAVE_COOL = 0x1000
-    AWAY = 0x2000
-    FULL_POWER = 0x4000
-    MANUFACTURER_SPECEFIC = 0x8000
+    OFF = 0x00
+    HEAT = 0x01
+    COOL = 0x02
+    AUTO = 0x03
+    AUX_HEAT = 0x04
+    RESUME = 0x05
+    FAN_ONLY = 0x06
+    FURNACE = 0x07
+    DRY_AIR = 0x08
+    MOIST_AIR = 0x09
+    AUTO_CHANGEOVER = 0x0A
+    ENERGY_SAVE_HEAT = 0x0B
+    ENERGY_SAVE_COOL = 0x0C
+    AWAY = 0x0F
+
+
+BITMASK_SUPPORTED_THERMOSTAT_MODE = {
+    0: ThermostatMode.OFF,
+    1: ThermostatMode.HEAT,
+    2: ThermostatMode.COOL,
+    3: ThermostatMode.AUTO,
+    4: ThermostatMode.AUX_HEAT,
+    5: ThermostatMode.RESUME,
+    6: ThermostatMode.FAN_ONLY,
+    7: ThermostatMode.FURNACE,
+}
 
 
 class ThermostatFanMode(IntEnum):
-    AUTO_LOW = 0x0001
-    LOW = 0x0002
-    AUTO_HIGH = 0x0004
-    HIGH = 0x0008
-    AUTO_MEDIUM = 0x0010
-    MEDIUM = 0x0020
-    CIRCULATION = 0x4000
-    HUMIDITY_CIRCULATION = 0x0080
-    LEFT_RIGHT = 0x0100
-    UP_DOWN = 0x0200
-    QUIET = 0x0400
+    AUTO_LOW = 0x00
+    LOW = 0x01
+    AUTO_HIGH = 0x02
+    HIGH = 0x03
+    AUTO_MEDIUM = 0x04
+    MEDIUM = 0x05
+    CIRCULATION = 0x06
+    HUMIDITY_CIRCULATION = 0x07
+    LEFT_RIGHT = 0x08
+    UP_DOWN = 0x09
+    QUIET = 0x0A
     EXTERNAL_CIRCULATION = 0x0800
-    MANUFACTURER_SPECEFIC = 0x1000
+
+
+BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE = {
+    0: ThermostatFanMode.AUTO_LOW,
+    1: ThermostatFanMode.LOW,
+    2: ThermostatFanMode.AUTO_HIGH,
+    3: ThermostatFanMode.HIGH,
+    4: ThermostatFanMode.AUTO_MEDIUM,
+    5: ThermostatFanMode.MEDIUM,
+    6: ThermostatFanMode.CIRCULATION,
+    7: ThermostatFanMode.HUMIDITY_CIRCULATION,
+}
+
+
+class ThermostatSetPointMode(IntEnum):
+    HEATING_1 = 0x00
+    COOLING_1 = 0x01
+    HEATING_2 = 0x02
+    COOLING_2 = 0x03
+    AWAY_HEATING_1 = 0x04
+    AWAY_COOLING_1 = 0x05
+
+
+BITMASK_SUPPORTED_THERMOSTAT_SETPOINT = {
+    0: ThermostatSetPointMode.HEATING_1,
+    1: ThermostatSetPointMode.COOLING_1,
+    2: ThermostatSetPointMode.HEATING_2,
+    3: ThermostatSetPointMode.COOLING_2,
+    4: ThermostatSetPointMode.AWAY_HEATING_1,
+    5: ThermostatSetPointMode.AWAY_COOLING_1,
+}
 
 
 class ZwaveCommandClass(IntEnum):
