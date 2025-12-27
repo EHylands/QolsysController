@@ -1,5 +1,4 @@
 import logging
-from re import L
 
 from .enum_zwave import (
     BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE,
@@ -7,6 +6,7 @@ from .enum_zwave import (
     BITMASK_SUPPORTED_THERMOSTAT_SETPOINT,
     ThermostatFanMode,
     ThermostatMode,
+    ThermostatSetPointMode,
 )
 from .zwave_device import QolsysZWaveDevice
 
@@ -389,7 +389,7 @@ class QolsysThermostat(QolsysZWaveDevice):
 
         return supported
 
-    def available_thermostat_set_point_mode(self) -> list[ThermostatMode]:
+    def available_thermostat_set_point_mode(self) -> list[ThermostatSetPointMode]:
         int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")

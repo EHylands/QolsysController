@@ -106,7 +106,7 @@ class QolsysZWaveDevice(QolsysObservable):
         if "multisensor_capabilities" in data:
             self.multisensor_capabilities = data.get("multisensor_capabilities", "")
         if "meter_capabilities" in data:
-            self._meter_capabilities = data.get("meter_capabilities", "") 
+            self._meter_capabilities = data.get("meter_capabilities", "")
 
         self.end_batch_update()
 
