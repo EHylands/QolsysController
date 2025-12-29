@@ -1,4 +1,8 @@
+import json
 import logging
+
+from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
+from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveServiceMultilevelSensor
 
 from .enum_zwave import ZwaveDeviceClass
 from .observable import QolsysObservable
@@ -35,8 +39,14 @@ class QolsysZWaveDevice(QolsysObservable):
         self._is_device_hidden: str = zwave_dict.get("is_device_hidden", "")
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
-        self._multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
-        self._meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
+        self._meter_capabilities: str = ""
+        self._multisensor_capabilities: str = ""
+
+        # Set Meter and MutilevelSensor Services if available
+        self._meter_endpoints: list[QolsysZwaveServiceMeter] = []
+        self._multilevelsensor_endpoints: list[QolsysZwaveServiceMultilevelSensor] = []
+        self.meter_capabilities = zwave_dict.get("meter_capabilities", "")
+        self.multisensor_capabilities = zwave_dict.get("multisensor_capabilities", "")
 
     def update_raw(self, payload: bytes) -> None:
         LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
@@ -106,7 +116,7 @@ class QolsysZWaveDevice(QolsysObservable):
         if "multisensor_capabilities" in data:
             self.multisensor_capabilities = data.get("multisensor_capabilities", "")
         if "meter_capabilities" in data:
-            self._meter_capabilities = data.get("meter_capabilities", "")
+            self.meter_capabilities = data.get("meter_capabilities", "")
 
         self.end_batch_update()
 
@@ -151,9 +161,36 @@ class QolsysZWaveDevice(QolsysObservable):
     @meter_capabilities.setter
     def meter_capabilities(self, value: str) -> None:
         if self._meter_capabilities != value:
-            LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
+            # LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
             self._meter_capabilities = value
-            self.notify()
+
+            # Update Meter Service
+            try:
+                meter_services = json.loads(value)
+                for endpoint, service in meter_services.items():
+                    # Check if we already have this meter service
+                    meter_endpoint = None
+                    for meter in self._meter_endpoints:
+                        if meter.endpoint == endpoint:
+                            meter_endpoint = meter
+                            LOGGER.debug(
+                                "ZWave%s (%s) - Updating existing meter endpoint: %s",
+                                self.node_id,
+                                self.node_name,
+                                meter.endpoint,
+                            )
+                            meter_endpoint.update_iq2medi(service)
+                            break
+
+                    # Create new meter service if not found
+                    if meter_endpoint is None:
+                        LOGGER.debug("ZWave%s (%s) - Adding new meter endpoint: %s", self.node_id, self.node_name, endpoint)
+                        meter_endpoint = QolsysZwaveServiceMeter(self, endpoint, service)
+                        self._meter_endpoints.append(meter_endpoint)
+
+            except json.JSONDecodeError:
+                LOGGER.error("ZWave%s (%s) - Error parsing meter_capabilities:%s", self.node_id, self.node_name, value)
+                return
 
     @property
     def multisensor_capabilities(self) -> str:
@@ -162,9 +199,42 @@ class QolsysZWaveDevice(QolsysObservable):
     @multisensor_capabilities.setter
     def multisensor_capabilities(self, value: str) -> None:
         if self._multisensor_capabilities != value:
-            LOGGER.debug("ZWave%s (%s) - multisensor_capabilities: %s", self.node_id, self.node_name, value)
+            # LOGGER.debug("ZWave%s (%s) - multisensor_capabilities: %s", self.node_id, self.node_name, value)
             self._multisensor_capabilities = value
-            self.notify()
+
+            # Update Multilevel Sensor Service
+            try:
+                sensor_services = json.loads(value)
+                for endpoint, service in sensor_services.items():
+                    # Check if we already have this meter service
+                    sensor_endpoint = None
+                    for sensor in self._multilevelsensor_endpoints:
+                        if sensor.endpoint == endpoint:
+                            sensor_endpoint = sensor
+                            LOGGER.debug(
+                                "ZWave%s (%s) - Updating existing multilevelsensor endpoint: %s",
+                                self.node_id,
+                                self.node_name,
+                                sensor_endpoint.endpoint,
+                            )
+                            sensor_endpoint.update_iq2medi(service)
+                            break
+
+                    # Create new meter service if not found
+                    if sensor_endpoint is None:
+                        LOGGER.debug(
+                            "ZWave%s (%s) - Adding new multilevelsensor endpoint: %s", self.node_id, self.node_name, endpoint
+                        )
+                        LOGGER.debug("create sensor service")
+                        sensor_endpoint = QolsysZwaveServiceMultilevelSensor(self, endpoint, service)
+                        self.multilevelsensor_endpoints.append(sensor_endpoint)
+                        LOGGER.debug(sensor_endpoint.sensors)
+
+            except json.JSONDecodeError:
+                LOGGER.error(
+                    "ZWave%s (%s) - Error parsing multilevelsensor_capabilities:%s", self.node_id, self.node_name, value
+                )
+                return
 
     @property
     def node_battery_level_value(self) -> int | None:
@@ -230,6 +300,14 @@ class QolsysZWaveDevice(QolsysObservable):
             self.notify()
 
     @property
+    def meter_endpoints(self) -> list[QolsysZwaveServiceMeter]:
+        return self._meter_endpoints
+
+    @property
+    def multilevelsensor_endpoints(self) -> list[QolsysZwaveServiceMultilevelSensor]:
+        return self._multilevelsensor_endpoints
+
+    @property
     def generic_device_type(self) -> ZwaveDeviceClass:
         try:
             return ZwaveDeviceClass(int(self._generic_device_type))
@@ -238,6 +316,12 @@ class QolsysZWaveDevice(QolsysObservable):
 
     def is_battery_enabled(self) -> bool:
         return self.node_battery_level_value is not None
+
+    def is_service_meter_enabled(self) -> bool:
+        return self._meter_endpoints != []
+
+    def is_service_multilevelsensor_enabled(self) -> bool:
+        return self._multilevelsensor_endpoints != []
 
     def to_dict_base(self) -> dict[str, str]:
         return {

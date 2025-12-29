@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-from enum import IntEnum
 from typing import TYPE_CHECKING
 
 from qolsys_controller.adc_service import QolsysAdcService
 from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
-from qolsys_controller.zwave_meter import QolsysMeterDevice
+from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
 from qolsys_controller.zwave_thermometer import QolsysThermometer
 
 from .adc_device import QolsysAdcDevice
@@ -96,10 +95,10 @@ class QolsysState(QolsysObservable):
         return thermostats
 
     @property
-    def zwave_meters(self) -> list[QolsysMeterDevice]:
+    def zwave_meters(self) -> list[QolsysEnergyClamp]:
         meters = []
         for device in self.zwave_devices:
-            if isinstance(device, QolsysMeterDevice):
+            if isinstance(device, QolsysEnergyClamp):
                 meters.append(device)
         return meters
 
@@ -351,10 +350,9 @@ class QolsysState(QolsysObservable):
                             state_zwave.update_lock(db_zwave.to_dict_lock())
                             break
 
-                        # Update Meter
-                        if isinstance(state_zwave, QolsysMeterDevice) and isinstance(db_zwave, QolsysMeterDevice):
-                            # Meter state not store in database
-                            # Keep old value instact
+                        # Update Energy Clamp
+                        if isinstance(state_zwave, QolsysEnergyClamp) and isinstance(db_zwave, QolsysEnergyClamp):
+                            state_zwave.update_base(db_zwave.to_dict_base())
                             break
 
                         # Generic Z-Wave Device
@@ -473,6 +471,29 @@ class QolsysState(QolsysObservable):
     def dump(self) -> None:  # noqa: PLR0912, PLR0915
         LOGGER.debug("*** Device Information ***")
 
+        def dump_meter(self: QolsysState, device: QolsysZWaveDevice) -> None:
+            for endpoint in device.meter_endpoints:
+                for meter_sensor in endpoint.sensors:
+                    LOGGER.debug(
+                        " Meter%s Endpoint%s - %s - value: %.2f (%s)",
+                        device.node_id,
+                        endpoint.endpoint,
+                        endpoint._meter_type.name,
+                        meter_sensor.value,
+                        meter_sensor.scale.name,
+                    )
+
+        def dump_multilevelsensor(self: QolsysState, device: QolsysZWaveDevice) -> None:
+            for endpoint in device.multilevelsensor_endpoints:
+                for sensor in endpoint.sensors:
+                    LOGGER.debug(
+                        " Multilevelsensor%s Endpoint%s - value: %.2f (%s)",
+                        device.node_id,
+                        endpoint.endpoint,
+                        sensor.value,
+                        sensor.unit.name,
+                    )
+
         for partition in self.partitions:
             pid = partition.id
             name = partition.name
@@ -513,6 +534,8 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Dimmer%s (%s) - node_status: %s", nid, name, zwave.node_status)
                 LOGGER.debug("Dimmer%s (%s) - battery_level: %s", nid, name, zwave.node_battery_level)
                 LOGGER.debug("Dimmer%s (%s) - battery_level_value: %s", nid, name, zwave.node_battery_level_value)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
                 continue
 
             if isinstance(zwave, QolsysThermostat):
@@ -525,34 +548,33 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s", zid, name, zwave.thermostat_target_cool_temp)
                 LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s", zid, name, zwave.thermostat_target_heat_temp)
                 LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", zid, name, zwave.thermostat_set_point_mode)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
                 continue
 
             if isinstance(zwave, QolsysLock):
                 zid = zwave.lock_node_id
                 name = zwave.lock_name
                 LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
                 continue
 
-            if isinstance(zwave, QolsysMeterDevice):
+            if isinstance(zwave, QolsysEnergyClamp):
                 nid = zwave.node_id
                 name = zwave.node_name
-                LOGGER.debug("Meter%s (%s)", nid, name)
-
-                for meter_sensor in zwave.meters:
-                    scale_type: type[IntEnum] = zwave.scale_for_meter_type(meter_sensor.meter_type)
-
-                    LOGGER.debug(
-                        " Sensor%s (%s) - value: %s (%s)",
-                        meter_sensor.meter_type,
-                        meter_sensor.meter_type.name,
-                        meter_sensor.value,
-                        scale_type(meter_sensor.scale).name,
-                    )
+                LOGGER.debug("EnergyClamp%s (%s)", nid, name)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
+                continue
 
             if isinstance(zwave, QolsysThermometer):
                 nid = zwave.node_id
                 name = zwave.node_name
                 LOGGER.debug("Thermometer%s (%s)", nid, name)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
+                continue
 
             if isinstance(zwave, QolsysGeneric):
                 zid = zwave.node_id
@@ -561,6 +583,8 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Generic%s (%s) - status: %s", zid, name, zwave.node_status)
                 LOGGER.debug("Generic%s (%s) - battery_level: %s", zid, name, zwave.node_battery_level)
                 LOGGER.debug("Generic%s (%s) - battery_level_vale: %s", zid, name, zwave.node_battery_level_value)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
                 continue
 
         LOGGER.debug("Other Z-Wave devices information")

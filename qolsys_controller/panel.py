@@ -6,7 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.adc_device import QolsysAdcDevice
-from qolsys_controller.zwave_meter import QolsysMeterDevice
+from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
 from qolsys_controller.zwave_thermometer import QolsysThermometer
 
 from .database.db import QolsysDB
@@ -900,8 +900,8 @@ class QolsysPanel(QolsysObservable):
 
             # Check if z-wave device is an Energy Clamp
             if device.get("node_type", "") == "Energy Clamp":
-                qolsys_meter_device = QolsysMeterDevice(device)
-                qolsys_meter_device.create_generic_electric_meter()
+                LOGGER.debug(device)
+                qolsys_meter_device = QolsysEnergyClamp(device)
                 devices.append(qolsys_meter_device)
                 device_added = True
 

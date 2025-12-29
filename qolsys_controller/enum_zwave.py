@@ -18,6 +18,28 @@ class MeterRateType(IntEnum):
     RESERVED = 0x03
 
 
+class ZWaveMultilevelSensorScale(Enum):
+    TEMPERATURE_CELSIUS = "temperature_celsius"
+    TEMPERATURE_FAHRENHEIT = "temperature_fahrenheit"
+    RELATIVE_HUMIDITY = "relative_humidity"
+    WIND_DIRECTION = "wind_direction"
+    BAROMETRIC_PRESSURE = "barometric_pressure"
+    DEW_POINT = "dew_point"
+    RAIN_RATE = "rain_rate"
+    TIDE_LEVEL = "tide_level"
+    WEIGHT = "weight"
+    VOLTS = "volts"
+    AMPS = "amps"
+    WATTS = "watts"
+    DISTANCE = "distance"
+    ANGLE_POSITION = "angle_position"
+    ROTATION = "rotation"
+    WATER_TEMPERATURE_CELSIUS = "water_temperature_celsius"
+    WATER_TEMPERATURE_FAHRENHEIT = "water_temperature_fahrenheit"
+    LUMINOSITY_LUX = "luminosity_lux"
+    UNKNOWN = "unknown"
+
+
 class ZWaveUnknownMeterScale(IntEnum):
     UNKNOWN = 0
 
