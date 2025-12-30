@@ -64,6 +64,7 @@ class ZoneStatus(StrEnum):
     FAILURE = "Failure"
     NOT_NETWORKED = "Not Networked"
     DISARM = "Disarm"
+    ARM_AWAY = "Arm-Away"
 
 
 class DeviceCapability(StrEnum):
