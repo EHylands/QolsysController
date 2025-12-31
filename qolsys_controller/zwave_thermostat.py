@@ -198,9 +198,10 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @thermostat_mode.setter
     def thermostat_mode(self, value: str) -> None:
-        if self._thermostat_mode != value:
-            LOGGER.debug("Thermostat%s (%s) - mode: %s", self.thermostat_node_id, self.thermostat_name, value)
-            self._thermostat_mode = value
+        new_value = value.strip("[]")
+        if self._thermostat_mode != new_value:
+            LOGGER.debug("Thermostat%s (%s) - mode: %s", self.thermostat_node_id, self.thermostat_name, new_value)
+            self._thermostat_mode = new_value
             self.notify()
 
     @property
@@ -233,9 +234,10 @@ class QolsysThermostat(QolsysZWaveDevice):
 
     @thermostat_fan_mode.setter
     def thermostat_fan_mode(self, value: str) -> None:
-        if self._thermostat_fan_mode != value:
-            LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", self.thermostat_node_id, self.thermostat_name, value)
-            self._thermostat_fan_mode = value
+        new_value = value.strip("[]")
+        if self._thermostat_fan_mode != new_value:
+            LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", self.thermostat_node_id, self.thermostat_name, new_value)
+            self._thermostat_fan_mode = new_value
             self.notify()
 
     @property
