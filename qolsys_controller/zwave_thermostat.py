@@ -51,14 +51,6 @@ class QolsysThermostat(QolsysZWaveDevice):
         self._thermostat_operating_state: str = thermostat_dict.get("operating_state", "")
         self._thermostat_setpoint_capabilites = thermostat_dict.get("setpoint_capabilites", "")
 
-        LOGGER.debug("Thermostat%s", self._thermostat_node_id)
-        LOGGER.debug("Thermostat Supported Mode: %s", self.available_thermostat_mode())
-        LOGGER.debug("Thermostat Supported Fan Mode: %s", self.available_thermostat_fan_mode())
-        LOGGER.debug("Thermostat Supported Set Point Mode: %s", self.available_thermostat_set_point_mode())
-        LOGGER.debug("Thermostat Operating State: %s", self._thermostat_operating_state)
-        LOGGER.debug("Thermostat Configuration Parameter: %s", self._thermostat_configuration_parameter)
-        LOGGER.debug("Thermostat Setpoint Capabilites: %s", self._thermostat_setpoint_capabilites)
-
     # -----------------------------
     # properties + setters
     # -----------------------------

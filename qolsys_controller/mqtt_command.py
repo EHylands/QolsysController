@@ -91,26 +91,32 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
 
         ipc_request: list[dict[str, Any]] = [
             {
+                # Node ID
                 "dataType": "int",
                 "dataValue": int(node_id),
             },
             {
+                # End Point
                 "dataType": "int",
                 "dataValue": 0,
             },
             {
+                # Z-Wave Payload
                 "dataType": "byteArray",
                 "dataValue": zwave_command,
             },
             {
+                # Transmit option ?
                 "dataType": "int",
                 "dataValue": 0,
             },
             {
+                # Command ID ?
                 "dataType": "int",
                 "dataValue": 106,
             },
             {
+                # Callback ?
                 "dataType": "byteArray",
                 "dataValue": [0],
             },
