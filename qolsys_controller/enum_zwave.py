@@ -57,14 +57,14 @@ class ZWaveElectricMeterScale(IntEnum):
 
 
 class ZWaveGasMeterScale(IntEnum):
-    CUBIC_METERS = 0  # m³
-    CUBIC_FEET = 1  # ft³
+    CUBIC_METERS = 0
+    CUBIC_FEET = 1
     PULSE_COUNT = 3
 
 
 class ZWaveWaterMeterScale(IntEnum):
-    CUBIC_METERS = 0  # m³
-    CUBIC_FEET = 1  # ft³
+    CUBIC_METERS = 0
+    CUBIC_FEET = 1
     US_GALLONS = 2
     PULSE_COUNT = 3
 
@@ -103,6 +103,33 @@ BITMASK_SUPPORTED_THERMOSTAT_MODE = {
 }
 
 
+class ThermostatSetpointMode(IntEnum):
+    HEATING = 0x01
+    COOLING = 0x02
+    FURNACE = 0x03
+    DRY_AIR = 0x04
+    MOIST_AIR = 0x05
+    AUTO_CHANGEOVER = 0x06
+    ECO_HEATING = 0x07
+    ECO_COOLING = 0x08
+    AWAY_HEATING = 0x09
+    AWAY_COOLING = 0x10
+
+
+BITMASK_SUPPORTED_THERMOSTAT_SETPOINT_MODE = {
+    0: ThermostatSetpointMode.HEATING,
+    1: ThermostatSetpointMode.COOLING,
+    2: ThermostatSetpointMode.FURNACE,
+    3: ThermostatSetpointMode.DRY_AIR,
+    4: ThermostatSetpointMode.MOIST_AIR,
+    5: ThermostatSetpointMode.AUTO_CHANGEOVER,
+    6: ThermostatSetpointMode.ECO_HEATING,
+    7: ThermostatSetpointMode.ECO_COOLING,
+    8: ThermostatSetpointMode.AWAY_HEATING,
+    9: ThermostatSetpointMode.AWAY_COOLING,
+}
+
+
 class ThermostatFanMode(IntEnum):
     AUTO_LOW = 0x00
     LOW = 0x01
@@ -127,25 +154,6 @@ BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE = {
     5: ThermostatFanMode.MEDIUM,
     6: ThermostatFanMode.CIRCULATION,
     7: ThermostatFanMode.HUMIDITY_CIRCULATION,
-}
-
-
-class ThermostatSetPointMode(IntEnum):
-    HEATING_1 = 0x00
-    COOLING_1 = 0x01
-    HEATING_2 = 0x02
-    COOLING_2 = 0x03
-    AWAY_HEATING_1 = 0x04
-    AWAY_COOLING_1 = 0x05
-
-
-BITMASK_SUPPORTED_THERMOSTAT_SETPOINT = {
-    0: ThermostatSetPointMode.HEATING_1,
-    1: ThermostatSetPointMode.COOLING_1,
-    2: ThermostatSetPointMode.HEATING_2,
-    3: ThermostatSetPointMode.COOLING_2,
-    4: ThermostatSetPointMode.AWAY_HEATING_1,
-    5: ThermostatSetPointMode.AWAY_COOLING_1,
 }
 
 

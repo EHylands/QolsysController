@@ -3,10 +3,11 @@ import logging
 from .enum_zwave import (
     BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE,
     BITMASK_SUPPORTED_THERMOSTAT_MODE,
-    BITMASK_SUPPORTED_THERMOSTAT_SETPOINT,
+    BITMASK_SUPPORTED_THERMOSTAT_SETPOINT_MODE,
     ThermostatFanMode,
     ThermostatMode,
-    ThermostatSetPointMode,
+    ThermostatSetpointMode,
+    ZWaveMultilevelSensorScale,
 )
 from .zwave_device import QolsysZWaveDevice
 
@@ -50,6 +51,8 @@ class QolsysThermostat(QolsysZWaveDevice):
         self._thermostat_configuration_parameter: str = thermostat_dict.get("configuration_parameter", "")
         self._thermostat_operating_state: str = thermostat_dict.get("operating_state", "")
         self._thermostat_setpoint_capabilites = thermostat_dict.get("setpoint_capabilites", "")
+
+        self._thermostat_current_humidity: float | None = None
 
     # -----------------------------
     # properties + setters
@@ -243,6 +246,19 @@ class QolsysThermostat(QolsysZWaveDevice):
             self._thermostat_set_point_mode = value
             self.notify()
 
+    @property
+    def thermostat_current_humidity(self) -> float | None:
+        sensor = self.multilevelsensor_value(ZWaveMultilevelSensorScale.RELATIVE_HUMIDITY)
+
+        if not sensor:
+            return None
+
+        if len(sensor) == 1:
+            return sensor[0].value
+
+        LOGGER.error("Multiple humidity sensor present")
+        return sensor[0].value
+
     def update_raw(self, payload: bytes) -> None:
         pass
 
@@ -383,13 +399,13 @@ class QolsysThermostat(QolsysZWaveDevice):
 
         return supported
 
-    def available_thermostat_set_point_mode(self) -> list[ThermostatSetPointMode]:
+    def available_thermostat_set_point_mode(self) -> list[ThermostatSetpointMode]:
         int_list = [int(x) for x in self._thermostat_set_point_mode_bitmask.strip("[]").split(",")]
         byte_array = bytes(int_list)
         bitmask = int.from_bytes(byte_array, byteorder="little")
 
         supported = []
-        for bit, mode in BITMASK_SUPPORTED_THERMOSTAT_SETPOINT.items():
+        for bit, mode in BITMASK_SUPPORTED_THERMOSTAT_SETPOINT_MODE.items():
             if bitmask & (1 << bit):
                 supported.append(mode)
 

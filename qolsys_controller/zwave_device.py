@@ -2,9 +2,9 @@ import json
 import logging
 
 from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
-from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveServiceMultilevelSensor
+from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
 
-from .enum_zwave import ZwaveDeviceClass
+from .enum_zwave import ZwaveDeviceClass, ZWaveMultilevelSensorScale
 from .observable import QolsysObservable
 
 LOGGER = logging.getLogger(__name__)
@@ -161,7 +161,6 @@ class QolsysZWaveDevice(QolsysObservable):
     @meter_capabilities.setter
     def meter_capabilities(self, value: str) -> None:
         if self._meter_capabilities != value:
-            # LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
             self._meter_capabilities = value
 
             # Update Meter Service
@@ -193,7 +192,6 @@ class QolsysZWaveDevice(QolsysObservable):
     @multisensor_capabilities.setter
     def multisensor_capabilities(self, value: str) -> None:
         if self._multisensor_capabilities != value:
-            # LOGGER.debug("ZWave%s (%s) - multisensor_capabilities: %s", self.node_id, self.node_name, value)
             self._multisensor_capabilities = value
 
             # Update Multilevel Sensor Service
@@ -213,10 +211,8 @@ class QolsysZWaveDevice(QolsysObservable):
                         LOGGER.debug(
                             "ZWave%s (%s) - Adding new multilevelsensor endpoint: %s", self.node_id, self.node_name, endpoint
                         )
-                        LOGGER.debug("create sensor service")
                         sensor_endpoint = QolsysZwaveServiceMultilevelSensor(self, endpoint, service)
                         self.multilevelsensor_endpoints.append(sensor_endpoint)
-                        LOGGER.debug(sensor_endpoint.sensors)
 
             except json.JSONDecodeError:
                 LOGGER.error(
@@ -310,6 +306,14 @@ class QolsysZWaveDevice(QolsysObservable):
 
     def is_service_multilevelsensor_enabled(self) -> bool:
         return self._multilevelsensor_endpoints != []
+
+    def multilevelsensor_value(self, scale: ZWaveMultilevelSensorScale) -> list[QolsysZwaveMultilevelSensor]:
+        result: list[QolsysZwaveMultilevelSensor] = []
+        for endpoint in self.multilevelsensor_endpoints:
+            sensor = endpoint.get_sensor(scale)
+            if sensor is not None:
+                result.append(sensor)
+        return result
 
     def to_dict_base(self) -> dict[str, str]:
         return {
