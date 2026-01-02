@@ -173,12 +173,6 @@ class QolsysZWaveDevice(QolsysObservable):
                     for meter in self._meter_endpoints:
                         if meter.endpoint == endpoint:
                             meter_endpoint = meter
-                            LOGGER.debug(
-                                "ZWave%s (%s) - Updating existing meter endpoint: %s",
-                                self.node_id,
-                                self.node_name,
-                                meter.endpoint,
-                            )
                             meter_endpoint.update_iq2medi(service)
                             break
 
@@ -211,12 +205,6 @@ class QolsysZWaveDevice(QolsysObservable):
                     for sensor in self._multilevelsensor_endpoints:
                         if sensor.endpoint == endpoint:
                             sensor_endpoint = sensor
-                            LOGGER.debug(
-                                "ZWave%s (%s) - Updating existing multilevelsensor endpoint: %s",
-                                self.node_id,
-                                self.node_name,
-                                sensor_endpoint.endpoint,
-                            )
                             sensor_endpoint.update_iq2medi(service)
                             break
 

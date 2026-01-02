@@ -49,6 +49,7 @@ class QolsysTableThermostat(QolsysTable):
             "paired_status",
             "configuration_parameter",
             "operating_state",
+            "fan_state",
         ]
 
         self._create_table()

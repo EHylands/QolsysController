@@ -910,12 +910,11 @@ class QolsysController:
         if zwave_node.thermostat_device_temp_unit == "F":
             scale = 1
 
-        precision: int = 0
+        precision: int = 1
         size: int = 2
-
         pss = (precision << 5) | (scale << 3) | size
-
-        temp_bytes = setpoint.to_bytes(2, byteorder="big", signed=True)
+        temp_int = int(round(setpoint * (10**precision)))
+        temp_bytes = temp_int.to_bytes(size, byteorder="big", signed=True)
 
         zwave_bytes: list[int] = [
             0x43,  # Thermostat Setpoint
@@ -928,6 +927,20 @@ class QolsysController:
             0x43,  # Thermostat Setpoint
             0x01,  # SET
             mode.value,  # Heating
+            pss,
+        ] + list(temp_bytes)
+
+        zwave_bytes3: list[int] = [
+            0x43,  # Thermostat Setpoint
+            0x01,  # SET
+            0x03,  # Furnace
+            pss,
+        ] + list(temp_bytes)
+
+        zwave_bytes4: list[int] = [
+            0x43,  # Thermostat Setpoint
+            0x03,  # SET
+            0x03,  # Furnace
             pss,
         ] + list(temp_bytes)
 
@@ -950,6 +963,30 @@ class QolsysController:
             mode,
             setpoint,
             zwave_bytes2,
+        )
+        command2 = MQTTCommand_ZWave(self, node_id, zwave_bytes2)
+        response2 = await command2.send_command()
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response2)
+
+        await asyncio.sleep(3)
+
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x01 - Node(%s) - Mode(0x03) - Setpoint(%s): %s",
+            node_id,
+            setpoint,
+            zwave_bytes3,
+        )
+        command2 = MQTTCommand_ZWave(self, node_id, zwave_bytes2)
+        response2 = await command2.send_command()
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response2)
+
+        await asyncio.sleep(3)
+
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(0x3) - Setpoint(%s): %s",
+            node_id,
+            setpoint,
+            zwave_bytes4,
         )
         command2 = MQTTCommand_ZWave(self, node_id, zwave_bytes2)
         response2 = await command2.send_command()

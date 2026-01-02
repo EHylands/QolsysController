@@ -427,12 +427,12 @@ class QolsysPanel(QolsysObservable):
     def parse_zwave_message(self, data: dict[str, Any]) -> None:
         zwave = data.get("ZWAVE_RESPONSE", "")
         payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
-        LOGGER.debug(
-            "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
-            zwave.get("NODE_ID", ""),
-            zwave.get("ZWAVE_COMMAND_STATUS", ""),
-            payload,
-        )
+        # LOGGER.debug(
+        #    "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
+        #    zwave.get("NODE_ID", ""),
+        #    zwave.get("ZWAVE_COMMAND_STATUS", ""),
+        #    payload,
+        # )
 
         node_id: str = str(zwave.get("NODE_ID", 0))
         node = self._controller.state.zwave_device(node_id)

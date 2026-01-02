@@ -80,6 +80,8 @@ class QolsysTableZwaveNode(QolsysTable):
             "long_range_nodeid",
             "hide_device_info",
             "meter_capabilities",
+            "multisensor_capabilities",
+            "central_scene_supported",
         ]
 
         self._create_table()
