@@ -924,12 +924,12 @@ class QolsysController:
         if mode == ThermostatSetpointMode.COOLING:
             setpointmode = mode
 
-        #zwave_bytes: list[int] = [
+        # zwave_bytes: list[int] = [
         #    0x43,
         #    0x03,  # SET
         #    mode.value,
         #    pss,
-        #] + list(temp_bytes)
+        # ] + list(temp_bytes)
 
         zwave_bytes2: list[int] = [
             0x43,  # Thermostat Setpoint
@@ -938,19 +938,19 @@ class QolsysController:
             pss,
         ] + list(temp_bytes)
 
-        #zwave_bytes3: list[int] = [
+        # zwave_bytes3: list[int] = [
         #    0x43,  # Thermostat Setpoint
         #    0x03,  # SET
         #    0x03,  # Furnace
         #    pss,
-        #] + list(temp_bytes)
+        # ] + list(temp_bytes)
 
-        #zwave_bytes4: list[int] = [
+        # zwave_bytes4: list[int] = [
         #    0x43,  # Thermostat Setpoint
         #    0x01,  # SET
         #    0x03,  # Furnace
         #    pss,
-        #] + list(temp_bytes)
+        # ] + list(temp_bytes)
 
         # LOGGER.debug(
         #    "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
