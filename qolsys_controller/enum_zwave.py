@@ -80,15 +80,15 @@ class ThermostatMode(IntEnum):
     COOL = 0x02
     AUTO = 0x03
     AUX_HEAT = 0x04
-    # RESUME = 0x05
-    # FAN_ONLY = 0x06
-    # FURNACE = 0x07
-    # DRY_AIR = 0x08
-    # MOIST_AIR = 0x09
-    # AUTO_CHANGEOVER = 0x0A
-    # ENERGY_SAVE_HEAT = 0x0B
-    # ENERGY_SAVE_COOL = 0x0C
-    # AWAY = 0x0F
+    RESUME = 0x05
+    FAN_ONLY = 0x06
+    FURNACE = 0x07
+    DRY_AIR = 0x08
+    MOIST_AIR = 0x09
+    AUTO_CHANGEOVER = 0x0A
+    ENERGY_SAVE_HEAT = 0x0B
+    ENERGY_SAVE_COOL = 0x0C
+    AWAY = 0x0F
 
 
 BITMASK_SUPPORTED_THERMOSTAT_MODE = {
@@ -97,9 +97,9 @@ BITMASK_SUPPORTED_THERMOSTAT_MODE = {
     2: ThermostatMode.COOL,
     3: ThermostatMode.AUTO,
     4: ThermostatMode.AUX_HEAT,
-    # 5: ThermostatMode.RESUME,
-    # 6: ThermostatMode.FAN_ONLY,
-    # 7: ThermostatMode.FURNACE,
+    5: ThermostatMode.RESUME,
+    6: ThermostatMode.FAN_ONLY,
+    7: ThermostatMode.FURNACE,
 }
 
 
