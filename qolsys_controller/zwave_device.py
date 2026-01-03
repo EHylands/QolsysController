@@ -41,6 +41,8 @@ class QolsysZWaveDevice(QolsysObservable):
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
         self._meter_capabilities: str = ""
         self._multisensor_capabilities: str = ""
+        self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
+        self._multi_channel_details = zwave_dict.get("multi_channel_details", "")
 
         # Set Meter and MutilevelSensor Services if available
         self._meter_endpoints: list[QolsysZwaveServiceMeter] = []
@@ -117,6 +119,10 @@ class QolsysZWaveDevice(QolsysObservable):
             self.multisensor_capabilities = data.get("multisensor_capabilities", "")
         if "meter_capabilities" in data:
             self.meter_capabilities = data.get("meter_capabilities", "")
+        if "notification_capabilities" in data:
+            self._notification_capabilities = data.get("notification_capabilities", "")
+        if "multi_channel_details" in data:
+            self._multi_channel_details = data.get("multi_channel_details", "")
 
         self.end_batch_update()
 
@@ -344,4 +350,6 @@ class QolsysZWaveDevice(QolsysObservable):
             "command_class_list": self._command_class_list,
             "multisensor_capabilities": self.multisensor_capabilities,
             "meter_capabilities": self.meter_capabilities,
+            "notification_capabilities": self._notification_capabilities,
+            "multi_channel_details": self._multi_channel_details,
         }
