@@ -748,6 +748,10 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
+    async def command_panel_virtual_device_send(self) -> None:
+        # send_virtual_device_description
+        pass
+
     async def command_panel_trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending panel_trigger_police command")
 
@@ -917,22 +921,77 @@ class QolsysController:
         temp_bytes = temp_int.to_bytes(size, byteorder="big", signed=True)
 
         zwave_bytes: list[int] = [
-            ZwaveCommandClass.ThermostatSetPoint.value,
+            0x43,
             0x03,  # SET
             mode.value,
             pss,
         ] + list(temp_bytes)
 
+        zwave_bytes2: list[int] = [
+            0x43,  # Thermostat Setpoint
+            0x01,  # SET
+            mode.value,
+            pss,
+        ] + list(temp_bytes)
+
+        zwave_bytes3: list[int] = [
+            0x43,  # Thermostat Setpoint
+            0x03,  # SET
+            0x03,  # Furnace
+            pss,
+        ] + list(temp_bytes)
+
+        zwave_bytes4: list[int] = [
+            0x43,  # Thermostat Setpoint
+            0x01,  # SET
+            0x03,  # Furnace
+            pss,
+        ] + list(temp_bytes)
+
         LOGGER.debug(
-            "MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
             node_id,
-            mode,
+            mode.value,
             setpoint,
             zwave_bytes,
         )
         command = MQTTCommand_ZWave(self, node_id, zwave_bytes)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
+
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x01 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            node_id,
+            mode.value,
+            setpoint,
+            zwave_bytes2,
+        )
+        command = MQTTCommand_ZWave(self, node_id, zwave_bytes2)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
+
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            node_id,
+            0x03,
+            setpoint,
+            zwave_bytes3,
+        )
+        command = MQTTCommand_ZWave(self, node_id, zwave_bytes3)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
+
+        LOGGER.debug(
+            "MQTT: Sending zwave_thermostat_setpoint_set 0x01 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            node_id,
+            0x03,
+            setpoint,
+            zwave_bytes4,
+        )
+        command = MQTTCommand_ZWave(self, node_id, zwave_bytes4)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
+
         return response
 
     async def command_zwave_thermostat_mode_set(self, node_id: str, mode: ThermostatMode) -> dict[str, Any] | None:
@@ -943,7 +1002,6 @@ class QolsysController:
             LOGGER.error("zwave_thermostat_mode_set - Invalid node_id %s", node_id)
             return None
 
-        LOGGER.debug("thermostat_mode: %s", int(mode))
         if mode not in thermostat.available_thermostat_mode():
             LOGGER.error("thermostat_mode_set - Invalid mode %s", mode)
 
