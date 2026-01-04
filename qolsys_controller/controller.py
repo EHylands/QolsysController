@@ -775,8 +775,7 @@ class QolsysController:
             "operation_name": "send_virtual_device_description",
             "virtual_device_operation": 4,
             "virtual_device_description": json.dumps(device_list),
-            "operation_source": 1,
-            "macAddress": self.settings.random_mac,
+            "operation_source": 0,
         }
 
         ipc_request = [
