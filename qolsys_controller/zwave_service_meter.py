@@ -130,7 +130,7 @@ class QolsysZwaveServiceMeter:
     def rate_type(self, value: MeterRateType) -> None:
         if self._rate_type != value:
             self._rate_type = value
-            LOGGER.debug("Zave Meter Service - rate_type: %s", value.name)
+            # LOGGER.debug("Zave Meter Service - rate_type: %s", value.name)
             self._parent_device.notify()
 
     @property

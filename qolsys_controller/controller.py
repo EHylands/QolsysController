@@ -748,9 +748,51 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
-    async def command_panel_virtual_device_send(self) -> None:
-        # send_virtual_device_description
-        pass
+    async def command_panel_virtual_device_action(self, device_id: str, state: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending virtual_device command")
+
+        garage_door = self.state.adc_device(device_id)
+        if not garage_door:
+            LOGGER.error("Invalid Virtual Garage Door Id: %s", device_id)
+
+        device_list = {
+            "virtualDeviceList": [
+                {
+                    "virtualDeviceId": device_id,
+                    "virtualDeviceFunctionList": [
+                        {
+                            "vdFuncId": 1,
+                            "vdFuncState": state,
+                            "vdFuncBackendTimestamp": int(time.time() * 1000),
+                            "vdFuncType": 1,
+                        }
+                    ],
+                }
+            ]
+        }
+
+        virtual_command = {
+            "operation_name": "send_virtual_device_description",
+            "virtual_device_operation": 4,
+            "virtual_device_description": json.dumps(device_list),
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(virtual_command),
+            }
+        ]
+
+        LOGGER.debug("virtual command: %s", virtual_command)
+
+        command = MQTTCommand_Panel(self)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving virtual_device command: %s", response)
+        return response
 
     async def command_panel_trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending panel_trigger_police command")
