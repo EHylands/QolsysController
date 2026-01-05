@@ -1,13 +1,17 @@
 import logging
+from typing import TYPE_CHECKING
 
 from .zwave_device import QolsysZWaveDevice
+
+if TYPE_CHECKING:
+    from .controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
 
 class QolsysDimmer(QolsysZWaveDevice):
-    def __init__(self, dimmer_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
-        super().__init__(zwave_dict)
+    def __init__(self, controller: "QolsysController", dimmer_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
+        super().__init__(controller, zwave_dict)
 
         self._dimmer_id: str = dimmer_dict.get("_id", "")
         self._dimmer_version: str = dimmer_dict.get("version", "")

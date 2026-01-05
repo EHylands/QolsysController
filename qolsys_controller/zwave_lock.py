@@ -1,6 +1,10 @@
 import logging
+from typing import TYPE_CHECKING
 
 from .zwave_device import QolsysZWaveDevice
+
+if TYPE_CHECKING:
+    from .controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -8,8 +12,8 @@ LOGGER = logging.getLogger(__name__)
 class QolsysLock(QolsysZWaveDevice):
     LOCK_STATUS_ARRAY = ["Locked"]  # noqa: RUF012
 
-    def __init__(self, lock_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
-        super().__init__(zwave_dict)
+    def __init__(self, controller: "QolsysController", lock_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
+        super().__init__(controller, zwave_dict)
 
         self._lock_id: str = lock_dict.get("_id", "")
         self._lock_version: str = lock_dict.get("version", "")

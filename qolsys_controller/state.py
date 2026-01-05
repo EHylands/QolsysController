@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from qolsys_controller.adc_service import QolsysAdcService
 from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
+from qolsys_controller.observable_v2 import QolsysObservable_v2
 from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
 from qolsys_controller.zwave_thermometer import QolsysThermometer
 
@@ -37,6 +38,8 @@ class QolsysState(QolsysObservable):
         self._adc_devices: list[QolsysAdcDevice] = []
         self._zwave_devices: list[QolsysZWaveDevice] = []
         self._scenes: list[QolsysScene] = []
+
+        self._state_observer = QolsysObservable_v2()
 
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
@@ -113,6 +116,10 @@ class QolsysState(QolsysObservable):
     @property
     def zwave_other_devices(self) -> list[dict[str, str]]:
         return self._controller.panel.db.get_zwave_other_devices()
+
+    @property
+    def state_observer(self) -> QolsysObservable_v2:
+        return self._state_observer
 
     @property
     def state_partition_observer(self) -> QolsysObservable:

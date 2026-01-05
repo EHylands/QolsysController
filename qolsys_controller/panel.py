@@ -901,13 +901,13 @@ class QolsysPanel(QolsysObservable):
             # Check if z-wave device is an Energy Clamp
             if device.get("node_type", "") == "Energy Clamp":
                 LOGGER.debug(device)
-                qolsys_meter_device = QolsysEnergyClamp(device)
+                qolsys_meter_device = QolsysEnergyClamp(self._controller, device)
                 devices.append(qolsys_meter_device)
                 device_added = True
 
             # Check if z-wave device is a thermometer
             if device.get("node_type", "") == "Thermometer":
-                qolsys_thermometer = QolsysThermometer(device)
+                qolsys_thermometer = QolsysThermometer(self._controller, device)
                 devices.append(qolsys_thermometer)
                 device_added = True
 
@@ -917,7 +917,7 @@ class QolsysPanel(QolsysObservable):
 
                 # Found a Dimmer
                 if zwave_node_id == dimmer_node_id:
-                    qolsys_dimmer = QolsysDimmer(d, device)
+                    qolsys_dimmer = QolsysDimmer(self._controller, d, device)
                     devices.append(qolsys_dimmer)
                     device_added = True
                     break
@@ -928,7 +928,7 @@ class QolsysPanel(QolsysObservable):
 
                 # Found a Thermostat
                 if zwave_node_id == thermostat_node_id:
-                    qolsys_thermostat = QolsysThermostat(thermostat, device)
+                    qolsys_thermostat = QolsysThermostat(self._controller, thermostat, device)
                     devices.append(qolsys_thermostat)
                     device_added = True
                     break
@@ -939,7 +939,7 @@ class QolsysPanel(QolsysObservable):
 
                 # Found a Lock
                 if zwave_node_id == lock_node_id:
-                    qolsys_lock = QolsysLock(lock, device)
+                    qolsys_lock = QolsysLock(self._controller, lock, device)
                     devices.append(qolsys_lock)
                     device_added = True
                     break
@@ -950,7 +950,7 @@ class QolsysPanel(QolsysObservable):
 
             # No Specific z-wave device found, add a generic z-wave device
             if not device_added:
-                qolsys_generic = QolsysGeneric(device)
+                qolsys_generic = QolsysGeneric(self._controller, device)
                 devices.append(qolsys_generic)
 
         return devices

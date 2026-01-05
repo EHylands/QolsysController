@@ -1,13 +1,17 @@
 import logging
+from typing import TYPE_CHECKING
 
 from .zwave_device import QolsysZWaveDevice
+
+if TYPE_CHECKING:
+    from .controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
 
 class QolsysEnergyClamp(QolsysZWaveDevice):
-    def __init__(self, zwave_dict: dict[str, str]) -> None:
-        super().__init__(zwave_dict)
+    def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str]) -> None:
+        super().__init__(controller, zwave_dict)
 
     # Energy clamp only enables meter seter in base zwave_device class
 

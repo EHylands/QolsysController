@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import TYPE_CHECKING
 
 from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
 from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
@@ -7,12 +8,17 @@ from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilev
 from .enum_zwave import ZwaveDeviceClass, ZWaveMultilevelSensorScale
 from .observable import QolsysObservable
 
+if TYPE_CHECKING:
+    from .controller import QolsysController
+
 LOGGER = logging.getLogger(__name__)
 
 
 class QolsysZWaveDevice(QolsysObservable):
-    def __init__(self, zwave_dict: dict[str, str]) -> None:
+    def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str]) -> None:
         super().__init__()
+
+        self._controller = controller
 
         self._id: str = zwave_dict.get("_id", "")
         self._node_id: str = zwave_dict.get("node_id", "")

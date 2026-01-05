@@ -4,6 +4,7 @@ import logging
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any
 
+from qolsys_controller.enum import QolsysEvent
 from qolsys_controller.enum_zwave import ZWaveMultilevelSensorScale
 
 if TYPE_CHECKING:
@@ -74,6 +75,14 @@ class QolsysZwaveServiceMultilevelSensor:
                 return
         self._sensors.append(new_sensor)
         self._parent_device.notify()
+
+        # Notify state
+        self._parent_device._controller.state.state_observer.publish(
+            QolsysEvent.EVENT_ZWAVE_MULTILEVELSENSOR_ADD,
+            node_id=self._parent_device.node_id,
+            endpoint=self.endpoint,
+            unit=new_sensor.unit,
+        )
 
     def get_sensor(self, unit: ZWaveMultilevelSensorScale) -> QolsysZwaveMultilevelSensor | None:
         for sensor in self._sensors:

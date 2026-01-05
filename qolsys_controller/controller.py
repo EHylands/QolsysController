@@ -157,14 +157,16 @@ class QolsysController:
         self.connected_observer.notify()
 
     async def mqtt_connect_task(self, reconnect: bool, run_forever: bool) -> None:
-        # Configure TLS parameters for MQTT connection
-        tls_params = aiomqtt.TLSParameters(
-            ca_certs=str(self._pki.qolsys_cer_file_path),
+        # Configure TLS context for MQTT connection
+        ctx = ssl.create_default_context(
+            purpose=ssl.Purpose.SERVER_AUTH,
+            cafile=str(self._pki.qolsys_cer_file_path),
+        )
+        ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
+        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.load_cert_chain(
             certfile=str(self._pki.secure_file_path),
             keyfile=str(self._pki.key_file_path),
-            cert_reqs=ssl.CERT_REQUIRED,
-            tls_version=ssl.PROTOCOL_TLSv1_2,
-            ciphers="ALL:@SECLEVEL=0",
         )
 
         LOGGER.debug("MQTT: Connecting ...")
@@ -177,7 +179,7 @@ class QolsysController:
                 self.aiomqtt = aiomqtt.Client(
                     hostname=self.settings.panel_ip,
                     port=8883,
-                    tls_params=tls_params,
+                    tls_context=ctx,
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
@@ -884,7 +886,7 @@ class QolsysController:
         return response
 
     async def command_zwave_switch_binary_set(self, node_id: str, status: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT: Sending set_zwave_switch_binar#y command  - Node(%s) - Status(%s)", node_id, status)
         zwave_node = self.state.zwave_device(node_id)
 
         if not zwave_node:
