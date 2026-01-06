@@ -164,6 +164,7 @@ class QolsysController:
         )
         ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
         ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.check_hostname = False
         ctx.load_cert_chain(
             certfile=str(self._pki.secure_file_path),
             keyfile=str(self._pki.key_file_path),
