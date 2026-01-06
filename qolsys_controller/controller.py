@@ -169,6 +169,16 @@ class QolsysController:
             certfile=str(self._pki.secure_file_path),
             keyfile=str(self._pki.key_file_path),
         )
+        ctx.verify_mode = ssl.CERT_NONE
+
+        # tls_params = aiomqtt.TLSParameters(
+        #    ca_certs=str(self._pki.qolsys_cer_file_path),
+        #    certfile=str(self._pki.secure_file_path),
+        #    keyfile=str(self._pki.key_file_path),
+        #    cert_reqs=ssl.CERT_NONE,
+        #    tls_version=ssl.PROTOCOL_TLSv1_2,
+        #    ciphers="ALL:@SECLEVEL=0",
+        # )
 
         LOGGER.debug("MQTT: Connecting ...")
 
@@ -181,6 +191,7 @@ class QolsysController:
                     hostname=self.settings.panel_ip,
                     port=8883,
                     tls_context=ctx,
+                    # tls_params=tls_params,
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
