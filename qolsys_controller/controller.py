@@ -158,23 +158,24 @@ class QolsysController:
 
     async def mqtt_connect_task(self, reconnect: bool, run_forever: bool) -> None:
         # Configure TLS context for MQTT connection
-        ctx = ssl.create_default_context(
-            purpose=ssl.Purpose.SERVER_AUTH,
-            cafile=str(self._pki.qolsys_cer_file_path),
-        )
-        ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
-        ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-
-        def load_certificates(self: QolsysController, ssl_context: ssl.SSLContext) -> None:
-            ssl_context.load_cert_chain(
+        def create_tls_context(self: QolsysController) -> ssl.SSLContext:
+            ctx = ssl.create_default_context(
+                purpose=ssl.Purpose.SERVER_AUTH,
+                cafile=str(self._pki.qolsys_cer_file_path),
+            )
+            ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            ctx.load_cert_chain(
                 certfile=str(self._pki.secure_file_path),
                 keyfile=str(self._pki.key_file_path),
             )
+            return ctx
+
 
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, load_certificates, self, ctx)
+        ctx = await loop.run_in_executor(None, create_tls_context, self)
 
         # tls_params = aiomqtt.TLSParameters(
         #    ca_certs=str(self._pki.qolsys_cer_file_path),
