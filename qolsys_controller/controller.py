@@ -173,7 +173,6 @@ class QolsysController:
             )
             return ctx
 
-
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
