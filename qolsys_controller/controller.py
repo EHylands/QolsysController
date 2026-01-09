@@ -165,11 +165,16 @@ class QolsysController:
         ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
         ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         ctx.check_hostname = False
-        ctx.load_cert_chain(
-            certfile=str(self._pki.secure_file_path),
-            keyfile=str(self._pki.key_file_path),
-        )
         ctx.verify_mode = ssl.CERT_NONE
+
+        def load_certificates(self: QolsysController, ssl_context: ssl.SSLContext) -> None:
+            ssl_context.load_cert_chain(
+                certfile=str(self._pki.secure_file_path),
+                keyfile=str(self._pki.key_file_path),
+            )
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, load_certificates, self, ctx)
 
         # tls_params = aiomqtt.TLSParameters(
         #    ca_certs=str(self._pki.qolsys_cer_file_path),
