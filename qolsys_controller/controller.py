@@ -20,7 +20,7 @@ from qolsys_controller.mqtt_command import (
 )
 from qolsys_controller.zwave_thermostat import QolsysThermostat
 
-from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
+from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus, QolsysEvent
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass, ZwaveDeviceClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
@@ -176,15 +176,6 @@ class QolsysController:
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
-        # tls_params = aiomqtt.TLSParameters(
-        #    ca_certs=str(self._pki.qolsys_cer_file_path),
-        #    certfile=str(self._pki.secure_file_path),
-        #    keyfile=str(self._pki.key_file_path),
-        #    cert_reqs=ssl.CERT_NONE,
-        #    tls_version=ssl.PROTOCOL_TLSv1_2,
-        #    ciphers="ALL:@SECLEVEL=0",
-        # )
-
         LOGGER.debug("MQTT: Connecting ...")
 
         self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -196,7 +187,6 @@ class QolsysController:
                     hostname=self.settings.panel_ip,
                     port=8883,
                     tls_context=ctx,
-                    # tls_params=tls_params,
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
@@ -215,6 +205,12 @@ class QolsysController:
 
                 # Subscribe to Z-Wave response
                 await self.aiomqtt.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
+
+                # Subscribe to Door Bell Event
+                await self.aiomqtt.subscribe("eventNameDoorBell", qos=self.settings.mqtt_qos)
+
+                # Subscribe to Chime Event
+                await self.aiomqtt.subscribe("chime", qos=self.settings.mqtt_qos)
 
                 # Only log all traffic for debug purposes
                 if self.settings.log_mqtt_mesages:
@@ -302,6 +298,18 @@ class QolsysController:
                     if isinstance(message.payload, bytes):
                         data = json.loads(message.payload.decode())
                         self.panel.parse_zwave_message(data)
+
+                # Panel Door Bell Event
+                if message.topic.matches("eventNameDoorBell"):
+                    event_doorbell: dict[str, Any] = {}
+                    LOGGER.debug("Doorbell Event: %s", message.payload.decode())
+                    self.state.state_observer.publish(QolsysEvent.EVENT_PANEL_DOORBELL, event_doorbell)
+
+                # Panel Chime Event
+                if message.topic.matches("chime"):
+                    event_chime: dict[str, Any] = {}
+                    LOGGER.debug("Chime Event: %s", message.payload.decode())
+                    self.state.state_observer.publish(QolsysEvent.EVENT_PANEL_CHIME, event_chime)
 
         except aiomqtt.MqttError as err:
             self.connected = False
