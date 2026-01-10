@@ -20,7 +20,7 @@ from qolsys_controller.mqtt_command import (
 )
 from qolsys_controller.zwave_thermostat import QolsysThermostat
 
-from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus, QolsysEvent
+from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass, ZwaveDeviceClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
@@ -206,12 +206,6 @@ class QolsysController:
                 # Subscribe to Z-Wave response
                 await self.aiomqtt.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
 
-                # Subscribe to Door Bell Event
-                await self.aiomqtt.subscribe("eventNameDoorBell", qos=self.settings.mqtt_qos)
-
-                # Subscribe to Chime Event
-                await self.aiomqtt.subscribe("chime", qos=self.settings.mqtt_qos)
-
                 # Only log all traffic for debug purposes
                 if self.settings.log_mqtt_mesages:
                     # Subscribe to MQTT commands send to panel by other devices
@@ -298,18 +292,6 @@ class QolsysController:
                     if isinstance(message.payload, bytes):
                         data = json.loads(message.payload.decode())
                         self.panel.parse_zwave_message(data)
-
-                # Panel Door Bell Event
-                if message.topic.matches("eventNameDoorBell"):
-                    event_doorbell: dict[str, Any] = {}
-                    LOGGER.debug("Doorbell Event: %s", message.payload.decode())
-                    self.state.state_observer.publish(QolsysEvent.EVENT_PANEL_DOORBELL, event_doorbell)
-
-                # Panel Chime Event
-                if message.topic.matches("chime"):
-                    event_chime: dict[str, Any] = {}
-                    LOGGER.debug("Chime Event: %s", message.payload.decode())
-                    self.state.state_observer.publish(QolsysEvent.EVENT_PANEL_CHIME, event_chime)
 
         except aiomqtt.MqttError as err:
             self.connected = False

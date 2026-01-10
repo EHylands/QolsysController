@@ -14,6 +14,7 @@ from .enum import (
     PartitionAlarmState,
     PartitionAlarmType,
     PartitionSystemStatus,
+    QolsysEvent,
 )
 from .observable import QolsysObservable
 from .partition import QolsysPartition
@@ -451,6 +452,14 @@ class QolsysPanel(QolsysObservable):
 
             case "primaryDisconnect":
                 LOGGER.info("Main Panel Disconnect")
+
+            case "eventNameDoorBell":
+                LOGGER.debug("Doorbell Event: %s", json.dumps(data))
+                self._controller.state.state_observer.publish(QolsysEvent.EVENT_PANEL_DOORBELL, data)
+
+            case "chime":
+                LOGGER.debug("Chime Event: %s", json.dumps(data))
+                self._controller.state.state_observer.publish(QolsysEvent.EVENT_PANEL_CHIME, data)
 
             case "dbChanged":
                 match dbOperation:

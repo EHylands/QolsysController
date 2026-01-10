@@ -58,6 +58,11 @@ class QolsysThermostat(QolsysZWaveDevice):
 
         self._thermostat_current_humidity: float | None = None
 
+        self._celsius_min_temp = 0
+        self._celsius_max_temp = 35
+        self._fahrenheit_min_temp = 32
+        self._fahrenheit_max_temp = 95
+
     # -----------------------------
     # properties + setters
     # -----------------------------
@@ -130,9 +135,38 @@ class QolsysThermostat(QolsysZWaveDevice):
     @thermostat_current_temp.setter
     def thermostat_current_temp(self, value: str) -> None:
         if self._thermostat_current_temp != value:
-            LOGGER.debug("Thermostat%s (%s) - current_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
-            self._thermostat_current_temp = value
-            self.notify()
+            # Prevent thermostat from setting value outside normal range
+            try:
+                temperature = float(value)
+                unit = self.thermostat_device_temp_unit.upper()
+                if unit == "F":
+                    if not self._fahrenheit_min_temp <= temperature <= self._fahrenheit_max_temp:
+                        LOGGER.debug(
+                            "Thermostat%s (%s) - temp %s°F out of range",
+                            self.thermostat_node_id,
+                            self.thermostat_name,
+                            value,
+                        )
+                        return
+
+                if unit == "C":
+                    if not self._celsius_min_temp <= temperature <= self._celsius_max_temp:
+                        LOGGER.debug(
+                            "Thermostat%s (%s) - temp %s°C out of range",
+                            self.thermostat_node_id,
+                            self.thermostat_name,
+                            value,
+                        )
+                        return
+
+                LOGGER.debug("Thermostat%s (%s) - current_temp: %s", self.thermostat_node_id, self.thermostat_name, value)
+                self._thermostat_current_temp = value
+                self.notify()
+
+            except ValueError:
+                LOGGER.debug(
+                    "Thermostat%s (%s) - invalid current_temp: %s", self.thermostat_node_id, self.thermostat_name, value
+                )
 
     @property
     def thermostat_target_cool_temp(self) -> str:
