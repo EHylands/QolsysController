@@ -1,6 +1,6 @@
 aiofiles==25.1.0
 aiomqtt==2.5.0
-cffi==1.17.1
+cffi==2.0.0
 cryptography==45.0.3
 ifaddr==0.2.0
 paho-mqtt>=2.1.0
