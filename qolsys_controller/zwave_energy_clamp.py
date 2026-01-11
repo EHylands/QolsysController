@@ -16,4 +16,4 @@ class QolsysEnergyClamp(QolsysZWaveDevice):
     # Energy clamp only enables meter seter in base zwave_device class
 
     def update_raw(self, payload: bytes) -> None:
-        pass
+        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 
 from .enum import DeviceCapability, ZoneSensorGroup, ZoneSensorType, ZoneStatus
@@ -71,6 +72,8 @@ class QolsysZone(QolsysObservable):
         self._powerg_link_quality: str = ""
         self._powerg_link_status: str = ""
         self._powerg_battery_voltage: str = ""
+        self._powerg_battery_level: str = ""
+        self._powerg_extras: str = ""
 
     def is_powerg_enabled(self) -> bool:
         return self._current_capability == DeviceCapability.POWERG
@@ -80,6 +83,12 @@ class QolsysZone(QolsysObservable):
 
     def is_powerg_light_enabled(self) -> bool:
         return self._powerg_light != ""
+
+    def is_powerg_battery_level_enabled(self) -> bool:
+        return self.powerg_battery_level is not None
+
+    def is_powerg_battery_voltage_enabled(self) -> bool:
+        return self.powerg_battery_voltage is not None
 
     def is_average_dbm_enabled(self) -> bool:
         return self.averagedBm is not None
@@ -131,7 +140,10 @@ class QolsysZone(QolsysObservable):
             self._powerg_link_status = data.get("link_status", "")
 
         if "battery_voltage" in data:
-            self._powerg_battery_voltage = data.get("battery_voltage", "")
+            self.powerg_battery_voltage = data.get("battery_voltage", "")
+
+        if "extras in data":
+            self._powerg_extras = data.get("extras", "")
 
         self.end_batch_update()
 
@@ -428,6 +440,54 @@ class QolsysZone(QolsysObservable):
             self._powerg_status_data = value
             self.notify()
 
+    @property
+    def powerg_extras(self) -> str:
+        return self._powerg_extras
+
+    @powerg_extras.setter
+    def powerg_extras(self, value: str) -> None:
+        try:
+            data_dict = json.loads(value)
+            self.powerg_battery_level = data_dict.get("BATTERY_LEVEL", "")
+
+        except (TypeError, json.JSONDecodeError):
+            LOGGER.debug("Zone%s (%s) - powerg_extras: %s", self._zone_id, self.sensorname, "Error loading json")
+            return
+
+    @property
+    def powerg_battery_voltage(self) -> float | None:
+        try:
+            voltage = int(self._powerg_battery_voltage) / 1000.0
+            if voltage >= 0:
+                return voltage
+            return None
+        except (TypeError, ValueError):
+            return None
+
+    @powerg_battery_voltage.setter
+    def powerg_battery_voltage(self, value: str) -> None:
+        if self._powerg_battery_voltage != value:
+            LOGGER.debug("Zone%s (%s) - powerg_battery_voltage: %s", self._zone_id, self.sensorname, value)
+            self._powerg_battery_voltage = value
+            self.notify()
+
+    @property
+    def powerg_battery_level(self) -> int | None:
+        try:
+            level = int(self._powerg_battery_level)
+            if 0 <= level <= 100:
+                return level
+            return None
+        except (TypeError, ValueError):
+            return None
+
+    @powerg_battery_level.setter
+    def powerg_battery_level(self, value: str) -> None:
+        if self._powerg_battery_level != value:
+            LOGGER.debug("Zone%s (%s) - powerg_battery_level: %s", self._zone_id, self.sensorname, value)
+            self._powerg_battery_level = value
+            self.notify()
+
     def to_powerg_dict(self) -> dict[str, str]:
         return {
             "shortID": self.shortID,
@@ -440,6 +500,7 @@ class QolsysZone(QolsysObservable):
             "link_quality": self._powerg_link_quality,
             "link_status": self._powerg_link_status,
             "battery_voltage": self._powerg_battery_voltage,
+            "extras": self._powerg_extras,
         }
 
     def to_dict(self) -> dict[str, str]:

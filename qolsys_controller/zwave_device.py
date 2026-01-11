@@ -174,6 +174,7 @@ class QolsysZWaveDevice(QolsysObservable):
     def meter_capabilities(self, value: str) -> None:
         if self._meter_capabilities != value:
             self._meter_capabilities = value
+            LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
 
             # Update Meter Service
             try:
