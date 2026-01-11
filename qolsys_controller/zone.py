@@ -143,7 +143,7 @@ class QolsysZone(QolsysObservable):
             self.powerg_battery_voltage = data.get("battery_voltage", "")
 
         if "extras in data":
-            self._powerg_extras = data.get("extras", "")
+            self.powerg_extras = data.get("extras", "")
 
         self.end_batch_update()
 
