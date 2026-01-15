@@ -996,9 +996,7 @@ class QolsysPanel(QolsysObservable):
             new_zone = QolsysZone(zone_info, self._controller.settings)
 
             if new_zone.current_capability == "POWERG":
-                LOGGER.debug("Loading PowerG device info for zone %s", new_zone.zone_id)
                 powerg_dict = self.db.get_powerg(short_id=new_zone.shortID)
-                LOGGER.debug("PowerG device info: %s", powerg_dict)
                 if powerg_dict is not None:
                     new_zone.update_powerg(powerg_dict)
 
@@ -1051,7 +1049,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Z-Wave Firmware Version: %s", self.ZWAVE_FIRM_WARE_VERSION)
         LOGGER.debug("Z-Wave Card Present: %s", self.ZWAVE_CARD)
         LOGGER.debug("Z-Wave Controller Enabled: %s", self.ZWAVE_CONTROLLER)
-        LOGGER.debug("Partitons Enabled: %s", self.PARTITIONS)
+        LOGGER.debug("Partitions Enabled: %s", self.PARTITIONS)
         LOGGER.debug("Control4 Enabled: %s", self.CONTROL_4)
         LOGGER.debug("Six Digit User Code Enabled: %s", self.SIX_DIGIT_USER_CODE)
         LOGGER.debug("Secure Arming: %s", self.SECURE_ARMING)

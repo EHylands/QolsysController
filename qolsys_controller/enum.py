@@ -58,23 +58,24 @@ class PartitionAlarmType(StrEnum):
 
 
 class ZoneStatus(StrEnum):
-    ALARMED = "Alarmed"
-    OPEN = "Open"
-    CLOSED = "Closed"
     ACTIVE = "Active"
-    INACTIVE = "Inactive"
     ACTIVATED = "Activated"
+    ALARMED = "Alarmed"
+    ARM_AWAY = "Arm-Away"
+    ARM_STAY = "Arm-Stay"
+    CLOSED = "Closed"
+    CONNECTED = "connected"
+    DISARM = "Disarm"
+    OPEN = "Open"
+    INACTIVE = "Inactive"
     IDLE = "Idle"
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
     TAMPERED = "Tampered"
     SYNCHRONIZING = "Synchronizing"
-    CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     FAILURE = "Failure"
     NOT_NETWORKED = "Not Networked"
-    DISARM = "Disarm"
-    ARM_AWAY = "Arm-Away"
 
 
 class DeviceCapability(StrEnum):
@@ -85,17 +86,16 @@ class DeviceCapability(StrEnum):
 
 
 class ZoneSensorType(StrEnum):
-    DOOR_WINDOW = "Door_Window"
+    AUXILIARY_PENDANT = "Auxiliary Pendant"
+    BLUETOOTH = "Bluetooth"
+    CO_DETECTOR = "CODetector"
     DOORBELL = "Doorbell"
-    MOTION = "Motion"
+    DOOR_WINDOW = "Door_Window"
     GLASS_BREAK = "GlassBreak"
+    MOTION = "Motion"
     KEY_FOB = "KeyFob"
     KEYPAD = "Keypad"
-    AUXILIARY_PENDANT = "Auxiliary Pendant"
     SMOKE_DETECTOR = "SmokeDetector"
-    CO_DETECTOR = "CODetector"
-    # HARDWIRE_TRANSLATOR = "" # TBD
-    # WIRELESS_TRANSLATOR = "" #TBD
     TEMPERATURE = "Temperature"
     HEAT = "Heat"
     WATER = "Water"
@@ -103,16 +103,18 @@ class ZoneSensorType(StrEnum):
     FREEZE = "Freeze"
     TILT = "Tilt"
     SMOKE_M = "Smoke_M"
-    # DOOR_WINDOW_M = "" #TBD
-    # OCCUPANCY = ""  #TBD
     SIREN = "Siren"
-    # HIGH_TEMPERATURE = "" # TBD
     PANEL_MOTION = "Panel Motion"
     PANEL_GLASS_BREAK = "Panel Glass Break"
-    BLUETOOTH = "Bluetooth"
     TAKEOVER_MODULE = "TakeoverModule"
     TRANSLATOR = "Translator"
     TAMPER = "Tamper Sensor"
+    ZWAVE_SIREN = "Z-Wave Siren"
+    # HARDWIRE_TRANSLATOR = "" # TBD
+    # HIGH_TEMPERATURE = "" # TBD
+    # DOOR_WINDOW_M = "" #TBD
+    # WIRELESS_TRANSLATOR = "" #TBD
+    # OCCUPANCY = ""  #TBD
 
 
 class ZoneSensorGroup(StrEnum):

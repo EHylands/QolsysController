@@ -364,9 +364,9 @@ class QolsysZone(QolsysObservable):
     def latestdBm(self) -> int | None:
         try:
             n = int(self._latestdBm)
-            if n >= 0 and n < 999:  # noqa: PLR2004
-                return n
-        except ValueError:
+            if n >= 0 and n < 999:
+                return -1 * n
+        except (ValueError, TypeError):
             pass
         return None
 
@@ -380,9 +380,9 @@ class QolsysZone(QolsysObservable):
     def averagedBm(self) -> int | None:
         try:
             n = int(self._averagedBm)
-            if n >= 0 and n < 999:  # noqa: PLR2004
-                return n
-        except ValueError:
+            if n >= 0 and n < 999:
+                return -1 * n
+        except (ValueError, TypeError):
             pass
         return None
 

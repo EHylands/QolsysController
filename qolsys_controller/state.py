@@ -551,7 +551,6 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("Thermostat%s (%s) - current_temp: %s", zid, name, zwave.thermostat_current_temp)
                 LOGGER.debug("Thermostat%s (%s) - mode: %s", zid, name, zwave.thermostat_mode)
                 LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", zid, name, zwave.thermostat_fan_mode)
-                LOGGER.debug("Thermostat%s (%s) - target_temp: %s", zid, name, zwave.thermostat_target_temp)
                 LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s", zid, name, zwave.thermostat_target_cool_temp)
                 LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s", zid, name, zwave.thermostat_target_heat_temp)
                 LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", zid, name, zwave.thermostat_set_point_mode)
