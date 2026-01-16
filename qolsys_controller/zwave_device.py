@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
 from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
 
-from .enum_zwave import ZwaveDeviceClass, ZWaveMultilevelSensorScale
+from .enum_zwave import ZwaveCommandClass, ZwaveDeviceClass, ZWaveMultilevelSensorScale
 from .observable import QolsysObservable
 
 if TYPE_CHECKING:
@@ -49,6 +49,8 @@ class QolsysZWaveDevice(QolsysObservable):
         self._multisensor_capabilities: str = ""
         self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
         self._multi_channel_details = zwave_dict.get("multi_channel_details", "")
+        self._endpoint = zwave_dict.get("endpoint", "")
+        self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
         # Set Meter and MutilevelSensor Services if available
         self._meter_endpoints: list[QolsysZwaveServiceMeter] = []
@@ -120,7 +122,7 @@ class QolsysZWaveDevice(QolsysObservable):
         if "last_updated_date" in data:
             self._last_updated_date = data.get("last_updated_date", "")
         if "command_class_list" in data:
-            self._last_updated_date = data.get("command_class_list", "")
+            self._command_class_list = data.get("command_class_list", "")
         if "multisensor_capabilities" in data:
             self.multisensor_capabilities = data.get("multisensor_capabilities", "")
         if "meter_capabilities" in data:
@@ -129,6 +131,10 @@ class QolsysZWaveDevice(QolsysObservable):
             self._notification_capabilities = data.get("notification_capabilities", "")
         if "multi_channel_details" in data:
             self._multi_channel_details = data.get("multi_channel_details", "")
+        if "endpoint" in data:
+            self.endpoint = data.get("endpoint", "")
+        if "endpoint_details" in data:
+            self.endpoint_details = data.get("endpoint_details", "")
 
         self.end_batch_update()
 
@@ -156,6 +162,17 @@ class QolsysZWaveDevice(QolsysObservable):
             self.notify()
 
     @property
+    def command_class_list(self) -> list[ZwaveCommandClass]:
+        commands = []
+        array = self._command_class_list.strip("[]").split(",")
+        for command in array:
+            try:
+                commands.append(ZwaveCommandClass(int(command)))
+            except (ValueError, TypeError):
+                continue
+        return commands
+
+    @property
     def node_battery_level(self) -> str:
         return self._node_battery_level
 
@@ -165,6 +182,26 @@ class QolsysZWaveDevice(QolsysObservable):
             LOGGER.debug("ZWave%s (%s) - node_battery_level: %s", self.node_id, self.node_name, value)
             self._node_battery_level = value
             self.notify()
+
+    @property
+    def endpoint(self) -> str:
+        return self._endpoint
+
+    @endpoint.setter
+    def endpoint(self, value: str) -> None:
+        if self._endpoint != value:
+            self._endpoint = value
+            LOGGER.debug("ZWave%s (%s) - endpoint: %s", self.node_id, self.node_name, value)
+
+    @property
+    def endpoint_details(self) -> str:
+        return self._endpoint_details
+
+    @endpoint_details.setter
+    def endpoint_details(self, value: str) -> None:
+        if self._endpoint_details != value:
+            self._endpoint_details = value
+            LOGGER.debug("ZWave%s (%s) - endpoint_details: %s", self.node_id, self.node_name, value)
 
     @property
     def meter_capabilities(self) -> str:
@@ -359,4 +396,6 @@ class QolsysZWaveDevice(QolsysObservable):
             "meter_capabilities": self.meter_capabilities,
             "notification_capabilities": self._notification_capabilities,
             "multi_channel_details": self._multi_channel_details,
+            "endpoint": self._endpoint,
+            "endpoint_details": self._endpoint_details,
         }

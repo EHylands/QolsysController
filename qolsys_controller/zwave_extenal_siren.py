@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class QolsysGarageDoor(QolsysZWaveDevice):
+class QolsysExternalSiren(QolsysZWaveDevice):
     def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str]) -> None:
         super().__init__(controller, zwave_dict)
 
     def update_raw(self, payload: bytes) -> None:
         LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
 
-    def to_dict_garagedoor(self) -> dict[str, str]:
+    def to_dict_external_siren(self) -> dict[str, str]:
         return {}

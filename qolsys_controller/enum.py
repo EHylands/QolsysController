@@ -83,6 +83,7 @@ class DeviceCapability(StrEnum):
     WIFI = "WiFi"
     POWERG = "POWERG"
     ZWAVE = "Z-Wave"
+    S_LINE = "S-Line"
 
 
 class ZoneSensorType(StrEnum):

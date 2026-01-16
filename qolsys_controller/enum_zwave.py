@@ -160,14 +160,30 @@ BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE = {
 class ZwaveCommandClass(IntEnum):
     SwitchBinary = 0x25
     SwitchMultilevel = 0x26
+    SceneActivation = 0x2B
+    SceneActuatorConf = 0x2C
     SensorMultiLevel = 0x31
     Meter = 0x32
     ThermostatMode = 0x40
     ThermostatSetPoint = 0x43
     ThermostatFanMode = 0x44
     ThermostatFanState = 0x45
+    DeviceResetLocally = 0x5A
+    AssociationGroupInformation = 0x59
+    ZWavePlusInfo = 0x5E
+    MultiChannel = 0x60
     DoorLock = 0x62
+    Supervision = 0x6C
+    Configuration = 0x70
     Alarm = 0x71
+    ManufacturerSpecific = 0x72
+    PowerLevel = 0x73
+    FirmwareUpdate = 0x7A
+    Association = 0x85
+    Version = 0x86
+    Indicator = 0x87
+    MultiChannelAssociation = 0x8E
+    SecurityS2 = 0x9F
 
 
 class ZwaveCommand(IntEnum):
