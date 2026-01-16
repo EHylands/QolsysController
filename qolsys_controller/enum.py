@@ -84,6 +84,7 @@ class DeviceCapability(StrEnum):
 
 class ZoneSensorType(StrEnum):
     DOOR_WINDOW = "Door_Window"
+    DOOR_WINDOW_M = "Door_Window_M"
     DOORBELL = "Doorbell"
     MOTION = "Motion"
     GLASS_BREAK = "GlassBreak"
@@ -101,7 +102,6 @@ class ZoneSensorType(StrEnum):
     FREEZE = "Freeze"
     TILT = "Tilt"
     SMOKE_M = "Smoke_M"
-    # DOOR_WINDOW_M = "" #TBD
     # OCCUPANCY = ""  #TBD
     SIREN = "Siren"
     # HIGH_TEMPERATURE = "" # TBD
