@@ -7,7 +7,11 @@ from qolsys_controller.adc_service import QolsysAdcService
 from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
 from qolsys_controller.observable_v2 import QolsysObservable_v2
 from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
+from qolsys_controller.zwave_extenal_siren import QolsysExternalSiren
+from qolsys_controller.zwave_garagedoor import QolsysGarageDoor
+from qolsys_controller.zwave_smart_socket import QolsysSmartSocket
 from qolsys_controller.zwave_thermometer import QolsysThermometer
+from qolsys_controller.zwave_water_valve import QolsysWaterValve
 
 from .adc_device import QolsysAdcDevice
 from .observable import QolsysObservable
@@ -112,6 +116,38 @@ class QolsysState(QolsysObservable):
             if isinstance(device, QolsysThermometer):
                 thermometer.append(device)
         return thermometer
+
+    @property
+    def zwave_water_valves(self) -> list[QolsysWaterValve]:
+        valves = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysWaterValve):
+                valves.append(device)
+        return valves
+
+    @property
+    def zwave_smart_sockets(self) -> list[QolsysSmartSocket]:
+        sockets = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysSmartSocket):
+                sockets.append(device)
+        return sockets
+
+    @property
+    def zwave_external_sirens(self) -> list[QolsysExternalSiren]:
+        sirens = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysExternalSiren):
+                sirens.append(device)
+        return sirens
+
+    @property
+    def zwave_garage_doors(self) -> list[QolsysGarageDoor]:
+        doors = []
+        for device in self.zwave_devices:
+            if isinstance(device, QolsysGarageDoor):
+                doors.append(device)
+        return doors
 
     @property
     def zwave_other_devices(self) -> list[dict[str, str]]:
@@ -537,32 +573,7 @@ class QolsysState(QolsysObservable):
                 name = zwave.dimmer_name
                 LOGGER.debug("Dimmer%s (%s) - status: %s", nid, name, zwave.dimmer_status)
                 LOGGER.debug("Dimmer%s (%s) - level: %s", nid, name, zwave.dimmer_level)
-                LOGGER.debug("Dimmer%s (%s) - paired_status: %s", nid, name, zwave.paired_status)
-                LOGGER.debug("Dimmer%s (%s) - node_status: %s", nid, name, zwave.node_status)
-                LOGGER.debug("Dimmer%s (%s) - battery_level: %s", nid, name, zwave.node_battery_level)
                 LOGGER.debug("Dimmer%s (%s) - battery_level_value: %s", nid, name, zwave.node_battery_level_value)
-                dump_meter(self, zwave)
-                dump_multilevelsensor(self, zwave)
-                continue
-
-            if isinstance(zwave, QolsysThermostat):
-                zid = zwave.thermostat_node_id
-                name = zwave.thermostat_name
-                LOGGER.debug("Thermostat%s (%s) - current_temp: %s", zid, name, zwave.thermostat_current_temp)
-                LOGGER.debug("Thermostat%s (%s) - mode: %s", zid, name, zwave.thermostat_mode)
-                LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", zid, name, zwave.thermostat_fan_mode)
-                LOGGER.debug("Thermostat%s (%s) - target_temp: %s", zid, name, zwave.thermostat_target_temp)
-                LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s", zid, name, zwave.thermostat_target_cool_temp)
-                LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s", zid, name, zwave.thermostat_target_heat_temp)
-                LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", zid, name, zwave.thermostat_set_point_mode)
-                dump_meter(self, zwave)
-                dump_multilevelsensor(self, zwave)
-                continue
-
-            if isinstance(zwave, QolsysLock):
-                zid = zwave.lock_node_id
-                name = zwave.lock_name
-                LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
                 dump_meter(self, zwave)
                 dump_multilevelsensor(self, zwave)
                 continue
@@ -575,12 +586,49 @@ class QolsysState(QolsysObservable):
                 dump_multilevelsensor(self, zwave)
                 continue
 
+            if isinstance(zwave, QolsysExternalSiren):
+                LOGGER.debug("ExternalSiren%s (%s)", zwave.node_id, zwave.node_name)
+                continue
+
+            if isinstance(zwave, QolsysGarageDoor):
+                LOGGER.debug("GarageDoor%s (%s)", zwave.node_id, zwave.node_name)
+                continue
+
+            if isinstance(zwave, QolsysLock):
+                zid = zwave.lock_node_id
+                name = zwave.lock_name
+                LOGGER.debug("Lock%s (%s) - lock_status: %s", zid, name, zwave.lock_status)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
+                continue
+
+            if isinstance(zwave, QolsysSmartSocket):
+                LOGGER.debug("Socket%s (%s)", zwave.node_id, zwave.node_name)
+                continue
+
             if isinstance(zwave, QolsysThermometer):
                 nid = zwave.node_id
                 name = zwave.node_name
                 LOGGER.debug("Thermometer%s (%s)", nid, name)
                 dump_meter(self, zwave)
                 dump_multilevelsensor(self, zwave)
+                continue
+
+            if isinstance(zwave, QolsysThermostat):
+                zid = zwave.thermostat_node_id
+                name = zwave.thermostat_name
+                LOGGER.debug("Thermostat%s (%s) - current_temp: %s", zid, name, zwave.thermostat_current_temp)
+                LOGGER.debug("Thermostat%s (%s) - mode: %s", zid, name, zwave.thermostat_mode)
+                LOGGER.debug("Thermostat%s (%s) - fan_mode: %s", zid, name, zwave.thermostat_fan_mode)
+                LOGGER.debug("Thermostat%s (%s) - target_cool_temp: %s", zid, name, zwave.thermostat_target_cool_temp)
+                LOGGER.debug("Thermostat%s (%s) - target_heat_temp: %s", zid, name, zwave.thermostat_target_heat_temp)
+                LOGGER.debug("Thermostat%s (%s) - set_point_mode: %s", zid, name, zwave.thermostat_set_point_mode)
+                dump_meter(self, zwave)
+                dump_multilevelsensor(self, zwave)
+                continue
+
+            if isinstance(zwave, QolsysWaterValve):
+                LOGGER.debug("WaterValve%s (%s)", zwave.node_id, zwave.node_name)
                 continue
 
             if isinstance(zwave, QolsysGeneric):

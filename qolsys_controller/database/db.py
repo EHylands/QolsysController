@@ -216,7 +216,7 @@ class QolsysDB:
         return partitions
 
     def get_adc_devices(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_virtual_device.table} ORDER BY device_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_virtual_device.table} ORDER BY CAST(device_id AS INTEGER)")
         self.db.commit()
 
         devices = []
@@ -228,7 +228,7 @@ class QolsysDB:
         return devices
 
     def get_zwave_devices(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY node_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()
 
         devices = []
@@ -240,7 +240,7 @@ class QolsysDB:
         return devices
 
     def get_zwave_other_devices(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_zwave_other.table} ORDER BY node_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_zwave_other.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()
 
         devices = []
@@ -252,7 +252,7 @@ class QolsysDB:
         return devices
 
     def get_locks(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY node_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_doorlock.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()
 
         locks = []
@@ -264,7 +264,7 @@ class QolsysDB:
         return locks
 
     def get_thermostats(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_thermostat.table} ORDER BY node_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_thermostat.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()
 
         thermostats = []
@@ -276,7 +276,7 @@ class QolsysDB:
         return thermostats
 
     def get_dimmers(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_dimmer.table} ORDER BY node_id")
+        self.cursor.execute(f"SELECT * FROM {self.table_dimmer.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()
 
         dimmers = []
@@ -288,7 +288,7 @@ class QolsysDB:
         return dimmers
 
     def get_zones(self) -> list[dict[str, str]]:
-        self.cursor.execute(f"SELECT * FROM {self.table_sensor.table} ORDER BY zoneid")
+        self.cursor.execute(f"SELECT * FROM {self.table_sensor.table} ORDER BY CAST(zoneid AS INTEGER)")
         self.db.commit()
 
         zones = []

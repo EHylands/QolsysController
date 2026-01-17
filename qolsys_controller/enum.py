@@ -4,6 +4,8 @@ from enum import StrEnum
 class QolsysEvent(StrEnum):
     EVENT_PANEL_PARTITION_ADD = "EVENT_PANEL_PARTITION_ADD"
     EVENT_PANEL_ZONE_ADD = "EVENT_PANEL_ZONE_ADD"
+    EVENT_PANEL_DOORBELL = "EVENT_PANEL_DOORBELL"
+    EVENT_PANEL_CHIME = "EVENT_PANEL_CHIME"
     EVENT_ZWAVE_DEVICE_ADD = "EVENT_ZWAVE_MULTILEVELSENSOR_ADD"
     EVENT_ZWAVE_MULTILEVELSENSOR_ADD = "EVENT_ZWAVE_MULTILEVELSENSOR_ADD"
     EVENT_ZWAVE_METER_ADD = "EVENT_ZWAVE_METER_ADD"
@@ -56,23 +58,24 @@ class PartitionAlarmType(StrEnum):
 
 
 class ZoneStatus(StrEnum):
-    ALARMED = "Alarmed"
-    OPEN = "Open"
-    CLOSED = "Closed"
     ACTIVE = "Active"
-    INACTIVE = "Inactive"
     ACTIVATED = "Activated"
+    ALARMED = "Alarmed"
+    ARM_AWAY = "Arm-Away"
+    ARM_STAY = "Arm-Stay"
+    CLOSED = "Closed"
+    CONNECTED = "connected"
+    DISARM = "Disarm"
+    OPEN = "Open"
+    INACTIVE = "Inactive"
     IDLE = "Idle"
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
     TAMPERED = "Tampered"
     SYNCHRONIZING = "Synchronizing"
-    CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     FAILURE = "Failure"
     NOT_NETWORKED = "Not Networked"
-    DISARM = "Disarm"
-    ARM_AWAY = "Arm-Away"
 
 
 class DeviceCapability(StrEnum):
@@ -80,6 +83,7 @@ class DeviceCapability(StrEnum):
     WIFI = "WiFi"
     POWERG = "POWERG"
     ZWAVE = "Z-Wave"
+    S_LINE = "S-Line"
 
 
 class ZoneSensorType(StrEnum):

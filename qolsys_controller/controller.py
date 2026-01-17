@@ -176,15 +176,6 @@ class QolsysController:
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
-        # tls_params = aiomqtt.TLSParameters(
-        #    ca_certs=str(self._pki.qolsys_cer_file_path),
-        #    certfile=str(self._pki.secure_file_path),
-        #    keyfile=str(self._pki.key_file_path),
-        #    cert_reqs=ssl.CERT_NONE,
-        #    tls_version=ssl.PROTOCOL_TLSv1_2,
-        #    ciphers="ALL:@SECLEVEL=0",
-        # )
-
         LOGGER.debug("MQTT: Connecting ...")
 
         self._task_manager.cancel(self._mqtt_task_listen_label)
@@ -196,7 +187,6 @@ class QolsysController:
                     hostname=self.settings.panel_ip,
                     port=8883,
                     tls_context=ctx,
-                    # tls_params=tls_params,
                     tls_insecure=True,
                     clean_session=True,
                     timeout=self.settings.mqtt_timeout,
@@ -984,78 +974,23 @@ class QolsysController:
         if mode == ThermostatSetpointMode.COOLING:
             setpointmode = mode
 
-        # zwave_bytes: list[int] = [
-        #    0x43,
-        #    0x03,  # SET
-        #    mode.value,
-        #    pss,
-        # ] + list(temp_bytes)
-
-        zwave_bytes2: list[int] = [
+        zwave_bytes: list[int] = [
             0x43,  # Thermostat Setpoint
             0x01,  # SET
             setpointmode.value,
             pss,
         ] + list(temp_bytes)
 
-        # zwave_bytes3: list[int] = [
-        #    0x43,  # Thermostat Setpoint
-        #    0x03,  # SET
-        #    0x03,  # Furnace
-        #    pss,
-        # ] + list(temp_bytes)
-
-        # zwave_bytes4: list[int] = [
-        #    0x43,  # Thermostat Setpoint
-        #    0x01,  # SET
-        #    0x03,  # Furnace
-        #    pss,
-        # ] + list(temp_bytes)
-
-        # LOGGER.debug(
-        #    "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
-        #    node_id,
-        #    mode.value,
-        #    setpoint,
-        #    zwave_bytes,
-        # )
-        # command = MQTTCommand_ZWave(self, node_id, zwave_bytes)
-        # response = await command.send_command()
-        # LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
-
         LOGGER.debug(
-            "MQTT: Sending zwave_thermostat_setpoint_set 0x01 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            "MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
             node_id,
             mode.value,
             setpoint,
-            zwave_bytes2,
+            zwave_bytes,
         )
-        command = MQTTCommand_ZWave(self, node_id, zwave_bytes2)
+        command = MQTTCommand_ZWave(self, node_id, zwave_bytes)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
-
-        # LOGGER.debug(
-        #    "MQTT: Sending zwave_thermostat_setpoint_set 0x03 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
-        #    node_id,
-        #    0x03,
-        #    setpoint,
-        #    zwave_bytes3,
-        # )
-        # command = MQTTCommand_ZWave(self, node_id, zwave_bytes3)
-        # response = await command.send_command()
-        # LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
-
-        # LOGGER.debug(
-        #    "MQTT: Sending zwave_thermostat_setpoint_set 0x01 - Node(%s) - Mode(%s) - Setpoint(%s): %s",
-        #    node_id,
-        #    0x03,
-        #    setpoint,
-        #    zwave_bytes4,
-        # )
-        # command = MQTTCommand_ZWave(self, node_id, zwave_bytes4)
-        # response = await command.send_command()
-        # LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
-
         return response
 
     async def command_zwave_thermostat_mode_set(self, node_id: str, mode: ThermostatMode) -> dict[str, Any] | None:

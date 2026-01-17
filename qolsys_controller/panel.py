@@ -7,13 +7,18 @@ from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.adc_device import QolsysAdcDevice
 from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
+from qolsys_controller.zwave_extenal_siren import QolsysExternalSiren
+from qolsys_controller.zwave_garagedoor import QolsysGarageDoor
+from qolsys_controller.zwave_smart_socket import QolsysSmartSocket
 from qolsys_controller.zwave_thermometer import QolsysThermometer
+from qolsys_controller.zwave_water_valve import QolsysWaterValve
 
 from .database.db import QolsysDB
 from .enum import (
     PartitionAlarmState,
     PartitionAlarmType,
     PartitionSystemStatus,
+    QolsysEvent,
 )
 from .observable import QolsysObservable
 from .partition import QolsysPartition
@@ -451,6 +456,14 @@ class QolsysPanel(QolsysObservable):
 
             case "primaryDisconnect":
                 LOGGER.info("Main Panel Disconnect")
+
+            case "eventNameDoorBell":
+                LOGGER.debug("Doorbell Event: %s", json.dumps(data))
+                self._controller.state.state_observer.publish(QolsysEvent.EVENT_PANEL_DOORBELL, data)
+
+            case "chime":
+                LOGGER.debug("Chime Event: %s", json.dumps(data))
+                self._controller.state.state_observer.publish(QolsysEvent.EVENT_PANEL_CHIME, data)
 
             case "dbChanged":
                 match dbOperation:
@@ -911,6 +924,12 @@ class QolsysPanel(QolsysObservable):
                 devices.append(qolsys_thermometer)
                 device_added = True
 
+            # Check if z-wave device is an external siren
+            if device.get("node_type", "") == "External Siren":
+                qolsys_siren = QolsysExternalSiren(self._controller, device)
+                devices.append(qolsys_siren)
+                device_added = True
+
             # Check if z-wave device is a Dimmer
             for d in dimmers_list:
                 dimmer_node_id = d.get("node_id", "")
@@ -945,8 +964,22 @@ class QolsysPanel(QolsysObservable):
                     break
 
             # Found a Smart Outlet
+            if device.get("node_type", "") == "Smart Socket":
+                qolsys_socket = QolsysSmartSocket(self._controller, device)
+                devices.append(qolsys_socket)
+                device_added = True
 
             # Found Garage Door Openner
+            if device.get("node_type", "") == "Garage Door":
+                qolsys_garagedoor = QolsysGarageDoor(self._controller, device)
+                devices.append(qolsys_garagedoor)
+                device_added = True
+
+            # Found a Water Valve
+            if device.get("node_type", "") == "Water Valve":
+                qolsys_watervalve = QolsysWaterValve(self._controller, device)
+                devices.append(qolsys_watervalve)
+                device_added = True
 
             # No Specific z-wave device found, add a generic z-wave device
             if not device_added:
@@ -987,9 +1020,7 @@ class QolsysPanel(QolsysObservable):
             new_zone = QolsysZone(zone_info, self._controller.settings)
 
             if new_zone.current_capability == "POWERG":
-                LOGGER.debug("Loading PowerG device info for zone %s", new_zone.zone_id)
                 powerg_dict = self.db.get_powerg(short_id=new_zone.shortID)
-                LOGGER.debug("PowerG device info: %s", powerg_dict)
                 if powerg_dict is not None:
                     new_zone.update_powerg(powerg_dict)
 
@@ -1042,7 +1073,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Z-Wave Firmware Version: %s", self.ZWAVE_FIRM_WARE_VERSION)
         LOGGER.debug("Z-Wave Card Present: %s", self.ZWAVE_CARD)
         LOGGER.debug("Z-Wave Controller Enabled: %s", self.ZWAVE_CONTROLLER)
-        LOGGER.debug("Partitons Enabled: %s", self.PARTITIONS)
+        LOGGER.debug("Partitions Enabled: %s", self.PARTITIONS)
         LOGGER.debug("Control4 Enabled: %s", self.CONTROL_4)
         LOGGER.debug("Six Digit User Code Enabled: %s", self.SIX_DIGIT_USER_CODE)
         LOGGER.debug("Secure Arming: %s", self.SECURE_ARMING)

@@ -65,6 +65,8 @@ class QolsysTableSensor(QolsysTable):
             "extras",
             "allowspeaker",
             "firmware_version",
+            "radio_version",
+            "radio_id",
         ]
 
         self._create_table()
