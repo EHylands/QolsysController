@@ -87,16 +87,18 @@ class DeviceCapability(StrEnum):
 
 
 class ZoneSensorType(StrEnum):
-    AUXILIARY_PENDANT = "Auxiliary Pendant"
-    BLUETOOTH = "Bluetooth"
-    CO_DETECTOR = "CODetector"
-    DOORBELL = "Doorbell"
     DOOR_WINDOW = "Door_Window"
-    GLASS_BREAK = "GlassBreak"
+    DOOR_WINDOW_M = "Door_Window_M"
+    DOORBELL = "Doorbell"
     MOTION = "Motion"
+    GLASS_BREAK = "GlassBreak"
     KEY_FOB = "KeyFob"
     KEYPAD = "Keypad"
+    AUXILIARY_PENDANT = "Auxiliary Pendant"
     SMOKE_DETECTOR = "SmokeDetector"
+    CO_DETECTOR = "CODetector"
+    # HARDWIRE_TRANSLATOR = "" # TBD
+    # WIRELESS_TRANSLATOR = "" #TBD
     TEMPERATURE = "Temperature"
     HEAT = "Heat"
     WATER = "Water"
@@ -104,18 +106,15 @@ class ZoneSensorType(StrEnum):
     FREEZE = "Freeze"
     TILT = "Tilt"
     SMOKE_M = "Smoke_M"
+    # OCCUPANCY = ""  #TBD
     SIREN = "Siren"
+    # HIGH_TEMPERATURE = "" # TBD
     PANEL_MOTION = "Panel Motion"
     PANEL_GLASS_BREAK = "Panel Glass Break"
+    BLUETOOTH = "Bluetooth"
     TAKEOVER_MODULE = "TakeoverModule"
     TRANSLATOR = "Translator"
     TAMPER = "Tamper Sensor"
-    ZWAVE_SIREN = "Z-Wave Siren"
-    # HARDWIRE_TRANSLATOR = "" # TBD
-    # HIGH_TEMPERATURE = "" # TBD
-    # DOOR_WINDOW_M = "" #TBD
-    # WIRELESS_TRANSLATOR = "" #TBD
-    # OCCUPANCY = ""  #TBD
 
 
 class ZoneSensorGroup(StrEnum):

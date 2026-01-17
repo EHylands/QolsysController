@@ -173,6 +173,7 @@ class ZwaveCommandClass(IntEnum):
     ZWavePlusInfo = 0x5E
     MultiChannel = 0x60
     DoorLock = 0x62
+    BarrierOperator = 0x66
     Supervision = 0x6C
     Configuration = 0x70
     Alarm = 0x71
