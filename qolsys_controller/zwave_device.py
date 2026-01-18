@@ -2,6 +2,7 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
+from qolsys_controller.mqtt_command import MQTTCommand_ZWave
 from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
 from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
 
@@ -60,6 +61,21 @@ class QolsysZWaveDevice(QolsysObservable):
 
     def update_raw(self, payload: bytes) -> None:
         LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
+
+    async def zwave_report(self) -> None:
+        command_array = [
+            ZwaveCommandClass.SwitchBinary,
+            ZwaveCommandClass.SwitchMultilevel,
+            ZwaveCommandClass.ThermostatFanMode,
+            ZwaveCommandClass.ThermostatMode,
+            ZwaveCommandClass.ThermostatSetPoint,
+            ZwaveCommandClass.DoorLock,
+        ]
+
+        for command in command_array:
+            if command in self.command_class_list:
+                zwave_command = MQTTCommand_ZWave(self._controller, self.node_id, "0", [command, 0x02])
+                await zwave_command.send_command()
 
     def update_base(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same node_id

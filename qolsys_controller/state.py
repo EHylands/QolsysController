@@ -387,6 +387,11 @@ class QolsysState(QolsysObservable):
                             state_zwave.update_thermostat(db_zwave.to_dict_thermostat())
                             break
 
+                        # Update Thermometer
+                        if isinstance(state_zwave, QolsysThermometer) and isinstance(db_zwave, QolsysThermometer):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            break
+
                         # Update Lock
                         if isinstance(state_zwave, QolsysLock) and isinstance(db_zwave, QolsysLock):
                             state_zwave.update_base(db_zwave.to_dict_base())
@@ -395,6 +400,21 @@ class QolsysState(QolsysObservable):
 
                         # Update Energy Clamp
                         if isinstance(state_zwave, QolsysEnergyClamp) and isinstance(db_zwave, QolsysEnergyClamp):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            break
+
+                        # Update Water Valve
+                        if isinstance(state_zwave, QolsysWaterValve) and isinstance(db_zwave, QolsysWaterValve):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            break
+
+                        # Update External Siren
+                        if isinstance(state_zwave, QolsysExternalSiren) and isinstance(db_zwave, QolsysExternalSiren):
+                            state_zwave.update_base(db_zwave.to_dict_base())
+                            break
+
+                        # Update Garage Door
+                        if isinstance(state_zwave, QolsysGarageDoor) and isinstance(db_zwave, QolsysGarageDoor):
                             state_zwave.update_base(db_zwave.to_dict_base())
                             break
 
@@ -508,7 +528,7 @@ class QolsysState(QolsysObservable):
         # Add new partition
         for db_partition in db_partitions:
             if db_partition.id not in state_partition_list:
-                LOGGER.debug("sync_data - Add Partition%s", db_partition.id)
+                LOGGER.debug("sync_data - add Partition%s", db_partition.id)
                 self.partition_add(db_partition)
 
     def dump(self) -> None:  # noqa: PLR0912, PLR0915
@@ -541,7 +561,6 @@ class QolsysState(QolsysObservable):
             pid = partition.id
             name = partition.name
             LOGGER.debug("Partition%s (%s) - system_status: %s", pid, name, partition.system_status)
-            LOGGER.debug("Partition%s (%s) - system_status_changed_time: %s", pid, name, partition.system_status_changed_time)
             LOGGER.debug("Partition%s (%s) - alarm_state: %s", pid, name, partition.alarm_state)
 
             if partition.alarm_type_array == []:
@@ -558,8 +577,12 @@ class QolsysState(QolsysObservable):
             name = zone.sensorname
             LOGGER.debug("Zone%s (%s) - status: %s", zid, name, zone.sensorstatus)
             LOGGER.debug("Zone%s (%s) - battery_status: %s", zid, name, zone.battery_status)
-            LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid, name, zone.latestdBm)
-            LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid, name, zone.averagedBm)
+
+            if zone.latestdBm is not None:
+                LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid, name, zone.latestdBm)
+
+            if zone.averagedBm is not None:
+                LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid, name, zone.averagedBm)
 
             if zone.is_powerg_temperature_enabled():
                 LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", zid, name, zone.powerg_temperature)
@@ -573,7 +596,10 @@ class QolsysState(QolsysObservable):
                 name = zwave.dimmer_name
                 LOGGER.debug("Dimmer%s (%s) - status: %s", nid, name, zwave.dimmer_status)
                 LOGGER.debug("Dimmer%s (%s) - level: %s", nid, name, zwave.dimmer_level)
-                LOGGER.debug("Dimmer%s (%s) - battery_level_value: %s", nid, name, zwave.node_battery_level_value)
+
+                if zwave.node_battery_level_value is not None:
+                    LOGGER.debug("Dimmer%s (%s) - battery_level_value: %s", nid, name, zwave.node_battery_level_value)
+
                 dump_meter(self, zwave)
                 dump_multilevelsensor(self, zwave)
                 continue

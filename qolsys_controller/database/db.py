@@ -390,7 +390,7 @@ class QolsysDB:
 
         return None
 
-    def load_db(self, database: list[dict[str, Any]]) -> None:
+    def load_db(self, database: Any | None) -> None:
         self.clear_db()
 
         if not database:

@@ -32,4 +32,4 @@ class QolsysAdcGarageDoorService(QolsysAdcService):
         )
 
     def is_open(self) -> bool:
-        return self.func_state == vdFuncState.ON
+        return self.func_state == 1

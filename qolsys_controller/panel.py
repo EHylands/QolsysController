@@ -391,7 +391,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self, database: list[dict[str, Any]]) -> None:
+    async def load_database(self, database: Any | None) -> None:
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -399,6 +399,11 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
+
+        # Sync Z-Wave device state
+        LOGGER.debug("sync_data - update z-wave devices states")
+        for device in self._controller.state.zwave_devices:
+            await device.zwave_report()
 
         # Validate all local user match a Qolsys Panel user
         qolsys_users = self.db.get_users()
@@ -432,13 +437,6 @@ class QolsysPanel(QolsysObservable):
     def parse_zwave_message(self, data: dict[str, Any]) -> None:
         zwave = data.get("ZWAVE_RESPONSE", "")
         payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
-        # LOGGER.debug(
-        #    "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
-        #    zwave.get("NODE_ID", ""),
-        #    zwave.get("ZWAVE_COMMAND_STATUS", ""),
-        #    payload,
-        # )
-
         node_id: str = str(zwave.get("NODE_ID", 0))
         node = self._controller.state.zwave_device(node_id)
         if node is not None:
@@ -1056,6 +1054,7 @@ class QolsysPanel(QolsysObservable):
 
     def dump(self) -> None:
         LOGGER.debug("*** Qolsys Panel Information ***")
+        LOGGER.debug("Product Type: %s", self.product_type)
         LOGGER.debug("Android Version: %s", self.ANDROID_VERSION)
         LOGGER.debug("Hardware Version: %s", self.HARDWARE_VERSION)
         LOGGER.debug("MAC Address: %s", self.MAC_ADDRESS)
@@ -1066,7 +1065,6 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("GSM Connection Status: %s", self.GSM_CONNECTION_STATUS)
         LOGGER.debug("GSM Signal Strength: %s", self.GSM_SIGNAL_STRENGTH)
         LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
-        # LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
         LOGGER.debug("Country: %s", self.COUNTRY)
         LOGGER.debug("Language: %s", self.LANGUAGE)
         LOGGER.debug("Temp Format: %s", self.TEMPFORMAT)

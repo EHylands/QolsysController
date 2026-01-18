@@ -10,14 +10,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysLock(QolsysZWaveDevice):
-    LOCK_STATUS_ARRAY = ["Locked"]  # noqa: RUF012
-
     def __init__(self, controller: "QolsysController", lock_dict: dict[str, str], zwave_dict: dict[str, str]) -> None:
         super().__init__(controller, zwave_dict)
 
         self._lock_id: str = lock_dict.get("_id", "")
-        self._lock_version: str = lock_dict.get("version", "")
-        self._lock_opr: str = lock_dict.get("opr", "")
         self._lock_partition_id: str = lock_dict.get("partition_id", "")
         self._lock_name: str = lock_dict.get("doorlock_name", "")
         self._lock_status: str = lock_dict.get("status", "")
@@ -31,6 +27,15 @@ class QolsysLock(QolsysZWaveDevice):
         self._lock_panel_arming: str = lock_dict.get("panel_arming", "")
         self._lock_endpoint: str = lock_dict.get("endpoint", "")
         self._lock_paired_status: str = lock_dict.get("paired_status", "")
+
+    def is_locked(self) -> bool:
+        return self.lock_status.lower() == "locked"
+
+    async def lock(self) -> None:
+        await self._controller.command_zwave_doorlock_set(self.node_id, "0", True)
+
+    async def unlock(self) -> None:
+        await self._controller.command_zwave_doorlock_set(self.node_id, "0", False)
 
     # -----------------------------
     # properties + setters
@@ -87,10 +92,6 @@ class QolsysLock(QolsysZWaveDevice):
 
         self.start_batch_update()
 
-        if "version" in data:
-            self._lock_version = data.get("version", "")
-        if "opr" in data:
-            self._lock_opr = data.get("opr", "")
         if "partition_id" in data:
             self._lock_partition_id = data.get("partition_id", "")
         if "lock_name" in data:
@@ -121,8 +122,6 @@ class QolsysLock(QolsysZWaveDevice):
     def to_dict_lock(self) -> dict[str, str]:
         return {
             "_id": self._lock_id,
-            "version": self._lock_version,
-            "opr": self._lock_opr,
             "partition_id": self._lock_partition_id,
             "doorlock_name": self.lock_name,
             "node_id": self.lock_node_id,
