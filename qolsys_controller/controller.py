@@ -758,7 +758,7 @@ class QolsysController:
 
         scene_command = {
             "operation_name": "execute_scene",
-            "scene_id": scene.scene_id,
+            "scene_id": int(scene.scene_id),
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
@@ -782,6 +782,7 @@ class QolsysController:
         garage_door = self.state.adc_device(device_id)
         if not garage_door:
             LOGGER.error("Invalid Virtual Garage Door Id: %s", device_id)
+            return
 
         device_list = {
             "virtualDeviceList": [
@@ -803,14 +804,7 @@ class QolsysController:
             "operation_name": "send_virtual_device_description",
             "virtual_device_operation": 4,
             "virtual_device_description": json.dumps(device_list),
-            "operation_source": 0,
-        }
-
-        virtual_command2 = {
-            "operation_name": "send_virtual_device_description",
-            "virtual_device_operation": 5,
-            "virtual_device_description": json.dumps(device_list),
-            "operation_source": 0,
+            #"operation_source": 0,
         }
 
         ipc_request = [
@@ -820,24 +814,12 @@ class QolsysController:
             }
         ]
 
-        ipc_request2 = [
-            {
-                "dataType": "string",
-                "dataValue": json.dumps(virtual_command2),
-            }
-        ]
 
         LOGGER.debug("virtual command: %s", virtual_command)
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving virtual_device command: %s", response)
-
-        LOGGER.debug("virtual command: %s", virtual_command2)
-        command2 = MQTTCommand_Panel(self)
-        command2.append_ipc_request(ipc_request2)
-        response2 = await command2.send_command()
-        LOGGER.debug("MQTT: Receiving virtual_device command: %s", response2)
         return response
 
     async def command_panel_trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
