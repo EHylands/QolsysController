@@ -31,5 +31,5 @@ class QolsysAdcGarageDoorService(QolsysAdcService):
             timestamp,
         )
 
-    def is_open(self) -> bool:
+    def is_closed(self) -> bool:
         return self.func_state == 0
