@@ -782,7 +782,7 @@ class QolsysController:
         garage_door = self.state.adc_device(device_id)
         if not garage_door:
             LOGGER.error("Invalid Virtual Garage Door Id: %s", device_id)
-            return
+            return None
 
         device_list = {
             "virtualDeviceList": [
@@ -804,7 +804,7 @@ class QolsysController:
             "operation_name": "send_virtual_device_description",
             "virtual_device_operation": 4,
             "virtual_device_description": json.dumps(device_list),
-            #"operation_source": 0,
+            # "operation_source": 0,
         }
 
         ipc_request = [
@@ -813,7 +813,6 @@ class QolsysController:
                 "dataValue": json.dumps(virtual_command),
             }
         ]
-
 
         LOGGER.debug("virtual command: %s", virtual_command)
         command = MQTTCommand_Panel(self)
