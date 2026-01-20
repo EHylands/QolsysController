@@ -13,6 +13,7 @@ from typing import Any
 import aiofiles
 import aiomqtt
 
+from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.mqtt_command import (
     MQTTCommand,
     MQTTCommand_Panel,
@@ -776,12 +777,19 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
-    async def command_panel_virtual_device_action(self, device_id: str, state: int) -> dict[str, Any] | None:
+    async def command_panel_virtual_device_action(
+        self, device_id: str, service_id: int, state: vdFuncState
+    ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending virtual_device command")
 
-        garage_door = self.state.adc_device(device_id)
-        if not garage_door:
-            LOGGER.error("Invalid Virtual Garage Door Id: %s", device_id)
+        device = self.state.adc_device(device_id)
+        if not device:
+            LOGGER.error("Invalid ADC Device: %s", device_id)
+            return None
+
+        service = device.get_adc_service(service_id)
+        if not service:
+            LOGGER.error("Invalid ADC Service: %s", service_id)
             return None
 
         device_list = {
@@ -790,10 +798,10 @@ class QolsysController:
                     "virtualDeviceId": int(device_id),
                     "virtualDeviceFunctionList": [
                         {
-                            "vdFuncId": 1,
+                            "vdFuncId": service_id,
                             "vdFuncState": state,
                             "vdFuncBackendTimestamp": int(time.time() * 1000),
-                            "vdFuncType": 1,
+                            "vdFuncType": service.func_type,
                         }
                     ],
                 }
@@ -804,7 +812,6 @@ class QolsysController:
             "operation_name": "send_virtual_device_description",
             "virtual_device_operation": 4,
             "virtual_device_description": json.dumps(device_list),
-            # "operation_source": 0,
         }
 
         ipc_request = [

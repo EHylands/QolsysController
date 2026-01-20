@@ -2,6 +2,9 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
+from qolsys_controller.adc_service_light import QolsysAdcLightService
+from qolsys_controller.adc_service_malfunction import QolsysAdcMalfunctionService
+
 from .adc_service import QolsysAdcService
 from .adc_service_garagedoor import QolsysAdcGarageDoorService
 from .enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
@@ -80,6 +83,23 @@ class QolsysAdcDevice(QolsysObservable):
             LOGGER.debug("ADC%s (%s) - Adding garage door service", self.device_id, self.name)
             self._services.append(
                 QolsysAdcGarageDoorService(self, id, func_name, local_control, func_type, func_state, timestamp)
+            )
+            self.notify()
+            return
+
+        # Light
+        if func_name == vdFuncName.OFF_ON and func_type == vdFuncType.LIGHT:
+            LOGGER.debug("ADC%s (%s) - Adding Light Service", self.device_id, self.name)
+            self._services.append(QolsysAdcLightService(self, id, func_name, local_control, func_type, func_state, timestamp))
+            self.notify()
+            return
+
+        # Malfunction
+        # Light
+        if func_name == vdFuncName.MALFUNCTION and func_type == vdFuncType.MALFUNCTION:
+            LOGGER.debug("ADC%s (%s) - Adding Malfunction Service", self.device_id, self.name)
+            self._services.append(
+                QolsysAdcMalfunctionService(self, id, func_name, local_control, func_type, func_state, timestamp)
             )
             self.notify()
             return

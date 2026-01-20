@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class QolsysAdcGarageDoorService(QolsysAdcService):
+class QolsysAdcMalfunctionService(QolsysAdcService):
     def __init__(
         self,
         parent_device: "QolsysAdcDevice",
@@ -31,5 +31,5 @@ class QolsysAdcGarageDoorService(QolsysAdcService):
             timestamp,
         )
 
-    def is_closed(self) -> bool:
-        return self.func_state == vdFuncState.OFF
+    def is_malfunctionning(self) -> bool:
+        return self.func_state == vdFuncState.ON
