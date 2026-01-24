@@ -780,7 +780,7 @@ class QolsysController:
     async def command_panel_virtual_device_action(
         self, device_id: str, service_id: int, state: vdFuncState
     ) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending virtual_device command")
+        LOGGER.debug("MQTT: Sending virtual_device command device:%s, service:%s", device_id, service_id)
 
         device = self.state.adc_device(device_id)
         if not device:
@@ -790,6 +790,7 @@ class QolsysController:
         service = device.get_adc_service(service_id)
         if not service:
             LOGGER.error("Invalid ADC Service: %s", service_id)
+            LOGGER.error(device.func_list)
             return None
 
         device_list = {
@@ -801,7 +802,7 @@ class QolsysController:
                             "vdFuncId": service_id,
                             "vdFuncState": state,
                             "vdFuncBackendTimestamp": int(time.time() * 1000),
-                            "vdFuncType": service.func_type,
+                            "vdFuncType": service.func_type.value,
                         }
                     ],
                 }

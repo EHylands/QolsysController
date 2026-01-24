@@ -297,8 +297,8 @@ class QolsysThermostat(QolsysZWaveDevice):
         LOGGER.error("Multiple humidity sensor present")
         return sensor[0].value
 
-    def update_raw(self, payload: bytes) -> None:
-        pass
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
     def update_thermostat(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same none_id

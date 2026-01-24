@@ -43,7 +43,7 @@ class QolsysZwaveMeterSensor:
         if self._value != new_value:
             self._value = new_value
             LOGGER.debug(
-                "ZWaveMeter%s-%s (%s) - %s - value: %s (%s)",
+                "ZWaveMeter%s-%s (%s) - %s - value: %.2f (%s)",
                 self._parent_device.node_id,
                 self._parent_meter.endpoint,
                 self._parent_device.node_name,
@@ -98,7 +98,7 @@ class QolsysZwaveServiceMeter:
             self.add_sensor(qolsys_meter_sensor)
 
         # Update sensor values
-        self.update_iq2medi(meter_dict)
+        # self.update_iq2medi(meter_dict)
 
     @property
     def sensors(self) -> list[QolsysZwaveMeterSensor]:
@@ -132,6 +132,10 @@ class QolsysZwaveServiceMeter:
             self._rate_type = value
             # LOGGER.debug("Zave Meter Service - rate_type: %s", value.name)
             self._parent_device.notify()
+
+    @property
+    def meter_type(self) -> MeterType:
+        return self._meter_type
 
     @property
     def supported_scale(self) -> list[IntEnum]:

@@ -15,8 +15,8 @@ class QolsysThermometer(QolsysZWaveDevice):
         self._temprature_value = ""
         self._humidity_value = ""
 
-    def update_raw(self, payload: bytes) -> None:
-        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
     def to_dict_thermometer(self) -> dict[str, str]:
         return {

@@ -13,8 +13,8 @@ class QolsysSmartSocket(QolsysZWaveDevice):
     def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str]) -> None:
         super().__init__(controller, zwave_dict)
 
-    def update_raw(self, payload: bytes) -> None:
-        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
     def to_dict_smart_socket(self) -> dict[str, str]:
         return {}

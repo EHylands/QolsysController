@@ -71,8 +71,8 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_level = value
             self.notify()
 
-    def update_raw(self, payload: bytes) -> None:
-        pass
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
     def update_dimmer(self, content_values: dict[str, str]) -> None:  # noqa: PLR0912
         # Check if we are updating same none_id

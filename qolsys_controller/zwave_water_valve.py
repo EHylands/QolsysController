@@ -44,8 +44,8 @@ class QolsysWaterValve(QolsysZWaveDevice):
 
         self.end_batch_update()
 
-    def update_raw(self, payload: bytes) -> None:
-        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
         # Check length
         if len(payload) < 3:
