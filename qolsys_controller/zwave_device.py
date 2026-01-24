@@ -77,7 +77,7 @@ class QolsysZWaveDevice(QolsysObservable):
             props = payload[2]
             meter_type = props & 0x1F
             # meter_type = (props >> 5) & 0x07
-            rateType = (props & 0x60) >> 5
+            #rateType = (props & 0x60) >> 5
             size = payload[3] & 0x07
             scale_msb = (props & 0x80) >> 7
             scale_lsb = (payload[3] & 0x18) >> 3
