@@ -7,7 +7,6 @@ from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
 from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
 
 from .enum_zwave import (
-    MeterType,
     ZwaveCommandClass,
     ZwaveDeviceClass,
     ZWaveMultilevelSensorScale,
@@ -76,19 +75,15 @@ class QolsysZWaveDevice(QolsysObservable):
         # Process report
         if command == 0x02:
             props = payload[2]
-            meter_type = (props >> 5) & 0x07
-            size = props & 0x07
+            meter_type = props & 0x1F
+            # meter_type = (props >> 5) & 0x07
+            rateType = (props & 0x60) >> 5
+            size = payload[3] & 0x07
             scale_msb = (props & 0x80) >> 7
             scale_lsb = (payload[3] & 0x18) >> 3
             scale = (scale_msb << 2) | scale_lsb
             precision = (payload[3] & 0xE0) >> 5
-            main_value_size = size
-
-            if meter_type == MeterType.ELECTRIC_METER:
-                main_value_size = 4
-
-            value_raw = int.from_bytes(payload[4 : 4 + main_value_size], byteorder="big")
-            value = value_raw / pow(10, precision)
+            value = int.from_bytes(payload[4 : 4 + size], byteorder="big") / pow(10, precision)
 
             for meter_endpoint in self.meter_endpoints:
                 if int(meter_endpoint.endpoint) == endpoint and meter_endpoint.meter_type == meter_type:

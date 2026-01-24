@@ -280,12 +280,21 @@ class QolsysController:
             if self.aiomqtt is not None and self.connected:
                 LOGGER.debug("Updating Z-Wave Energy Clamps")
                 with contextlib.suppress(aiomqtt.MqttError):
-                    for energy_clamp in self.state.zwave_meters:
-                        for meter in energy_clamp.meter_endpoints:
-                            zwave_command = MQTTCommand_ZWave(
-                                self, energy_clamp.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
-                            )
-                            await zwave_command.send_command()
+                    for device in self.state.zwave_devices:
+                        if device._FIX_MULTICHANNEL_METER_ENDPOINT:
+                            for meter in device.meter_endpoints:
+                                zwave_command = MQTTCommand_ZWave(
+                                    self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
+                                )
+                                await zwave_command.send_command()
+
+                                # Update all endpoint scale
+                                for sensor in meter.sensors:
+                                    zwave_command = MQTTCommand_ZWave(
+                                        self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01, sensor.scale]
+                                    )
+                                    await zwave_command.send_command()
+
             await asyncio.sleep(60)
 
     async def mqtt_listen_task(self) -> None:
