@@ -315,7 +315,7 @@ class QolsysController:
                                 await zwave_command.send_command()
                                 await asyncio.sleep(5)
 
-            await asyncio.sleep(5)
+            await asyncio.sleep(60)
 
     async def mqtt_listen_task(self) -> None:
         try:
