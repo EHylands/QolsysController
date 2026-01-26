@@ -3,33 +3,34 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.adc_service import QolsysAdcService
-from qolsys_controller.adc_service_garagedoor import QolsysAdcGarageDoorService
 from qolsys_controller.observable_v2 import QolsysObservable_v2
-from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
-from qolsys_controller.zwave_extenal_siren import QolsysExternalSiren
-from qolsys_controller.zwave_garagedoor import QolsysGarageDoor
-from qolsys_controller.zwave_smart_socket import QolsysSmartSocket
-from qolsys_controller.zwave_thermometer import QolsysThermometer
-from qolsys_controller.zwave_water_valve import QolsysWaterValve
+from qolsys_controller.protocol_adc.service import QolsysAdcService
+from qolsys_controller.protocol_adc.service_garagedoor import QolsysAdcGarageDoorService
+from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
+from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
+from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
+from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
+from qolsys_controller.protocol_zwave.garagedoor import QolsysGarageDoor
+from qolsys_controller.protocol_zwave.generic import QolsysGeneric
+from qolsys_controller.protocol_zwave.lock import QolsysLock
+from qolsys_controller.protocol_zwave.smart_socket import QolsysSmartSocket
+from qolsys_controller.protocol_zwave.thermometer import QolsysThermometer
+from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
+from qolsys_controller.protocol_zwave.water_valve import QolsysWaterValve
 
-from .adc_device import QolsysAdcDevice
 from .observable import QolsysObservable
+from .protocol_adc.device import QolsysAdcDevice
 from .weather import QolsysWeather
-from .zwave_device import QolsysZWaveDevice
-from .zwave_dimmer import QolsysDimmer
-from .zwave_generic import QolsysGeneric
-from .zwave_lock import QolsysLock
-from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
+
     from .partition import QolsysPartition
     from .scene import QolsysScene
     from .zone import QolsysZone
-    from .zwave_device import QolsysZWaveDevice
 
 
 class QolsysState(QolsysObservable):
@@ -538,7 +539,7 @@ class QolsysState(QolsysObservable):
             for endpoint in device.meter_endpoints:
                 for meter_sensor in endpoint.sensors:
                     LOGGER.debug(
-                        " Meter%s Endpoint%s - %s - value: %.2f (%s)",
+                        " Meter%s Endpoint%s - %s - value: %s (%s)",
                         device.node_id,
                         endpoint.endpoint,
                         endpoint._meter_type.name,
@@ -550,7 +551,7 @@ class QolsysState(QolsysObservable):
             for endpoint in device.multilevelsensor_endpoints:
                 for sensor in endpoint.sensors:
                     LOGGER.debug(
-                        " Multilevelsensor%s Endpoint%s - value: %.2f (%s)",
+                        " Multilevelsensor%s Endpoint%s - value: %s (%s)",
                         device.node_id,
                         endpoint.endpoint,
                         sensor.value,

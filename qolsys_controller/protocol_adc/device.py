@@ -2,16 +2,16 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.adc_service_light import QolsysAdcLightService
-from qolsys_controller.adc_service_malfunction import QolsysAdcMalfunctionService
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+from qolsys_controller.observable import QolsysObservable
+from qolsys_controller.protocol_adc.service_light import QolsysAdcLightService
+from qolsys_controller.protocol_adc.service_malfunction import QolsysAdcMalfunctionService
 
-from .adc_service import QolsysAdcService
-from .adc_service_garagedoor import QolsysAdcGarageDoorService
-from .enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
-from .observable import QolsysObservable
+from .service import QolsysAdcService
+from .service_garagedoor import QolsysAdcGarageDoorService
 
 if TYPE_CHECKING:
-    from .adc_service import QolsysAdcService
+    from .service import QolsysAdcService
 
 LOGGER = logging.getLogger(__name__)
 

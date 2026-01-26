@@ -2,19 +2,21 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.mqtt_command import MQTTCommand_ZWave
-from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
-from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
-
-from .enum_zwave import (
+from qolsys_controller.enum_zwave import (
     ZwaveCommandClass,
     ZwaveDeviceClass,
     ZWaveMultilevelSensorScale,
 )
-from .observable import QolsysObservable
+from qolsys_controller.mqtt_command import MQTTCommand_ZWave
+from qolsys_controller.observable import QolsysObservable
+from qolsys_controller.protocol_zwave.service_meter import QolsysZwaveServiceMeter
+from qolsys_controller.protocol_zwave.service_multilevelsensor import (
+    QolsysZwaveMultilevelSensor,
+    QolsysZwaveServiceMultilevelSensor,
+)
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -94,19 +96,23 @@ class QolsysZWaveDevice(QolsysObservable):
     def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
         LOGGER.debug("Raw Update (node%s-%s) - payload: %s", self.node_id, endpoint, payload.hex())
 
-        command_class = payload[0]
+        try:
+            command_class = payload[0]
 
-        match command_class:
-            case ZwaveCommandClass.Meter:
-                if not self._FIX_MULTICHANNEL_METER_ENDPOINT:
-                    return
+            match command_class:
+                case ZwaveCommandClass.Meter:
+                    if not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        return
 
-                self.parse32(payload, endpoint)
+                    self.parse32(payload, endpoint)
 
-            case ZwaveCommandClass.MultiChannel:
-                if payload[1] == 0x0D:
-                    source_endpoint = payload[2]
-                    self.update_raw(payload[4:], source_endpoint)
+                case ZwaveCommandClass.MultiChannel:
+                    if payload[1] == 0x0D:
+                        source_endpoint = payload[2]
+                        self.update_raw(payload[4:], source_endpoint)
+
+        except IndexError:
+            LOGGER.debug("update_raw: invalid payload:%s", payload)
 
     async def zwave_report(self) -> None:
         command_array = [

@@ -5,13 +5,17 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from qolsys_controller.adc_device import QolsysAdcDevice
-from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
-from qolsys_controller.zwave_extenal_siren import QolsysExternalSiren
-from qolsys_controller.zwave_garagedoor import QolsysGarageDoor
-from qolsys_controller.zwave_smart_socket import QolsysSmartSocket
-from qolsys_controller.zwave_thermometer import QolsysThermometer
-from qolsys_controller.zwave_water_valve import QolsysWaterValve
+from qolsys_controller.protocol_adc.device import QolsysAdcDevice
+from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
+from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
+from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
+from qolsys_controller.protocol_zwave.garagedoor import QolsysGarageDoor
+from qolsys_controller.protocol_zwave.generic import QolsysGeneric
+from qolsys_controller.protocol_zwave.lock import QolsysLock
+from qolsys_controller.protocol_zwave.smart_socket import QolsysSmartSocket
+from qolsys_controller.protocol_zwave.thermometer import QolsysThermometer
+from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
+from qolsys_controller.protocol_zwave.water_valve import QolsysWaterValve
 
 from .database.db import QolsysDB
 from .enum import (
@@ -26,16 +30,12 @@ from .scene import QolsysScene
 from .users import QolsysUser
 from .weather import QolsysForecast, QolsysWeather
 from .zone import QolsysZone
-from .zwave_dimmer import QolsysDimmer
-from .zwave_generic import QolsysGeneric
-from .zwave_lock import QolsysLock
-from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
-    from .zwave_device import QolsysZWaveDevice
+    from qolsys_controller.controller import QolsysController
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 
 class QolsysPanel(QolsysObservable):
@@ -863,7 +863,6 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.insert(data=content_values)
                                 LOGGER.debug("New Z-Wave Other information")
-                                LOGGER.debug(content_values)
 
                             # Virtual Device
                             case self.db.table_virtual_device.uri:
@@ -911,7 +910,6 @@ class QolsysPanel(QolsysObservable):
 
             # Check if z-wave device is an Energy Clamp
             if device.get("node_type", "") == "Energy Clamp":
-                LOGGER.debug(device)
                 qolsys_meter_device = QolsysEnergyClamp(self._controller, device)
                 devices.append(qolsys_meter_device)
                 device_added = True
@@ -1062,8 +1060,6 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Panel Tamper State: %s", self.PANEL_TAMPER_STATE)
         LOGGER.debug("AC Status: %s", self.AC_STATUS)
         LOGGER.debug("Battery Status: %s", self.BATTERY_STATUS)
-        LOGGER.debug("GSM Connection Status: %s", self.GSM_CONNECTION_STATUS)
-        LOGGER.debug("GSM Signal Strength: %s", self.GSM_SIGNAL_STRENGTH)
         LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
         LOGGER.debug("Country: %s", self.COUNTRY)
         LOGGER.debug("Language: %s", self.LANGUAGE)

@@ -1,11 +1,12 @@
 import logging
 from typing import TYPE_CHECKING
 
-from .adc_service import QolsysAdcService
-from .enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+
+from .service import QolsysAdcService
 
 if TYPE_CHECKING:
-    from .adc_device import QolsysAdcDevice
+    from .device import QolsysAdcDevice
 
 LOGGER = logging.getLogger(__name__)
 

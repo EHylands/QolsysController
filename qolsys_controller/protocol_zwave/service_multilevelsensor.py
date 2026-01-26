@@ -8,7 +8,7 @@ from qolsys_controller.enum import QolsysEvent
 from qolsys_controller.enum_zwave import ZWaveMultilevelSensorScale
 
 if TYPE_CHECKING:
-    from .zwave_device import QolsysZWaveDevice
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 

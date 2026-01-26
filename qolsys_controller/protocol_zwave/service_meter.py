@@ -13,7 +13,7 @@ from qolsys_controller.enum_zwave import (
 )
 
 if TYPE_CHECKING:
-    from .zwave_device import QolsysZWaveDevice
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class QolsysZwaveMeterSensor:
         if self._value != new_value:
             self._value = new_value
             LOGGER.debug(
-                "ZWaveMeter%s-%s (%s) - %s - value: %.2f (%s)",
+                "ZWaveMeter%s-%s (%s) - %s - value: %s (%s)",
                 self._parent_device.node_id,
                 self._parent_meter.endpoint,
                 self._parent_device.node_name,

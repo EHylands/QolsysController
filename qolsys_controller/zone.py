@@ -454,7 +454,6 @@ class QolsysZone(QolsysObservable):
             self.powerg_battery_level = data_dict.get("BATTERY_LEVEL", "")
 
         except (TypeError, json.JSONDecodeError):
-            LOGGER.debug("Zone%s (%s) - powerg_extras: %s", self._zone_id, self.sensorname, "Error loading json")
             return
 
     @property

@@ -2,11 +2,10 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.enum_zwave import ZwaveCommandClass
-
-from .zwave_device import QolsysZWaveDevice
+from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 

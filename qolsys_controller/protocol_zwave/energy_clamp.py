@@ -1,20 +1,19 @@
 import logging
 from typing import TYPE_CHECKING
 
-from .zwave_device import QolsysZWaveDevice
+from .device import QolsysZWaveDevice
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
 
-class QolsysSmartSocket(QolsysZWaveDevice):
+class QolsysEnergyClamp(QolsysZWaveDevice):
     def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str]) -> None:
         super().__init__(controller, zwave_dict)
 
+    # Energy clamp only enables meter seter in base zwave_device class
+
     def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
         super().update_raw(payload, endpoint)
-
-    def to_dict_smart_socket(self) -> dict[str, str]:
-        return {}

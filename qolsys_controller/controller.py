@@ -19,7 +19,7 @@ from qolsys_controller.mqtt_command import (
     MQTTCommand_Panel,
     MQTTCommand_ZWave,
 )
-from qolsys_controller.zwave_thermostat import QolsysThermostat
+from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
 
 from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass
@@ -277,25 +277,45 @@ class QolsysController:
 
     async def mqtt_zwave_meter_update(self) -> None:
         while True:
+            LOGGER.debug("Updating Z-Wave Energy Clamps")
             if self.aiomqtt is not None and self.connected:
-                LOGGER.debug("Updating Z-Wave Energy Clamps")
-                with contextlib.suppress(aiomqtt.MqttError):
-                    for device in self.state.zwave_devices:
-                        if device._FIX_MULTICHANNEL_METER_ENDPOINT:
-                            for meter in device.meter_endpoints:
+                for device in self.state.zwave_devices:
+                    if device._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        for meter in device.meter_endpoints:
+                            zwave_command = MQTTCommand_ZWave(
+                                self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
+                            )
+                            await zwave_command.send_command()
+
+                            # Update all endpoint scale
+                            for sensor in meter.sensors:
                                 zwave_command = MQTTCommand_ZWave(
-                                    self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
+                                    self,
+                                    device.node_id,
+                                    meter.endpoint,
+                                    [ZwaveCommandClass.Meter.value, 0x01, sensor.scale.value & 0x07],
                                 )
                                 await zwave_command.send_command()
+                                await asyncio.sleep(5)
 
-                                # Update all endpoint scale
-                                for sensor in meter.sensors:
-                                    zwave_command = MQTTCommand_ZWave(
-                                        self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01, sensor.scale]
-                                    )
-                                    await zwave_command.send_command()
+                                zwave_command = MQTTCommand_ZWave(
+                                    self,
+                                    device.node_id,
+                                    "0",
+                                    [
+                                        0x60,
+                                        0x0D,
+                                        0x00,
+                                        int(meter.endpoint),
+                                        ZwaveCommandClass.Meter.value,
+                                        0x01,
+                                        sensor.scale.value & 0x07,
+                                    ],
+                                )
+                                await zwave_command.send_command()
+                                await asyncio.sleep(5)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(5)
 
     async def mqtt_listen_task(self) -> None:
         try:
