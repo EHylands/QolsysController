@@ -85,7 +85,7 @@ class QolsysZWaveDevice(QolsysObservable):
             scale_lsb = (payload[3] & 0x18) >> 3
             scale = (scale_msb << 2) | scale_lsb
             precision = (payload[3] & 0xE0) >> 5
-            value = int.from_bytes(payload[4 : 4 + size], byteorder="big") / pow(10, precision)
+            value = int.from_bytes(payload[4 : 4 + size], "big") / (10.0**precision)
 
             for meter_endpoint in self.meter_endpoints:
                 if int(meter_endpoint.endpoint) == endpoint and meter_endpoint.meter_type == meter_type:

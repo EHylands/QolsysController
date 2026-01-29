@@ -277,7 +277,6 @@ class QolsysController:
 
     async def mqtt_zwave_meter_update(self) -> None:
         while True:
-            LOGGER.debug("Updating Z-Wave Energy Clamps")
             if self.aiomqtt is not None and self.connected:
                 for device in self.state.zwave_devices:
                     if device._FIX_MULTICHANNEL_METER_ENDPOINT:
@@ -315,7 +314,7 @@ class QolsysController:
                                 await zwave_command.send_command()
                                 await asyncio.sleep(5)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
 
     async def mqtt_listen_task(self) -> None:
         try:
