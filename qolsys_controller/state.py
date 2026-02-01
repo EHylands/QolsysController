@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.observable_v2 import QolsysObservable_v2
 from qolsys_controller.protocol_adc.service import QolsysAdcService
 from qolsys_controller.protocol_adc.service_garagedoor import QolsysAdcGarageDoorService
@@ -41,6 +42,7 @@ class QolsysState(QolsysObservable):
         self._partitions: list[QolsysPartition] = []
         self._zones: list[QolsysZone] = []
         self._adc_devices: list[QolsysAdcDevice] = []
+        self._automation_devices: list[QolsysAutomationDevice] = []
         self._zwave_devices: list[QolsysZWaveDevice] = []
         self._scenes: list[QolsysScene] = []
 
@@ -51,6 +53,7 @@ class QolsysState(QolsysObservable):
         self._state_zwave_observer = QolsysObservable()
         self._state_adc_observer = QolsysObservable()
         self._state_scene_observer = QolsysObservable()
+        self._automation_device_observer = QolsysObservable()
 
     @property
     def partitions(self) -> list[QolsysPartition]:
@@ -63,6 +66,10 @@ class QolsysState(QolsysObservable):
     @property
     def adc_devices(self) -> list[QolsysAdcDevice]:
         return self._adc_devices
+
+    @property
+    def automation_devices(self) -> list[QolsysAutomationDevice]:
+        return self._automation_devices
 
     @property
     def zones(self) -> list[QolsysZone]:
@@ -167,6 +174,10 @@ class QolsysState(QolsysObservable):
         return self._state_zone_observer
 
     @property
+    def automation_device_observer(self) -> QolsysObservable:
+        return self._automation_device_observer
+
+    @property
     def state_zwave_observer(self) -> QolsysObservable:
         return self._state_zwave_observer
 
@@ -243,6 +254,36 @@ class QolsysState(QolsysObservable):
                 return zone
         return None
 
+    def automation_device(self, virtual_node_id: str) -> QolsysAutomationDevice | None:
+        for automation_device in self.automation_devices:
+            if automation_device.virtual_node_id == virtual_node_id:
+                return automation_device
+        return None
+
+    def automation_device_add(self, new_automation_device: QolsysAutomationDevice) -> None:
+        for automation_device in self.automation_devices:
+            if new_automation_device.virtual_node_id == automation_device.virtual_node_id:
+                LOGGER.debug(
+                    "Adding AutomationDevice to State, AutDev%s (%s) - Allready in AutomationDevice List",
+                    new_automation_device.virtual_node_id,
+                    automation_device.device_name,
+                )
+                return
+
+        self.automation_devices.append(new_automation_device)
+        self.automation_devices.sort(key=lambda x: x.virtual_node_id, reverse=False)
+        self.automation_device_observer.notify()
+
+    def automation_device_delete(self, virtual_node_id: str) -> None:
+        automation_device = self.automation_device(virtual_node_id)
+
+        if automation_device is None:
+            LOGGER.debug("Deleting AutomationDevice from State, AutDev%s not found", virtual_node_id)
+            return
+
+        self.automation_devices.remove(automation_device)
+        self._automation_device_observer.notify()
+
     def zone_from_short_id(self, short_id: int) -> QolsysZone | None:
         for zone in self.zones:
             if zone.shortID == str(short_id):
@@ -259,7 +300,6 @@ class QolsysState(QolsysObservable):
 
         self.zones.append(new_zone)
         self.zones.sort(key=lambda x: x.zone_id, reverse=False)
-        self.state_zone_observer.notify()
 
     def zone_delete(self, zone_id: str) -> None:
         zone = self.zone(zone_id)
@@ -359,6 +399,9 @@ class QolsysState(QolsysObservable):
             if state_adc.device_id not in db_adc_list:
                 LOGGER.debug("sync_data - delete ADC%s", state_adc.device_id)
                 self.adc_delete(state_adc.device_id)
+
+    def sync_automation_devices_data(self, db_automation_devices: list[QolsysAutomationDevice]) -> None:
+        pass
 
     def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
         db_zwave_list = []

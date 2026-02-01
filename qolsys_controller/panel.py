@@ -5,6 +5,10 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
+from qolsys_controller.automaton_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.protocol_adc.device import QolsysAdcDevice
 from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
 from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
@@ -399,6 +403,7 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
+        # LOGGER.debug(self.get_automation_devices_from_db())
 
         # Sync Z-Wave device state
         LOGGER.debug("sync_data - update z-wave devices states")
@@ -641,6 +646,10 @@ class QolsysPanel(QolsysObservable):
                                 if adc_device is not None:
                                     adc_device.update_adc_device(content_values)
 
+                            # Output Rules
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.update(selection, selection_argument, content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -724,6 +733,9 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.delete(selection, selection_argument)
+
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.delete(selection, selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -869,6 +881,10 @@ class QolsysPanel(QolsysObservable):
                                 self.db.table_virtual_device.insert(data=content_values)
                                 self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
 
+                            # Output Rules
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.insert(data=content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -887,6 +903,35 @@ class QolsysPanel(QolsysObservable):
 
         # No valid user code found
         return -1
+
+    def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
+        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.UNKNOWN]
+
+        automation_devices: list[QolsysAutomationDevice] = []
+        devices_list = self.db.get_automation_devices()
+
+        for device in devices_list:
+            try:
+                protocol = AutomationDeviceProtocol(device.get("protocol", ""))
+            except ValueError:
+                protocol = AutomationDeviceProtocol.UNKNOWN
+
+            new_device: QolsysAutomationDevice | None = None
+
+            match protocol:
+                case AutomationDeviceProtocol.POWERG:
+                    new_device = QolsysAutomationDevicePowerG(self._controller, device)
+
+                case AutomationDeviceProtocol.Z_WAVE:
+                    new_device = QolsysAutomationDeviceZwave(self._controller, device)
+
+                case AutomationDeviceProtocol.UNKNOWN:
+                    new_device = QolsysAutomationDevice(self._controller, device)
+
+        if new_device is not None and protocol in allowed_protocols:
+            automation_devices.append(new_device)
+
+        return automation_devices
 
     def get_adc_devices_from_db(self) -> list[QolsysAdcDevice]:
         adc_devices: list[QolsysAdcDevice] = []

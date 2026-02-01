@@ -63,6 +63,7 @@ class ZoneStatus(StrEnum):
     ALARMED = "Alarmed"
     ARM_AWAY = "Arm-Away"
     ARM_STAY = "Arm-Stay"
+    BELL_TROUBLE = "Bell Trouble"
     CLOSED = "Closed"
     CONNECTED = "connected"
     DISARM = "Disarm"
@@ -84,6 +85,12 @@ class DeviceCapability(StrEnum):
     POWERG = "POWERG"
     ZWAVE = "Z-Wave"
     S_LINE = "S-Line"
+
+
+class AutomationDeviceProtocol(StrEnum):
+    POWERG = "PowerG"
+    Z_WAVE = "Z-Wave"
+    UNKNOWN = "Unknown"
 
 
 class ZoneSensorType(StrEnum):
