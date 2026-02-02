@@ -1,37 +1,68 @@
+import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.automation.service import AutomationService
+from qolsys_controller.automation.service_lock import LockService
 
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
 
 
-class LockServicePowerG(AutomationService):
-    def __init__(self, automation_device: "QolsysAutomationDevice") -> None:
-        super().__init__(automation_device)
-        self._is_locking = False
-        self._is_unlocking = False
+LOGGER = logging.getLogger(__name__)
 
-    def lock(self) -> None:
-        self._is_locking = True
-        self._is_unlocking = False
-        self._automation_device.notify()
-        # Logic to lock
 
-    def unlock(self) -> None:
-        self._is_locking = False
-        self._is_unlocking = True
-        self._automation_device.notify()
-        # Logic to unlock
+class LockServicePowerG(LockService):
+    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+        super().__init__(automation_device=automation_device, endpoint=endpoint)
 
-    def is_locked(self) -> bool:
-        return self.automation_device.status.lower() == "locked"
+    async def lock(self) -> None:
+        if self.locked:
+            LOGGER.debug(
+                "%s[%s] LockServicePowerG - lock: already locked",
+                self.automation_device.prefix,
+                self.endpoint,
+            )
+            return
 
-    def is_locking(self) -> bool:
-        return self._is_locking
+        self.locking = True
+        self.unlocking = False
+        self.automation_device.notify()
+        self._locking = False  # Dont fire notify again, will update when status comes back
+        await self.automation_device.controller.command_automation_door_lock(
+            int(self.automation_device.virtual_node_id), self.endpoint
+        )
 
-    def is_unlocking(self) -> bool:
-        return self._is_unlocking
+    async def unlock(self) -> None:
+        if not self.locked:
+            LOGGER.debug(
+                "%s[%s] LockServicePowerG - unlock: already unlocked",
+                self.automation_device.prefix,
+                self.endpoint,
+            )
+            return
 
-    def is_jammed(self) -> bool:
+        self.locking = False
+        self.unlocking = True
+        self.automation_device.notify()
+        self._unlocking = False  # Dont fire notify again, will update when status comes back
+        await self.automation_device.controller.command_automation_door_unlock(
+            int(self.automation_device.virtual_node_id), self.endpoint
+        )
+
+    async def open(self) -> None:
+        pass
+
+    async def close(self) -> None:
+        pass
+
+    def is_lock_supported(self) -> bool:
+        return True
+
+    def is_open_supported(self) -> bool:
         return False
+
+    def is_jam_supported(self) -> bool:
+        return True
+
+    def update_automation_service(self) -> None:
+        self.locked = self.automation_device.status.lower() == "locked"
+        self.jammed = self.automation_device.status.lower() == "jammed"

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
-from qolsys_controller.automaton_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.protocol_adc.device import QolsysAdcDevice
 from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
@@ -401,9 +401,9 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_zones_data(self.get_zones_from_db())
         self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
         self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
+        self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
-        # LOGGER.debug(self.get_automation_devices_from_db())
 
         # Sync Z-Wave device state
         LOGGER.debug("sync_data - update z-wave devices states")
@@ -588,6 +588,10 @@ class QolsysPanel(QolsysObservable):
                             # Update AutomationDeviceContentProvider
                             case self.db.table_automation.uri:
                                 self.db.table_automation.update(selection, selection_argument, content_values)
+                                virtual_node_id = content_values.get("virtual_node_id", "")
+                                automation_device = self._controller.state.automation_device(virtual_node_id)
+                                if automation_device is not None:
+                                    automation_device.update_automation_device(content_values)
 
                             # Update Alarmed Sensor Content Provider
                             case self.db.table_alarmedsensor.uri:
@@ -905,7 +909,7 @@ class QolsysPanel(QolsysObservable):
         return -1
 
     def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
-        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.UNKNOWN]
+        allowed_protocols = [AutomationDeviceProtocol.POWERG]
 
         automation_devices: list[QolsysAutomationDevice] = []
         devices_list = self.db.get_automation_devices()
@@ -928,8 +932,8 @@ class QolsysPanel(QolsysObservable):
                 case AutomationDeviceProtocol.UNKNOWN:
                     new_device = QolsysAutomationDevice(self._controller, device)
 
-        if new_device is not None and protocol in allowed_protocols:
-            automation_devices.append(new_device)
+            if new_device is not None and protocol in allowed_protocols:
+                automation_devices.append(new_device)
 
         return automation_devices
 

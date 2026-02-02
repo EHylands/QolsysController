@@ -16,6 +16,7 @@ import aiomqtt
 from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.mqtt_command import (
     MQTTCommand,
+    MQTTCommand_Automation,
     MQTTCommand_Panel,
     MQTTCommand_ZWave,
 )
@@ -948,7 +949,7 @@ class QolsysController:
         return response
 
     async def command_zwave_switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending set_zwave_switch_binar#y command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
         zwave_node = self.state.zwave_device(node_id)
 
         if not zwave_node:
@@ -1083,4 +1084,32 @@ class QolsysController:
         command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
+        return response
+
+    async def command_automation_door_lock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending automation_door_lock command - Node(%s)(%s)", virtual_node_id, endpoint)
+
+        # Check if virtual_node_id exist
+        virtual_node = self.state.automation_device(str(virtual_node_id))
+        if not virtual_node:
+            LOGGER.error("automation_door_lock - Invalid virtual_node_id %s", virtual_node_id)
+            return None
+
+        command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=5, result="status_Locked")
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving automation_door_lock command: %s", response)
+        return response
+
+    async def command_automation_door_unlock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending automation_door_unlock command - Node(%s)(%s)", virtual_node_id, endpoint)
+
+        # Check if virtual_node_id exist
+        virtual_node = self.state.automation_device(str(virtual_node_id))
+        if not virtual_node:
+            LOGGER.error("automation_door_unlock - Invalid virtual_node_id %s", virtual_node_id)
+            return None
+
+        command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=6, result="status_Unlocked")
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving  automation_door_unlock command: %s", response)
         return response

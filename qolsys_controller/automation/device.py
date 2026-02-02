@@ -3,11 +3,17 @@ from abc import ABC
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.protocol_battery import BatteryProtocol
+from qolsys_controller.automation.protocol_light import LightProtocol
 from qolsys_controller.automation.protocol_lock import LockProtocol
 from qolsys_controller.automation.protocol_service import ServiceProtocol
+from qolsys_controller.automation.protocol_status import StatusProtocol
 from qolsys_controller.automation.service import AutomationService
+from qolsys_controller.automation.service_status import StatusService
 from qolsys_controller.automation_powerg.service_battery import BatteryServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
+from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
+from qolsys_controller.automation_zwave.service_light import LightServiceZwave
+from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.observable import QolsysObservable
 
@@ -31,6 +37,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         self._device_id: str = dict.get("device_id", "")
         self._device_name: str = dict.get("device_name", "")
         self._device_type: str = dict.get("device_type", "")
+        self._extras: str = dict.get("extras", "")
         self._protocol: str = dict.get("protocol", "")
         self._state: str = dict.get("state", "")
         self._status: str = dict.get("status", "")
@@ -52,23 +59,62 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         self._services: list[AutomationService] = []
 
+        match self.device_type:
+            case "Light":
+                self.service_add_light_service(int(self._end_point))
+            case "Door Lock":
+                self.service_add_lock_service(int(self._end_point))
+
+    def info(self) -> None:
+        pass
+        # return "AutDev%s [%s] (%s)" % (self.virtual_node_id, self.protocol, self.device_name)
+
+    def service_get(self, service_type: type[ServiceProtocol], endpoint: int = 0) -> ServiceProtocol | None:
+        for service in self._services:
+            if isinstance(service, service_type) and service.endpoint == endpoint:
+                return service
+        return None
+
+    def service_get_protocol(self, service_type: type[ServiceProtocol]) -> list[AutomationService]:
+        services: list[AutomationService] = []
+        for service in self._services:
+            if isinstance(service, service_type):
+                services.append(service)
+        return services
+
     def service_add(self, service: AutomationService) -> None:
         if not isinstance(service, ServiceProtocol):
             LOGGER.error(
-                "AutomationDevice%s [%s] (%s) - Unable to add Service (not a ServiceProtocol): %s",
+                "AutDev%s [%s][%s][%s] (%s) - Unable to add Service (not a ServiceProtocol): %s",
                 self.virtual_node_id,
                 self.protocol,
+                self.virtual_node_id,
+                service.endpoint,
                 self.device_name,
                 type(service),
+            )
+            return
+
+        if isinstance(service, LightProtocol):
+            self._services.append(service)
+            LOGGER.debug(
+                "AutDev%s [%s][%s][%s] (%s) - Adding Light Service ",
+                self.virtual_node_id,
+                self.protocol,
+                self.virtual_node_id,
+                service.endpoint,
+                self.device_name,
             )
             return
 
         if isinstance(service, BatteryProtocol):
             self._services.append(service)
             LOGGER.debug(
-                "AutomationDevice%s [%s] (%s) - Adding Battery Service ",
+                "AutDev%s [%s][%s][%s] (%s) - Adding Battery Service ",
                 self.virtual_node_id,
                 self.protocol,
+                self.virtual_node_id,
+                service.endpoint,
                 self.device_name,
             )
             return
@@ -76,62 +122,122 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         if isinstance(service, LockProtocol):
             self._services.append(service)
             LOGGER.debug(
-                "AutomationDevice%s [%s] (%s) - Adding Lock Service ",
+                "AutDev%s [%s][%s][%s] (%s) - Adding Lock Service ",
                 self.virtual_node_id,
                 self.protocol,
+                self.virtual_node_id,
+                service.endpoint,
+                self.device_name,
+            )
+            return
+
+        if isinstance(service, StatusProtocol):
+            self._services.append(service)
+            LOGGER.debug(
+                "AutDev%s [%s][%s][%s] (%s) - Adding Status Service ",
+                self.virtual_node_id,
+                self.protocol,
+                self.virtual_node_id,
+                service.endpoint,
                 self.device_name,
             )
             return
 
         LOGGER.error(
-            "AutomationDevice%s [%s] (%s) - Unable to add Service (unknown type): %s",
+            "AutDev%s [%s][%s][%s] (%s) - Unable to add Service (unknown type): %s",
             self.virtual_node_id,
             self.protocol,
+            self.virtual_node_id,
+            service.endpoint,
             self.device_name,
             type(service),
         )
 
-    def service_add_lock_service(self) -> None:
-        lock_service: AutomationService | None = None
-        if self.protocol == AutomationDeviceProtocol.POWERG:
-            lock_service = LockServicePowerG(self)
+    def service_add_light_service(self, endpoint: int = 0) -> None:
+        light_service: AutomationService | None = None
 
-        if lock_service is not None:
-            self._services.append(lock_service)
+        match self.protocol:
+            case AutomationDeviceProtocol.POWERG:
+                pass
+            case AutomationDeviceProtocol.Z_WAVE:
+                light_service = LightServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if light_service is not None:
+            self.service_add(light_service)
             return
 
         LOGGER.error(
-            "AutomationDevice%s [%s] (%s) - Unable to add Lock Service",
+            "AutDev%s [%s][%s][%s] (%s) - Unable to add Light Service",
             self.virtual_node_id,
             self.protocol,
+            self.virtual_node_id,
+            endpoint,
             self.device_name,
         )
 
-    def service_add_battery_service(self) -> None:
+    def service_add_lock_service(self, endpoint: int = 0) -> None:
+        lock_service: AutomationService | None = None
+        if self.protocol == AutomationDeviceProtocol.POWERG:
+            lock_service = LockServicePowerG(self, endpoint=endpoint)
+
+        if lock_service is not None:
+            self.service_add(lock_service)
+            return
+
+        LOGGER.error(
+            "AutDev%s [%s][%s][%s] (%s) - Unable to add Lock Service",
+            self.virtual_node_id,
+            self.protocol,
+            self.virtual_node_id,
+            endpoint,
+            self.device_name,
+        )
+
+    def service_add_battery_service(self, endpoint: int = 0) -> None:
         battery_service: AutomationService | None = None
         if self.protocol == AutomationDeviceProtocol.POWERG:
-            battery_service = BatteryServicePowerG(automation_device=self)
+            battery_service = BatteryServicePowerG(automation_device=self, endpoint=endpoint)
 
         if self.protocol == AutomationDeviceProtocol.Z_WAVE:
-            battery_service = BatteryServicePowerG(automation_device=self)
+            battery_service = BatteryServiceZwave(automation_device=self, endpoint=endpoint)
 
         if battery_service is not None:
             self.service_add(battery_service)
             return
 
         LOGGER.error(
-            "AutomationDevice%s [%s] (%s) - Unable to add Battery Service",
+            "AutDev%s [%s][%s][%s] (%s) - Unable to add Battery Service",
             self.virtual_node_id,
             self.protocol,
+            self.virtual_node_id,
+            endpoint,
             self.device_name,
         )
+
+    def service_add_status_service(self, endpoint: int = 0) -> None:
+        service: StatusService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.Z_WAVE:
+                service = StatusServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if service is not None:
+            self.service_add(service)
+            return
+
+    def update_automation_services(self) -> None:
+        for service in self._services:
+            service.update_automation_service()
 
     def update_automation_device(self, data: dict[str, str]) -> None:
         # Check if we are updating same virtual_node_id
         virtual_node_id_update = data.get("virtual_node_id", "")
         if virtual_node_id_update != self._virtual_node_id:
             LOGGER.error(
-                "Updating AutomationDevice%s (%s) with %s (different virtual_node_id)",
+                "Updating AutDev%s (%s) with %s (different virtual_node_id)",
                 self._virtual_node_id,
                 self._device_name,
                 virtual_node_id_update,
@@ -152,11 +258,28 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         if "status" in data:
             self._status = data.get("status", "")
 
+        if "extras" in data:
+            self.extras = data.get("extras", "")
+
+        self.update_automation_services()
+
         self.end_batch_update()
 
     # -----------------------------
     # properties + setters
     # -----------------------------
+
+    @property
+    def controller(self) -> "QolsysController":
+        return self._controller
+
+    @property
+    def services(self) -> list[AutomationService]:
+        return self._services
+
+    @property
+    def prefix(self) -> str:
+        return f"AutDev{self.virtual_node_id} ({self.device_name}) [{self.protocol}][{self.virtual_node_id}]"
 
     @property
     def device_id(self) -> str:
@@ -165,7 +288,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @device_id.setter
     def device_id(self, value: str) -> None:
         if self._device_id != value:
-            LOGGER.debug("AutomationDevice%s (%s) - device_id: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - device_id: %s", self.device_id, self.device_name, value)
             self._device_id = value
             self.notify()
 
@@ -176,7 +299,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @virtual_node_id.setter
     def virtual_node_id(self, value: str) -> None:
         if self._virtual_node_id != value:
-            LOGGER.debug("AutomationDevice%s (%s) - virtual_node_id: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - virtual_node_id: %s", self.device_id, self.device_name, value)
             self._virtual_node_id = value
             self.notify()
 
@@ -187,7 +310,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @partition_id.setter
     def partition_id(self, value: str) -> None:
         if self._partition_id != value:
-            LOGGER.debug("AutomationDevice%s (%s) - partition_id: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - partition_id: %s", self.device_id, self.device_name, value)
             self._partition_id = value
             self.notify()
 
@@ -198,7 +321,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @state.setter
     def state(self, value: str) -> None:
         if self._state != value:
-            LOGGER.debug("AutomationDevice%s (%s) - state: %s", self.device_id, self.device_name, value)
+            # LOGGER.debug("AutDev%s (%s) - state: %s", self.device_id, self.device_name, value)
             self._state = value
             self.notify()
 
@@ -209,7 +332,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @status.setter
     def status(self, value: str) -> None:
         if self._status != value:
-            LOGGER.debug("AutomationDevice%s (%s) - status: %s", self.device_id, self.device_name, value)
+            # LOGGER.debug("AutDev%s (%s) - status: %s", self.device_id, self.device_name, value)
             self._status = value
             self.notify()
 
@@ -220,7 +343,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @device_name.setter
     def device_name(self, value: str) -> None:
         if self._device_name != value:
-            LOGGER.debug("AutomationDevice%s (%s) - device_name: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - device_name: %s", self.device_id, self.device_name, value)
             self._device_name = value
             self.notify()
 
@@ -231,12 +354,23 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @device_type.setter
     def device_type(self, value: str) -> None:
         if self._device_type != value:
-            LOGGER.debug("AutomationDevice%s (%s) - device_type: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - device_type: %s", self.device_id, self.device_name, value)
             self._device_type = value
             self.notify()
 
     @property
-    def protocol(self) -> str:
+    def extras(self) -> str:
+        return self._extras
+
+    @extras.setter
+    def extras(self, value: str) -> None:
+        if self._extras != value:
+            # LOGGER.debug("AutDev%s (%s) - extras: %s", self.device_id, self.device_name, value)
+            self._extras = value
+            self.notify()
+
+    @property
+    def protocol(self) -> AutomationDeviceProtocol:
         try:
             return AutomationDeviceProtocol(self._protocol)
         except ValueError:
@@ -245,7 +379,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @protocol.setter
     def protocol(self, value: str) -> None:
         if self._protocol != value:
-            LOGGER.debug("AutomationDevice%s (%s) - protocol: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("AutDev%s (%s) - protocol: %s", self.device_id, self.device_name, value)
             self._protocol = value
             self.notify()
 
@@ -274,4 +408,5 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             "nodeid_secure_cmd_classes": self._nodeid_secure_cmd_classes,
             "created_date": self._created_date,
             "smart_energy_optimizer": self._smart_energy_optimizer,
+            "linked_security_zone: ": self._linked_security_zone,
         }

@@ -13,11 +13,12 @@ class QolsysAutomationDevicePowerG(QolsysAutomationDevice):
     def __init__(self, controller: "QolsysController", dict: dict[str, str]) -> None:
         super().__init__(controller, dict)
 
-        # Main device identifier
         self._short_device_id: str = ""
 
-        # Add Battery Service
-        self.service_add_battery_service()
+        # Add Status Service
+        self.service_add_status_service(endpoint=0)
+
+        super().update_automation_services()
 
     def update_power_device(self, data: dict[str, str]) -> None:
         pass

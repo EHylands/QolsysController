@@ -124,3 +124,55 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
         ]
 
         self.append_ipc_request(ipc_request)
+
+
+class MQTTCommand_Automation(MQTTCommand_IpcCall):
+    def __init__(
+        self, controller: "QolsysController", virtual_node_id: int, endpoint: int, operation_type: int, result: str
+    ) -> None:
+        super().__init__(
+            controller=controller,
+            ipc_service_name="qautomationservice",
+            ipc_interface_name="android.os.IQAutomationService",
+            ipc_transaction_id=1,
+        )
+
+        ipc_request: list[dict[str, Any]] = [
+            {
+                # Operation_type
+                "dataType": "int",
+                "dataValue": operation_type,
+            },
+            {
+                # node_id
+                "dataType": "int",
+                "dataValue": virtual_node_id,
+            },
+            {
+                # token
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                # expected_result
+                "dataType": "string",
+                "dataValue": result,
+            },
+            {
+                # source
+                "dataType": "int",
+                "dataValue": 1,
+            },
+            {
+                # enpoint
+                "dataType": "int",
+                "dataValue": endpoint,
+            },
+            {
+                # request_type
+                "dataType": "string",
+                "dataValue": "_Operations",
+            },
+        ]
+
+        self.append_ipc_request(ipc_request)

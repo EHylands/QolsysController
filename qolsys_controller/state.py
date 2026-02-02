@@ -401,7 +401,33 @@ class QolsysState(QolsysObservable):
                 self.adc_delete(state_adc.device_id)
 
     def sync_automation_devices_data(self, db_automation_devices: list[QolsysAutomationDevice]) -> None:
-        pass
+        db_automation_list = []
+        for db_automation in db_automation_devices:
+            db_automation_list.append(db_automation.virtual_node_id)
+
+        state_automation_list = []
+        for state_automation in self.automation_devices:
+            state_automation_list.append(state_automation.virtual_node_id)
+
+        # Update existing Automation Devices
+        for state_automation in self.automation_devices:
+            if state_automation.virtual_node_id in db_automation_list:
+                for db_automation in db_automation_devices:
+                    if state_automation.virtual_node_id == db_automation.virtual_node_id:
+                        state_automation.update_automation_device(db_automation.to_dict())
+                        LOGGER.debug("sync_data - update AutDev%s", state_automation.virtual_node_id)
+
+        # Add new Automation Devices
+        for db_automation in db_automation_devices:
+            if db_automation.virtual_node_id not in state_automation_list:
+                LOGGER.debug("sync_data - add AutDev%s", db_automation.virtual_node_id)
+                self.automation_device_add(db_automation)
+
+        # Delete zwave device
+        for state_automation in self.automation_devices:
+            if state_automation.virtual_node_id not in db_automation_list:
+                LOGGER.debug("sync_data - delete AutDev%s", state_automation.virtual_node_id)
+                self.automation_device_delete(state_automation.virtual_node_id)
 
     def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
         db_zwave_list = []
@@ -725,6 +751,10 @@ class QolsysState(QolsysObservable):
 
                 if isinstance(service, QolsysAdcService):
                     LOGGER.debug("ADC%s Service%s (%s) - state: %s", adc.device_id, service.id, adc.name, service.func_state)
+
+        for automation_device in self.automation_devices:
+            for automation_service in automation_device.services:
+                automation_service.info()
 
         for scene in self.scenes:
             sid = scene.scene_id

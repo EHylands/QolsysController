@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_battery import BatteryService
@@ -6,24 +7,18 @@ if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 class BatteryServicePowerG(BatteryService):
-    def __init__(self, automation_device: "QolsysAutomationDevice") -> None:
-        super().__init__(automation_device)
+    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+        super().__init__(automation_device, endpoint)
 
-    def is_battery_enabled(self) -> bool:
+    def is_battery_low_supported(self) -> bool:
         return False
 
-    def is_battery_level_value_enabled(self) -> bool:
-        return self.battery_level_value is not None
-
-    def battery_level_value(self) -> int | None:
-        try:
-            value = int(self._automation_device._node_battery_level_value)
-            if 0 <= value <= 100:
-                return value
-            return None
-        except ValueError:
-            return None
-
-    def low_battery(self) -> bool:
+    def is_battery_level_supported(self) -> bool:
         return False
+
+    def update_automation_service(self) -> None:
+        pass
