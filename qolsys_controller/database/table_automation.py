@@ -40,6 +40,7 @@ class QolsysTableAutomation(QolsysTable):
             "created_date",
             "status",
             "smart_energy_optimizer",
+            "linked_security_zone",
         ]
 
         self._create_table()

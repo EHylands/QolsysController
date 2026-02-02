@@ -1,10 +1,10 @@
 import logging
 from typing import TYPE_CHECKING
 
-from .enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
 
 if TYPE_CHECKING:
-    from .adc_device import QolsysAdcDevice
+    from .device import QolsysAdcDevice
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,11 +60,11 @@ class QolsysAdcService:
         if value != self._func_name:
             self._func_name = value
             LOGGER.debug(
-                "ADC%s (%s) - Func%s - func_name:%s",
+                "ADC%s (%s) - Func%s - func_name: %s",
                 self._parent_device.device_id,
                 self._parent_device.name,
                 self.id,
-                self.func_name,
+                self.func_name.name,
             )
             LOGGER.debug("Warning - Changing func_name will change device type - Not supported")
             self._parent_device.notify()
@@ -78,11 +78,11 @@ class QolsysAdcService:
         if value != self.local_control:
             self._local_control = value
             LOGGER.debug(
-                "ADC%s (%s) - Func%s - local_control:%s",
+                "ADC%s (%s) - Func%s - local_control: %s",
                 self._parent_device.device_id,
                 self._parent_device.name,
                 self.id,
-                self.local_control,
+                self.local_control.name,
             )
             self._parent_device.notify()
 
@@ -95,11 +95,11 @@ class QolsysAdcService:
         if value != self._func_type:
             self._func_type = value
             LOGGER.debug(
-                "ADC%s (%s) - Func%s - func_type:%s",
+                "ADC%s (%s) - Func%s - func_type: %s",
                 self._parent_device.device_id,
                 self._parent_device.name,
                 self.id,
-                self.func_type,
+                self.func_type.name,
             )
             LOGGER.debug("Warning - Changing func_type will change device type - Not supported")
             self._parent_device.notify()
@@ -113,11 +113,11 @@ class QolsysAdcService:
         if value != self._func_state:
             self._func_state = value
             LOGGER.debug(
-                "ADC%s (%s) - Func%s - func_state:%s",
+                "ADC%s (%s) - Func%s - func_state: %s",
                 self._parent_device.device_id,
                 self._parent_device.name,
                 self.id,
-                self.func_state,
+                self.func_state.name,
             )
             self._parent_device.notify()
 

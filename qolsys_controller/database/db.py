@@ -155,6 +155,18 @@ class QolsysDB:
     def cursor(self) -> sqlite3.Cursor:
         return self._cursor
 
+    def get_automation_devices(self) -> list[dict[str, str]]:
+        self.cursor.execute(f"SELECT * FROM {self.table_automation.table} ORDER BY _id")
+        self.db.commit()
+
+        automation_devices: list[dict[str, str]] = []
+        columns = [description[0] for description in self.cursor.description]
+        for row in self.cursor.fetchall():
+            row_dict = dict(zip(columns, row, strict=True))
+            automation_devices.append(row_dict)
+
+        return automation_devices
+
     def get_users(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_user.table} ORDER BY _id")
         self.db.commit()
@@ -390,7 +402,7 @@ class QolsysDB:
 
         return None
 
-    def load_db(self, database: list[dict[str, Any]]) -> None:
+    def load_db(self, database: Any | None) -> None:
         self.clear_db()
 
         if not database:

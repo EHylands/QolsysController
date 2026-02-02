@@ -1,10 +1,10 @@
 import logging
 from typing import TYPE_CHECKING
 
-from .zwave_device import QolsysZWaveDevice
+from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,8 +14,6 @@ class QolsysDimmer(QolsysZWaveDevice):
         super().__init__(controller, zwave_dict)
 
         self._dimmer_id: str = dimmer_dict.get("_id", "")
-        self._dimmer_version: str = dimmer_dict.get("version", "")
-        self._dimmer_opr: str = dimmer_dict.get("opr", "")
         self._dimmer_partition_id: str = dimmer_dict.get("partition_id", "")
         self._dimmer_name: str = dimmer_dict.get("dimmer_name", "")
         self._dimmer_status: str = dimmer_dict.get("status", "")
@@ -73,8 +71,8 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_level = value
             self.notify()
 
-    def update_raw(self, payload: bytes) -> None:
-        pass
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        super().update_raw(payload, endpoint)
 
     def update_dimmer(self, content_values: dict[str, str]) -> None:  # noqa: PLR0912
         # Check if we are updating same none_id
@@ -97,10 +95,6 @@ class QolsysDimmer(QolsysZWaveDevice):
             self._dimmer_created_by = content_values.get("created_by", "")
         if "created_date" in content_values:
             self._dimmer_created_date = content_values.get("created_date", "")
-        if "version" in content_values:
-            self._dimmer_version = content_values.get("version", "")
-        if "opr" in content_values:
-            self._dimmer_opr = content_values.get("opr", "")
         if "partition_id" in content_values:
             self.partition_id = content_values.get("partition_id", "")
         if "updated_by" in content_values:
@@ -119,8 +113,6 @@ class QolsysDimmer(QolsysZWaveDevice):
     def to_dict_dimmer(self) -> dict[str, str]:
         return {
             "_id": self._dimmer_id,
-            "version": self._dimmer_version,
-            "opr": self._dimmer_opr,
             "partition_id": self._partition_id,
             "dimmer_name": self.dimmer_name,
             "status": self.dimmer_status,

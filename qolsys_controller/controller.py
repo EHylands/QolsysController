@@ -13,15 +13,16 @@ from typing import Any
 import aiofiles
 import aiomqtt
 
+from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.mqtt_command import (
     MQTTCommand,
     MQTTCommand_Panel,
     MQTTCommand_ZWave,
 )
-from qolsys_controller.zwave_thermostat import QolsysThermostat
+from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
 
 from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
-from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass, ZwaveDeviceClass
+from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
 from .mqtt_command_queue import QolsysMqttCommandQueue
@@ -61,6 +62,7 @@ class QolsysController:
         self._mqtt_task_listen_label: str = "mqtt_task_listen"
         self._mqtt_task_connect_label: str = "mqtt_task_connect"
         self._mqtt_task_ping_label: str = "mqtt_task_ping"
+        self._mqtt_task_zwave_meter_update_label: str = "mqtt_task_zwave_meter_update"
 
     @property
     def state(self) -> QolsysState:
@@ -152,6 +154,7 @@ class QolsysController:
         self._task_manager.cancel(self._mqtt_task_listen_label)
         self._task_manager.cancel(self._mqtt_task_ping_label)
         self._task_manager.cancel(self._mqtt_task_config_label)
+        self._task_manager.cancel(self._mqtt_task_zwave_meter_update_label)
 
         self.connected = False
         self.connected_observer.notify()
@@ -180,6 +183,7 @@ class QolsysController:
 
         self._task_manager.cancel(self._mqtt_task_listen_label)
         self._task_manager.cancel(self._mqtt_task_ping_label)
+        self._task_manager.cancel(self._mqtt_task_zwave_meter_update_label)
 
         while True:
             try:
@@ -223,11 +227,14 @@ class QolsysController:
 
                 response_database = await self.command_sync_database()
                 LOGGER.debug("MQTT: Updating State from syncdatabase")
-                self.panel.load_database(response_database.get("fulldbdata"))  # type: ignore[arg-type]
+                await self.panel.load_database(response_database.get("fulldbdata"))
                 self.panel.dump()
                 self.state.dump()
 
                 self.connected = True
+
+                self._task_manager.run(self.mqtt_zwave_meter_update(), self._mqtt_task_zwave_meter_update_label)
+
                 self.connected_observer.notify()
 
                 if not run_forever:
@@ -267,6 +274,47 @@ class QolsysController:
                     await self.command_pingevent()
 
             await asyncio.sleep(self.settings.mqtt_ping)
+
+    async def mqtt_zwave_meter_update(self) -> None:
+        while True:
+            if self.aiomqtt is not None and self.connected:
+                for device in self.state.zwave_devices:
+                    if device._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        for meter in device.meter_endpoints:
+                            zwave_command = MQTTCommand_ZWave(
+                                self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
+                            )
+                            await zwave_command.send_command()
+
+                            # Update all endpoint scale
+                            for sensor in meter.sensors:
+                                zwave_command = MQTTCommand_ZWave(
+                                    self,
+                                    device.node_id,
+                                    meter.endpoint,
+                                    [ZwaveCommandClass.Meter.value, 0x01, sensor.scale.value & 0x07],
+                                )
+                                await zwave_command.send_command()
+                                await asyncio.sleep(5)
+
+                                zwave_command = MQTTCommand_ZWave(
+                                    self,
+                                    device.node_id,
+                                    "0",
+                                    [
+                                        0x60,
+                                        0x0D,
+                                        0x00,
+                                        int(meter.endpoint),
+                                        ZwaveCommandClass.Meter.value,
+                                        0x01,
+                                        sensor.scale.value & 0x07,
+                                    ],
+                                )
+                                await zwave_command.send_command()
+                                await asyncio.sleep(5)
+
+            await asyncio.sleep(300)
 
     async def mqtt_listen_task(self) -> None:
         try:
@@ -739,7 +787,7 @@ class QolsysController:
 
         scene_command = {
             "operation_name": "execute_scene",
-            "scene_id": scene.scene_id,
+            "scene_id": int(scene.scene_id),
             "operation_source": 1,
             "macAddress": self.settings.random_mac,
         }
@@ -757,23 +805,32 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving execute_scene command")
         return response
 
-    async def command_panel_virtual_device_action(self, device_id: str, state: int) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending virtual_device command")
+    async def command_panel_virtual_device_action(
+        self, device_id: str, service_id: int, state: vdFuncState
+    ) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending virtual_device command device:%s, service:%s", device_id, service_id)
 
-        garage_door = self.state.adc_device(device_id)
-        if not garage_door:
-            LOGGER.error("Invalid Virtual Garage Door Id: %s", device_id)
+        device = self.state.adc_device(device_id)
+        if not device:
+            LOGGER.error("Invalid ADC Device: %s", device_id)
+            return None
+
+        service = device.get_adc_service(service_id)
+        if not service:
+            LOGGER.error("Invalid ADC Service: %s", service_id)
+            LOGGER.error(device.func_list)
+            return None
 
         device_list = {
             "virtualDeviceList": [
                 {
-                    "virtualDeviceId": device_id,
+                    "virtualDeviceId": int(device_id),
                     "virtualDeviceFunctionList": [
                         {
-                            "vdFuncId": 1,
+                            "vdFuncId": service_id,
                             "vdFuncState": state,
                             "vdFuncBackendTimestamp": int(time.time() * 1000),
-                            "vdFuncType": 1,
+                            "vdFuncType": service.func_type.value,
                         }
                     ],
                 }
@@ -784,7 +841,6 @@ class QolsysController:
             "operation_name": "send_virtual_device_description",
             "virtual_device_operation": 4,
             "virtual_device_description": json.dumps(device_list),
-            "operation_source": 0,
         }
 
         ipc_request = [
@@ -795,7 +851,6 @@ class QolsysController:
         ]
 
         LOGGER.debug("virtual command: %s", virtual_command)
-
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
@@ -892,7 +947,7 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving panel_trigger_fire command")
         return response
 
-    async def command_zwave_switch_binary_set(self, node_id: str, status: bool) -> dict[str, Any] | None:
+    async def command_zwave_switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending set_zwave_switch_binar#y command  - Node(%s) - Status(%s)", node_id, status)
         zwave_node = self.state.zwave_device(node_id)
 
@@ -900,20 +955,20 @@ class QolsysController:
             LOGGER.error("switch_binary_set - Invalid node_id %s", node_id)
             return None
 
-        if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchBinary, ZwaveDeviceClass.RemoteSwitchBinary):
-            LOGGER.error("switch_binary_set used on invalid %s", zwave_node.generic_device_type)
+        if ZwaveCommandClass.SwitchBinary not in zwave_node.command_class_list:
+            LOGGER.error("Z-Wave node does not support switch_binary_set")
             return None
 
         level = 0
         if status:
             level = 255
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.SwitchBinary, 1, level])
+        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.SwitchBinary, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
         return response
 
-    async def command_zwave_switch_multilevel_set(self, node_id: str, level: int) -> dict[str, Any] | None:
+    async def command_zwave_switch_multilevel_set(self, node_id: str, endpoint: str, level: int) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -921,16 +976,16 @@ class QolsysController:
             LOGGER.error("switch_multilevel_set - Invalid node_id %s", node_id)
             return None
 
-        if zwave_node.generic_device_type not in (ZwaveDeviceClass.SwitchMultilevel, ZwaveDeviceClass.RemoteSwitchMultilevel):
-            LOGGER.error("switch_multilevel_set used on invalid %s", zwave_node.generic_device_type)
+        if ZwaveCommandClass.SwitchMultilevel not in zwave_node.command_class_list:
+            LOGGER.error("Z-Wave node does not support switch_multilevel_set")
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.SwitchMultilevel, 1, level])
+        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.SwitchMultilevel, 1, level])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_multilevel_switch command")
         return response
 
-    async def command_zwave_doorlock_set(self, node_id: str, locked: bool) -> dict[str, Any] | None:
+    async def command_zwave_doorlock_set(self, node_id: str, endpoint: str, locked: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -938,18 +993,22 @@ class QolsysController:
             LOGGER.error("doorlock_set - Invalid node_id %s", node_id)
             return None
 
+        if ZwaveCommandClass.DoorLock not in zwave_node.command_class_list:
+            LOGGER.error("Z-Wave node does not support zwave_doorlock_set")
+            return None
+
         # 0 unlocked, 255 locked
         lock_mode = 0
         if locked:
             lock_mode = 255
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.DoorLock, 1, lock_mode])
+        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.DoorLock, 1, lock_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
         return response
 
     async def command_zwave_thermostat_setpoint_set(
-        self, node_id: str, mode: ThermostatSetpointMode, setpoint: int
+        self, node_id: str, endpoint: str, mode: ThermostatSetpointMode, setpoint: int
     ) -> dict[str, Any] | None:
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
@@ -988,12 +1047,14 @@ class QolsysController:
             setpoint,
             zwave_bytes,
         )
-        command = MQTTCommand_ZWave(self, node_id, zwave_bytes)
+        command = MQTTCommand_ZWave(self, node_id, endpoint, zwave_bytes)
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
         return response
 
-    async def command_zwave_thermostat_mode_set(self, node_id: str, mode: ThermostatMode) -> dict[str, Any] | None:
+    async def command_zwave_thermostat_mode_set(
+        self, node_id: str, endpoint: str, mode: ThermostatMode
+    ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode)
 
         thermostat = self.state.zwave_thermostat(node_id)
@@ -1004,12 +1065,14 @@ class QolsysController:
         if mode not in thermostat.available_thermostat_mode():
             LOGGER.error("thermostat_mode_set - Invalid mode %s", mode)
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.ThermostatMode, 1, int(mode)])
+        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatMode, 1, int(mode)])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
 
-    async def command_zwave_thermostat_fan_mode_set(self, node_id: str, fan_mode: ThermostatFanMode) -> dict[str, Any] | None:
+    async def command_zwave_thermostat_fan_mode_set(
+        self, node_id: str, endpoint: str, fan_mode: ThermostatFanMode
+    ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode)
 
         zwave_node = self.state.zwave_device(node_id)
@@ -1017,7 +1080,7 @@ class QolsysController:
             LOGGER.error("thermostat_fan_mode_set - Invalid node_id %s", node_id)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])
+        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
         return response

@@ -63,6 +63,7 @@ class ZoneStatus(StrEnum):
     ALARMED = "Alarmed"
     ARM_AWAY = "Arm-Away"
     ARM_STAY = "Arm-Stay"
+    BELL_TROUBLE = "Bell Trouble"
     CLOSED = "Closed"
     CONNECTED = "connected"
     DISARM = "Disarm"
@@ -86,35 +87,42 @@ class DeviceCapability(StrEnum):
     S_LINE = "S-Line"
 
 
+class AutomationDeviceProtocol(StrEnum):
+    POWERG = "PowerG"
+    Z_WAVE = "Z-Wave"
+    UNKNOWN = "Unknown"
+
+
 class ZoneSensorType(StrEnum):
+    AUXILIARY_PENDANT = "Auxiliary Pendant"
+    BLUETOOTH = "Bluetooth"
+    CO_DETECTOR = "CODetector"
+    DOORBELL = "Doorbell"
     DOOR_WINDOW = "Door_Window"
     DOOR_WINDOW_M = "Door_Window_M"
-    DOORBELL = "Doorbell"
-    MOTION = "Motion"
+    FREEZE = "Freeze"
     GLASS_BREAK = "GlassBreak"
+    # HARDWIRE_TRANSLATOR = "" # TBD
+    HEAT = "Heat"
+    # HIGH_TEMPERATURE = "" # TBD
     KEY_FOB = "KeyFob"
     KEYPAD = "Keypad"
-    AUXILIARY_PENDANT = "Auxiliary Pendant"
-    SMOKE_DETECTOR = "SmokeDetector"
-    CO_DETECTOR = "CODetector"
-    # HARDWIRE_TRANSLATOR = "" # TBD
-    # WIRELESS_TRANSLATOR = "" #TBD
-    TEMPERATURE = "Temperature"
-    HEAT = "Heat"
-    WATER = "Water"
-    SHOCK = "Shock"
-    FREEZE = "Freeze"
-    TILT = "Tilt"
-    SMOKE_M = "Smoke_M"
+    MOTION = "Motion"
     # OCCUPANCY = ""  #TBD
-    SIREN = "Siren"
-    # HIGH_TEMPERATURE = "" # TBD
-    PANEL_MOTION = "Panel Motion"
     PANEL_GLASS_BREAK = "Panel Glass Break"
-    BLUETOOTH = "Bluetooth"
+    PANEL_MOTION = "Panel Motion"
+    # WIRELESS_TRANSLATOR = "" #TBD
+    SIREN = "Siren"
+    SHOCK = "Shock"
+    SMOKE_DETECTOR = "SmokeDetector"
+    SMOKE_M = "Smoke_M"
     TAKEOVER_MODULE = "TakeoverModule"
-    TRANSLATOR = "Translator"
     TAMPER = "Tamper Sensor"
+    TEMPERATURE = "Temperature"
+    TILT = "Tilt"
+    TRANSLATOR = "Translator"
+    UNKNOWN = "Unknown"
+    WATER = "Water"
 
 
 class ZoneSensorGroup(StrEnum):

@@ -5,13 +5,21 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from qolsys_controller.adc_device import QolsysAdcDevice
-from qolsys_controller.zwave_energy_clamp import QolsysEnergyClamp
-from qolsys_controller.zwave_extenal_siren import QolsysExternalSiren
-from qolsys_controller.zwave_garagedoor import QolsysGarageDoor
-from qolsys_controller.zwave_smart_socket import QolsysSmartSocket
-from qolsys_controller.zwave_thermometer import QolsysThermometer
-from qolsys_controller.zwave_water_valve import QolsysWaterValve
+from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
+from qolsys_controller.automaton_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.enum import AutomationDeviceProtocol
+from qolsys_controller.protocol_adc.device import QolsysAdcDevice
+from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
+from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
+from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
+from qolsys_controller.protocol_zwave.garagedoor import QolsysGarageDoor
+from qolsys_controller.protocol_zwave.generic import QolsysGeneric
+from qolsys_controller.protocol_zwave.lock import QolsysLock
+from qolsys_controller.protocol_zwave.smart_socket import QolsysSmartSocket
+from qolsys_controller.protocol_zwave.thermometer import QolsysThermometer
+from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
+from qolsys_controller.protocol_zwave.water_valve import QolsysWaterValve
 
 from .database.db import QolsysDB
 from .enum import (
@@ -26,16 +34,12 @@ from .scene import QolsysScene
 from .users import QolsysUser
 from .weather import QolsysForecast, QolsysWeather
 from .zone import QolsysZone
-from .zwave_dimmer import QolsysDimmer
-from .zwave_generic import QolsysGeneric
-from .zwave_lock import QolsysLock
-from .zwave_thermostat import QolsysThermostat
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
-    from .zwave_device import QolsysZWaveDevice
+    from qolsys_controller.controller import QolsysController
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 
 class QolsysPanel(QolsysObservable):
@@ -391,7 +395,7 @@ class QolsysPanel(QolsysObservable):
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
 
-    def load_database(self, database: list[dict[str, Any]]) -> None:
+    async def load_database(self, database: Any | None) -> None:
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
@@ -399,6 +403,12 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
+        # LOGGER.debug(self.get_automation_devices_from_db())
+
+        # Sync Z-Wave device state
+        LOGGER.debug("sync_data - update z-wave devices states")
+        for device in self._controller.state.zwave_devices:
+            await device.zwave_report()
 
         # Validate all local user match a Qolsys Panel user
         qolsys_users = self.db.get_users()
@@ -432,13 +442,6 @@ class QolsysPanel(QolsysObservable):
     def parse_zwave_message(self, data: dict[str, Any]) -> None:
         zwave = data.get("ZWAVE_RESPONSE", "")
         payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
-        # LOGGER.debug(
-        #    "Z-Wave Response: Node(%s) - Status(%s) - Payload(%s)",
-        #    zwave.get("NODE_ID", ""),
-        #    zwave.get("ZWAVE_COMMAND_STATUS", ""),
-        #    payload,
-        # )
-
         node_id: str = str(zwave.get("NODE_ID", 0))
         node = self._controller.state.zwave_device(node_id)
         if node is not None:
@@ -643,6 +646,10 @@ class QolsysPanel(QolsysObservable):
                                 if adc_device is not None:
                                     adc_device.update_adc_device(content_values)
 
+                            # Output Rules
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.update(selection, selection_argument, content_values)
+
                             case _:
                                 LOGGER.debug("iq2meid updating unknow uri:%s", uri)
                                 LOGGER.debug(data)
@@ -726,6 +733,9 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.delete(selection, selection_argument)
+
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.delete(selection, selection_argument)
 
                             case _:
                                 LOGGER.debug("iq2meid deleting unknown uri:%s", uri)
@@ -865,12 +875,15 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.insert(data=content_values)
                                 LOGGER.debug("New Z-Wave Other information")
-                                LOGGER.debug(content_values)
 
                             # Virtual Device
                             case self.db.table_virtual_device.uri:
                                 self.db.table_virtual_device.insert(data=content_values)
                                 self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
+
+                            # Output Rules
+                            case self.db.table_output_rules.uri:
+                                self.db.table_output_rules.insert(data=content_values)
 
                             case _:
                                 LOGGER.debug("iq2meid inserting unknow uri:%s", uri)
@@ -890,6 +903,35 @@ class QolsysPanel(QolsysObservable):
 
         # No valid user code found
         return -1
+
+    def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
+        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.UNKNOWN]
+
+        automation_devices: list[QolsysAutomationDevice] = []
+        devices_list = self.db.get_automation_devices()
+
+        for device in devices_list:
+            try:
+                protocol = AutomationDeviceProtocol(device.get("protocol", ""))
+            except ValueError:
+                protocol = AutomationDeviceProtocol.UNKNOWN
+
+            new_device: QolsysAutomationDevice | None = None
+
+            match protocol:
+                case AutomationDeviceProtocol.POWERG:
+                    new_device = QolsysAutomationDevicePowerG(self._controller, device)
+
+                case AutomationDeviceProtocol.Z_WAVE:
+                    new_device = QolsysAutomationDeviceZwave(self._controller, device)
+
+                case AutomationDeviceProtocol.UNKNOWN:
+                    new_device = QolsysAutomationDevice(self._controller, device)
+
+        if new_device is not None and protocol in allowed_protocols:
+            automation_devices.append(new_device)
+
+        return automation_devices
 
     def get_adc_devices_from_db(self) -> list[QolsysAdcDevice]:
         adc_devices: list[QolsysAdcDevice] = []
@@ -913,7 +955,6 @@ class QolsysPanel(QolsysObservable):
 
             # Check if z-wave device is an Energy Clamp
             if device.get("node_type", "") == "Energy Clamp":
-                LOGGER.debug(device)
                 qolsys_meter_device = QolsysEnergyClamp(self._controller, device)
                 devices.append(qolsys_meter_device)
                 device_added = True
@@ -1056,6 +1097,7 @@ class QolsysPanel(QolsysObservable):
 
     def dump(self) -> None:
         LOGGER.debug("*** Qolsys Panel Information ***")
+        LOGGER.debug("Product Type: %s", self.product_type)
         LOGGER.debug("Android Version: %s", self.ANDROID_VERSION)
         LOGGER.debug("Hardware Version: %s", self.HARDWARE_VERSION)
         LOGGER.debug("MAC Address: %s", self.MAC_ADDRESS)
@@ -1063,10 +1105,7 @@ class QolsysPanel(QolsysObservable):
         LOGGER.debug("Panel Tamper State: %s", self.PANEL_TAMPER_STATE)
         LOGGER.debug("AC Status: %s", self.AC_STATUS)
         LOGGER.debug("Battery Status: %s", self.BATTERY_STATUS)
-        LOGGER.debug("GSM Connection Status: %s", self.GSM_CONNECTION_STATUS)
-        LOGGER.debug("GSM Signal Strength: %s", self.GSM_SIGNAL_STRENGTH)
         LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
-        # LOGGER.debug("System Time: %s",datetime.fromtimestamp(int(self.SYSTEM_TIME)/1000))
         LOGGER.debug("Country: %s", self.COUNTRY)
         LOGGER.debug("Language: %s", self.LANGUAGE)
         LOGGER.debug("Temp Format: %s", self.TEMPFORMAT)

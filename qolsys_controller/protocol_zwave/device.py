@@ -2,14 +2,21 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from qolsys_controller.zwave_service_meter import QolsysZwaveServiceMeter
-from qolsys_controller.zwave_service_multilevelsensor import QolsysZwaveMultilevelSensor, QolsysZwaveServiceMultilevelSensor
-
-from .enum_zwave import ZwaveCommandClass, ZwaveDeviceClass, ZWaveMultilevelSensorScale
-from .observable import QolsysObservable
+from qolsys_controller.enum_zwave import (
+    ZwaveCommandClass,
+    ZwaveDeviceClass,
+    ZWaveMultilevelSensorScale,
+)
+from qolsys_controller.mqtt_command import MQTTCommand_ZWave
+from qolsys_controller.observable import QolsysObservable
+from qolsys_controller.protocol_zwave.service_meter import QolsysZwaveServiceMeter
+from qolsys_controller.protocol_zwave.service_multilevelsensor import (
+    QolsysZwaveMultilevelSensor,
+    QolsysZwaveServiceMultilevelSensor,
+)
 
 if TYPE_CHECKING:
-    from .controller import QolsysController
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,13 +60,74 @@ class QolsysZWaveDevice(QolsysObservable):
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
         # Set Meter and MutilevelSensor Services if available
+        self._FIX_MULTICHANNEL_METER_ENDPOINT: bool = False
         self._meter_endpoints: list[QolsysZwaveServiceMeter] = []
         self._multilevelsensor_endpoints: list[QolsysZwaveServiceMultilevelSensor] = []
         self.meter_capabilities = zwave_dict.get("meter_capabilities", "")
         self.multisensor_capabilities = zwave_dict.get("multisensor_capabilities", "")
 
-    def update_raw(self, payload: bytes) -> None:
-        LOGGER.debug("Raw Update (node%s) - payload: %s", self.node_id, payload.hex())
+    def parse32(self, payload: bytes, endpoint: int) -> None:
+        command_class = payload[0]
+        command = payload[1]
+
+        if command_class != ZwaveCommandClass.Meter:
+            LOGGER.debug("0x32: Invalid command class")
+            return
+
+        # Process report
+        if command == 0x02:
+            props = payload[2]
+            meter_type = props & 0x1F
+            # meter_type = (props >> 5) & 0x07
+            # rateType = (props & 0x60) >> 5
+            size = payload[3] & 0x07
+            scale_msb = (props & 0x80) >> 7
+            scale_lsb = (payload[3] & 0x18) >> 3
+            scale = (scale_msb << 2) | scale_lsb
+            precision = (payload[3] & 0xE0) >> 5
+            value = int.from_bytes(payload[4 : 4 + size], "big") / (10.0**precision)
+
+            for meter_endpoint in self.meter_endpoints:
+                if int(meter_endpoint.endpoint) == endpoint and meter_endpoint.meter_type == meter_type:
+                    for sensor in meter_endpoint.sensors:
+                        if sensor.scale == scale:
+                            sensor.value = value
+
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        LOGGER.debug("Raw Update (node%s-%s) - payload: %s", self.node_id, endpoint, payload.hex())
+
+        try:
+            command_class = payload[0]
+
+            match command_class:
+                case ZwaveCommandClass.Meter:
+                    if not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        return
+
+                    self.parse32(payload, endpoint)
+
+                case ZwaveCommandClass.MultiChannel:
+                    if payload[1] == 0x0D:
+                        source_endpoint = payload[2]
+                        self.update_raw(payload[4:], source_endpoint)
+
+        except IndexError:
+            LOGGER.debug("update_raw: invalid payload:%s", payload)
+
+    async def zwave_report(self) -> None:
+        command_array = [
+            ZwaveCommandClass.SwitchBinary,
+            ZwaveCommandClass.SwitchMultilevel,
+            ZwaveCommandClass.ThermostatFanMode,
+            ZwaveCommandClass.ThermostatMode,
+            ZwaveCommandClass.ThermostatSetPoint,
+            ZwaveCommandClass.DoorLock,
+        ]
+
+        for command in command_array:
+            if command in self.command_class_list:
+                zwave_command = MQTTCommand_ZWave(self._controller, self.node_id, "0", [command, 0x02])
+                await zwave_command.send_command()
 
     def update_base(self, data: dict[str, str]) -> None:  # noqa: C901, PLR0912, PLR0915
         # Check if we are updating same node_id
@@ -209,6 +277,10 @@ class QolsysZWaveDevice(QolsysObservable):
 
     @meter_capabilities.setter
     def meter_capabilities(self, value: str) -> None:
+        # Do not update meters if FIX_MULTICHANNEL_METER_ENDPOINT is enabled
+        if self._FIX_MULTICHANNEL_METER_ENDPOINT:
+            return
+
         if self._meter_capabilities != value:
             self._meter_capabilities = value
             LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
@@ -216,6 +288,11 @@ class QolsysZWaveDevice(QolsysObservable):
             # Update Meter Service
             try:
                 meter_services = json.loads(value)
+
+                if len(meter_services.keys()) > 1 and not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                    self._FIX_MULTICHANNEL_METER_ENDPOINT = True
+                    LOGGER.debug("ZWave%s - FIX_MULTICHANNEL_METER_ENPOINT = True", self.node_id)
+
                 for endpoint, service in meter_services.items():
                     # Check if we already have this meter service
                     meter_endpoint = None
@@ -227,9 +304,12 @@ class QolsysZWaveDevice(QolsysObservable):
 
                     # Create new meter service if not found
                     if meter_endpoint is None:
-                        LOGGER.debug("ZWave%s (%s) - Adding new meter endpoint: %s", self.node_id, self.node_name, endpoint)
+                        LOGGER.debug("ZWave%s (%s) - Adding meter endpoint%s", self.node_id, self.node_name, endpoint)
                         meter_endpoint = QolsysZwaveServiceMeter(self, endpoint, service)
                         self._meter_endpoints.append(meter_endpoint)
+
+                        if not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                            meter_endpoint.update_iq2medi(service)
 
             except json.JSONDecodeError:
                 LOGGER.error("ZWave%s (%s) - Error parsing meter_capabilities:%s", self.node_id, self.node_name, value)
@@ -259,7 +339,7 @@ class QolsysZWaveDevice(QolsysObservable):
                     # Create new meter service if not found
                     if sensor_endpoint is None:
                         LOGGER.debug(
-                            "ZWave%s (%s) - Adding new multilevelsensor endpoint: %s", self.node_id, self.node_name, endpoint
+                            "ZWave%s (%s) - Adding multilevelsensor endpoint%s", self.node_id, self.node_name, endpoint
                         )
                         sensor_endpoint = QolsysZwaveServiceMultilevelSensor(self, endpoint, service)
                         self.multilevelsensor_endpoints.append(sensor_endpoint)

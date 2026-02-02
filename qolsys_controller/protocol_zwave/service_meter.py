@@ -13,7 +13,7 @@ from qolsys_controller.enum_zwave import (
 )
 
 if TYPE_CHECKING:
-    from .zwave_device import QolsysZWaveDevice
+    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 LOGGER = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class QolsysZwaveServiceMeter:
             self.add_sensor(qolsys_meter_sensor)
 
         # Update sensor values
-        self.update_iq2medi(meter_dict)
+        # self.update_iq2medi(meter_dict)
 
     @property
     def sensors(self) -> list[QolsysZwaveMeterSensor]:
@@ -132,6 +132,10 @@ class QolsysZwaveServiceMeter:
             self._rate_type = value
             # LOGGER.debug("Zave Meter Service - rate_type: %s", value.name)
             self._parent_device.notify()
+
+    @property
+    def meter_type(self) -> MeterType:
+        return self._meter_type
 
     @property
     def supported_scale(self) -> list[IntEnum]:

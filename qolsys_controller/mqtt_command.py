@@ -80,6 +80,7 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
         self,
         controller: "QolsysController",
         node_id: str,
+        endpoint: str,
         zwave_command: list[int],
     ) -> None:
         super().__init__(
@@ -98,7 +99,7 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
             {
                 # End Point
                 "dataType": "int",
-                "dataValue": 0,
+                "dataValue": int(endpoint),
             },
             {
                 # Z-Wave Payload

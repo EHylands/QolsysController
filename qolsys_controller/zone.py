@@ -19,7 +19,6 @@ class QolsysZone(QolsysObservable):
         self._zone_id: str = data.get("zoneid", "")
         self._sensorname: str = data.get("sensorname", "")
         self._sensorstatus: ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
-        self._sensortype = ZoneSensorType(data.get("sensortype", ""))
         self._sensorgroup: str = data.get("sensorgroup", "")
         self._battery_status: str = data.get("battery_status", "")
         self._averagedBm: str = data.get("averagedBm", "")
@@ -28,6 +27,12 @@ class QolsysZone(QolsysObservable):
         self._shortID: str = data.get("shortID", "")
         self._device_capability: str = data.get("device_capability", "")
         self._current_capability: str = data.get("current_capability", "")
+
+        try:
+            self._sensortype = ZoneSensorType(data.get("sensortype", ""))
+        except ValueError:
+            self._sensortype = ZoneSensorType.UNKNOWN
+            LOGGER.warning("Unkonw ZoneSensorType: %s", data.get("sensortype", ""))
 
         self._id: str = data.get("_id", "")
         self._zone_type: str = data.get("zone_type", "")
@@ -49,8 +54,6 @@ class QolsysZone(QolsysObservable):
         self._frame_id: str = data.get("frame_id", "")
         self._allowdisarming: str = data.get("allowdisarming", "")
         self._time: str = data.get("time", "")
-        self._version: str = data.get("version", "")
-        self._opr: str = data.get("opr", "")
         self._zone_equipement_code: str = data.get("zone_equipment_code", "")
         self._created_date: str = data.get("created_date", "")
         self._created_by: str = data.get("created_by", "")
@@ -451,7 +454,6 @@ class QolsysZone(QolsysObservable):
             self.powerg_battery_level = data_dict.get("BATTERY_LEVEL", "")
 
         except (TypeError, json.JSONDecodeError):
-            LOGGER.debug("Zone%s (%s) - powerg_extras: %s", self._zone_id, self.sensorname, "Error loading json")
             return
 
     @property
@@ -540,8 +542,6 @@ class QolsysZone(QolsysObservable):
             "frame_type": self._frame_type,
             "frame_id": self._frame_id,
             "time": self.time,
-            "version": self._version,
-            "opr": self._opr,
             "zone_equipment_code": self._zone_equipement_code,
             "updated_by": self._updated_by,
             "updated_date": self._updated_date,
