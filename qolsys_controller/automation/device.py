@@ -11,6 +11,7 @@ from qolsys_controller.automation.service import AutomationService
 from qolsys_controller.automation.service_status import StatusService
 from qolsys_controller.automation_powerg.service_battery import BatteryServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
+from qolsys_controller.automation_powerg.service_status import StatusServicePowerG
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
@@ -219,7 +220,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         match self.protocol:
             case AutomationDeviceProtocol.POWERG:
-                pass
+                service = StatusServicePowerG(automation_device=self, endpoint=endpoint)
 
             case AutomationDeviceProtocol.Z_WAVE:
                 service = StatusServiceZwave(automation_device=self, endpoint=endpoint)

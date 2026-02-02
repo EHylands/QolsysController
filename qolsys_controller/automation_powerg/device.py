@@ -15,7 +15,7 @@ class QolsysAutomationDevicePowerG(QolsysAutomationDevice):
 
         self._short_device_id: str = ""
 
-        # Add Status Service
+        # Add Services
         self.service_add_status_service(endpoint=0)
 
         super().update_automation_services()
