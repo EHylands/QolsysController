@@ -67,7 +67,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
     def info(self) -> None:
         pass
-        # return "AutDev%s [%s] (%s)" % (self.virtual_node_id, self.protocol, self.device_name)
+        # return  "AutDev%s [%s] (%s)" % (self.virtual_node_id, self.protocol, self.device_name)
 
     def service_get(self, service_type: type[ServiceProtocol], endpoint: int = 0) -> ServiceProtocol | None:
         for service in self._services:
