@@ -17,3 +17,6 @@ class ServiceProtocol(Protocol):
 
     @endpoint.setter
     def endpoint(self, value: int) -> None: ...
+
+    @property
+    def service_name(self) -> str: ...

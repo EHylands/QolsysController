@@ -14,15 +14,6 @@ class QolsysAutomationDevicePowerG(QolsysAutomationDevice):
         super().__init__(controller, dict)
 
         self._short_device_id: str = ""
-
-        LOGGER.debug(
-            "%s QolsysAutomationDevicePowerG - init: created PowerG device",
-            self.prefix,
-        )
-
-        # Add Services
-        self.service_add_status_service(endpoint=0)
-
         super().update_automation_services()
 
     def update_power_device(self, data: dict[str, str]) -> None:

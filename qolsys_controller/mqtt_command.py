@@ -137,42 +137,21 @@ class MQTTCommand_Automation(MQTTCommand_IpcCall):
             ipc_transaction_id=1,
         )
 
-        ipc_request: list[dict[str, Any]] = [
+        dict_operation: dict[str, Any] = {
+            "operation_type": operation_type,
+            "node_id": virtual_node_id,
+            "token": 0,
+            "expected_result": result,
+            "source": 0,
+            "endpoint": endpoint,
+            "request_type": "_Operations",
+        }
+
+        ipc_request = [
             {
-                # Operation_type
-                "dataType": "int",
-                "dataValue": operation_type,
-            },
-            {
-                # node_id
-                "dataType": "int",
-                "dataValue": virtual_node_id,
-            },
-            {
-                # token
-                "dataType": "int",
-                "dataValue": 0,
-            },
-            {
-                # expected_result
                 "dataType": "string",
-                "dataValue": result,
-            },
-            {
-                # source
-                "dataType": "int",
-                "dataValue": 1,
-            },
-            {
-                # enpoint
-                "dataType": "int",
-                "dataValue": endpoint,
-            },
-            {
-                # request_type
-                "dataType": "string",
-                "dataValue": "_Operations",
-            },
+                "dataValue": json.dumps(dict_operation),
+            }
         ]
 
         self.append_ipc_request(ipc_request)

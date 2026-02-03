@@ -2,12 +2,11 @@ import logging
 from abc import ABC
 from typing import TYPE_CHECKING
 
-from qolsys_controller.automation.protocol_battery import BatteryProtocol
-from qolsys_controller.automation.protocol_light import LightProtocol
-from qolsys_controller.automation.protocol_lock import LockProtocol
 from qolsys_controller.automation.protocol_service import ServiceProtocol
-from qolsys_controller.automation.protocol_status import StatusProtocol
 from qolsys_controller.automation.service import AutomationService
+from qolsys_controller.automation.service_battery import BatteryService
+from qolsys_controller.automation.service_light import LightService
+from qolsys_controller.automation.service_lock import LockService
 from qolsys_controller.automation.service_status import StatusService
 from qolsys_controller.automation_powerg.service_battery import BatteryServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
@@ -58,6 +57,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         self._smart_energy_optimizer: str = dict.get("smart_energy_optimizer", "")
         self._linked_security_zone: str = dict.get("linked_security_zone", "")
 
+        self._available_services = [StatusService, BatteryService, LightService, LockService]  # type: list[type[AutomationService]]
         self._services: list[AutomationService] = []
 
         match self.device_type:
@@ -66,17 +66,21 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             case "Door Lock":
                 self.service_add_lock_service(int(self._end_point))
 
+        # Add Base Services
+        self.service_add_status_service(endpoint=0)
+        self.service_add_battery_service(endpoint=0)
+
     def info(self) -> None:
         pass
         # return  "AutDev%s [%s] (%s)" % (self.virtual_node_id, self.protocol, self.device_name)
 
-    def service_get(self, service_type: type[ServiceProtocol], endpoint: int = 0) -> ServiceProtocol | None:
+    def service_get(self, service_type: type[AutomationService], endpoint: int = 0) -> AutomationService | None:
         for service in self._services:
             if isinstance(service, service_type) and service.endpoint == endpoint:
                 return service
         return None
 
-    def service_get_protocol(self, service_type: type[ServiceProtocol]) -> list[AutomationService]:
+    def service_get_protocol(self, service_type: type[AutomationService]) -> list[AutomationService]:
         services: list[AutomationService] = []
         for service in self._services:
             if isinstance(service, service_type):
@@ -96,53 +100,26 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             )
             return
 
-        if isinstance(service, LightProtocol):
-            self._services.append(service)
-            LOGGER.debug(
-                "AutDev%s [%s][%s][%s] (%s) - Adding Light Service ",
-                self.virtual_node_id,
-                self.protocol,
-                self.virtual_node_id,
-                service.endpoint,
-                self.device_name,
-            )
-            return
-
-        if isinstance(service, BatteryProtocol):
-            self._services.append(service)
-            LOGGER.debug(
-                "AutDev%s [%s][%s][%s] (%s) - Adding Battery Service ",
-                self.virtual_node_id,
-                self.protocol,
-                self.virtual_node_id,
-                service.endpoint,
-                self.device_name,
-            )
-            return
-
-        if isinstance(service, LockProtocol):
-            self._services.append(service)
-            LOGGER.debug(
-                "AutDev%s [%s][%s][%s] (%s) - Adding Lock Service ",
-                self.virtual_node_id,
-                self.protocol,
-                self.virtual_node_id,
-                service.endpoint,
-                self.device_name,
-            )
-            return
-
-        if isinstance(service, StatusProtocol):
-            self._services.append(service)
-            LOGGER.debug(
-                "AutDev%s [%s][%s][%s] (%s) - Adding Status Service ",
-                self.virtual_node_id,
-                self.protocol,
-                self.virtual_node_id,
-                service.endpoint,
-                self.device_name,
-            )
-            return
+        for service_type in self._available_services:
+            if isinstance(service, service_type):
+                if self.service_get(service_type, service.endpoint) is not None:
+                    LOGGER.error(
+                        "%s[%s] (%s) - Unable to add Service (already exists): %s",
+                        self.prefix,
+                        service.endpoint,
+                        self.device_name,
+                        type(service),
+                    )
+                    return
+                self._services.append(service)
+                LOGGER.debug(
+                    "%s[%s] (%s) - Adding %s ",
+                    self.prefix,
+                    service.endpoint,
+                    self.device_name,
+                    service.service_name,
+                )
+                return
 
         LOGGER.error(
             "AutDev%s [%s][%s][%s] (%s) - Unable to add Service (unknown type): %s",
@@ -168,10 +145,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             return
 
         LOGGER.error(
-            "AutDev%s [%s][%s][%s] (%s) - Unable to add Light Service",
-            self.virtual_node_id,
-            self.protocol,
-            self.virtual_node_id,
+            "%s[%s] (%s) - Unable to add Light Service",
+            self.prefix,
             endpoint,
             self.device_name,
         )
@@ -186,43 +161,34 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             return
 
         LOGGER.error(
-            "AutDev%s [%s][%s][%s] (%s) - Unable to add Lock Service",
-            self.virtual_node_id,
-            self.protocol,
-            self.virtual_node_id,
+            "%s[%s] (%s) - Unable to add Lock Service",
+            self.prefix,
             endpoint,
             self.device_name,
         )
 
     def service_add_battery_service(self, endpoint: int = 0) -> None:
         battery_service: AutomationService | None = None
-        if self.protocol == AutomationDeviceProtocol.POWERG:
-            battery_service = BatteryServicePowerG(automation_device=self, endpoint=endpoint)
 
-        if self.protocol == AutomationDeviceProtocol.Z_WAVE:
-            battery_service = BatteryServiceZwave(automation_device=self, endpoint=endpoint)
+        match self.protocol:
+            case AutomationDeviceProtocol.POWERG:
+                battery_service = BatteryServicePowerG(automation_device=self, endpoint=endpoint)
+            case AutomationDeviceProtocol.Z_WAVE:
+                battery_service = BatteryServiceZwave(automation_device=self, endpoint=endpoint)
 
         if battery_service is not None:
             self.service_add(battery_service)
             return
 
         LOGGER.error(
-            "AutDev%s [%s][%s][%s] (%s) - Unable to add Battery Service",
-            self.virtual_node_id,
-            self.protocol,
-            self.virtual_node_id,
+            "%s[%s] (%s) - Unable to add Battery Service",
+            self.prefix,
             endpoint,
             self.device_name,
         )
 
     def service_add_status_service(self, endpoint: int = 0) -> None:
         service: StatusService | None = None
-
-        LOGGER.debug(
-            "%s QolsysAutomationDevice - service_add_status_service: Adding Status Service for protocol %s",
-            self.prefix,
-            self.protocol,
-        )
 
         match self.protocol:
             case AutomationDeviceProtocol.POWERG:

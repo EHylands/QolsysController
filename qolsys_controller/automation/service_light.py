@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 class LightService(AutomationService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
-
+        self._service_name = "LightService"
         self._level: int | None = None
         self._is_on: bool = False
 

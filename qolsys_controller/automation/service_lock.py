@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 class LockService(AutomationService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
-
+        self._service_name = "LockService"
         self._is_lock_supported: bool = False
         self._is_open_supported: bool = False
         self._is_jam_supported: bool = False

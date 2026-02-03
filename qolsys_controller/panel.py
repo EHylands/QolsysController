@@ -929,9 +929,6 @@ class QolsysPanel(QolsysObservable):
                 case AutomationDeviceProtocol.Z_WAVE:
                     new_device = QolsysAutomationDeviceZwave(self._controller, device)
 
-                case AutomationDeviceProtocol.UNKNOWN:
-                    new_device = QolsysAutomationDevice(self._controller, device)
-
             if new_device is not None and protocol in allowed_protocols:
                 automation_devices.append(new_device)
 

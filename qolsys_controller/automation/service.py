@@ -9,6 +9,7 @@ class AutomationService(ABC):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         self._automation_device = automation_device
         self._endpoint: int = endpoint
+        self._service_name: str = "AutomationService"
 
     @property
     def automation_device(self) -> "QolsysAutomationDevice":
@@ -25,6 +26,10 @@ class AutomationService(ABC):
     @endpoint.setter
     def endpoint(self, value: int) -> None:
         self._endpoint = value
+
+    @property
+    def service_name(self) -> str:
+        return self._service_name
 
     @abstractmethod
     def info(self) -> None:
