@@ -218,6 +218,12 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     def service_add_status_service(self, endpoint: int = 0) -> None:
         service: StatusService | None = None
 
+        LOGGER.debug(
+            "%s QolsysAutomationDevice - service_add_status_service: Adding Status Service for protocol %s",
+            self.prefix,
+            self.protocol,
+        )
+
         match self.protocol:
             case AutomationDeviceProtocol.POWERG:
                 service = StatusServicePowerG(automation_device=self, endpoint=endpoint)

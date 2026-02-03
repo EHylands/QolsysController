@@ -15,7 +15,7 @@ class LockServicePowerG(LockService):
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     async def lock(self) -> None:
-        if self.locked:
+        if self.is_locked:
             LOGGER.debug(
                 "%s[%s] LockServicePowerG - lock: already locked",
                 self.automation_device.prefix,
@@ -23,16 +23,16 @@ class LockServicePowerG(LockService):
             )
             return
 
-        self.locking = True
-        self.unlocking = False
+        self.is_locking = True
+        self.is_unlocking = False
         self.automation_device.notify()
-        self._locking = False  # Dont fire notify again, will update when status comes back
+        self._is_locking = False  # Dont fire notify again, will update when status comes back
         await self.automation_device.controller.command_automation_door_lock(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
 
     async def unlock(self) -> None:
-        if not self.locked:
+        if not self.is_locked:
             LOGGER.debug(
                 "%s[%s] LockServicePowerG - unlock: already unlocked",
                 self.automation_device.prefix,
@@ -40,10 +40,10 @@ class LockServicePowerG(LockService):
             )
             return
 
-        self.locking = False
-        self.unlocking = True
+        self.is_locking = False
+        self.is_unlocking = True
         self.automation_device.notify()
-        self._unlocking = False  # Dont fire notify again, will update when status comes back
+        self._is_unlocking = False  # Dont fire notify again, will update when status comes back
         await self.automation_device.controller.command_automation_door_unlock(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
@@ -64,5 +64,5 @@ class LockServicePowerG(LockService):
         return True
 
     def update_automation_service(self) -> None:
-        self.locked = self.automation_device.status.lower() == "locked"
+        self.is_locked = self.automation_device.status.lower() == "locked"
         self.jammed = self.automation_device.status.lower() == "jammed"

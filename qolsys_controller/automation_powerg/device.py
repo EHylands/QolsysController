@@ -15,6 +15,11 @@ class QolsysAutomationDevicePowerG(QolsysAutomationDevice):
 
         self._short_device_id: str = ""
 
+        LOGGER.debug(
+            "%s QolsysAutomationDevicePowerG - init: created PowerG device",
+            self.prefix,
+        )
+
         # Add Services
         self.service_add_status_service(endpoint=0)
 

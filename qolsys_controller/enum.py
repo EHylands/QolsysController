@@ -104,11 +104,11 @@ class ZoneSensorType(StrEnum):
     GLASS_BREAK = "GlassBreak"
     # HARDWIRE_TRANSLATOR = "" # TBD
     HEAT = "Heat"
-    # HIGH_TEMPERATURE = "" # TBD
+    HIGH_TEMPERATURE = "High Temperature"
     KEY_FOB = "KeyFob"
     KEYPAD = "Keypad"
     MOTION = "Motion"
-    # OCCUPANCY = ""  #TBD
+    OCCUPANCY = "Occupancy Sensor"
     PANEL_GLASS_BREAK = "Panel Glass Break"
     PANEL_MOTION = "Panel Motion"
     # WIRELESS_TRANSLATOR = "" #TBD

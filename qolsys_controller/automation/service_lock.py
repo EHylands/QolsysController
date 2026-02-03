@@ -18,9 +18,9 @@ class LockService(AutomationService):
         self._is_open_supported: bool = False
         self._is_jam_supported: bool = False
 
-        self._locked: bool = False
-        self._locking: bool = False
-        self._unlocking: bool = False
+        self._is_locked: bool = False
+        self._is_locking: bool = False
+        self._is_unlocking: bool = False
 
         self._openned: bool = False
         self._openning: bool = False
@@ -57,51 +57,51 @@ class LockService(AutomationService):
         pass
 
     @property
-    def locked(self) -> bool:
-        return self._locked
+    def is_locked(self) -> bool:
+        return self._is_locked
 
-    @locked.setter
-    def locked(self, value: bool) -> None:
-        if self._locked != value:
-            self._locked = value
+    @is_locked.setter
+    def is_locked(self, value: bool) -> None:
+        # if self._is_locked != value:
+        self._is_locked = value
+        self.automation_device.notify()
+        LOGGER.debug(
+            "%s[%s] LockService - is_locked: %s",
+            self.automation_device.prefix,
+            self.endpoint,
+            value,
+        )
+
+    @property
+    def is_locking(self) -> bool:
+        return self._is_locking
+
+    @is_locking.setter
+    def is_locking(self, value: bool) -> None:
+        if self._is_locking != value:
+            self._is_locking = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - locked: %s",
+                "%s[%s] LockService - is_locking: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.locked,
+                value,
             )
 
     @property
-    def locking(self) -> bool:
-        return self._locking
+    def is_unlocking(self) -> bool:
+        return self._is_unlocking
 
-    @locking.setter
-    def locking(self, value: bool) -> None:
-        if self._locking != value:
-            self._locking = value
+    @is_unlocking.setter
+    def is_unlocking(self, value: bool) -> None:
+        if self._is_unlocking != value:
+            self._is_unlocking = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - locking: %s",
+                "%s[%s] LockService - is_unlocking: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.locking,
-            )
-
-    @property
-    def unlocking(self) -> bool:
-        return self._unlocking
-
-    @unlocking.setter
-    def unlocking(self, value: bool) -> None:
-        if self._unlocking != value:
-            self._unlocking = value
-            self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] LockService - unlocking: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self.unlocking,
+                value,
             )
 
     @property
@@ -174,7 +174,7 @@ class LockService(AutomationService):
                 "%s[%s] LockService - locked: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.locked,
+                self.is_locked,
             )
         if self.is_open_supported():
             LOGGER.debug(
