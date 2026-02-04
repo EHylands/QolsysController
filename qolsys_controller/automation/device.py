@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Type
 
 from qolsys_controller.automation.protocol_service import ServiceProtocol
 from qolsys_controller.automation.service import AutomationService
@@ -57,7 +57,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         self._smart_energy_optimizer: str = dict.get("smart_energy_optimizer", "")
         self._linked_security_zone: str = dict.get("linked_security_zone", "")
 
-        self._available_services = [StatusService, BatteryService, LightService, LockService]  # type: list[type[AutomationService]]
+        self._available_services: list[Type[Any]] = [StatusService, BatteryService, LightService, LockService]
         self._services: list[AutomationService] = []
 
         match self.device_type:
