@@ -1113,3 +1113,31 @@ class QolsysController:
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving  automation_door_unlock command: %s", response)
         return response
+
+    async def command_automation_light_on(self, virtual_node_id: int, endpoint: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending automation_light_on command - Node(%s)(%s)", virtual_node_id, endpoint)
+
+        # Check if virtual_node_id exist
+        virtual_node = self.state.automation_device(str(virtual_node_id))
+        if not virtual_node:
+            LOGGER.error("automation_light_on - Invalid virtual_node_id %s", virtual_node_id)
+            return None
+
+        command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=1, result="status_On")
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving automation_light_on command")
+        return response
+
+    async def command_automation_light_off(self, virtual_node_id: int, endpoint: int) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending automation_light_off command - Node(%s)(%s)", virtual_node_id, endpoint)
+
+        # Check if virtual_node_id exist
+        virtual_node = self.state.automation_device(str(virtual_node_id))
+        if not virtual_node:
+            LOGGER.error("automation_light_off - Invalid virtual_node_id %s", virtual_node_id)
+            return None
+
+        command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=0, result="status_Off")
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving automation_light_off command")
+        return response

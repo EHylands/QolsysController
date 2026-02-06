@@ -4,11 +4,10 @@ from json import JSONDecodeError
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_light import LightService
-from qolsys_controller.enum_zwave import ZwaveDeviceClass
+from qolsys_controller.enum_zwave import ZwaveCommandClass
 
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
-    from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 
 
 LOGGER = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class LightServiceZwave(LightService):
 
     async def turn_on(self) -> None:
         if self.is_level_supported():
-            await self.set_level(0xFF)  # Return to las known level
+            await self.set_level(0xFF)  # Return to last known level
         else:
             await self.automation_device.controller.command_zwave_switch_binary_set(
                 self.automation_device.virtual_node_id, str(self.endpoint), True
@@ -40,32 +39,15 @@ class LightServiceZwave(LightService):
         )
 
     def is_level_supported(self) -> bool:
-        if not isinstance(self.automation_device, QolsysAutomationDeviceZwave):
-            LOGGER.error(
-                "%s[%s] LightServiceZwave - Invalid Protocol",
-                self.automation_device.prefix,
-                self.endpoint,
-            )
-            return False
+        from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 
-        if self.automation_device.generic_device_type in {
-            ZwaveDeviceClass.SwitchMultilevel,
-            ZwaveDeviceClass.RemoteSwitchMultilevel,
-        }:
-            return True
-
-        if self.automation_device.generic_device_type in {ZwaveDeviceClass.SwitchBinary, ZwaveDeviceClass.RemoteSwitchBinary}:
-            return False
-
+        if isinstance(self.automation_device, QolsysAutomationDeviceZwave):
+            return ZwaveCommandClass.SwitchMultilevel in self.automation_device.command_class_list
         LOGGER.error(
-            "AutDev%s [%s][%s][%s] LightServiceZwave - unknown generic device type for level support: %s",
-            self.automation_device.virtual_node_id,
-            self.automation_device.protocol,
-            self.automation_device.virtual_node_id,
+            "%s[%s] LightServiceZwave - is_level_supported - Error, not a QolsysAutomationDeviceZwave",
+            self.automation_device.prefix,
             self.endpoint,
-            self.automation_device.generic_device_type,
         )
-
         return False
 
     def update_automation_service(self) -> None:

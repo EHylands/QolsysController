@@ -20,9 +20,7 @@ class BatteryServiceZwave(BatteryService):
     def is_battery_level_supported(self) -> bool:
         try:
             level = int(self.automation_device._node_battery_level_value)
-            if 0 <= level <= 100:
-                return True
-            return False
+            return 0 <= level <= 100
         except (ValueError, TypeError):
             return False
 
@@ -31,7 +29,7 @@ class BatteryServiceZwave(BatteryService):
             self.battery_level = int(self.automation_device._node_battery_level_value)
         except (ValueError, TypeError):
             LOGGER.error(
-                "[%s] BatteryerviceZwave - update_automation_service - error parsing node_battery_level_value: %s",
+                "%s[%s] BatteryerviceZwave - update_automation_service - error parsing node_battery_level_value: %s",
                 self.automation_device.prefix,
                 self.endpoint,
                 self.automation_device._node_battery_level_value,

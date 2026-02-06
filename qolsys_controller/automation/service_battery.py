@@ -35,6 +35,7 @@ class BatteryService(AutomationService):
     @battery_level.setter
     def battery_level(self, value: int) -> None:
         if not self.is_battery_level_supported():
+            self._level = None
             return
 
         if not (0 <= value <= 100):

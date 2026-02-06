@@ -34,12 +34,10 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                        | Latest dBm                           | ✅     |
 | **Z-Wave Devices**     | Battery Level                        | ✅     |
 |                        | Node Status                          | ✅     |
-|                        | Control Generic Devices              | TBD    |
-| **Z-Wave Dimmers**     | Binary Switch                        | ✅     |
-|                        | Multi Level Dimmer                   | ✅     |
-| **Z-Wave Door Locks**  | Lock, Unlock                         | ✅     |
-| **Z-Wave Thermostats** | Read device status                   | ✅     |
-|                        | Write device status                  | ✅     |
+|                        | Control Generic Devices              | ✅.    |
+| **Z-Wave Dimmers**     |                                      | ✅     |
+| **Z-Wave Door Locks**  |                                      | ✅     |
+| **Z-Wave Thermostats** |                                      | ✅     |
 | **Z-Wave Garage Doors**|                                      | 🛠️     |
 | **Z-Wave Outlets**     |                                      | 🛠️     |
 

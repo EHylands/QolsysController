@@ -909,7 +909,7 @@ class QolsysPanel(QolsysObservable):
         return -1
 
     def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
-        allowed_protocols = [AutomationDeviceProtocol.POWERG]
+        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.Z_WAVE]
 
         automation_devices: list[QolsysAutomationDevice] = []
         devices_list = self.db.get_automation_devices()

@@ -90,12 +90,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     def service_add(self, service: AutomationService) -> None:
         if not isinstance(service, ServiceProtocol):
             LOGGER.error(
-                "AutDev%s [%s][%s][%s] (%s) - Unable to add Service (not a ServiceProtocol): %s",
-                self.virtual_node_id,
-                self.protocol,
-                self.virtual_node_id,
+                "%s[%s] - Unable to add Service (not a ServiceProtocol): %s",
+                self.prefix,
                 service.endpoint,
-                self.device_name,
                 type(service),
             )
             return
@@ -113,21 +110,17 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                     return
                 self._services.append(service)
                 LOGGER.debug(
-                    "%s[%s] (%s) - Adding %s ",
+                    "%s[%s] - Adding %s ",
                     self.prefix,
                     service.endpoint,
-                    self.device_name,
                     service.service_name,
                 )
                 return
 
         LOGGER.error(
-            "AutDev%s [%s][%s][%s] (%s) - Unable to add Service (unknown type): %s",
-            self.virtual_node_id,
-            self.protocol,
-            self.virtual_node_id,
+            "%s[%s] - Unable to add Service (unknown type): %s",
+            self.prefix,
             service.endpoint,
-            self.device_name,
             type(service),
         )
 
