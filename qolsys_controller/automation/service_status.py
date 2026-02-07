@@ -14,32 +14,32 @@ class StatusService(AutomationService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "StatusService"
-        self._malfunction: bool = False
+        self._is_malfunctioning: bool = False
 
     @abstractmethod
-    def is_status_supported(self) -> bool:
+    def supports_status(self) -> bool:
         pass
 
     @property
-    def malfunction(self) -> bool:
-        return self._malfunction
+    def is_malfunctioning(self) -> bool:
+        return self._is_malfunctioning
 
-    @malfunction.setter
-    def malfunction(self, value: bool) -> None:
-        if self._malfunction != value:
-            self._malfunction = value
+    @is_malfunctioning.setter
+    def is_malfunctioning(self, value: bool) -> None:
+        if self._is_malfunctioning != value:
+            self._is_malfunctioning = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] StatusService - malfunction: %s",
+                "%s[%s] StatusService - is_malfunctioning: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.malfunction,
+                value,
             )
 
     def info(self) -> None:
         LOGGER.debug(
-            "%s[%s] StatusService - malfunction: %s",
+            "%s[%s] StatusService - is_malfunctioning: %s",
             self.automation_device.prefix,
             self.endpoint,
-            self.malfunction,
+            self.is_malfunctioning,
         )

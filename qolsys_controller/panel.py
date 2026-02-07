@@ -909,7 +909,7 @@ class QolsysPanel(QolsysObservable):
         return -1
 
     def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
-        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.Z_WAVE]
+        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.ZWAVE]
 
         automation_devices: list[QolsysAutomationDevice] = []
         devices_list = self.db.get_automation_devices()
@@ -926,7 +926,7 @@ class QolsysPanel(QolsysObservable):
                 case AutomationDeviceProtocol.POWERG:
                     new_device = QolsysAutomationDevicePowerG(self._controller, device)
 
-                case AutomationDeviceProtocol.Z_WAVE:
+                case AutomationDeviceProtocol.ZWAVE:
                     new_device = QolsysAutomationDeviceZwave(self._controller, device)
 
             if new_device is not None and protocol in allowed_protocols:

@@ -165,6 +165,7 @@ class QolsysAdcDevice(QolsysObservable):
 
     @func_list.setter
     def func_list(self, value: str) -> None:
+        LOGGER.debug("ADC%s (%s) - Updating func_list", self.device_id, self.name)
         if self._func_list != value:
             LOGGER.debug("ADC%s (%s) - func_list: %s", self.device_id, self.name, value)
             self._func_list = value

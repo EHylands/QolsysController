@@ -14,10 +14,10 @@ class BatteryServicePowerG(BatteryService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device, endpoint)
 
-    def is_battery_low_supported(self) -> bool:
+    def supports_battery_low(self) -> bool:
         return False
 
-    def is_battery_level_supported(self) -> bool:
+    def supports_battery_level(self) -> bool:
         return False
 
     def update_automation_service(self) -> None:

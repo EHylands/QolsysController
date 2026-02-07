@@ -13,8 +13,8 @@ class StatusServicePowerG(StatusService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
-    def is_status_supported(self) -> bool:
+    def supports_status(self) -> bool:
         return True
 
     def update_automation_service(self) -> None:
-        self.malfunction = self.automation_device.state.lower() != "normal"
+        self.is_malfunctioning = self.automation_device.state.lower() != "normal"

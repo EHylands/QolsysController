@@ -18,15 +18,12 @@ class BatteryService(AutomationService):
         self._battery_low: bool = False
 
     @abstractmethod
-    def is_battery_low_supported(self) -> bool:
+    def supports_battery_low(self) -> bool:
         pass
 
     @abstractmethod
-    def is_battery_level_supported(self) -> bool:
+    def supports_battery_level(self) -> bool:
         pass
-
-    def battery_level_value(self) -> int | None:
-        return self._battery_level
 
     @property
     def battery_level(self) -> int | None:
@@ -34,8 +31,8 @@ class BatteryService(AutomationService):
 
     @battery_level.setter
     def battery_level(self, value: int) -> None:
-        if not self.is_battery_level_supported():
-            self._level = None
+        if not self.supports_battery_level():
+            self._battery_level = None
             return
 
         if not (0 <= value <= 100):
@@ -45,7 +42,7 @@ class BatteryService(AutomationService):
                 self.endpoint,
                 value,
             )
-            self._level = None
+            self._battery_level = None
             return
 
         if self._battery_level != value:
@@ -55,7 +52,7 @@ class BatteryService(AutomationService):
                 "%s[%s] BatteryService - battery_level: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.battery_level,
+                value,
             )
 
     @property
@@ -64,7 +61,7 @@ class BatteryService(AutomationService):
 
     @battery_low.setter
     def battery_low(self, value: bool) -> None:
-        if not self.is_battery_low_supported():
+        if not self.supports_battery_low():
             return
 
         if self._battery_low != value:
@@ -74,11 +71,11 @@ class BatteryService(AutomationService):
                 "%s[%s] BatteryService - battery_low: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.battery_low,
+                value,
             )
 
     def info(self) -> None:
-        if self.is_battery_level_supported():
+        if self.supports_battery_level():
             LOGGER.debug(
                 "%s[%s] BatteryService - battery_level: %s%%",
                 self.automation_device.prefix,
@@ -87,7 +84,7 @@ class BatteryService(AutomationService):
             )
             return
 
-        if self.is_battery_low_supported():
+        if self.supports_battery_low():
             LOGGER.debug(
                 "%s[%s] BatteryService - low_battery: %s",
                 self.automation_device.prefix,

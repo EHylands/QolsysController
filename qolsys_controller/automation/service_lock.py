@@ -14,19 +14,13 @@ class LockService(AutomationService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "LockService"
-        self._is_lock_supported: bool = False
-        self._is_open_supported: bool = False
-        self._is_jam_supported: bool = False
-
         self._is_locked: bool = False
         self._is_locking: bool = False
         self._is_unlocking: bool = False
-
-        self._openned: bool = False
-        self._openning: bool = False
-        self._closing: bool = False
-
-        self._jammed: bool = False
+        self._is_open: bool = False
+        self._is_openning: bool = False
+        self._is_closing: bool = False
+        self._is_jammed: bool = False
 
     @abstractmethod
     async def lock(self) -> None:
@@ -45,15 +39,15 @@ class LockService(AutomationService):
         pass
 
     @abstractmethod
-    def is_lock_supported(self) -> bool:
+    def supports_lock(self) -> bool:
         pass
 
     @abstractmethod
-    def is_open_supported(self) -> bool:
+    def supports_open(self) -> bool:
         pass
 
     @abstractmethod
-    def is_jam_supported(self) -> bool:
+    def supports_jam(self) -> bool:
         pass
 
     @property
@@ -105,88 +99,88 @@ class LockService(AutomationService):
             )
 
     @property
-    def openned(self) -> bool:
-        return self._openned
+    def is_open(self) -> bool:
+        return self._is_open
 
-    @openned.setter
-    def openned(self, value: bool) -> None:
-        if self._openned != value:
-            self._openned = value
+    @is_open.setter
+    def is_open(self, value: bool) -> None:
+        if self._is_open != value:
+            self._is_open = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - openned: %s",
+                "%s[%s] LockService - is_open: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.openned,
+                value,
             )
 
     @property
-    def openning(self) -> bool:
-        return self._openning
+    def is_openning(self) -> bool:
+        return self._is_openning
 
-    @openning.setter
-    def openning(self, value: bool) -> None:
-        if self._openning != value:
-            self._openning = value
+    @is_openning.setter
+    def is_openning(self, value: bool) -> None:
+        if self._is_openning != value:
+            self._is_openning = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - openning: %s",
+                "%s[%s] LockService - is_openning: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.openning,
+                self.is_openning,
             )
 
     @property
-    def closing(self) -> bool:
-        return self._closing
+    def is_closing(self) -> bool:
+        return self._is_closing
 
-    @closing.setter
-    def closing(self, value: bool) -> None:
-        if self._closing != value:
-            self._closing = value
+    @is_closing.setter
+    def is_closing(self, value: bool) -> None:
+        if self._is_closing != value:
+            self._is_closing = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - closing: %s",
+                "%s[%s] LockService - is_closing: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.closing,
+                value,
             )
 
     @property
-    def jammed(self) -> bool:
-        return self._jammed
+    def is_jammed(self) -> bool:
+        return self._is_jammed
 
-    @jammed.setter
-    def jammed(self, value: bool) -> None:
-        if self._jammed != value:
-            self._jammed = value
+    @is_jammed.setter
+    def is_jammed(self, value: bool) -> None:
+        if self._is_jammed != value:
+            self._is_ammed = value
             self.automation_device.notify()
             LOGGER.debug(
-                "%s[%s] LockService - jammed: %s",
+                "%s[%s] LockService - is_jammed: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.jammed,
+                value,
             )
 
     def info(self) -> None:
-        if self.is_lock_supported():
+        if self.supports_lock():
             LOGGER.debug(
-                "%s[%s] LockService - locked: %s",
+                "%s[%s] LockService - is_locked: %s",
                 self.automation_device.prefix,
                 self.endpoint,
                 self.is_locked,
             )
-        if self.is_open_supported():
+        if self.supports_open():
             LOGGER.debug(
-                "%s[%s] LockService - openned: %s",
+                "%s[%s] LockService - is_open: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.openned,
+                self.is_open,
             )
-        if self.is_jam_supported():
+        if self.supports_jam():
             LOGGER.debug(
-                "%s[%s] LockService - jammed: %s",
+                "%s[%s] LockService - is_jammed: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.jammed,
+                self.is_jammed,
             )

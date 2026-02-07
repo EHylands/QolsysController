@@ -18,7 +18,7 @@ class LightServiceZwave(LightService):
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     async def turn_on(self) -> None:
-        if self.is_level_supported():
+        if self.supports_level():
             await self.set_level(0xFF)  # Return to last known level
         else:
             await self.automation_device.controller.command_zwave_switch_binary_set(
@@ -26,7 +26,7 @@ class LightServiceZwave(LightService):
             )
 
     async def turn_off(self) -> None:
-        if self.is_level_supported():
+        if self.supports_level():
             await self.set_level(0)
         else:
             await self.automation_device.controller.command_zwave_switch_binary_set(
@@ -38,13 +38,13 @@ class LightServiceZwave(LightService):
             self.automation_device.virtual_node_id, str(self.endpoint), level
         )
 
-    def is_level_supported(self) -> bool:
+    def supports_level(self) -> bool:
         from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 
         if isinstance(self.automation_device, QolsysAutomationDeviceZwave):
             return ZwaveCommandClass.SwitchMultilevel in self.automation_device.command_class_list
         LOGGER.error(
-            "%s[%s] LightServiceZwave - is_level_supported - Error, not a QolsysAutomationDeviceZwave",
+            "%s[%s] LightServiceZwave - supports_level - Error, not a QolsysAutomationDeviceZwave",
             self.automation_device.prefix,
             self.endpoint,
         )

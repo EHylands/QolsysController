@@ -88,8 +88,9 @@ class DeviceCapability(StrEnum):
 
 
 class AutomationDeviceProtocol(StrEnum):
+    ADC = "ADC"
     POWERG = "PowerG"
-    Z_WAVE = "Z-Wave"
+    ZWAVE = "Z-Wave"
     UNKNOWN = "Unknown"
 
 
@@ -102,7 +103,6 @@ class ZoneSensorType(StrEnum):
     DOOR_WINDOW_M = "Door_Window_M"
     FREEZE = "Freeze"
     GLASS_BREAK = "GlassBreak"
-    # HARDWIRE_TRANSLATOR = "" # TBD
     HEAT = "Heat"
     HIGH_TEMPERATURE = "High Temperature"
     KEY_FOB = "KeyFob"
@@ -111,7 +111,6 @@ class ZoneSensorType(StrEnum):
     OCCUPANCY = "Occupancy Sensor"
     PANEL_GLASS_BREAK = "Panel Glass Break"
     PANEL_MOTION = "Panel Motion"
-    # WIRELESS_TRANSLATOR = "" #TBD
     SIREN = "Siren"
     SHOCK = "Shock"
     SMOKE_DETECTOR = "SmokeDetector"

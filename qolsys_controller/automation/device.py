@@ -5,14 +5,20 @@ from typing import TYPE_CHECKING, Any, Type
 from qolsys_controller.automation.protocol_service import ServiceProtocol
 from qolsys_controller.automation.service import AutomationService
 from qolsys_controller.automation.service_battery import BatteryService
+from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
 from qolsys_controller.automation.service_status import StatusService
+from qolsys_controller.automation_adc.service_cover import CoverServiceADC
+from qolsys_controller.automation_adc.service_light import LightServiceADC
+from qolsys_controller.automation_adc.service_status import StatusServiceADC
 from qolsys_controller.automation_powerg.service_battery import BatteryServicePowerG
+from qolsys_controller.automation_powerg.service_light import LightServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
 from qolsys_controller.automation_powerg.service_status import StatusServicePowerG
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
+from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.observable import QolsysObservable
@@ -57,7 +63,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         self._smart_energy_optimizer: str = dict.get("smart_energy_optimizer", "")
         self._linked_security_zone: str = dict.get("linked_security_zone", "")
 
-        self._available_services: list[Type[Any]] = [StatusService, BatteryService, LightService, LockService]
+        self._available_services: list[Type[Any]] = [StatusService, BatteryService, LightService, LockService, CoverService]
         self._services: list[AutomationService] = []
 
         match self.device_type:
@@ -65,10 +71,6 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 self.service_add_light_service(int(self._end_point))
             case "Door Lock":
                 self.service_add_lock_service(int(self._end_point))
-
-        # Add Base Services
-        self.service_add_status_service(endpoint=0)
-        self.service_add_battery_service(endpoint=0)
 
     def info(self) -> None:
         pass
@@ -128,9 +130,13 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         light_service: AutomationService | None = None
 
         match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                light_service = LightServiceADC(automation_device=self, endpoint=endpoint)
+
             case AutomationDeviceProtocol.POWERG:
-                pass
-            case AutomationDeviceProtocol.Z_WAVE:
+                light_service = LightServicePowerG(automation_device=self, endpoint=endpoint)
+
+            case AutomationDeviceProtocol.ZWAVE:
                 light_service = LightServiceZwave(automation_device=self, endpoint=endpoint)
 
         if light_service is not None:
@@ -146,8 +152,13 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
     def service_add_lock_service(self, endpoint: int = 0) -> None:
         lock_service: AutomationService | None = None
-        if self.protocol == AutomationDeviceProtocol.POWERG:
-            lock_service = LockServicePowerG(self, endpoint=endpoint)
+
+        match self.protocol:
+            case AutomationDeviceProtocol.POWERG:
+                lock_service = LockServicePowerG(self, endpoint=endpoint)
+
+            case AutomationDeviceProtocol.ZWAVE:
+                lock_service = LockServiceZwave(self, endpoint=endpoint)
 
         if lock_service is not None:
             self.service_add(lock_service)
@@ -166,7 +177,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         match self.protocol:
             case AutomationDeviceProtocol.POWERG:
                 battery_service = BatteryServicePowerG(automation_device=self, endpoint=endpoint)
-            case AutomationDeviceProtocol.Z_WAVE:
+
+            case AutomationDeviceProtocol.ZWAVE:
                 battery_service = BatteryServiceZwave(automation_device=self, endpoint=endpoint)
 
         if battery_service is not None:
@@ -184,14 +196,34 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         service: StatusService | None = None
 
         match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                service = StatusServiceADC(automation_device=self, endpoint=endpoint)
+
             case AutomationDeviceProtocol.POWERG:
                 service = StatusServicePowerG(automation_device=self, endpoint=endpoint)
 
-            case AutomationDeviceProtocol.Z_WAVE:
+            case AutomationDeviceProtocol.ZWAVE:
                 service = StatusServiceZwave(automation_device=self, endpoint=endpoint)
 
         if service is not None:
             self.service_add(service)
+            return
+
+    def service_add_cover_service(self, endpoint: int = 0) -> None:
+        cover_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                cover_service = CoverServiceADC(automation_device=self, endpoint=endpoint)
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                pass
+
+        if cover_service is not None:
+            self.service_add(cover_service)
             return
 
     def update_automation_services(self) -> None:
@@ -244,8 +276,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         return self._services
 
     @property
-    def prefix(self) -> str:
-        return f"AutDev{self.virtual_node_id} ({self.device_name}) [{self.protocol}][{self.virtual_node_id}]"
+    def prefix(self, endpoint: int | None = None) -> str:
+        return f"[AutDev][{self.protocol}]{self.virtual_node_id}]"
 
     @property
     def device_id(self) -> str:

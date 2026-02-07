@@ -30,7 +30,7 @@ class LightService(AutomationService):
         pass
 
     @abstractmethod
-    def is_level_supported(self) -> bool:
+    def supports_level(self) -> bool:
         pass
 
     @property
@@ -72,7 +72,7 @@ class LightService(AutomationService):
                 "%s[%s] LightService - level: %s",
                 self.automation_device.prefix,
                 self.endpoint,
-                self.level,
+                value,
             )
 
     def info(self) -> None:

@@ -15,6 +15,11 @@ LOGGER = logging.getLogger(__name__)
 class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     def __init__(self, controller: "QolsysController", dict: dict[str, str]) -> None:
         super().__init__(controller, dict)
+
+        # Add Base Services
+        self.service_add_status_service(endpoint=0)
+        self.service_add_battery_service(endpoint=0)
+
         super().update_automation_services()
 
     def update_zwave_device(self, data: dict[str, str]) -> None:
