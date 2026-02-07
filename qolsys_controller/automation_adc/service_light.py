@@ -41,7 +41,7 @@ class LightServiceADC(LightService):
         func_name: vdFuncName,
         func_type: vdFuncType,
         func_state: vdFuncState,
-        timestamp:str,
+        timestamp: str,
     ) -> None:
         self.is_on = func_state == vdFuncState.ON
 

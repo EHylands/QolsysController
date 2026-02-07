@@ -31,7 +31,7 @@ class StatusServiceADC(StatusService):
         func_name: vdFuncName,
         func_type: vdFuncType,
         func_state: vdFuncState,
-        timestamp:str,
+        timestamp: str,
     ) -> None:
         self.is_malfunctioning = func_state == vdFuncState.ON
 

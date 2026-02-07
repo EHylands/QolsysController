@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_cover import CoverService
@@ -54,7 +53,7 @@ class CoverServiceADC(CoverService):
         func_name: vdFuncName,
         func_type: vdFuncType,
         func_state: vdFuncState,
-        timestamp:str,
+        timestamp: str,
     ) -> None:
         self.is_closed = func_state == vdFuncState.OFF
 

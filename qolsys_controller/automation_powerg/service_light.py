@@ -1,6 +1,4 @@
-import json
 import logging
-from json import JSONDecodeError
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_light import LightService
