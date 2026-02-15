@@ -13,8 +13,41 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
-    def __init__(self, controller: "QolsysController", dict: dict[str, str]) -> None:
+    def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str], dict: dict[str, str]) -> None:
         super().__init__(controller, dict)
+
+        # Base Z-Wave Device Properties
+        self._id: str = zwave_dict.get("_id", "")
+        self._node_id: str = zwave_dict.get("node_id", "")
+        self._node_name: str = zwave_dict.get("node_name", "")
+        self._node_type: str = zwave_dict.get("node_type", "")
+        self._node_status: str = zwave_dict.get("node_status", "")
+        self._partition_id: str = zwave_dict.get("partition_id", "")
+        self._node_secure_cmd_cls: str = zwave_dict.get("node_secure_cmd_cls", "")
+        self._node_battery_level: str = zwave_dict.get("node_battery_level", "")
+        self._node_battery_level_value: str = zwave_dict.get("node_battery_level_value", "")
+        self._is_node_listening_node: str = zwave_dict.get("is_node_listening_node", "")
+        self._basic_report_value: str = zwave_dict.get("basic_report_value", "")
+        self._switch_multilevel_report_value: str = zwave_dict.get("switch_multilevel_report_value", "")
+        self._basic_device_type: str = zwave_dict.get("basic_device_type", "")
+        self._generic_device_type: str = zwave_dict.get("generic_device_type", "")
+        self._specific_device_type: str = zwave_dict.get("specific_device_type", "")
+        self._num_secure_command_class: str = zwave_dict.get("num_secure_command_class", "")
+        self._secure_command_class: str = zwave_dict.get("secure_command_class", "")
+        self._manufacture_id: str = zwave_dict.get("manufacture_id", "")
+        self._product_type: str = zwave_dict.get("product_type", "")
+        self._device_protocol: str = zwave_dict.get("device_protocol", "")
+        self._paired_status: str = zwave_dict.get("paired_status", "")
+        self._is_device_sleeping: str = zwave_dict.get("is_device_sleeping", "")
+        self._is_device_hidden: str = zwave_dict.get("is_device_hidden", "")
+        self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
+        self._command_class_list: str = zwave_dict.get("command_class_list", "")
+        self._meter_capabilities: str = ""
+        self._multisensor_capabilities: str = ""
+        self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
+        self._multi_channel_details = zwave_dict.get("multi_channel_details", "")
+        self._endpoint = zwave_dict.get("endpoint", "")
+        self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
         # Add Base Services
         self.service_add_status_service(endpoint=0)

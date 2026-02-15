@@ -29,8 +29,7 @@ class BatteryServiceZwave(BatteryService):
             self.battery_level = int(self.automation_device._node_battery_level_value)
         except (ValueError, TypeError):
             LOGGER.error(
-                "%s[%s] BatteryerviceZwave - update_automation_service - error parsing node_battery_level_value: %s",
-                self.automation_device.prefix,
-                self.endpoint,
+                "%s BatteryerviceZwave - update_automation_service - error parsing node_battery_level_value: %s",
+                self.prefix,
                 self.automation_device._node_battery_level_value,
             )

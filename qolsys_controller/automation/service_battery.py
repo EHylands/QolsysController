@@ -36,24 +36,14 @@ class BatteryService(AutomationService):
             return
 
         if not (0 <= value <= 100):
-            LOGGER.error(
-                "%s[%s] BatteryService - battery_level: invalid value: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.error("%s - battery_level: invalid value: %s", self.prefix, value)
             self._battery_level = None
             return
 
         if self._battery_level != value:
             self._battery_level = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] BatteryService - battery_level: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.debug("%s - battery_level: %s", self.prefix, value)
 
     @property
     def battery_low(self) -> bool:
@@ -67,34 +57,15 @@ class BatteryService(AutomationService):
         if self._battery_low != value:
             self._battery_low = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] BatteryService - battery_low: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.debug("%s - battery_low: %s", self.prefix, value)
 
     def info(self) -> None:
         if self.supports_battery_level():
-            LOGGER.debug(
-                "%s[%s] BatteryService - battery_level: %s%%",
-                self.automation_device.prefix,
-                self.endpoint,
-                self.battery_level,
-            )
+            LOGGER.debug("%s - battery_level: %s%%", self.prefix, self.battery_level)
             return
 
         if self.supports_battery_low():
-            LOGGER.debug(
-                "%s[%s] BatteryService - low_battery: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self.battery_low,
-            )
+            LOGGER.debug("%s - low_battery: %s", self.prefix, self.battery_low)
             return
 
-        LOGGER.debug(
-            "%s[%s] BatteryService - Disabled",
-            self.automation_device.prefix,
-            self.endpoint,
-        )
+        LOGGER.debug("%s - Disabled", self.prefix)

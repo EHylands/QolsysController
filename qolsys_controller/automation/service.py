@@ -20,6 +20,10 @@ class AutomationService(ABC):
         self._automation_device = value
 
     @property
+    def prefix(self) -> str:
+        return f"[AutDev][{self.automation_device.protocol.name}]{self.automation_device.virtual_node_id}][{self.endpoint}] ({self.automation_device.device_name})"
+
+    @property
     def endpoint(self) -> int:
         return self._endpoint
 

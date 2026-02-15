@@ -9,6 +9,7 @@ from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
 from qolsys_controller.automation.service_status import StatusService
+from qolsys_controller.automation.service_thermostat import ThermostatService
 from qolsys_controller.automation_adc.service_cover import CoverServiceADC
 from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
@@ -20,6 +21,7 @@ from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwa
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
+from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.observable import QolsysObservable
 
@@ -63,7 +65,14 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         self._smart_energy_optimizer: str = dict.get("smart_energy_optimizer", "")
         self._linked_security_zone: str = dict.get("linked_security_zone", "")
 
-        self._available_services: list[Type[Any]] = [StatusService, BatteryService, LightService, LockService, CoverService]
+        self._available_services: list[Type[Any]] = [
+            BatteryService,
+            CoverService,
+            LightService,
+            LockService,
+            StatusService,
+            ThermostatService,
+        ]
         self._services: list[AutomationService] = []
 
         match self.device_type:
@@ -71,6 +80,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 self.service_add_light_service(int(self._end_point))
             case "Door Lock":
                 self.service_add_lock_service(int(self._end_point))
+            case "Thermostat":
+                self.service_add_thermostat_service(int(self._end_point))
 
     def info(self) -> None:
         pass
@@ -126,6 +137,23 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             type(service),
         )
 
+    def service_add_thermostat_service(self, endpoint: int = 0) -> None:
+        thermostat_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                pass
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                thermostat_service = ThermostatServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if thermostat_service is not None:
+            self.service_add(thermostat_service)
+            return
+
     def service_add_light_service(self, endpoint: int = 0) -> None:
         light_service: AutomationService | None = None
 
@@ -143,12 +171,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(light_service)
             return
 
-        LOGGER.error(
-            "%s[%s] (%s) - Unable to add Light Service",
-            self.prefix,
-            endpoint,
-            self.device_name,
-        )
+        LOGGER.error("%s[%s] (%s) - Unable to add Light Service", self.prefix, endpoint, self.device_name)
 
     def service_add_lock_service(self, endpoint: int = 0) -> None:
         lock_service: AutomationService | None = None
@@ -164,12 +187,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(lock_service)
             return
 
-        LOGGER.error(
-            "%s[%s] (%s) - Unable to add Lock Service",
-            self.prefix,
-            endpoint,
-            self.device_name,
-        )
+        LOGGER.error("%s[%s] (%s) - Unable to add Lock Service", self.prefix, endpoint, self.device_name)
 
     def service_add_battery_service(self, endpoint: int = 0) -> None:
         battery_service: AutomationService | None = None
@@ -185,12 +203,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(battery_service)
             return
 
-        LOGGER.error(
-            "%s[%s] (%s) - Unable to add Battery Service",
-            self.prefix,
-            endpoint,
-            self.device_name,
-        )
+        LOGGER.error("%s[%s] (%s) - Unable to add Battery Service", self.prefix, endpoint, self.device_name)
 
     def service_add_status_service(self, endpoint: int = 0) -> None:
         service: StatusService | None = None

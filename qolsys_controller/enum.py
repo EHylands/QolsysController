@@ -154,19 +154,43 @@ class ZoneSensorGroup(StrEnum):
     AWAY_DELAY_MOTION = "awaydelaymotion"
     WATER = "WaterSensor"
 
-    # TAKEOVER = "" #TBD
-    # GARAGE_TILT_SAFETY = "" # TBD
-    # WATER_SENSOR = "" # TBD
-    # WATER_SENSOR_NON_REPORTING = "" # TBD
-    # SHOCK_GLASS_BREAK = "" # TBD
-    # SHOCK_GLASS_BREAK_AWAY_ONLY = "" # TBD
-    # FREEZE = "" # TBD
-    # FREEZE_NON_REPORTING = "" # TBD
-    # TEMP_REPORTING = "" #TBD
-    # TEMP_NON_REPORTING = "" #TBD
-    # SIREN = "" # TBD
-
 
 class ZWaveNodeStatus(StrEnum):
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
+
+
+class QolsysHvacMode(StrEnum):
+    OFF = "off"
+    HEAT = "heat"
+    COOL = "cool"
+    AUTO = "auto"
+    HEAT_COOL = "heat_cool"
+    FAN_ONLY = "fan_only"
+    DRY = "dry"
+
+
+class QolsysFanMode(StrEnum):
+    FAN_ON = "on"
+    FAN_OFF = "off"
+    FAN_AUTO = "auto"
+    FAN_LOW = "low"
+    FAN_MEDIUM = "medium"
+    FAN_HIGH = "high"
+    FAN_CIRCULATE = "circulate"
+
+
+class QolsysHvacAction(StrEnum):
+    OFF = "off"
+    PREHEATING = "preheating"
+    HEATING = "heating"
+    COOLING = "cooling"
+    DRYING = "drying"
+    FAN = "fan"
+    IDLE = "idle"
+    DEFROSTING = "defrosting"
+
+
+class QolsysTemperatureUnit(StrEnum):
+    CELSIUS = "C"
+    FAHRENHEIT = "F"

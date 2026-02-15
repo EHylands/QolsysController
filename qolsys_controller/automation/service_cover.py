@@ -56,26 +56,14 @@ class CoverService(AutomationService):
     @current_position.setter
     def current_position(self, value: int) -> None:
         if not (0 <= value <= 99):
-            LOGGER.error(
-                "%s[%s] %s - level: invalid value: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self._service_name,
-                value,
-            )
+            LOGGER.error("%s - level: invalid value: %s", self.prefix, value)
             self._current_position = None
             return
 
         if self._current_position != value:
             self._current_position = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] %s - current_position: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self._service_name,
-                value,
-            )
+            LOGGER.debug("%s - current_position: %s", self.prefix, value)
 
     @property
     def is_closed(self) -> bool:
@@ -86,27 +74,12 @@ class CoverService(AutomationService):
         if self._is_closed != value:
             self._is_closed = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] %s - is_closed: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self._service_name,
-                value,
-            )
+            LOGGER.debug("%s - is_closed: %s", self.prefix, value)
 
     def info(self) -> None:
-        LOGGER.debug(
-            "%s[%s] %s - is_closed: %s",
-            self.automation_device.prefix,
-            self.endpoint,
-            self._service_name,
-            self.is_closed,
-        )
-
-        LOGGER.debug(
-            "%s[%s] %s - current_position: %s",
-            self.automation_device.prefix,
-            self.endpoint,
-            self.service_name,
-            self.current_position,
-        )
+        LOGGER.debug("%s - is_closed: %s", self.prefix, self.is_closed)
+        LOGGER.debug("%s - current_position: %s", self.prefix, self.current_position)
+        LOGGER.debug("%s - supports_open: %s", self.prefix, self.supports_open())
+        LOGGER.debug("%s - supports_close: %s", self.prefix, self.supports_close())
+        LOGGER.debug("%s - supports_stop: %s", self.prefix, self.supports_stop())
+        LOGGER.debug("%s - supports_position: %s", self.prefix, self.supports_position())

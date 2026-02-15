@@ -29,17 +29,7 @@ class StatusService(AutomationService):
         if self._is_malfunctioning != value:
             self._is_malfunctioning = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] StatusService - is_malfunctioning: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.debug("%s- is_malfunctioning: %s", self.prefix, value)
 
     def info(self) -> None:
-        LOGGER.debug(
-            "%s[%s] StatusService - is_malfunctioning: %s",
-            self.automation_device.prefix,
-            self.endpoint,
-            self.is_malfunctioning,
-        )
+        LOGGER.debug("%s - is_malfunctioning: %s", self.prefix, self.is_malfunctioning)

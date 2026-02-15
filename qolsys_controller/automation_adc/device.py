@@ -132,7 +132,7 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
                             service = self.service_get_adc(endpoint=id)
 
                         if service is not None:
-                            service.update_adc_service(
+                            service.update_adc_service(  # type: ignore[attr-defined]
                                 local_control=local_control,
                                 func_name=func_name,
                                 func_type=func_type,

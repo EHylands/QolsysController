@@ -42,12 +42,7 @@ class LightService(AutomationService):
         if self._is_on != value:
             self._is_on = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] LightService - is_on: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                self.is_on,
-            )
+            LOGGER.debug("%s - is_on: %s", self.prefix, value)
 
     @property
     def level(self) -> int | None:
@@ -56,36 +51,16 @@ class LightService(AutomationService):
     @level.setter
     def level(self, value: int) -> None:
         if not (0 <= value <= 99):
-            LOGGER.error(
-                "%s[%s] LightService - level: invalid value: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.error("%s[ - level: invalid value: %s", self.prefix, value)
             self._level = None
             return
 
         if self._level != value:
             self._level = value
             self.automation_device.notify()
-            LOGGER.debug(
-                "%s[%s] LightService - level: %s",
-                self.automation_device.prefix,
-                self.endpoint,
-                value,
-            )
+            LOGGER.debug("%s - level: %s", self.prefix, value)
 
     def info(self) -> None:
-        LOGGER.debug(
-            "%s[%s] LightService - is_on: %s",
-            self.automation_device.prefix,
-            self.endpoint,
-            self.is_on,
-        )
-
-        LOGGER.debug(
-            "%s[%s] LightService - level: %s",
-            self.automation_device.prefix,
-            self.endpoint,
-            self.level,
-        )
+        LOGGER.debug("%s - is_on: %s", self.prefix, self.is_on)
+        LOGGER.debug("%s - level: %s", self.prefix, self.level)
+        LOGGER.debug("%s - supports_level: %s", self.prefix, self.supports_level())

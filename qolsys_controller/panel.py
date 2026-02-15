@@ -577,9 +577,16 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
+
+                                # Update Z-Wave Device state if exist
                                 node = self._controller.state.zwave_device(node_id)
                                 if node is not None:
                                     node.update_base(content_values)
+
+                                # Update Automation Device if exist
+                                automation_device = self._controller.state.automation_device(node_id)
+                                if isinstance(automation_device, QolsysAutomationDeviceZwave):
+                                    automation_device.update_zwave_device(content_values)
 
                             # Update Z-Wave History Content Provier
                             case self.db.table_zwave_history.uri:
@@ -927,7 +934,10 @@ class QolsysPanel(QolsysObservable):
                     new_device = QolsysAutomationDevicePowerG(self._controller, device)
 
                 case AutomationDeviceProtocol.ZWAVE:
-                    new_device = QolsysAutomationDeviceZwave(self._controller, device)
+                    node_id = device.get("virtual_node_id", "")
+                    zwave_node = self.db.get_zwave_device(node_id)
+                    if zwave_node is not None:
+                        new_device = QolsysAutomationDeviceZwave(self._controller, zwave_node, device)
 
             if new_device is not None and protocol in allowed_protocols:
                 automation_devices.append(new_device)
