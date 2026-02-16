@@ -35,9 +35,9 @@ class ThermostatService(AutomationService):
         self._target_temperature_step: float | None = None
         self._device_temperature_unit: QolsysTemperatureUnit | None = None
 
-        self._min_temp_celsius = 0.0
-        self._min_temp_fahrenheit = 32.0
-        self.max_temp_celsius = 35.0
+        self._min_temp_celsius = 7.0
+        self._min_temp_fahrenheit = 45.0
+        self._max_temp_celsius = 35.0
         self._max_temp_fahrenheit = 95.0
 
     @property
@@ -50,6 +50,18 @@ class ThermostatService(AutomationService):
             self._hvac_mode = value
             self.automation_device.notify()
             LOGGER.debug("%s - hvac_mode: %s", self.prefix, value.name if value else None)
+
+    @property
+    def min_temp(self) -> float:
+        if self.device_temperature_unit == QolsysTemperatureUnit.CELSIUS:
+            return self._min_temp_celsius
+        return self._min_temp_fahrenheit
+
+    @property
+    def max_temp(self) -> float:
+        if self.device_temperature_unit == QolsysTemperatureUnit.CELSIUS:
+            return self._max_temp_celsius
+        return self._max_temp_fahrenheit
 
     @property
     def hvac_modes(self) -> list[QolsysHvacMode]:
@@ -193,7 +205,7 @@ class ThermostatService(AutomationService):
             case QolsysTemperatureUnit.FAHRENHEIT:
                 return self._max_temp_fahrenheit
             case QolsysTemperatureUnit.CELSIUS:
-                return self.max_temp_celsius
+                return self._max_temp_celsius
             case _:
                 return None
 

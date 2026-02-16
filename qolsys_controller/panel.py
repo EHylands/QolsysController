@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
@@ -651,11 +652,18 @@ class QolsysPanel(QolsysObservable):
 
                             # Virtual device
                             case self.db.table_virtual_device.uri:
+                                # Update ADC device - Legacy
                                 self.db.table_virtual_device.update(selection, selection_argument, content_values)
                                 adc_id = content_values.get("device_id", "")
                                 adc_device = self._controller.state.adc_device(adc_id)
                                 if adc_device is not None:
                                     adc_device.update_adc_device(content_values)
+
+                                # Update ADC devices in automation devices list
+                                virtual_node_id = content_values.get("device_id", "")
+                                automation_device = self._controller.state.automation_device(virtual_node_id)
+                                if isinstance(automation_device, QolsysAutomationDeviceADC):
+                                    automation_device.update_adc_device(content_values)
 
                             # Output Rules
                             case self.db.table_output_rules.uri:
@@ -916,11 +924,12 @@ class QolsysPanel(QolsysObservable):
         return -1
 
     def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
-        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.ZWAVE]
+        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.ZWAVE, AutomationDeviceProtocol.ADC]
 
         automation_devices: list[QolsysAutomationDevice] = []
         devices_list = self.db.get_automation_devices()
 
+        # Add all device in automation content provider table
         for device in devices_list:
             try:
                 protocol = AutomationDeviceProtocol(device.get("protocol", ""))
@@ -939,7 +948,17 @@ class QolsysPanel(QolsysObservable):
                     if zwave_node is not None:
                         new_device = QolsysAutomationDeviceZwave(self._controller, zwave_node, device)
 
+                case _:
+                    LOGGER.debug("Unknown protocol for automation device: %s", protocol)
+
             if new_device is not None and protocol in allowed_protocols:
+                automation_devices.append(new_device)
+
+        # Add virtual adc devices
+        if AutomationDeviceProtocol.ADC in allowed_protocols:
+            adc_devices = self.db.get_adc_devices()
+            for adc_device in adc_devices:
+                new_device = QolsysAutomationDeviceADC(self._controller, adc_device)
                 automation_devices.append(new_device)
 
         return automation_devices

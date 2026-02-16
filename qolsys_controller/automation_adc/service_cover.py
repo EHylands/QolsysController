@@ -42,7 +42,7 @@ class CoverServiceADC(CoverService):
         return True
 
     def supports_stop(self) -> bool:
-        return True
+        return False
 
     def supports_position(self) -> bool:
         return False

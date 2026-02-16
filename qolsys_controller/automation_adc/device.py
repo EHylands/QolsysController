@@ -30,10 +30,12 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
         self._func_list = ""
 
         # Set virtual_node_id to device_id for now, since ADC devices don't have a nodeid like zwave/powerg devices
+        self.start_batch_update()
+        self.protocol = AutomationDeviceProtocol.ADC
         self.virtual_node_id = self._device_id
         self.device_name = self._name
-        self.protocol = AutomationDeviceProtocol.ADC
         self._node_battery_level_value = "-1"
+        self.end_batch_update()
 
         # Load services based on func_list
         self.func_list = adc_dict.get("func_list", "")

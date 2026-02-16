@@ -114,26 +114,24 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             if isinstance(service, service_type):
                 if self.service_get(service_type, service.endpoint) is not None:
                     LOGGER.error(
-                        "%s[%s] (%s) - Unable to add Service (already exists): %s",
+                        "%s[%s] - Unable to add Service (already exists): %s",
                         self.prefix,
                         service.endpoint,
-                        self.device_name,
                         type(service),
                     )
                     return
                 self._services.append(service)
                 LOGGER.debug(
-                    "%s[%s] - Adding %s ",
+                    "%s - Adding %s to endpoint%s",
                     self.prefix,
-                    service.endpoint,
                     service.service_name,
+                    service.endpoint,
                 )
                 return
 
         LOGGER.error(
-            "%s[%s] - Unable to add Service (unknown type): %s",
+            "%s - Unable to add Service (unknown type): %s",
             self.prefix,
-            service.endpoint,
             type(service),
         )
 
@@ -171,7 +169,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(light_service)
             return
 
-        LOGGER.error("%s[%s] (%s) - Unable to add Light Service", self.prefix, endpoint, self.device_name)
+        LOGGER.error("%s - Unable to add Light Service to endpoint%s", self.prefix, endpoint)
 
     def service_add_lock_service(self, endpoint: int = 0) -> None:
         lock_service: AutomationService | None = None
@@ -187,7 +185,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(lock_service)
             return
 
-        LOGGER.error("%s[%s] (%s) - Unable to add Lock Service", self.prefix, endpoint, self.device_name)
+        LOGGER.error("%s - Unable to add Lock Service to endpoint%s", self.prefix, endpoint)
 
     def service_add_battery_service(self, endpoint: int = 0) -> None:
         battery_service: AutomationService | None = None
@@ -203,7 +201,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(battery_service)
             return
 
-        LOGGER.error("%s[%s] (%s) - Unable to add Battery Service", self.prefix, endpoint, self.device_name)
+        LOGGER.error("%s - Unable to add Battery Service to endpoint%s", self.prefix, endpoint)
 
     def service_add_status_service(self, endpoint: int = 0) -> None:
         service: StatusService | None = None
@@ -290,7 +288,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
     @property
     def prefix(self, endpoint: int | None = None) -> str:
-        return f"[AutDev][{self.protocol}]{self.virtual_node_id}]"
+        return f"[AutDev][{self.protocol.name}]{self.virtual_node_id}] ({self.device_name})"
 
     @property
     def device_id(self) -> str:
@@ -299,7 +297,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @device_id.setter
     def device_id(self, value: str) -> None:
         if self._device_id != value:
-            LOGGER.debug("AutDev%s (%s) - device_id: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("%s - device_id: %s", self.prefix, value)
             self._device_id = value
             self.notify()
 
@@ -310,7 +308,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @virtual_node_id.setter
     def virtual_node_id(self, value: str) -> None:
         if self._virtual_node_id != value:
-            LOGGER.debug("AutDev%s (%s) - virtual_node_id: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("%s - virtual_node_id: %s", self.prefix, value)
             self._virtual_node_id = value
             self.notify()
 
@@ -354,7 +352,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     @device_name.setter
     def device_name(self, value: str) -> None:
         if self._device_name != value:
-            LOGGER.debug("AutDev%s (%s) - device_name: %s", self.device_id, self.device_name, value)
+            LOGGER.debug("%s - device_name: %s", self.prefix, value)
             self._device_name = value
             self.notify()
 
