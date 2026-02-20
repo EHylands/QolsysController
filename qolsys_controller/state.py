@@ -4,6 +4,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
+from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.observable_v2 import QolsysObservable_v2
 from qolsys_controller.protocol_adc.service import QolsysAdcService
 from qolsys_controller.protocol_adc.service_garagedoor import QolsysAdcGarageDoorService
@@ -414,7 +416,21 @@ class QolsysState(QolsysObservable):
             if state_automation.virtual_node_id in db_automation_list:
                 for db_automation in db_automation_devices:
                     if state_automation.virtual_node_id == db_automation.virtual_node_id:
+                        # Update ADC extracted attributes
+                        if isinstance(state_automation, QolsysAutomationDeviceADC) and isinstance(
+                            db_automation, QolsysAutomationDeviceADC
+                        ):
+                            state_automation.update_adc_device(db_automation.to_dict_adc())
+
+                        # Update Z-Wave extra attributes
+                        if isinstance(state_automation, QolsysAutomationDeviceZwave) and isinstance(
+                            db_automation, QolsysAutomationDeviceZwave
+                        ):
+                            state_automation.update_zwave_device(db_automation.to_dict_zwave())
+
+                        # Update Automation Device base attributes
                         state_automation.update_automation_device(db_automation.to_dict())
+
                         LOGGER.debug("sync_data - update AutDev%s", state_automation.virtual_node_id)
 
         # Add new Automation Devices

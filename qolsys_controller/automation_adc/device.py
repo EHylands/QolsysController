@@ -31,14 +31,12 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
 
         # Set virtual_node_id to device_id for now, since ADC devices don't have a nodeid like zwave/powerg devices
         self.start_batch_update()
-        self.protocol = AutomationDeviceProtocol.ADC
-        self.virtual_node_id = self._device_id
-        self.device_name = self._name
+        self._protocol = AutomationDeviceProtocol.ADC
+        self._virtual_node_id = self._device_id
+        self._device_name = self._name
         self._node_battery_level_value = "-1"
-        self.end_batch_update()
-
-        # Load services based on func_list
         self.func_list = adc_dict.get("func_list", "")
+        self.end_batch_update()
 
     def update_adc_device(self, adc_data: dict[str, str]) -> None:
         # Check if we are updating same virtual_node_id
@@ -67,6 +65,21 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
             self.func_list = adc_data.get("func_list", "")
 
         self.end_batch_update()
+
+    def to_dict_adc(self) -> dict[str, str]:
+        return {
+            "_id": self._id,
+            "partition_id": self._partition_id,
+            "device_id": self._virtual_node_id,
+            "name": self._device_name,
+            "type": self._type,
+            "create_time": self._create_time,
+            "created_by": self._created_by,
+            "update_time": self._update_time,
+            "updated_by": self._updated_by,
+            "device_zone_list": self._device_zone_list,
+            "func_list": self._func_list,
+        }
 
     def service_get_adc(self, endpoint: int) -> AutomationService | None:
         # In AutomationDeviceADC, only 1 service per endpoint is expected

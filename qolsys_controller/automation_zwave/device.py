@@ -58,6 +58,35 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     def update_zwave_device(self, data: dict[str, str]) -> None:
         pass
 
+    def to_dict_zwave(self) -> dict[str, str]:
+        return {
+            "_id": self._id,
+            "node_id": self._node_id,
+            "node_name": self._node_name,
+            "node_type": self._node_type,
+            "node_status": self._node_status,
+            "partition_id": self._partition_id,
+            "node_secure_cmd_cls": self._node_secure_cmd_cls,
+            "node_battery_level": self._node_battery_level,
+            "node_battery_level_value": self._node_battery_level_value,
+            "is_node_listening_node": self._is_node_listening_node,
+            "basic_report_value": self._basic_report_value,
+            "switch_multilevel_report_value": self._switch_multilevel_report_value,
+            "basic_device_type": self._basic_device_type,
+            "generic_device_type": self._generic_device_type,
+            "specific_device_type": self._specific_device_type,
+            "num_secure_command_class": self._num_secure_command_class,
+            "secure_command_class": self._secure_command_class,
+            "manufacture_id": self._manufacture_id,
+            "product_type": self._product_type,
+            "device_protocol": self._device_protocol,
+            "paired_status": self._paired_status,
+            "is_device_sleeping": self._is_device_sleeping,
+            "is_device_hidden": self._is_device_hidden,
+            "last_updated_date": self._last_updated_date,
+            "command_class_list": self._command_class_list,
+        }
+
     # -----------------------------
     # properties + setters
     # -----------------------------
