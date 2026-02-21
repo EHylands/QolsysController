@@ -9,6 +9,7 @@ class QolsysEvent(StrEnum):
     EVENT_ZWAVE_DEVICE_ADD = "EVENT_ZWAVE_MULTILEVELSENSOR_ADD"
     EVENT_ZWAVE_MULTILEVELSENSOR_ADD = "EVENT_ZWAVE_MULTILEVELSENSOR_ADD"
     EVENT_ZWAVE_METER_ADD = "EVENT_ZWAVE_METER_ADD"
+    EVENT_AUTDEV_SENSOR_ADD = "EVENT_AUTDEV_SENSOR_ADD"
 
 
 class PartitionSystemStatus(StrEnum):
@@ -194,3 +195,25 @@ class QolsysHvacAction(StrEnum):
 class QolsysTemperatureUnit(StrEnum):
     CELSIUS = "C"
     FAHRENHEIT = "F"
+
+
+class QolsysSensorScale(StrEnum):
+    TEMPERATURE_CELSIUS = "temperature_celsius"
+    TEMPERATURE_FAHRENHEIT = "temperature_fahrenheit"
+    RELATIVE_HUMIDITY = "relative_humidity"
+    WIND_DIRECTION = "wind_direction"
+    BAROMETRIC_PRESSURE = "barometric_pressure"
+    DEW_POINT = "dew_point"
+    RAIN_RATE = "rain_rate"
+    TIDE_LEVEL = "tide_level"
+    WEIGHT = "weight"
+    VOLTS = "volts"
+    AMPS = "amps"
+    WATTS = "watts"
+    DISTANCE = "distance"
+    ANGLE_POSITION = "angle_position"
+    ROTATION = "rotation"
+    WATER_TEMPERATURE_CELSIUS = "water_temperature_celsius"
+    WATER_TEMPERATURE_FAHRENHEIT = "water_temperature_fahrenheit"
+    LUMINOSITY_LUX = "luminosity_lux"
+    UNKNOWN = "unknown"

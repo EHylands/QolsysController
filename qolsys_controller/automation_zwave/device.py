@@ -3,6 +3,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation.service_sensor import SensorService
+from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
 from qolsys_controller.enum_zwave import ZwaveCommandClass, ZwaveDeviceClass
 
 if TYPE_CHECKING:
@@ -44,6 +46,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._command_class_list: str = zwave_dict.get("command_class_list", "")
         self._meter_capabilities: str = ""
         self._multisensor_capabilities: str = ""
+
         self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
         self._multi_channel_details = zwave_dict.get("multi_channel_details", "")
         self._endpoint = zwave_dict.get("endpoint", "")
@@ -52,11 +55,17 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         # Add Base Services
         self.service_add_status_service(endpoint=0)
         self.service_add_battery_service(endpoint=0)
+        self.multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
 
         super().update_automation_services()
 
     def update_zwave_device(self, data: dict[str, str]) -> None:
-        pass
+        self.start_batch_update()
+
+        if "multisensor_capabilities" in data:
+            self.multisensor_capabilities = data.get("multisensor_capabilities", "")
+
+        self.end_batch_update()
 
     def to_dict_zwave(self) -> dict[str, str]:
         return {
@@ -110,3 +119,28 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             except (ValueError, TypeError):
                 continue
         return commands
+
+    @property
+    def multisensor_capabilities(self) -> str:
+        return self._multisensor_capabilities
+
+    @multisensor_capabilities.setter
+    def multisensor_capabilities(self, value: str) -> None:
+        if self._multisensor_capabilities != value:
+            self._multisensor_capabilities = value
+
+            # Update Sensor Service
+            try:
+                sensors_dict = json.loads(value)
+                for endpoint, values in sensors_dict.items():
+                    service = self.service_get(SensorService, int(endpoint))
+                    if not service:
+                        service = SensorServiceZwave(self, int(endpoint))
+                        self.service_add(service)
+
+                    if isinstance(service, SensorServiceZwave):
+                        service.update_zwave_service(values)
+
+            except json.JSONDecodeError:
+                LOGGER.error("%s - Error parsing multilevelsensor_capabilities:%s", self.prefix)
+                return

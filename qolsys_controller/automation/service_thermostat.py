@@ -141,6 +141,13 @@ class ThermostatService(AutomationService):
     def current_humidity(self) -> float | None:
         return self._current_humidity
 
+    @current_humidity.setter
+    def current_humidity(self, value: float | None) -> None:
+        if self._current_humidity != value:
+            self._current_humidity = value
+            self.automation_device.notify()
+            LOGGER.debug("%s - current_humidity: %s", self.prefix, value)
+
     @property
     def device_temperature_unit(self) -> QolsysTemperatureUnit | None:
         return self._device_temperature_unit
@@ -357,7 +364,7 @@ class ThermostatService(AutomationService):
         ThermostatFanMode.AUTO_HIGH: QolsysFanMode.FAN_AUTO,
         ThermostatFanMode.AUTO_LOW: QolsysFanMode.FAN_AUTO,
         ThermostatFanMode.AUTO_MEDIUM: QolsysFanMode.FAN_AUTO,
-        ThermostatFanMode.LOW: QolsysFanMode.FAN_LOW,
+        ThermostatFanMode.LOW: QolsysFanMode.FAN_ON,
         ThermostatFanMode.MEDIUM: QolsysFanMode.FAN_MEDIUM,
         ThermostatFanMode.HIGH: QolsysFanMode.FAN_HIGH,
         ThermostatFanMode.CIRCULATION: QolsysFanMode.FAN_CIRCULATE,
@@ -368,6 +375,6 @@ class ThermostatService(AutomationService):
         QolsysFanMode.FAN_AUTO: ThermostatFanMode.AUTO_LOW,
         QolsysFanMode.FAN_HIGH: ThermostatFanMode.HIGH,
         QolsysFanMode.FAN_MEDIUM: ThermostatFanMode.MEDIUM,
-        QolsysFanMode.FAN_LOW: ThermostatFanMode.LOW,
+        QolsysFanMode.FAN_ON: ThermostatFanMode.LOW,
         QolsysFanMode.FAN_CIRCULATE: ThermostatFanMode.CIRCULATION,
     }

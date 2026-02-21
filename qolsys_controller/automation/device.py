@@ -8,6 +8,7 @@ from qolsys_controller.automation.service_battery import BatteryService
 from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
+from qolsys_controller.automation.service_sensor import SensorService
 from qolsys_controller.automation.service_status import StatusService
 from qolsys_controller.automation.service_thermostat import ThermostatService
 from qolsys_controller.automation_adc.service_cover import CoverServiceADC
@@ -20,6 +21,7 @@ from qolsys_controller.automation_powerg.service_status import StatusServicePowe
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
+from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
@@ -70,6 +72,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             CoverService,
             LightService,
             LockService,
+            SensorService,
             StatusService,
             ThermostatService,
         ]
@@ -150,6 +153,23 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         if thermostat_service is not None:
             self.service_add(thermostat_service)
+            return
+
+    def service_add_sensort_service(self, endpoint: int = 0) -> None:
+        sensor_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                pass
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                sensor_service = SensorServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if sensor_service is not None:
+            self.service_add(sensor_service)
             return
 
     def service_add_light_service(self, endpoint: int = 0) -> None:
