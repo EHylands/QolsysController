@@ -1056,7 +1056,7 @@ class QolsysController:
     async def command_zwave_thermostat_mode_set(
         self, node_id: str, endpoint: str, mode: ThermostatMode
     ) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode)
+        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
 
         thermostat = self.state.zwave_thermostat(node_id)
         if not thermostat:
@@ -1074,7 +1074,7 @@ class QolsysController:
     async def command_zwave_thermostat_fan_mode_set(
         self, node_id: str, endpoint: str, fan_mode: ThermostatFanMode
     ) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode)
+        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode.name)
 
         zwave_node = self.state.zwave_device(node_id)
         if not zwave_node:
