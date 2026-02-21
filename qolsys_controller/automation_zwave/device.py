@@ -25,7 +25,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._partition_id: str = zwave_dict.get("partition_id", "")
         self._node_secure_cmd_cls: str = zwave_dict.get("node_secure_cmd_cls", "")
         self._node_battery_level: str = zwave_dict.get("node_battery_level", "")
-        self._node_battery_level_value: str = zwave_dict.get("node_battery_level_value", "")
+        # self._node_battery_level_value: str = zwave_dict.get("node_battery_level_value", "")
         self._is_node_listening_node: str = zwave_dict.get("is_node_listening_node", "")
         self._basic_report_value: str = zwave_dict.get("basic_report_value", "")
         self._switch_multilevel_report_value: str = zwave_dict.get("switch_multilevel_report_value", "")

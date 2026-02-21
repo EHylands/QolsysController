@@ -32,6 +32,7 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
         # Set virtual_node_id to device_id for now, since ADC devices don't have a nodeid like zwave/powerg devices
         self.start_batch_update()
         self._protocol = AutomationDeviceProtocol.ADC
+        self.device_type = "VirtualADC"
         self._virtual_node_id = self._device_id
         self._device_name = self._name
         self._node_battery_level_value = "-1"
