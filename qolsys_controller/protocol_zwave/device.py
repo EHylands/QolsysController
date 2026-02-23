@@ -94,7 +94,7 @@ class QolsysZWaveDevice(QolsysObservable):
                             sensor.value = value
 
     def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
-        LOGGER.debug("Raw Update (node%s-%s) - payload: %s", self.node_id, endpoint, payload.hex())
+        # LOGGER.debug("Raw Update (node%s-%s) - payload: %s", self.node_id, endpoint, payload.hex())
 
         try:
             command_class = payload[0]
@@ -283,7 +283,7 @@ class QolsysZWaveDevice(QolsysObservable):
 
         if self._meter_capabilities != value:
             self._meter_capabilities = value
-            LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
+            # LOGGER.debug("ZWave%s (%s) - meter_capabilities: %s", self.node_id, self.node_name, value)
 
             # Update Meter Service
             try:

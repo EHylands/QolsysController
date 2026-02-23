@@ -103,6 +103,12 @@ BITMASK_SUPPORTED_THERMOSTAT_MODE = {
 }
 
 
+class ThermostatOperatingState(IntEnum):
+    IDLE = 0x00
+    HEATING = 0x01
+    COOLING = 0x02
+
+
 class ThermostatSetpointMode(IntEnum):
     HEATING = 0x01
     COOLING = 0x02
@@ -167,6 +173,7 @@ class ZwaveCommandClass(IntEnum):
     SwitchColor = 0x33
     MeterTableMonitor = 0x3D
     ThermostatMode = 0x40
+    ThermostatOperatingState = 0x42
     ThermostatSetPoint = 0x43
     ThermostatFanMode = 0x44
     ThermostatFanState = 0x45
