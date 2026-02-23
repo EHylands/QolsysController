@@ -127,14 +127,17 @@ class LockService(AutomationService):
             self.automation_device.notify()
             LOGGER.debug("%s - is_jammed: %s", self.prefix, value)
 
-    def info(self) -> None:
-        LOGGER.debug("%s - supports_lock: %s", self.prefix, self.supports_lock())
-        LOGGER.debug("%s - supports_open: %s", self.prefix, self.supports_open())
-        LOGGER.debug("%s - supports_jam: %s", self.prefix, self.supports_jam())
+    def info(self) -> list[str]:
+        str = []
+        str.append(f"{self.prefix} - supports_lock: {self.supports_lock()}")
+        str.append(f"{self.prefix} - supports_open: {self.supports_open()}")
+        str.append(f"{self.prefix} - supports_jam: {self.supports_jam()}")
 
         if self.supports_lock():
-            LOGGER.debug("%s - is_locked: %s", self.prefix, self.is_locked)
+            str.append(f"{self.prefix} - is_locked: {self.is_locked}")
         if self.supports_open():
-            LOGGER.debug("%s - is_open: %s", self.prefix, self.is_open)
+            str.append(f"{self.prefix} - is_open: {self.is_open}")
         if self.supports_jam():
-            LOGGER.debug("%s - is_jammed: %s", self.prefix, self.is_jammed)
+            str.append(f"{self.prefix} - is_jammed: {self.is_jammed}")
+
+        return str

@@ -18,6 +18,11 @@ class CoverServiceADC(CoverService):
         endpoint: int,
     ) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
+        self._func_type: vdFuncType = vdFuncType.UNKNOWN
+
+    @property
+    def func_type(self) -> vdFuncType:
+        return self._func_type
 
     async def open(self) -> None:
         await self.automation_device.controller.command_panel_virtual_device_action(
@@ -56,6 +61,7 @@ class CoverServiceADC(CoverService):
         timestamp: str,
     ) -> None:
         self.is_closed = func_state == vdFuncState.OFF
+        self._vdfunc_type = func_type
 
     def update_automation_service(self) -> None:
         pass

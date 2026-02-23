@@ -3,9 +3,19 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
+from qolsys_controller.automation.service_meter import MeterService
 from qolsys_controller.automation.service_sensor import SensorService
+from qolsys_controller.automation_zwave.service_light import LightServiceZwave
+from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
+from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
 from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
+from qolsys_controller.automation_zwave.service_siren import SirenServiceZwave
+from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
+from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
+from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
+from qolsys_controller.enum import QolsysMeterType, map_to_qolsys_meter_scale
 from qolsys_controller.enum_zwave import ZwaveCommandClass, ZwaveDeviceClass
+from qolsys_controller.mqtt_command import MQTTCommand_ZWave
 
 if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
@@ -52,10 +62,14 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
+        # Fix Meter multichannel endpoint
+        self._FIX_MULTICHANNEL_METER_ENDPOINT: bool = False
+
         # Add Base Services
         self.service_add_status_service(endpoint=0)
         self.service_add_battery_service(endpoint=0)
         self.multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
+        self.meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
 
         super().update_automation_services()
 
@@ -65,7 +79,157 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         if "multisensor_capabilities" in data:
             self.multisensor_capabilities = data.get("multisensor_capabilities", "")
 
+        if "meter_capabilities" in data:
+            self.meter_capabilities = data.get("meter_capabilities", "")
+
+        if "node_status" in data:
+            self.node_status = data.get("node_status", "")
+
+        if "command_class_list" in data:
+            self._command_class_list = data.get("command_class_list", "")
+
         self.end_batch_update()
+
+    def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
+        try:
+            command_class = payload[0]
+            LOGGER.debug(
+                "%s - endpoint%s - update_raw - command class: 0x%02X: %s", self.prefix, endpoint, command_class, payload.hex()
+            )
+
+            match command_class:
+                case ZwaveCommandClass.SwitchBinary:
+                    self.parse_command_25(payload, endpoint)
+
+                case ZwaveCommandClass.Meter:
+                    if self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        self.parse_command_32(payload, endpoint)
+
+                case ZwaveCommandClass.MultiChannel:
+                    if payload[1] == 0x0D:
+                        source_endpoint = payload[2]
+                        self.update_raw(payload[4:], source_endpoint)
+
+                case ZwaveCommandClass.ThermostatOperatingState:
+                    LOGGER.warning("%s - Received ThermostatOperatingState report %s", self.prefix, payload.hex())
+
+        except IndexError:
+            LOGGER.debug("update_raw: invalid payload:%s", payload)
+
+    def parse_command_25(self, payload: bytes, endpoint: int) -> None:
+        command = payload[1]
+
+        if command == 0x03:
+            # Update Valve Service at specified endpoint
+            valve_service = self.service_get(ValveServiceZwave, endpoint)
+            if isinstance(valve_service, ValveServiceZwave):
+                if payload[2] == 0xFF:
+                    valve_service.is_closed = False
+                elif payload[2] == 0x00:
+                    valve_service.is_closed = True
+                else:
+                    LOGGER.warning("Unexpected Binary Switch value 0x%02X for node %s", payload[2], self.virtual_node_id)
+
+                valve_service.is_closed = payload[2] == 0x00
+
+            # Update Siren Service at specified endpoint
+            siren_service = self.service_get(SirenServiceZwave, endpoint)
+            if isinstance(siren_service, SirenServiceZwave):
+                if payload[2] == 0xFF:
+                    siren_service._is_on = True
+                elif payload[2] == 0x00:
+                    siren_service._is_on = False
+                else:
+                    LOGGER.warning("Unexpected Binary Switch value 0x%02X for node %s", payload[2], self.virtual_node_id)
+
+    def parse_command_32(self, payload: bytes, endpoint: int) -> None:
+        command = payload[1]
+
+        # Process report
+        if command == 0x02:
+            props = payload[2]
+            meter_type = props & 0x1F
+            # rateType = (props & 0x60) >> 5
+            size = payload[3] & 0x07
+            scale_msb = (props & 0x80) >> 7
+            scale_lsb = (payload[3] & 0x18) >> 3
+            scale = (scale_msb << 2) | scale_lsb
+            precision = (payload[3] & 0xE0) >> 5
+            value = int.from_bytes(payload[4 : 4 + size], "big") / (10.0**precision)
+
+            # Update Meter Service at specified endpoint
+            meter_service = self.service_get(MeterServiceZwave, endpoint)
+            if not isinstance(meter_service, MeterServiceZwave):
+                LOGGER.error("%s - Received Meter Report for endpoint %s but no MeterService found", self.prefix, endpoint)
+                return
+
+            if meter_service.meter_type != meter_type:
+                LOGGER.error(
+                    "%s - Received Meter Report for meter type %s but MeterService has meter type %s",
+                    self.prefix,
+                    meter_type,
+                    meter_service.meter_type,
+                )
+                return
+
+            qolsys_scale = map_to_qolsys_meter_scale(QolsysMeterType(meter_type), scale)
+
+            for meter in meter_service.meters:
+                if meter.unit == qolsys_scale:
+                    meter.value = value
+                    return
+
+    async def zwave_report(self) -> None:
+        for service in self.services:
+            if isinstance(service, LightServiceZwave):
+                light_commands = [ZwaveCommandClass.SwitchBinary, ZwaveCommandClass.SwitchMultilevel]
+                for command in light_commands:
+                    if command in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
+                        )
+                        await zwave_command.send_command()
+
+            if isinstance(service, LockServiceZwave):
+                lock_commands = [ZwaveCommandClass.DoorLock]
+                for command in lock_commands:
+                    if command in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
+                        )
+                        await zwave_command.send_command()
+
+            if isinstance(service, ThermostatServiceZwave):
+                thermostat_commands = [
+                    ZwaveCommandClass.ThermostatFanMode,
+                    ZwaveCommandClass.ThermostatMode,
+                    ZwaveCommandClass.ThermostatSetPoint,
+                    ZwaveCommandClass.ThermostatOperatingState,
+                ]
+                for command in thermostat_commands:
+                    if command in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
+                        )
+                        await zwave_command.send_command()
+
+            if isinstance(service, ValveServiceZwave):
+                valve_commands = [ZwaveCommandClass.SwitchBinary]
+                for command in valve_commands:
+                    if command in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
+                        )
+                        await zwave_command.send_command()
+
+            if isinstance(service, SirenServiceZwave):
+                siren_commands = [ZwaveCommandClass.SwitchBinary]
+                for command in siren_commands:
+                    if command in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
+                        )
+                        await zwave_command.send_command()
 
     def to_dict_zwave(self) -> dict[str, str]:
         return {
@@ -94,6 +258,12 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             "is_device_hidden": self._is_device_hidden,
             "last_updated_date": self._last_updated_date,
             "command_class_list": self._command_class_list,
+            "multisensor_capabilities": self._multisensor_capabilities,
+            "notification_capabilities": self._notification_capabilities,
+            "multi_channel_details": self._multi_channel_details,
+            "endpoint": self._endpoint,
+            "endpoint_details": self._endpoint_details,
+            "meter_capabilities": self._meter_capabilities,
         }
 
     # -----------------------------
@@ -112,7 +282,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     @property
     def command_class_list(self) -> list[ZwaveCommandClass]:
         commands = []
-        array = self._nodeid_cmd_classes.strip("[]").split(",")
+        array = self._command_class_list.strip("[]").split(",")
         for command in array:
             try:
                 commands.append(ZwaveCommandClass(int(command)))
@@ -144,3 +314,50 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             except json.JSONDecodeError:
                 LOGGER.error("%s - Error parsing multilevelsensor_capabilities:%s", self.prefix)
                 return
+
+    @property
+    def meter_capabilities(self) -> str:
+        return self._meter_capabilities
+
+    @meter_capabilities.setter
+    def meter_capabilities(self, value: str) -> None:
+        # Do not update meters if FIX_MULTICHANNEL_METER_ENDPOINT is enabled
+        if self._FIX_MULTICHANNEL_METER_ENDPOINT:
+            return
+
+        if self._meter_capabilities != value:
+            self._meter_capabilities = value
+
+            # Update Meter Service
+            try:
+                meters_dict = json.loads(value)
+                if len(meters_dict.keys()) > 1 and not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                    self._FIX_MULTICHANNEL_METER_ENDPOINT = True
+                    LOGGER.debug(
+                        "%s - Multiple meter endpoints detected, enabling FIX_MULTICHANNEL_METER_ENDPOINT", self.prefix
+                    )
+
+                for endpoint, values in meters_dict.items():
+                    service = self.service_get(MeterService, int(endpoint))
+                    if not service:
+                        service = MeterServiceZwave(self, int(endpoint))
+                        self.service_add(service)
+
+                    if isinstance(service, MeterServiceZwave):
+                        service.update_zwave_service(values)
+
+            except json.JSONDecodeError:
+                LOGGER.error("%s - Error parsing meter_capabilities:%s", self.prefix)
+                return
+
+    @property
+    def node_status(self) -> str:
+        return self._node_status
+
+    @node_status.setter
+    def node_status(self, value: str) -> None:
+        if self._node_status != value:
+            self._node_status = value
+            for service in self.service_get_protocol(StatusServiceZwave):
+                if isinstance(service, StatusServiceZwave):
+                    service.update_automation_service()

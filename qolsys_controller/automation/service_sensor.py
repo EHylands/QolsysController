@@ -75,6 +75,8 @@ class SensorService(AutomationService):
     def update_automation_service(self) -> None:
         pass
 
-    def info(self) -> None:
+    def info(self) -> list[str]:
+        str = []
         for sensor in self.sensors:
-            LOGGER.debug("%s - Sensor: %s (%s)", self.prefix, sensor.value, sensor.unit.name)
+            str.append(f"{self.prefix} - sensor: {sensor.value} ({sensor.unit.name})")
+        return str

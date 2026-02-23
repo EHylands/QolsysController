@@ -317,20 +317,21 @@ class ThermostatService(AutomationService):
                     supported_fan_modes.append(qolsys_fan_mode)
         self.fan_modes = supported_fan_modes
 
-    def info(self) -> None:
-        LOGGER.debug("%s - hvac_mode: %s", self.prefix, self.hvac_mode.name if self.hvac_mode else None)
-        LOGGER.debug("%s - fan_mode: %s", self.prefix, self.fan_mode.name if self.fan_mode else None)
-        LOGGER.debug("%s - hvac_modes: %s", self.prefix, ", ".join(mode.name for mode in self.hvac_modes))
-        LOGGER.debug("%s - fan_modes: %s", self.prefix, ", ".join(mode.name for mode in self.fan_modes))
-        LOGGER.debug("%s - current_temp: %s", self.prefix, self.current_temperature)
-        LOGGER.debug("%s - current_humidity: %s", self.prefix, self.current_humidity)
-        LOGGER.debug("%s - target_cool_temp: %s", self.prefix, self.target_cool_temp)
-        LOGGER.debug("%s - target_heat_temp: %s", self.prefix, self.target_heat_temp)
-        LOGGER.debug(
-            "%s - device_temperature_unit: %s",
-            self.prefix,
-            self.device_temperature_unit.name if self.device_temperature_unit else None,
+    def info(self) -> list[str]:
+        str = []
+        str.append(f"{self.prefix} - hvac_mode: {self.hvac_mode.name if self.hvac_mode else None}")
+        str.append(f"{self.prefix} - fan_mode: {self.fan_mode.name if self.fan_mode else None}")
+        str.append(f"{self.prefix} - hvac_action: {self.hvac_action.name if self.hvac_action else None}")
+        str.append(f"{self.prefix} - hvac_modes: {', '.join(mode.name for mode in self.hvac_modes)}")
+        str.append(f"{self.prefix} - fan_modes: {', '.join(mode.name for mode in self.fan_modes)}")
+        str.append(f"{self.prefix} - current_temperature: {self.current_temperature}")
+        str.append(f"{self.prefix} - current_humidity: {self.current_humidity}")
+        str.append(f"{self.prefix} - target_cool_temp: {self.target_cool_temp}")
+        str.append(f"{self.prefix} - target_heat_temp: {self.target_heat_temp}")
+        str.append(
+            f"{self.prefix} - device_temperature_unit: {self.device_temperature_unit.name if self.device_temperature_unit else None}"
         )
+        return str
 
     ZWAVE_TO_QOLSYS_HVAC_MODE: dict[ThermostatMode, QolsysHvacMode] = {
         ThermostatMode.OFF: QolsysHvacMode.OFF,
@@ -347,7 +348,6 @@ class ThermostatService(AutomationService):
         ThermostatMode.AUTO_CHANGEOVER: QolsysHvacMode.HEAT_COOL,
         ThermostatMode.FAN_ONLY: QolsysHvacMode.FAN_ONLY,
         ThermostatMode.MOIST_AIR: QolsysHvacMode.FAN_ONLY,
-        ThermostatMode.AWAY: QolsysHvacMode.AUTO,
     }
 
     QOLSYS_TO_ZWAVE_HVAC_MODE: dict[QolsysHvacMode, ThermostatMode] = {

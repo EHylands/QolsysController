@@ -76,10 +76,12 @@ class CoverService(AutomationService):
             self.automation_device.notify()
             LOGGER.debug("%s - is_closed: %s", self.prefix, value)
 
-    def info(self) -> None:
-        LOGGER.debug("%s - is_closed: %s", self.prefix, self.is_closed)
-        LOGGER.debug("%s - current_position: %s", self.prefix, self.current_position)
-        LOGGER.debug("%s - supports_open: %s", self.prefix, self.supports_open())
-        LOGGER.debug("%s - supports_close: %s", self.prefix, self.supports_close())
-        LOGGER.debug("%s - supports_stop: %s", self.prefix, self.supports_stop())
-        LOGGER.debug("%s - supports_position: %s", self.prefix, self.supports_position())
+    def info(self) -> list[str]:
+        str = []
+        str.append(f"{self.prefix} - is_closed: {self.is_closed}")
+        str.append(f"{self.prefix} - current_position: {self.current_position}")
+        str.append(f"{self.prefix} - supports_open: {self.supports_open()}")
+        str.append(f"{self.prefix} - supports_close: {self.supports_close()}")
+        str.append(f"{self.prefix} - supports_stop: {self.supports_stop()}")
+        str.append(f"{self.prefix} - supports_position: {self.supports_position()}")
+        return str

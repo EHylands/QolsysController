@@ -6,6 +6,7 @@ from qolsys_controller.automation.service_status import StatusService
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
 
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -17,4 +18,9 @@ class StatusServiceZwave(StatusService):
         return True
 
     def update_automation_service(self) -> None:
-        self.is_malfunctioning = self.automation_device.state.lower() != "normal"
+        from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+
+        if isinstance(self.automation_device, QolsysAutomationDeviceZwave):
+            self.is_malfunctioning = self.automation_device.node_status.lower() != "normal"
+
+        # self.is_malfunctioning = self.automation_device.state.lower() != "normal"

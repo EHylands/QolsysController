@@ -6,6 +6,7 @@ class vdFuncType(IntEnum):
     LIGHT = 3
     MALFUNCTION = 10
     DIMMER = 12
+    UNKNOWN = 99
 
 
 class vdFuncName(Enum):

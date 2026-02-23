@@ -10,7 +10,6 @@ from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
-from qolsys_controller.protocol_adc.device import QolsysAdcDevice
 from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
 from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
 from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
@@ -401,15 +400,19 @@ class QolsysPanel(QolsysObservable):
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
         self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
-        self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
         self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
 
-        # Sync Z-Wave device state
+        # Sync Z-Wave device state - LEGACY
         LOGGER.debug("sync_data - update z-wave devices states")
         for device in self._controller.state.zwave_devices:
             await device.zwave_report()
+
+        LOGGER.debug("sync_data - update automation devices z-wave devices states")
+        for autdev in self._controller.state.automation_devices:
+            if isinstance(autdev, QolsysAutomationDeviceZwave):
+                await autdev.zwave_report()
 
         # Validate all local user match a Qolsys Panel user
         qolsys_users = self.db.get_users()
@@ -444,9 +447,16 @@ class QolsysPanel(QolsysObservable):
         zwave = data.get("ZWAVE_RESPONSE", "")
         payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
         node_id: str = str(zwave.get("NODE_ID", 0))
+
+        # Legacy - Update Z-Wave device state with raw payload
         node = self._controller.state.zwave_device(node_id)
         if node is not None:
             node.update_raw(bytes.fromhex(payload))
+
+        # Update Atomation Device Z-Wave Service with raw payload
+        automation_device = self._controller.state.automation_device(node_id)
+        if isinstance(automation_device, QolsysAutomationDeviceZwave):
+            automation_device.update_raw(bytes.fromhex(payload))
 
     # Parse panel update to database
     def parse_iq2meid_message(self, data: dict[str, Any]) -> None:  # noqa: C901, PLR0912, PLR0915
@@ -652,12 +662,7 @@ class QolsysPanel(QolsysObservable):
 
                             # Virtual device
                             case self.db.table_virtual_device.uri:
-                                # Update ADC device - Legacy
                                 self.db.table_virtual_device.update(selection, selection_argument, content_values)
-                                adc_id = content_values.get("device_id", "")
-                                adc_device = self._controller.state.adc_device(adc_id)
-                                if adc_device is not None:
-                                    adc_device.update_adc_device(content_values)
 
                                 # Update ADC devices in automation devices list
                                 virtual_node_id = content_values.get("device_id", "")
@@ -748,7 +753,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_virtual_device.uri:
                                 self.db.table_virtual_device.delete(selection, selection_argument)
-                                self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.delete(selection, selection_argument)
@@ -893,12 +898,11 @@ class QolsysPanel(QolsysObservable):
                             # Zwave Other
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.insert(data=content_values)
-                                LOGGER.debug("New Z-Wave Other information")
 
                             # Virtual Device
                             case self.db.table_virtual_device.uri:
                                 self.db.table_virtual_device.insert(data=content_values)
-                                self._controller.state.sync_adc_devices_data(self.get_adc_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # Output Rules
                             case self.db.table_output_rules.uri:
@@ -954,6 +958,26 @@ class QolsysPanel(QolsysObservable):
             if new_device is not None and protocol in allowed_protocols:
                 automation_devices.append(new_device)
 
+        # Add other Z-Wave devices that are not in automation content provider
+        if AutomationDeviceProtocol.ZWAVE in allowed_protocols:
+            for zwave_device in self.db.get_zwave_devices():
+                node_type = zwave_device.get("node_type", "")
+
+                if node_type in [
+                    "Energy Clamp",
+                    "Thermometer",
+                    "External Siren",
+                    "Garage Door",
+                    "Repeater",
+                    "Smart Socket",
+                    "Water Valve",
+                ]:
+                    new_device = QolsysAutomationDeviceZwave(self._controller, zwave_device, {})
+                    new_device.virtual_node_id = zwave_device.get("node_id", "")
+                    new_device.protocol = AutomationDeviceProtocol.ZWAVE
+                    new_device.device_type = node_type
+                    automation_devices.append(new_device)
+
         # Add virtual adc devices
         if AutomationDeviceProtocol.ADC in allowed_protocols:
             adc_devices = self.db.get_adc_devices()
@@ -962,15 +986,6 @@ class QolsysPanel(QolsysObservable):
                 automation_devices.append(new_device)
 
         return automation_devices
-
-    def get_adc_devices_from_db(self) -> list[QolsysAdcDevice]:
-        adc_devices: list[QolsysAdcDevice] = []
-        devices_list = self.db.get_adc_devices()
-
-        for device in devices_list:
-            adc_devices.append(QolsysAdcDevice(device))
-
-        return adc_devices
 
     def get_zwave_devices_from_db(self) -> list[QolsysZWaveDevice]:
         devices: list[QolsysZWaveDevice] = []

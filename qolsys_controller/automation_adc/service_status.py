@@ -18,6 +18,11 @@ class StatusServiceADC(StatusService):
         endpoint: int,
     ) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
+        self._func_type: vdFuncType = vdFuncType.UNKNOWN
+
+    @property
+    def func_type(self) -> vdFuncType:
+        return self._func_type
 
     async def set_level(self, level: int) -> None:
         pass
@@ -34,6 +39,7 @@ class StatusServiceADC(StatusService):
         timestamp: str,
     ) -> None:
         self.is_malfunctioning = func_state == vdFuncState.ON
+        self._vdfunc_type = func_type
 
     def update_automation_service(self) -> None:
         pass

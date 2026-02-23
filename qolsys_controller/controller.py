@@ -13,6 +13,12 @@ from typing import Any
 import aiofiles
 import aiomqtt
 
+from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
+from qolsys_controller.automation_adc.service_cover import CoverServiceADC
+from qolsys_controller.automation_adc.service_light import LightServiceADC
+from qolsys_controller.automation_adc.service_status import StatusServiceADC
+from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
 from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.mqtt_command import (
     MQTTCommand,
@@ -279,11 +285,24 @@ class QolsysController:
     async def mqtt_zwave_meter_update(self) -> None:
         while True:
             if self.aiomqtt is not None and self.connected:
+                for autdev in self.state.automation_devices:
+                    if not isinstance(autdev, QolsysAutomationDeviceZwave):
+                        continue
+
+                    if not autdev._FIX_MULTICHANNEL_METER_ENDPOINT:
+                        continue
+
+                    for service in autdev.service_get_protocol(MeterServiceZwave):
+                        if isinstance(service, MeterServiceZwave):
+                            await service.refresh_meter_zwave()
+                            await asyncio.sleep(5)
+
+                # Legacy fix for older Z-Wave devices with multichannel meter endpoints
                 for device in self.state.zwave_devices:
                     if device._FIX_MULTICHANNEL_METER_ENDPOINT:
                         for meter in device.meter_endpoints:
                             zwave_command = MQTTCommand_ZWave(
-                                self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter, 0x01]
+                                self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter.value, 0x01]
                             )
                             await zwave_command.send_command()
 
@@ -811,14 +830,14 @@ class QolsysController:
     ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending virtual_device command device:%s, service:%s", device_id, service_id)
 
-        device = self.state.adc_device(device_id)
-        if not device:
-            LOGGER.error("Invalid ADC Device: %s", device_id)
+        device = self.state.automation_device(device_id)
+        if not isinstance(device, QolsysAutomationDeviceADC):
+            LOGGER.error("Invalid Automation Device ADC: %s", device_id)
             return None
 
-        service = device.get_adc_service(service_id)
-        if not service:
-            LOGGER.error("Invalid ADC Service: %s", service_id)
+        service = device.service_get_adc(service_id)
+        if not isinstance(service, (LightServiceADC, CoverServiceADC, StatusServiceADC)):
+            LOGGER.error("Invalid Automation ADC Service: %s", service_id)
             LOGGER.error(device.func_list)
             return None
 

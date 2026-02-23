@@ -60,7 +60,9 @@ class LightService(AutomationService):
             self.automation_device.notify()
             LOGGER.debug("%s - level: %s", self.prefix, value)
 
-    def info(self) -> None:
-        LOGGER.debug("%s - is_on: %s", self.prefix, self.is_on)
-        LOGGER.debug("%s - level: %s", self.prefix, self.level)
-        LOGGER.debug("%s - supports_level: %s", self.prefix, self.supports_level())
+    def info(self) -> list[str]:
+        str = []
+        str.append(f"{self.prefix} - is_on: {self.is_on}")
+        str.append(f"{self.prefix} - level: {self.level}")
+        str.append(f"{self.prefix} - supports_level: {self.supports_level()}")
+        return str

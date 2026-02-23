@@ -1,4 +1,4 @@
-# Qolsys Controller - qolsys-controller
+# Qolsys Controller
 
 [![Build](https://github.com/EHylands/QolsysController/actions/workflows/build.yml/badge.svg)](https://github.com/EHylands/QolsysController/actions/workflows/build.yml)
 
@@ -10,14 +10,13 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 - 🔢 Supports **4-digit user codes**
 - ⚠️ Uses a **custom local usercode database** — panel's internal user code verification process is not yet supported
 
-## ✨ Functionality Highlights
+## Functionality Highlights
 
 | Category               | Feature                              | Status |
 |------------------------|--------------------------------------|--------|
 | **Panel**              | Diagnostic Sensors                   | ✅     |
 |                        | Panel Scenes                         | ✅     |
 |                        | Weather Forecast                     | ✅     |
-|                        | (Alarm.com Weather to Panel)         |        |
 | **Partition**          | Arming Status                        | ✅     |
 |                        | Alarm State                          | ✅     |
 |                        | Home Instant Arming                  | ✅     |
@@ -33,18 +32,17 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                        | Latest dBm                           | ✅     |
 
 
-| Automation Devices| Z-Wave | PowerG | ADC |
-|-----------------|--------|--------|-----|
-| Door Locks       | ✅     | ✅     | ❌  |
-| Energy Clamp     | ✅     | ❌     | ❌  |
-| External Siren   | 🛠️     | ❌     | ❌  |
-| Garage Door.     | 🛠️     | ❌     | ✅  |
-| Lights           | ✅     | 🛠️     | ✅  |
-| Smart Outlets    | 🛠️     | ❌     | ❌  |
-| Thermometer      | ✅     | ❌     | ❌  |
-| Thermostats      | ✅     | ❌     | ❌  |
-| Water Valve      | 🛠️     | ❌     | ❌  |
-
+| Automation Devices| Z-Wave | PowerG | Alarm.com |
+|-----------------|--------|--------|-------|
+| Door Lock        | ✅     | ✅     | ❌    |
+| Energy Clamp     | ✅     | ❌     | ❌    |
+| External Siren   | 🛠️     | ❌     | ❌    |
+| Garage Door      | 🛠️     | ❌     | ✅    |
+| Lights           | ✅     | 🛠️     | ✅    |
+| Smart Outlet.    | 🛠️     | ❌     | ❌    |
+| Thermometer      | ✅     | ❌     | ❌    |
+| Thermostat       | ✅     | ❌     | ❌    |
+| Water Valve      | 🛠️     | ❌     | ❌    |
 
 
 ## ⚠️ Certificate Warning

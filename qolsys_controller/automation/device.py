@@ -8,9 +8,12 @@ from qolsys_controller.automation.service_battery import BatteryService
 from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
+from qolsys_controller.automation.service_meter import MeterService
 from qolsys_controller.automation.service_sensor import SensorService
+from qolsys_controller.automation.service_siren import SirenService
 from qolsys_controller.automation.service_status import StatusService
 from qolsys_controller.automation.service_thermostat import ThermostatService
+from qolsys_controller.automation.service_valve import ValveService
 from qolsys_controller.automation_adc.service_cover import CoverServiceADC
 from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
@@ -22,8 +25,10 @@ from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwa
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
+from qolsys_controller.automation_zwave.service_siren import SirenServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
+from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
 from qolsys_controller.observable import QolsysObservable
 
@@ -72,23 +77,45 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             CoverService,
             LightService,
             LockService,
+            MeterService,
             SensorService,
+            SirenService,
             StatusService,
             ThermostatService,
+            ValveService,
         ]
         self._services: list[AutomationService] = []
 
         match self.device_type:
             case "Light":
                 self.service_add_light_service(int(self._end_point))
+
             case "Door Lock":
                 self.service_add_lock_service(int(self._end_point))
+
+            case "External Siren":
+                self.service_add_siren_service(int(self._end_point))
+
+            case "Water Valve":
+                self.service_add_valve_service(int(self._end_point))
+
             case "Thermostat":
                 self.service_add_thermostat_service(int(self._end_point))
 
+            case "Thermometer":  # Device will auto discover multilevel sensors
+                pass
+
+            case "Energy Clamp":  # Device will auto discover meters
+                pass
+
+            case "Repeater":  # No services
+                pass
+
+            case "Smart Socket":
+                pass
+
     def info(self) -> None:
         pass
-        # return  "AutDev%s [%s] (%s)" % (self.virtual_node_id, self.protocol, self.device_name)
 
     def service_get(self, service_type: type[AutomationService], endpoint: int = 0) -> AutomationService | None:
         for service in self._services:
@@ -138,6 +165,40 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             type(service),
         )
 
+    def service_add_valve_service(self, endpoint: int = 0) -> None:
+        valve_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                pass
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                valve_service = ValveServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if valve_service is not None:
+            self.service_add(valve_service)
+            return
+
+    def service_add_siren_service(self, endpoint: int = 0) -> None:
+        siren_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                pass
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                siren_service = SirenServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if siren_service is not None:
+            self.service_add(siren_service)
+            return
+
     def service_add_thermostat_service(self, endpoint: int = 0) -> None:
         thermostat_service: AutomationService | None = None
 
@@ -155,7 +216,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.service_add(thermostat_service)
             return
 
-    def service_add_sensort_service(self, endpoint: int = 0) -> None:
+    def service_add_sensor_service(self, endpoint: int = 0) -> None:
         sensor_service: AutomationService | None = None
 
         match self.protocol:
@@ -188,8 +249,6 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         if light_service is not None:
             self.service_add(light_service)
             return
-
-        LOGGER.error("%s - Unable to add Light Service to endpoint%s", self.prefix, endpoint)
 
     def service_add_lock_service(self, endpoint: int = 0) -> None:
         lock_service: AutomationService | None = None
@@ -308,7 +367,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
     @property
     def prefix(self, endpoint: int | None = None) -> str:
-        return f"[AutDev][{self.protocol.name}]{self.virtual_node_id}] ({self.device_name})"
+        return f"[AutDev][{self.protocol.name}][{self.virtual_node_id}]({self.device_name})"
 
     @property
     def device_id(self) -> str:

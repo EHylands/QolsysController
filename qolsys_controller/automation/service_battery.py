@@ -59,13 +59,16 @@ class BatteryService(AutomationService):
             self.automation_device.notify()
             LOGGER.debug("%s - battery_low: %s", self.prefix, value)
 
-    def info(self) -> None:
+    def info(self) -> list[str]:
+        str = []
+        str.append(f"{self.prefix} - supports_battery_level: {self.supports_battery_level()}")
+        str.append(f"{self.prefix} - supports_battery_low: {self.supports_battery_low()}")
         if self.supports_battery_level():
-            LOGGER.debug("%s - battery_level: %s%%", self.prefix, self.battery_level)
-            return
-
+            str.append(f"{self.prefix} - battery_level: {self.battery_level}%")
+            return str
         if self.supports_battery_low():
-            LOGGER.debug("%s - low_battery: %s", self.prefix, self.battery_low)
-            return
+            str.append(f"{self.prefix} - battery_low: {self.battery_low}")
+            return str
 
-        LOGGER.debug("%s - Disabled", self.prefix)
+        str.append(f"{self.prefix} - Disabled")
+        return str
