@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class LockServicePowerG(LockService):
+class LockServiceZwave(LockService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
@@ -21,12 +21,12 @@ class LockServicePowerG(LockService):
         return False
 
     def supports_jam(self) -> bool:
-        return True
+        return False
 
     async def lock(self) -> None:
         if self.is_locked:
             LOGGER.debug(
-                "%s[%s] LockServicePowerG - lock: already locked",
+                "%s[%s] LockServiceZwave - lock: already locked",
                 self.automation_device.prefix,
                 self.endpoint,
             )
@@ -35,15 +35,16 @@ class LockServicePowerG(LockService):
         self.is_locking = True
         self.is_unlocking = False
         self.automation_device.notify()
-        self._is_locking = False  # Dont fire notify again, will update when status comes back
-        await self.automation_device.controller.command_automation_door_lock(
-            int(self.automation_device.virtual_node_id), self.endpoint
+        self._is_locking = False
+
+        await self.automation_device.controller.command_zwave_doorlock_set(
+            self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
     async def unlock(self) -> None:
         if not self.is_locked:
             LOGGER.debug(
-                "%s[%s] LockServicePowerG - unlock: already unlocked",
+                "%s[%s] LockServiceZwave - unlock already unlocked",
                 self.automation_device.prefix,
                 self.endpoint,
             )
@@ -52,9 +53,10 @@ class LockServicePowerG(LockService):
         self.is_locking = False
         self.is_unlocking = True
         self.automation_device.notify()
-        self._is_unlocking = False  # Dont fire notify again, will update when status comes back
-        await self.automation_device.controller.command_automation_door_unlock(
-            int(self.automation_device.virtual_node_id), self.endpoint
+        self._is_unlocking = False
+
+        await self.automation_device.controller.command_zwave_doorlock_set(
+            self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 
     async def open(self) -> None:
@@ -65,4 +67,3 @@ class LockServicePowerG(LockService):
 
     def update_automation_service(self) -> None:
         self.is_locked = self.automation_device.status.lower() == "locked"
-        self.is_jammed = self.automation_device.status.lower() == "jammed"

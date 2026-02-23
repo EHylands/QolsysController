@@ -239,6 +239,24 @@ class QolsysDB:
 
         return devices
 
+    def get_zwave_device(self, node_id: str) -> dict[str, str] | None:
+        try:
+            self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} WHERE node_id = ?", (node_id,))
+            self.db.commit()
+
+            row = self.cursor.fetchone()
+
+            if row is None:
+                LOGGER.debug("Zwave node_id %s not found", node_id)
+                return None
+
+            columns = [description[0] for description in self.cursor.description]
+            return dict(zip(columns, row, strict=True))
+
+        except sqlite3.Error:
+            LOGGER.exception("Error getting Zwave device info for node_id %s", node_id)
+            return None
+
     def get_zwave_devices(self) -> list[dict[str, str]]:
         self.cursor.execute(f"SELECT * FROM {self.table_zwave_node.table} ORDER BY CAST(node_id AS INTEGER)")
         self.db.commit()

@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -6,9 +6,10 @@ if TYPE_CHECKING:
 
 
 class AutomationService(ABC):
-    def __init__(self, automation_device: "QolsysAutomationDevice") -> None:
+    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         self._automation_device = automation_device
-        self._endpoint: int = 0
+        self._endpoint: int = endpoint
+        self._service_name: str = "AutomationService"
 
     @property
     def automation_device(self) -> "QolsysAutomationDevice":
@@ -19,9 +20,25 @@ class AutomationService(ABC):
         self._automation_device = value
 
     @property
+    def prefix(self) -> str:
+        return f"[AutDev][{self.automation_device.protocol.name}][{self.automation_device.virtual_node_id}][{self.endpoint}]({self.automation_device.device_name}) - {self.service_name}"
+
+    @property
     def endpoint(self) -> int:
         return self._endpoint
 
     @endpoint.setter
     def endpoint(self, value: int) -> None:
         self._endpoint = value
+
+    @property
+    def service_name(self) -> str:
+        return self._service_name
+
+    @abstractmethod
+    def info(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def update_automation_service(self) -> None:
+        pass
