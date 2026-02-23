@@ -23,8 +23,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                        | Home Instant Arming                  | ✅     |
 |                        | Home Silent Disarming (Firmware 4.6.1)| ✅     |
 |                        | Set Exit Sounds                      | ✅     |
-|                        | Set Entry Delay                      | ✅            |
-|                        | TTS                                  | 🛠️     |
+|                        | Set Entry Delay                      | ✅     |
 | **Zones**              | Sensor Status                        | ✅     |
 |                        | Tamper State                         | ✅     |
 |                        | Battery Level                        | ✅     |
@@ -32,14 +31,20 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |                        | Light (supported PowerG device)      | ✅     |
 |                        | Average dBm                          | ✅     |
 |                        | Latest dBm                           | ✅     |
-| **Z-Wave Devices**     | Battery Level                        | ✅     |
-|                        | Node Status                          | ✅     |
-|                        | Control Generic Devices              | ✅.    |
-| **Z-Wave Dimmers**     |                                      | ✅     |
-| **Z-Wave Door Locks**  |                                      | ✅     |
-| **Z-Wave Thermostats** |                                      | ✅     |
-| **Z-Wave Garage Doors**|                                      | 🛠️     |
-| **Z-Wave Outlets**     |                                      | 🛠️     |
+
+
+| Automation Devices| Z-Wave | PowerG | ADC |
+|-----------------|--------|--------|-----|
+| Door Locks       | ✅     | ✅     | ❌  |
+| Energy Clamp     | ✅     | ❌     | ❌  |
+| External Siren   | 🛠️     | ❌     | ❌  |
+| Garage Door.     | 🛠️     | ❌     | ✅  |
+| Lights           | ✅     | 🛠️     | ✅  |
+| Smart Outlets    | 🛠️     | ❌     | ❌  |
+| Thermometer      | ✅     | ❌     | ❌  |
+| Thermostats      | ✅     | ❌     | ❌  |
+| Water Valve      | 🛠️     | ❌     | ❌  |
+
 
 
 ## ⚠️ Certificate Warning
@@ -66,6 +71,6 @@ git clone https://github.com/EHylands/QolsysController.git
 cd qolsys_controller
 pip3.12 install -r requirements.txt
 
-# Change panel_ip and plugin_in in main.py file
+# Change panel_ip and plugin_ip in example.py file
 python3.12 example.py
 ```
