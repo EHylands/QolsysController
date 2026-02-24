@@ -828,7 +828,9 @@ class QolsysController:
     async def command_panel_virtual_device_action(
         self, device_id: str, service_id: int, state: vdFuncState
     ) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending virtual_device command device:%s, service:%s", device_id, service_id)
+        LOGGER.debug(
+            "MQTT: Sending virtual_device_action device: %s, service: %s state: %s", device_id, service_id, state.name
+        )
 
         device = self.state.automation_device(device_id)
         if not isinstance(device, QolsysAutomationDeviceADC):
@@ -850,7 +852,7 @@ class QolsysController:
                             "vdFuncId": service_id,
                             "vdFuncState": state,
                             "vdFuncBackendTimestamp": int(time.time() * 1000),
-                            "vdFuncType": service.func_type.value,
+                            "vdFuncType": service.func_type,
                         }
                     ],
                 }

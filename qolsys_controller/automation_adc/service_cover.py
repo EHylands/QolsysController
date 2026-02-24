@@ -61,7 +61,7 @@ class CoverServiceADC(CoverService):
         timestamp: str,
     ) -> None:
         self.is_closed = func_state == vdFuncState.OFF
-        self._vdfunc_type = func_type
+        self._func_type = func_type
 
     def update_automation_service(self) -> None:
         pass

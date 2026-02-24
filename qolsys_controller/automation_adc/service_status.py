@@ -39,7 +39,7 @@ class StatusServiceADC(StatusService):
         timestamp: str,
     ) -> None:
         self.is_malfunctioning = func_state == vdFuncState.ON
-        self._vdfunc_type = func_type
+        self._func_type = func_type
 
     def update_automation_service(self) -> None:
         pass

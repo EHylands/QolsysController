@@ -49,7 +49,7 @@ class LightServiceADC(LightService):
         timestamp: str,
     ) -> None:
         self.is_on = func_state == vdFuncState.ON
-        self._vdfunc_type = func_type
+        self._func_type = func_type
 
     def update_automation_service(self) -> None:
         pass
