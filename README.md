@@ -17,19 +17,16 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 | **Panel**              | Diagnostic Sensors                   | ✅     |
 |                        | Panel Scenes                         | ✅     |
 |                        | Weather Forecast                     | ✅     |
-| **Partition**          | Arming Status                        | ✅     |
-|                        | Alarm State                          | ✅     |
+| **Partition**          | Arming Status and Alarm State        | ✅     |
 |                        | Home Instant Arming                  | ✅     |
 |                        | Home Silent Disarming (Firmware 4.6.1)| ✅     |
-|                        | Set Exit Sounds                      | ✅     |
-|                        | Set Entry Delay                      | ✅     |
+|                        | Set Exit Sounds and Entry Delay      | ✅     |
 | **Zones**              | Sensor Status                        | ✅     |
 |                        | Tamper State                         | ✅     |
 |                        | Battery Level                        | ✅     |
 |                        | Temperature (supported PowerG device)| ✅     |
 |                        | Light (supported PowerG device)      | ✅     |
-|                        | Average dBm                          | ✅     |
-|                        | Latest dBm                           | ✅     |
+|                        | Average and Latest dBm               | ✅     |
 
 
 | Automation Devices| Z-Wave | PowerG | Alarm.com |

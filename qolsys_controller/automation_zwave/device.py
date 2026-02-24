@@ -344,7 +344,8 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         self.service_add(service)
 
                     if isinstance(service, MeterServiceZwave):
-                        service.update_zwave_service(values)
+                        if not self._FIX_MULTICHANNEL_METER_ENDPOINT:
+                            service.update_zwave_service(values)
 
             except json.JSONDecodeError:
                 LOGGER.error("%s - Error parsing meter_capabilities:%s", self.prefix)
