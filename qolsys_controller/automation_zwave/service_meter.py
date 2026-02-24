@@ -18,7 +18,7 @@ class MeterServiceZwave(MeterService):
     def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
-    def update_zwave_service(self, data: dict[str, Any]) -> None:
+    def update_zwave_service(self, data: dict[str, Any], update_meter_value: bool = True) -> None:
         # Update Meter Type
         type: str | int = data.get("meter_type", "")
         if type == "ENERGY_METER" or type == QolsysMeterType.ELECTRIC_METER:
@@ -58,6 +58,10 @@ class MeterServiceZwave(MeterService):
                 self.supported_scales = []
 
         # Update Meter Values
+
+        if not update_meter_value:
+            return
+
         if "meter_scale_reading_values" in data:
             meter_scale_values: dict[str, Any] = data.get("meter_scale_reading_values", {})
             for key, value in meter_scale_values.items():

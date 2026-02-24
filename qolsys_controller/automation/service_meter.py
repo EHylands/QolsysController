@@ -69,11 +69,13 @@ class MeterService(AutomationService):
 
     @supported_scales.setter
     def supported_scales(self, value: list[QolsysMeterScale]) -> None:
-        for scale in value:
-            if scale not in self._supported_scales:
-                self._supported_scales.append(scale)
-                self.meter_add(QolsysMeter(parent_device=self._automation_device, parent_service=self, unit=scale))
-                self.automation_device.notify()
+        if self._supported_scales != value:
+            for scale in value:
+                if scale not in self._supported_scales:
+                    self._supported_scales.append(scale)
+                    self.meter_add(QolsysMeter(parent_device=self._automation_device, parent_service=self, unit=scale))
+                    self.automation_device.notify()
+            LOGGER.debug("%s - supported_scales: %s", self.prefix, [] if not value else ", ".join([s.name for s in value]))
 
     @property
     def master_reset_flag(self) -> bool:
