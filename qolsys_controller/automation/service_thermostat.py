@@ -133,7 +133,6 @@ class ThermostatService(AutomationService):
     @current_temperature.setter
     def current_temperature(self, value: float) -> None:
         if self._current_temperature != value:
-
             if self.device_temperature_unit == QolsysTemperatureUnit.FAHRENHEIT:
                 if not self._fahrenheit_min_temp <= value <= self._fahrenheit_max_temp:
                     LOGGER.debug(
