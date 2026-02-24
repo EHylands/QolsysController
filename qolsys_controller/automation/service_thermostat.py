@@ -133,6 +133,27 @@ class ThermostatService(AutomationService):
     @current_temperature.setter
     def current_temperature(self, value: float) -> None:
         if self._current_temperature != value:
+
+            if self.device_temperature_unit == QolsysTemperatureUnit.FAHRENHEIT:
+                if not self._fahrenheit_min_temp <= value <= self._fahrenheit_max_temp:
+                    LOGGER.debug(
+                        "Thermostat%s (%s) - temp %s°F out of range",
+                        self.thermostat_node_id,
+                        self.thermostat_name,
+                        value,
+                    )
+                    return
+
+            if self.device_temperature_unit == QolsysTemperatureUnit.CELSIUS:
+                if not self._celsius_min_temp <= value <= self._celsius_max_temp:
+                    LOGGER.debug(
+                        "Thermostat%s (%s) - temp %s°C out of range",
+                        self.thermostat_node_id,
+                        self.thermostat_name,
+                        value,
+                    )
+                    return
+
             self._current_temperature = value
             self.automation_device.notify()
             LOGGER.debug("%s - current_temperature: %s", self.prefix, value)
