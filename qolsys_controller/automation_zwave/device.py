@@ -111,7 +111,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         self.update_raw(payload[4:], source_endpoint)
 
                 case ZwaveCommandClass.ThermostatOperatingState:
-                    LOGGER.warning("%s - Received ThermostatOperatingState report %s", self.prefix, payload.hex())
+                    LOGGER.debug("%s - Received ThermostatOperatingState report %s", self.prefix, payload.hex())
 
         except IndexError:
             LOGGER.debug("update_raw: invalid payload:%s", payload)

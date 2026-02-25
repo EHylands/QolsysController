@@ -70,6 +70,8 @@ class ZoneStatus(StrEnum):
     CLOSED = "Closed"
     CONNECTED = "connected"
     DISARM = "Disarm"
+    FAILURE = "Failure"
+    FIRE = "Fire Emergency"
     OPEN = "Open"
     INACTIVE = "Inactive"
     IDLE = "Idle"
@@ -78,7 +80,6 @@ class ZoneStatus(StrEnum):
     TAMPERED = "Tampered"
     SYNCHRONIZING = "Synchronizing"
     DISCONNECTED = "disconnected"
-    FAILURE = "Failure"
     NOT_NETWORKED = "Not Networked"
 
 
