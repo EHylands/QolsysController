@@ -53,6 +53,7 @@ class PartitionAlarmType(StrEnum):
     REPORTING_SAFETY_SENSOR = "reportingsafety"
     DELAYED_REPORTING_SAFETY_SENSOR = "delayedreportingsafety"
     AWAY_INSTANT_MOTION = "awayinstantmotion"
+    SMOKE_HEAT = "smoke_heat"
     STAY_INSTANT_MOTION = "stayinstantmotion"
     STAY_DELAY_MOTION = "staydelaymotion"
     AWAY_DELAY_MOTION = "awaydelaymotion"

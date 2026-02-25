@@ -270,6 +270,12 @@ class QolsysPartition(QolsysObservable):
             }:
                 new_alarm_type = PartitionAlarmType.POLICE_EMERGENCY
 
+            # Map values to Fire Emergency if needed
+            if new_alarm_type in {
+                PartitionAlarmType.SMOKE_HEAT,
+            }:
+                new_alarm_type = PartitionAlarmType.FIRE_EMERGENCY
+
             # Value already in array
             if new_alarm_type in self._alarm_type_array:
                 continue
