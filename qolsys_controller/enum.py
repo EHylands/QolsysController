@@ -40,6 +40,7 @@ class PartitionAlarmState(StrEnum):
 class PartitionAlarmType(StrEnum):
     POLICE_EMERGENCY = "Police Emergency"
     FIRE_EMERGENCY = "Fire Emergency"
+    GAZ_CO = "co"
     AUXILIARY_EMERGENCY = "Auxiliary Emergency"
     SILENT_AUXILIARY_EMERGENCY = "Silent Auxiliary Emergency"
     SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
@@ -58,6 +59,8 @@ class PartitionAlarmType(StrEnum):
     STAY_DELAY_MOTION = "staydelaymotion"
     AWAY_DELAY_MOTION = "awaydelaymotion"
     EMPTY = ""
+    SHOCK = "shock"
+    WATER_SENSOR = "WaterSensor"
 
 
 class ZoneStatus(StrEnum):
@@ -66,21 +69,28 @@ class ZoneStatus(StrEnum):
     ALARMED = "Alarmed"
     ARM_AWAY = "Arm-Away"
     ARM_STAY = "Arm-Stay"
+    AUXILLIARY_EMERGENCY = "Auxiliary Emergency"
     BELL_TROUBLE = "Bell Trouble"
     CLOSED = "Closed"
     CONNECTED = "connected"
     DISARM = "Disarm"
     FAILURE = "Failure"
-    FIRE = "Fire Emergency"
+    FIRE_EMERGENCY = "Fire Emergency"
     OPEN = "Open"
+    OCCUPIED = "Occupied"
+    POLICE_EMERGENCY = "Police Emergency"
     INACTIVE = "Inactive"
     IDLE = "Idle"
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"
+    SILENT_POLICE_EMERGENCY = "Silent Police Emergency"
+    SILENT_AUXILIARY_EMERGENCY = "Silent Auxiliary Emergency"
     TAMPERED = "Tampered"
     SYNCHRONIZING = "Synchronizing"
     DISCONNECTED = "disconnected"
     NOT_NETWORKED = "Not Networked"
+    TROUBLE = "Trouble"
+    VACANT = "Vacant"
 
 
 class DeviceCapability(StrEnum):
