@@ -18,7 +18,10 @@ from qolsys_controller.automation_adc.service_cover import CoverServiceADC
 from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.automation_zwave.service_light import LightServiceZwave
+from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
+from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.mqtt_command import (
     MQTTCommand,
@@ -26,9 +29,8 @@ from qolsys_controller.mqtt_command import (
     MQTTCommand_Panel,
     MQTTCommand_ZWave,
 )
-from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
 
-from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus
+from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus, QolsysTemperatureUnit
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
@@ -296,43 +298,6 @@ class QolsysController:
                         if isinstance(service, MeterServiceZwave):
                             await service.refresh_meter_zwave()
                             await asyncio.sleep(5)
-
-                # Legacy fix for older Z-Wave devices with multichannel meter endpoints
-                for device in self.state.zwave_devices:
-                    if device._FIX_MULTICHANNEL_METER_ENDPOINT:
-                        for meter in device.meter_endpoints:
-                            zwave_command = MQTTCommand_ZWave(
-                                self, device.node_id, meter.endpoint, [ZwaveCommandClass.Meter.value, 0x01]
-                            )
-                            await zwave_command.send_command()
-
-                            # Update all endpoint scale
-                            for sensor in meter.sensors:
-                                zwave_command = MQTTCommand_ZWave(
-                                    self,
-                                    device.node_id,
-                                    meter.endpoint,
-                                    [ZwaveCommandClass.Meter.value, 0x01, sensor.scale.value & 0x07],
-                                )
-                                await zwave_command.send_command()
-                                await asyncio.sleep(5)
-
-                                zwave_command = MQTTCommand_ZWave(
-                                    self,
-                                    device.node_id,
-                                    "0",
-                                    [
-                                        0x60,
-                                        0x0D,
-                                        0x00,
-                                        int(meter.endpoint),
-                                        ZwaveCommandClass.Meter.value,
-                                        0x01,
-                                        sensor.scale.value & 0x07,
-                                    ],
-                                )
-                                await zwave_command.send_command()
-                                await asyncio.sleep(5)
 
             await asyncio.sleep(300)
 
@@ -971,14 +936,15 @@ class QolsysController:
 
     async def command_zwave_switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
-        zwave_node = self.state.zwave_device(node_id)
+        node = self.state.automation_device(node_id)
 
-        if not zwave_node:
+        if not isinstance(node, QolsysAutomationDeviceZwave):
             LOGGER.error("switch_binary_set - Invalid node_id %s", node_id)
             return None
 
-        if ZwaveCommandClass.SwitchBinary not in zwave_node.command_class_list:
-            LOGGER.error("Z-Wave node does not support switch_binary_set")
+        service = node.service_get(LightServiceZwave, int(endpoint))
+        if not isinstance(service, LightServiceZwave):
+            LOGGER.error("switch_binary_set - No LightServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
             return None
 
         level = 0
@@ -993,13 +959,14 @@ class QolsysController:
     async def command_zwave_switch_multilevel_set(self, node_id: str, endpoint: str, level: int) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
 
-        zwave_node = self.state.zwave_device(node_id)
-        if not zwave_node:
+        node = self.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
             LOGGER.error("switch_multilevel_set - Invalid node_id %s", node_id)
             return None
 
-        if ZwaveCommandClass.SwitchMultilevel not in zwave_node.command_class_list:
-            LOGGER.error("Z-Wave node does not support switch_multilevel_set")
+        service = node.service_get(LightServiceZwave, int(endpoint))
+        if not isinstance(service, LightServiceZwave):
+            LOGGER.error("switch_multilevel_set - No LightServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
             return None
 
         command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.SwitchMultilevel, 1, level])
@@ -1010,13 +977,14 @@ class QolsysController:
     async def command_zwave_doorlock_set(self, node_id: str, endpoint: str, locked: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
-        zwave_node = self.state.zwave_device(node_id)
-        if not zwave_node:
+        node = self.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
             LOGGER.error("doorlock_set - Invalid node_id %s", node_id)
             return None
 
-        if ZwaveCommandClass.DoorLock not in zwave_node.command_class_list:
-            LOGGER.error("Z-Wave node does not support zwave_doorlock_set")
+        service = node.service_get(LockServiceZwave, int(endpoint))
+        if not isinstance(service, LockServiceZwave):
+            LOGGER.error("doorlock_set - No DoorLockServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
             return None
 
         # 0 unlocked, 255 locked
@@ -1032,17 +1000,20 @@ class QolsysController:
     async def command_zwave_thermostat_setpoint_set(
         self, node_id: str, endpoint: str, mode: ThermostatSetpointMode, setpoint: int
     ) -> dict[str, Any] | None:
-        zwave_node = self.state.zwave_device(node_id)
-        if not zwave_node:
+        node = self.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
             LOGGER.error("thermostat_setpoint_set - Invalid node_id %s", node_id)
             return None
 
-        if not isinstance(zwave_node, QolsysThermostat):
-            LOGGER.error("thermostat_setpoint_set - Z-Wave node is not a thermostat %s", node_id)
+        service = node.service_get(ThermostatServiceZwave, int(endpoint))
+        if not isinstance(service, ThermostatServiceZwave):
+            LOGGER.error(
+                "thermostat_setpoint_set - no ThermostatServiceZwave found for node_id %s endpoint %s", node_id, endpoint
+            )
             return None
 
         scale: int = 0
-        if zwave_node.thermostat_device_temp_unit == "F":
+        if service.device_temperature_unit == QolsysTemperatureUnit.FAHRENHEIT:
             scale = 1
 
         precision: int = 1
@@ -1078,14 +1049,16 @@ class QolsysController:
         self, node_id: str, endpoint: str, mode: ThermostatMode
     ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
+        node = self.state.automation_device(node_id)
 
-        thermostat = self.state.zwave_thermostat(node_id)
-        if not thermostat:
-            LOGGER.error("zwave_thermostat_mode_set - Invalid node_id %s", node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            LOGGER.error("thermostat_mode_set - Invalid node_id %s", node_id)
             return None
 
-        if mode not in thermostat.available_thermostat_mode():
-            LOGGER.error("thermostat_mode_set - Invalid mode %s", mode)
+        service = node.service_get(ThermostatServiceZwave, int(endpoint))
+        if not isinstance(service, ThermostatServiceZwave):
+            LOGGER.error("thermostat_mode_set - no ThermostatServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
+            return None
 
         command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatMode, 1, int(mode)])
         response = await command.send_command()
@@ -1097,9 +1070,16 @@ class QolsysController:
     ) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode.name)
 
-        zwave_node = self.state.zwave_device(node_id)
-        if not zwave_node:
+        node = self.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
             LOGGER.error("thermostat_fan_mode_set - Invalid node_id %s", node_id)
+            return None
+
+        service = node.service_get(ThermostatServiceZwave, int(endpoint))
+        if not isinstance(service, ThermostatServiceZwave):
+            LOGGER.error(
+                "thermostat_fan_mode_set - no ThermostatServiceZwave found for node_id %s endpoint %s", node_id, endpoint
+            )
             return None
 
         command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])

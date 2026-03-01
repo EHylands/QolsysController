@@ -7,17 +7,6 @@ from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.observable_v2 import QolsysObservable_v2
-from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
-from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
-from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
-from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
-from qolsys_controller.protocol_zwave.garagedoor import QolsysGarageDoor
-from qolsys_controller.protocol_zwave.generic import QolsysGeneric
-from qolsys_controller.protocol_zwave.lock import QolsysLock
-from qolsys_controller.protocol_zwave.smart_socket import QolsysSmartSocket
-from qolsys_controller.protocol_zwave.thermometer import QolsysThermometer
-from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
-from qolsys_controller.protocol_zwave.water_valve import QolsysWaterValve
 
 from .observable import QolsysObservable
 from .weather import QolsysWeather
@@ -26,7 +15,6 @@ LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
-    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
     from .partition import QolsysPartition
     from .scene import QolsysScene
@@ -41,14 +29,12 @@ class QolsysState(QolsysObservable):
         self._partitions: list[QolsysPartition] = []
         self._zones: list[QolsysZone] = []
         self._automation_devices: list[QolsysAutomationDevice] = []
-        self._zwave_devices: list[QolsysZWaveDevice] = []
         self._scenes: list[QolsysScene] = []
 
         self._state_observer = QolsysObservable_v2()
 
         self._state_partition_observer = QolsysObservable()
         self._state_zone_observer = QolsysObservable()
-        self._state_zwave_observer = QolsysObservable()
         self._state_adc_observer = QolsysObservable()
         self._state_scene_observer = QolsysObservable()
         self._automation_device_observer = QolsysObservable()
@@ -56,10 +42,6 @@ class QolsysState(QolsysObservable):
     @property
     def partitions(self) -> list[QolsysPartition]:
         return self._partitions
-
-    @property
-    def zwave_devices(self) -> list[QolsysZWaveDevice]:
-        return self._zwave_devices
 
     @property
     def automation_devices(self) -> list[QolsysAutomationDevice]:
@@ -76,80 +58,6 @@ class QolsysState(QolsysObservable):
     @property
     def weather(self) -> QolsysWeather:
         return self._weather
-
-    @property
-    def zwave_dimmers(self) -> list[QolsysDimmer]:
-        dimmers = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysDimmer):
-                dimmers.append(device)
-
-        return dimmers
-
-    @property
-    def zwave_locks(self) -> list[QolsysLock]:
-        locks = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysLock):
-                locks.append(device)
-
-        return locks
-
-    @property
-    def zwave_thermostats(self) -> list[QolsysThermostat]:
-        thermostats = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysThermostat):
-                thermostats.append(device)
-        return thermostats
-
-    @property
-    def zwave_meters(self) -> list[QolsysEnergyClamp]:
-        meters = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysEnergyClamp):
-                meters.append(device)
-        return meters
-
-    @property
-    def zwave_thermometers(self) -> list[QolsysThermometer]:
-        thermometer = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysThermometer):
-                thermometer.append(device)
-        return thermometer
-
-    @property
-    def zwave_water_valves(self) -> list[QolsysWaterValve]:
-        valves = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysWaterValve):
-                valves.append(device)
-        return valves
-
-    @property
-    def zwave_smart_sockets(self) -> list[QolsysSmartSocket]:
-        sockets = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysSmartSocket):
-                sockets.append(device)
-        return sockets
-
-    @property
-    def zwave_external_sirens(self) -> list[QolsysExternalSiren]:
-        sirens = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysExternalSiren):
-                sirens.append(device)
-        return sirens
-
-    @property
-    def zwave_garage_doors(self) -> list[QolsysGarageDoor]:
-        doors = []
-        for device in self.zwave_devices:
-            if isinstance(device, QolsysGarageDoor):
-                doors.append(device)
-        return doors
 
     @property
     def zwave_other_devices(self) -> list[dict[str, str]]:
@@ -170,10 +78,6 @@ class QolsysState(QolsysObservable):
     @property
     def automation_device_observer(self) -> QolsysObservable:
         return self._automation_device_observer
-
-    @property
-    def state_zwave_observer(self) -> QolsysObservable:
-        return self._state_zwave_observer
 
     @property
     def state_scene_observer(self) -> QolsysObservable:
@@ -305,40 +209,6 @@ class QolsysState(QolsysObservable):
         self.zones.remove(zone)
         self.state_zone_observer.notify()
 
-    def zwave_device(self, node_id: str) -> QolsysZWaveDevice | None:
-        for zwave_device in self.zwave_devices:
-            if zwave_device.node_id == node_id:
-                return zwave_device
-        return None
-
-    def zwave_thermostat(self, node_id: str) -> QolsysThermostat | None:
-        thermostat = self.zwave_device(node_id)
-        if isinstance(thermostat, QolsysThermostat):
-            return thermostat
-        return None
-
-    def zwave_add(self, new_zwave: QolsysZWaveDevice) -> None:
-        for zwave_device in self.zwave_devices:
-            if new_zwave.node_id == zwave_device.node_id:
-                LOGGER.debug(
-                    "Adding ZWave to State, ZWave%s (%s) - Allready in ZWave List", new_zwave.node_id, zwave_device.node_name
-                )
-                return
-
-        self.zwave_devices.append(new_zwave)
-        self.zwave_devices.sort(key=lambda x: x.node_id, reverse=False)
-        self.state_zwave_observer.notify()
-
-    def zwave_delete(self, node_id: str) -> None:
-        zwave = self.zwave_device(node_id)
-
-        if zwave is None:
-            LOGGER.debug("Deleting ZWave from State, ZWave%s not found", node_id)
-            return
-
-        self.zwave_devices.remove(zwave)
-        self.state_zwave_observer.notify()
-
     def sync_automation_devices_data(self, db_automation_devices: list[QolsysAutomationDevice]) -> None:
         db_automation_list = []
         for db_automation in db_automation_devices:
@@ -381,82 +251,6 @@ class QolsysState(QolsysObservable):
             if state_automation.virtual_node_id not in db_automation_list:
                 LOGGER.debug("sync_data - delete AutDev%s", state_automation.virtual_node_id)
                 self.automation_device_delete(state_automation.virtual_node_id)
-
-    def sync_zwave_devices_data(self, db_zwaves: list[QolsysZWaveDevice]) -> None:  # noqa: PLR0912
-        db_zwave_list = []
-        for db_zwave in db_zwaves:
-            db_zwave_list.append(db_zwave.node_id)
-
-        state_zwave_list = []
-        for state_zwave in self.zwave_devices:
-            state_zwave_list.append(state_zwave.node_id)
-
-        # Update existing ZWave devices
-        for state_zwave in self.zwave_devices:
-            if state_zwave.node_id in db_zwave_list:
-                for db_zwave in db_zwaves:
-                    if state_zwave.node_id == db_zwave.node_id:
-                        LOGGER.debug("sync_data - update ZWave%s", state_zwave.node_id)
-
-                        # Update Dimmer
-                        if isinstance(state_zwave, QolsysDimmer) and isinstance(db_zwave, QolsysDimmer):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_dimmer(db_zwave.to_dict_dimmer())
-                            break
-
-                        # Update Thermostat
-                        if isinstance(state_zwave, QolsysThermostat) and isinstance(db_zwave, QolsysThermostat):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_thermostat(db_zwave.to_dict_thermostat())
-                            break
-
-                        # Update Thermometer
-                        if isinstance(state_zwave, QolsysThermometer) and isinstance(db_zwave, QolsysThermometer):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-                        # Update Lock
-                        if isinstance(state_zwave, QolsysLock) and isinstance(db_zwave, QolsysLock):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            state_zwave.update_lock(db_zwave.to_dict_lock())
-                            break
-
-                        # Update Energy Clamp
-                        if isinstance(state_zwave, QolsysEnergyClamp) and isinstance(db_zwave, QolsysEnergyClamp):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-                        # Update Water Valve
-                        if isinstance(state_zwave, QolsysWaterValve) and isinstance(db_zwave, QolsysWaterValve):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-                        # Update External Siren
-                        if isinstance(state_zwave, QolsysExternalSiren) and isinstance(db_zwave, QolsysExternalSiren):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-                        # Update Garage Door
-                        if isinstance(state_zwave, QolsysGarageDoor) and isinstance(db_zwave, QolsysGarageDoor):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-                        # Generic Z-Wave Device
-                        if isinstance(state_zwave, QolsysGeneric) and isinstance(db_zwave, QolsysGeneric):
-                            state_zwave.update_base(db_zwave.to_dict_base())
-                            break
-
-        # Add new zwave device
-        for db_zwave in db_zwaves:
-            if db_zwave.node_id not in state_zwave_list:
-                LOGGER.debug("sync_data - add ZWave%s", db_zwave.node_id)
-                self.zwave_add(db_zwave)
-
-        # Delete zwave device
-        for state_zwave in self.zwave_devices:
-            if state_zwave.node_id not in db_zwave_list:
-                LOGGER.debug("sync_data - delete ZWave%s", state_zwave.node_id)
-                self.zwave_delete(state_zwave.node_id)
 
     def sync_weather_data(self, db_weather: QolsysWeather) -> None:
         LOGGER.debug("sync_data - update Weather")
@@ -556,29 +350,6 @@ class QolsysState(QolsysObservable):
 
     def dump(self) -> None:  # noqa: PLR0912, PLR0915
         LOGGER.debug("*** Device Information ***")
-
-        def dump_meter(self: QolsysState, device: QolsysZWaveDevice) -> None:
-            for endpoint in device.meter_endpoints:
-                for meter_sensor in endpoint.sensors:
-                    LOGGER.debug(
-                        " Meter%s Endpoint%s - %s - value: %s (%s)",
-                        device.node_id,
-                        endpoint.endpoint,
-                        endpoint._meter_type.name,
-                        meter_sensor.value,
-                        meter_sensor.scale.name,
-                    )
-
-        def dump_multilevelsensor(self: QolsysState, device: QolsysZWaveDevice) -> None:
-            for endpoint in device.multilevelsensor_endpoints:
-                for sensor in endpoint.sensors:
-                    LOGGER.debug(
-                        " Multilevelsensor%s Endpoint%s - value: %s (%s)",
-                        device.node_id,
-                        endpoint.endpoint,
-                        sensor.value,
-                        sensor.unit.name,
-                    )
 
         for partition in self.partitions:
             pid = partition.id

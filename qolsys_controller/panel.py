@@ -10,16 +10,6 @@ from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.enum import AutomationDeviceProtocol
-from qolsys_controller.protocol_zwave.dimmer import QolsysDimmer
-from qolsys_controller.protocol_zwave.energy_clamp import QolsysEnergyClamp
-from qolsys_controller.protocol_zwave.extenal_siren import QolsysExternalSiren
-from qolsys_controller.protocol_zwave.garagedoor import QolsysGarageDoor
-from qolsys_controller.protocol_zwave.generic import QolsysGeneric
-from qolsys_controller.protocol_zwave.lock import QolsysLock
-from qolsys_controller.protocol_zwave.smart_socket import QolsysSmartSocket
-from qolsys_controller.protocol_zwave.thermometer import QolsysThermometer
-from qolsys_controller.protocol_zwave.thermostat import QolsysThermostat
-from qolsys_controller.protocol_zwave.water_valve import QolsysWaterValve
 
 from .database.db import QolsysDB
 from .enum import (
@@ -39,7 +29,6 @@ LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
-    from qolsys_controller.protocol_zwave.device import QolsysZWaveDevice
 
 
 class QolsysPanel(QolsysObservable):
@@ -399,15 +388,9 @@ class QolsysPanel(QolsysObservable):
         self.db.load_db(database)
         self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
-        self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
         self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
-
-        # Sync Z-Wave device state - LEGACY
-        LOGGER.debug("sync_data - update z-wave devices states")
-        for device in self._controller.state.zwave_devices:
-            await device.zwave_report()
 
         LOGGER.debug("sync_data - update automation devices z-wave devices states")
         for autdev in self._controller.state.automation_devices:
@@ -447,11 +430,6 @@ class QolsysPanel(QolsysObservable):
         zwave = data.get("ZWAVE_RESPONSE", "")
         payload = base64.b64decode(zwave.get("ZWAVE_PAYLOAD", "")).hex()
         node_id: str = str(zwave.get("NODE_ID", 0))
-
-        # Legacy - Update Z-Wave device state with raw payload
-        node = self._controller.state.zwave_device(node_id)
-        if node is not None:
-            node.update_raw(bytes.fromhex(payload))
 
         # Update Atomation Device Z-Wave Service with raw payload
         automation_device = self._controller.state.automation_device(node_id)
@@ -564,35 +542,21 @@ class QolsysPanel(QolsysObservable):
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._controller.state.zwave_device(node_id)
-                                if node is not None and isinstance(node, QolsysDimmer):
-                                    node.update_dimmer(content_values)
 
                             # Update Thermostat Content Provider
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._controller.state.zwave_device(node_id)
-                                if node is not None and isinstance(node, QolsysThermostat):
-                                    node.update_thermostat(content_values)
 
                             # Update DoorLockContentProvider
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-                                node = self._controller.state.zwave_device(node_id)
-                                if node is not None and isinstance(node, QolsysLock):
-                                    node.update_lock(content_values)
 
                             # Update ZwaveContentProvider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.update(selection, selection_argument, content_values)
                                 node_id = content_values.get("node_id", "")
-
-                                # Update Z-Wave Device state if exist
-                                node = self._controller.state.zwave_device(node_id)
-                                if node is not None:
-                                    node.update_base(content_values)
 
                                 # Update Automation Device if exist
                                 automation_device = self._controller.state.automation_device(node_id)
@@ -711,22 +675,23 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.delete(selection, selection_argument)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.delete(selection, selection_argument)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.delete(selection, selection_argument)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.delete(selection, selection_argument)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_automation.uri:
                                 self.db.table_automation.delete(selection, selection_argument)
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_partition.uri:
                                 self.db.table_partition.delete(selection, selection_argument)
@@ -757,6 +722,7 @@ class QolsysPanel(QolsysObservable):
 
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.delete(selection, selection_argument)
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             case self.db.table_output_rules.uri:
                                 self.db.table_output_rules.delete(selection, selection_argument)
@@ -832,22 +798,22 @@ class QolsysPanel(QolsysObservable):
                             # Door Lock Content Provider
                             case self.db.table_doorlock.uri:
                                 self.db.table_doorlock.insert(data=content_values)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # Dimmer Content Provider
                             case self.db.table_dimmer.uri:
                                 self.db.table_dimmer.insert(data=content_values)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # Thermostat Content Provider
                             case self.db.table_thermostat.uri:
                                 self.db.table_thermostat.insert(data=content_values)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # ZWave Node Content Provider
                             case self.db.table_zwave_node.uri:
                                 self.db.table_zwave_node.insert(data=content_values)
-                                self._controller.state.sync_zwave_devices_data(self.get_zwave_devices_from_db())
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # HistoryContentProvider
                             case self.db.table_history.uri:
@@ -898,6 +864,7 @@ class QolsysPanel(QolsysObservable):
                             # Zwave Other
                             case self.db.table_zwave_other.uri:
                                 self.db.table_zwave_other.insert(data=content_values)
+                                self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
 
                             # Virtual Device
                             case self.db.table_virtual_device.uri:
@@ -986,93 +953,6 @@ class QolsysPanel(QolsysObservable):
                 automation_devices.append(new_device)
 
         return automation_devices
-
-    def get_zwave_devices_from_db(self) -> list[QolsysZWaveDevice]:
-        devices: list[QolsysZWaveDevice] = []
-        devices_list = self.db.get_zwave_devices()
-        dimmers_list = self.db.get_dimmers()
-        thermostats_list = self.db.get_thermostats()
-        locks_list = self.db.get_locks()
-
-        for device in devices_list:
-            device_added = False
-            zwave_node_id = device.get("node_id", "")
-
-            # Check if z-wave device is an Energy Clamp
-            if device.get("node_type", "") == "Energy Clamp":
-                qolsys_meter_device = QolsysEnergyClamp(self._controller, device)
-                devices.append(qolsys_meter_device)
-                device_added = True
-
-            # Check if z-wave device is a thermometer
-            if device.get("node_type", "") == "Thermometer":
-                qolsys_thermometer = QolsysThermometer(self._controller, device)
-                devices.append(qolsys_thermometer)
-                device_added = True
-
-            # Check if z-wave device is an external siren
-            if device.get("node_type", "") == "External Siren":
-                qolsys_siren = QolsysExternalSiren(self._controller, device)
-                devices.append(qolsys_siren)
-                device_added = True
-
-            # Check if z-wave device is a Dimmer
-            for d in dimmers_list:
-                dimmer_node_id = d.get("node_id", "")
-
-                # Found a Dimmer
-                if zwave_node_id == dimmer_node_id:
-                    qolsys_dimmer = QolsysDimmer(self._controller, d, device)
-                    devices.append(qolsys_dimmer)
-                    device_added = True
-                    break
-
-            # Check is z-wave devie is a Thermostat
-            for thermostat in thermostats_list:
-                thermostat_node_id = thermostat.get("node_id", "")
-
-                # Found a Thermostat
-                if zwave_node_id == thermostat_node_id:
-                    qolsys_thermostat = QolsysThermostat(self._controller, thermostat, device)
-                    devices.append(qolsys_thermostat)
-                    device_added = True
-                    break
-
-            # Check is z-wave device is a Lock
-            for lock in locks_list:
-                lock_node_id = lock.get("node_id", "")
-
-                # Found a Lock
-                if zwave_node_id == lock_node_id:
-                    qolsys_lock = QolsysLock(self._controller, lock, device)
-                    devices.append(qolsys_lock)
-                    device_added = True
-                    break
-
-            # Found a Smart Outlet
-            if device.get("node_type", "") == "Smart Socket":
-                qolsys_socket = QolsysSmartSocket(self._controller, device)
-                devices.append(qolsys_socket)
-                device_added = True
-
-            # Found Garage Door Openner
-            if device.get("node_type", "") == "Garage Door":
-                qolsys_garagedoor = QolsysGarageDoor(self._controller, device)
-                devices.append(qolsys_garagedoor)
-                device_added = True
-
-            # Found a Water Valve
-            if device.get("node_type", "") == "Water Valve":
-                qolsys_watervalve = QolsysWaterValve(self._controller, device)
-                devices.append(qolsys_watervalve)
-                device_added = True
-
-            # No Specific z-wave device found, add a generic z-wave device
-            if not device_added:
-                qolsys_generic = QolsysGeneric(self._controller, device)
-                devices.append(qolsys_generic)
-
-        return devices
 
     def get_scenes_from_db(self) -> list[QolsysScene]:
         scenes = []
