@@ -35,7 +35,7 @@ class QolsysSettings:
         self._mqtt_ping: int = 600
         self._mqtt_qos: int = 0
         self._mqtt_remote_client_id: str = ""
-        self._log_mqtt_message: bool = False
+        self._log_mqtt_messages: bool = False
 
         # Operation
         self._motion_sensor_delay: bool = True
@@ -96,12 +96,12 @@ class QolsysSettings:
         self._panel_ip = panel_ip
 
     @property
-    def log_mqtt_mesages(self) -> bool:
+    def log_mqtt_messages(self) -> bool:
         return self._log_mqtt_messages
 
-    @log_mqtt_mesages.setter
-    def log_mqtt_mesages(self, log_mqtt_mesages: bool) -> None:
-        self._log_mqtt_messages = log_mqtt_mesages
+    @log_mqtt_messages.setter
+    def log_mqtt_messages(self, log_mqtt_messages: bool) -> None:
+        self._log_mqtt_messages = log_mqtt_messages
 
     @property
     def check_user_code_on_disarm(self) -> bool:

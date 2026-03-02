@@ -34,7 +34,7 @@ async def main() -> None:  # noqa: D103
 
     # Additionnal remote plugin config
     Panel.settings.check_user_code_on_disarm = False
-    Panel.settings.log_mqtt_mesages = args.debug
+    Panel.settings.log_mqtt_messages = args.debug
     Panel.settings.auto_discover_pki = args.pki_autodiscovery
 
     # Configure remote plugin

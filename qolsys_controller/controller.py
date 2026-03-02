@@ -304,7 +304,7 @@ class QolsysController:
     async def mqtt_listen_task(self) -> None:
         try:
             async for message in self.aiomqtt.messages:  # type: ignore[union-attr]
-                if self.settings.log_mqtt_mesages:  # noqa: SIM102
+                if self.settings.log_mqtt_messages:  # noqa: SIM102
                     if isinstance(message.payload, bytes):
                         LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
 
