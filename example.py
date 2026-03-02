@@ -16,8 +16,8 @@ LOGGER = logging.getLogger(__name__)
 async def main() -> None:  # noqa: D103
     remote = QolsysController()
     remote.settings.config_directory = "./config/"
-    remote.settings.panel_ip = "192.168.10.220" # Qolsys Panel IP
-    remote.settings.plugin_ip = "192.168.10.73" # Controller Plugin IP
+    remote.settings.panel_ip = "192.168.10.220"  # Qolsys Panel IP
+    remote.settings.plugin_ip = "192.168.10.73"  # Controller Plugin IP
     remote.settings.random_mac = ""  # Example: F2:16:3E:33:ED:20
 
     # Additionnal remote plugin config
