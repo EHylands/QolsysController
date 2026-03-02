@@ -61,14 +61,18 @@ class BatteryService(AutomationService):
 
     def info(self) -> list[str]:
         str = []
+
+        # Return disabled if both battery level and low are not supported
+        if not self.supports_battery_level() and not self.supports_battery_low():
+            str.append(f"{self.prefix} - Disabled")
+            return str
+
         str.append(f"{self.prefix} - supports_battery_level: {self.supports_battery_level()}")
         str.append(f"{self.prefix} - supports_battery_low: {self.supports_battery_low()}")
+
         if self.supports_battery_level():
             str.append(f"{self.prefix} - battery_level: {self.battery_level}%")
             return str
         if self.supports_battery_low():
             str.append(f"{self.prefix} - battery_low: {self.battery_low}")
             return str
-
-        str.append(f"{self.prefix} - Disabled")
-        return str

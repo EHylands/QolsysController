@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import os
+import ssl
 import sys
 
 from qolsys_controller.controller import QolsysController
@@ -15,13 +16,14 @@ LOGGER = logging.getLogger(__name__)
 async def main() -> None:  # noqa: D103
     remote = QolsysController()
     remote.settings.config_directory = "./config/"
-    remote.settings.panel_ip = "****"
-    remote.settings.plugin_ip = "****"
+    remote.settings.panel_ip = "192.168.10.220" # Qolsys Panel IP
+    remote.settings.plugin_ip = "192.168.10.73" # Controller Plugin IP
     remote.settings.random_mac = ""  # Example: F2:16:3E:33:ED:20
 
     # Additionnal remote plugin config
+    remote.settings.check_user_code_on_arm = True
     remote.settings.check_user_code_on_disarm = False  # Check user code in user.conf file
-    remote.settings.log_mqtt_mesages = False  # Enable for MQTT debug purposes
+    remote.settings.log_mqtt_messages = False  # Enable for MQTT debug purposes
     remote.settings.auto_discover_pki = True
 
     # Configure remote plugin
@@ -35,7 +37,7 @@ async def main() -> None:  # noqa: D103
     except QolsysMqttError:
         LOGGER.debug("QolsysMqttError")
 
-    except QolsysSslError:
+    except (QolsysSslError, ssl.SSLError):
         LOGGER.debug("QolsysSslError")
 
     except QolsysSqlError:
@@ -46,20 +48,6 @@ async def main() -> None:  # noqa: D103
         return
 
     LOGGER.debug("Qolsys Panel Ready for operation")
-
-    await asyncio.sleep(5)
-    # await remote.command_zwave_switch_multi_level(node_id="6",level=99)
-    # await remote.command_zwave_switch_binary_set(node_id="8", status=True)
-    # await remote.plugin.command_arm(
-    #   partition_id='0',
-    #   arming_type=PartitionArmingType:ARM_NIGHT,
-    #   user_code="1111",
-    #   exit_sounds=False,
-    #   instant_arm=True)
-    # await remote.command_disarm(partition_id="0", user_code="1111")
-    # await remote.command_panel_execute_scene(scene_id="3")
-    # await remote.command_zwave_doorlock_set(node_id="7",locked=True)
-    # await remote.stop_operation()
 
     # Use an asyncio.Event to keep the program running efficiently
     stop_event = asyncio.Event()

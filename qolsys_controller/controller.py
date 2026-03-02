@@ -220,7 +220,7 @@ class QolsysController:
                 await self.aiomqtt.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
 
                 # Only log all traffic for debug purposes
-                if self.settings.log_mqtt_mesages:
+                if self.settings.log_mqtt_messages:
                     # Subscribe to MQTT commands send to panel by other devices
                     await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
