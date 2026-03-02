@@ -76,3 +76,5 @@ class BatteryService(AutomationService):
         if self.supports_battery_low():
             str.append(f"{self.prefix} - battery_low: {self.battery_low}")
             return str
+
+        return str
