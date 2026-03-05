@@ -934,6 +934,29 @@ class QolsysController:
         LOGGER.debug("MQTT: Receiving panel_trigger_fire command")
         return response
 
+    async def command_panel_speak(self, text: str) -> dict[str, Any] | None:
+        LOGGER.debug("MQTT: Sending panel_speak command")
+
+        speak_command = {
+            "operation_name": "speak_text",
+            "tts_text": text,
+            "operation_source": 1,
+            "macAddress": self.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(speak_command),
+            }
+        ]
+
+        command = MQTTCommand_Panel(self)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT: Receiving panel_speak  command")
+        return response
+
     async def command_zwave_switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending set_zwave_switch_binary command  - Node(%s) - Status(%s)", node_id, status)
         node = self.state.automation_device(node_id)
