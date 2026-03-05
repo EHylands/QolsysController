@@ -16,6 +16,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 |------------------------|--------------------------------------|--------|
 | **Panel**              | Diagnostic Sensors                   | ✅     |
 |                        | Panel Scenes                         | ✅     |
+|                        | Speak Command                        | ✅     |
 |                        | Weather Forecast                     | ✅     |
 | **Partition**          | Arming Status and Alarm State        | ✅     |
 |                        | Home Instant Arming                  | ✅     |
