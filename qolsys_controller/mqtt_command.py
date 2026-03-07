@@ -10,8 +10,6 @@ from .errors import QolsysMqttError
 if TYPE_CHECKING:
     import aiomqtt
 
-    from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
-
     from .controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
@@ -147,10 +145,11 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
         )
 
         # Check for valid node
-        node = self._controller.state.automation_device(node_id)
-        if not isinstance(node, QolsysAutomationDeviceZwave):
-            LOGGER.error("MQTTCommand_ZWave_Old - Invalid node_id %s", node_id)
-            return
+        # from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+        # node = self._controller.state.automation_device(node_id)
+        # if not isinstance(node, QolsysAutomationDeviceZwave):
+        #    LOGGER.error("MQTTCommand_ZWave_Old - Invalid node_id %s", node_id)
+        #    return
 
         def convert_to_multiendpoint_command(zwave_command: list[int], endpoint: int) -> list[int]:
             modified_command = [ZwaveCommandClass.MultiChannel.value, 0x0D, 0, endpoint]

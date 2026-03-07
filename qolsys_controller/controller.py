@@ -1046,8 +1046,18 @@ class QolsysController:
             await command.send_command()
 
             await asyncio.sleep(2)
-            LOGGER.debug("GET Using secure_level: %s", 0)
+            LOGGER.debug("GET Using secure_level: %s", 1)
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 1, [doorlock_get])
+            await command.send_command()
+
+            await asyncio.sleep(2)
+            LOGGER.debug("GET Using secure_level: %s", 2)
             command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 2, [doorlock_get])
+            await command.send_command()
+
+            await asyncio.sleep(2)
+            LOGGER.debug("GET Using secure_level: %s", 3)
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 3, [doorlock_get])
 
         else:
             command = MQTTCommand_ZWave(self, node_id, endpoint, doorlock_set)
