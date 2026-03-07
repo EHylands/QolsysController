@@ -171,8 +171,9 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
                 "dataValue": 106,
             },
             {
+                # Security Level
                 "dataType": "int",
-                "dataValue": 0,
+                "dataValue": 1,
             },
             {
                 # Command Array Length

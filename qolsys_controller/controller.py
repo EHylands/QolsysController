@@ -19,6 +19,7 @@ from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
+from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.enum_adc import vdFuncState
@@ -1000,15 +1001,15 @@ class QolsysController:
     async def command_zwave_doorlock_set(self, node_id: str, endpoint: str, locked: bool) -> dict[str, Any] | None:
         LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
-        # node = self.state.automation_device(node_id)
-        # if not isinstance(node, QolsysAutomationDeviceZwave):
-        #    LOGGER.error("doorlock_set - Invalid node_id %s", node_id)
-        #    return None
+        node = self.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            LOGGER.error("doorlock_set - Invalid node_id %s", node_id)
+            return None
 
-        # service = node.service_get(LockServiceZwave, int(endpoint))
-        # if not isinstance(service, LockServiceZwave):
-        #    LOGGER.error("doorlock_set - No DoorLockServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
-        #    return None
+        service = node.service_get(LockServiceZwave, int(endpoint))
+        if not isinstance(service, LockServiceZwave):
+            LOGGER.error("doorlock_set - No DoorLockServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
+            return None
 
         # 0 unlocked, 255 locked
         lock_mode = 0
