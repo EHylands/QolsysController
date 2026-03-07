@@ -9,14 +9,15 @@ from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
-from qolsys_controller.enum import AutomationDeviceProtocol
 
 from .database.db import QolsysDB
 from .enum import (
+    AutomationDeviceProtocol,
     PartitionAlarmState,
     PartitionAlarmType,
     PartitionSystemStatus,
     QolsysEvent,
+    QolsysPanelType,
 )
 from .observable import QolsysObservable
 from .partition import QolsysPartition
@@ -130,7 +131,7 @@ class QolsysPanel(QolsysObservable):
         self._unique_id: str = ""
 
         self._imei: str = ""
-        self._product_type: str = ""
+        self._product_type: QolsysPanelType = QolsysPanelType.UNKNOWN
 
     def read_users_file(self) -> bool:
         # Loading user_code data from users.conf file if exists
@@ -363,12 +364,16 @@ class QolsysPanel(QolsysObservable):
         self._imei = value
 
     @property
-    def product_type(self) -> str:
+    def product_type(self) -> QolsysPanelType:
         return self._product_type
 
     @product_type.setter
     def product_type(self, value: str) -> None:
-        self._product_type = value
+        try:
+            self._product_type = QolsysPanelType(value)
+        except ValueError:
+            LOGGER.error("Unknown panel product type: %s, please report", value)
+            self._product_type = QolsysPanelType.UNKNOWN
 
     @property
     def SYSTEM_LOGGED_IN_USER(self) -> str:
@@ -1022,7 +1027,7 @@ class QolsysPanel(QolsysObservable):
 
     def dump(self) -> None:
         LOGGER.debug("*** Qolsys Panel Information ***")
-        LOGGER.debug("Product Type: %s", self.product_type)
+        LOGGER.debug("Product Type: %s", self.product_type.name)
         LOGGER.debug("Android Version: %s", self.ANDROID_VERSION)
         LOGGER.debug("Hardware Version: %s", self.HARDWARE_VERSION)
         LOGGER.debug("MAC Address: %s", self.MAC_ADDRESS)
