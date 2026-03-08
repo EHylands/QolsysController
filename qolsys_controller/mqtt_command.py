@@ -144,14 +144,7 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
             ipc_transaction_id=28,
         )
 
-        # Check for valid node
-        # from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
-        # node = self._controller.state.automation_device(node_id)
-        # if not isinstance(node, QolsysAutomationDeviceZwave):
-        #    LOGGER.error("MQTTCommand_ZWave_Old - Invalid node_id %s", node_id)
-        #    return
-
-        def convert_to_multiendpoint_command(zwave_command: list[int], endpoint: int) -> list[int]:
+        def convert_to_multi_endpoint_command(zwave_command: list[int], endpoint: int) -> list[int]:
             modified_command = [ZwaveCommandClass.MultiChannel.value, 0x0D, 0, endpoint]
             modified_command.extend(zwave_command)
             return modified_command
@@ -159,16 +152,9 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
         final_command: list[int] = []
         final_command.append(len(zwave_command_array))
 
-        # is_secure_s2 = ZwaveCommandClass.SecurityS2 in node.command_class_list
-
         for command in zwave_command_array:
-            # Check if command is in secure list
-            # is_secure = False
-            # if command[0] in node.secure_command_class_list:
-            # is_secure = True
-
             if endpoint != 0:
-                command = convert_to_multiendpoint_command(command, endpoint)
+                command = convert_to_multi_endpoint_command(command, endpoint)
 
             final_command.append(len(command))
             final_command.append(secure_level)
@@ -183,7 +169,7 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
             {
                 # Priority
                 "dataType": "int",
-                "dataValue": 105,
+                "dataValue": 104,
             },
             {
                 "dataType": "int",
@@ -200,8 +186,6 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
                 "dataValue": final_command,
             },
         ]
-
-        LOGGER.debug("Final Z-Wave Command: %s", final_command)
 
         self.append_ipc_request(ipc_request)
 
