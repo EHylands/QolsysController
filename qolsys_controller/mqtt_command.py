@@ -183,7 +183,7 @@ class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
             {
                 # Priority
                 "dataType": "int",
-                "dataValue": 106,
+                "dataValue": 105,
             },
             {
                 "dataType": "int",

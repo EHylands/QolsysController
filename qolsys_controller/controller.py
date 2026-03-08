@@ -1017,47 +1017,13 @@ class QolsysController:
             lock_mode = 255
 
         doorlock_set = [ZwaveCommandClass.DoorLock.value, 1, lock_mode]  # Door Lock Set Command
-        doorlock_get = [ZwaveCommandClass.DoorLock.value, 2]  # Door Lock Get Command to get updated status after set command
+        # doorlock_get = [ZwaveCommandClass.DoorLock.value, 2]  # Door Lock Get Command to get updated status after set command
 
         command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
         if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
             LOGGER.debug("Detected IQ Panel 2 Plus - Using Old ZWave Command Format for Door Lock")
-            LOGGER.debug("SET Using secure_level: %s", 0)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 0, [doorlock_set])
-
-            await asyncio.sleep(2)
             LOGGER.debug("SET Using secure_level: %s", 1)
             command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 1, [doorlock_set])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("SET Using secure_level: %s", 2)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 2, [doorlock_set])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("SET Using secure_level: %s", 3)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 3, [doorlock_set])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("GET Using secure_level: %s", 0)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 0, [doorlock_get])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("GET Using secure_level: %s", 1)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 1, [doorlock_get])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("GET Using secure_level: %s", 2)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 2, [doorlock_get])
-            await command.send_command()
-
-            await asyncio.sleep(2)
-            LOGGER.debug("GET Using secure_level: %s", 3)
-            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), 3, [doorlock_get])
 
         else:
             command = MQTTCommand_ZWave(self, node_id, endpoint, doorlock_set)
