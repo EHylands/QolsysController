@@ -1,5 +1,5 @@
 aiofiles==25.1.0
-aiomqtt==2.5.0
+aiomqtt==2.5.1
 cffi==2.0.0
 cryptography==46.0.5
 ifaddr==0.2.0
