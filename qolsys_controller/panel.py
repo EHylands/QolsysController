@@ -831,13 +831,12 @@ class QolsysPanel(QolsysObservable):
 
                                 partition = self._controller.state.partition(partition_id)
                                 if partition is not None:
-
                                     # Add new alarm type to partition
                                     try:
                                         partition.append_alarm_type([PartitionAlarmType(content_values.get("sgroup", ""))])
                                     except ValueError:
                                         LOGGER.error("PLEASE REPORT: Unknown alarm type: %s", content_values.get("sgroup", ""))
-                                        partition.append_alarm_type(PartitionAlarmType.EMPTY)
+                                        partition.append_alarm_type([PartitionAlarmType.EMPTY])
 
                             # IQRemoteSettingsProvider
                             case self.db.table_iqremotesettings.uri:
