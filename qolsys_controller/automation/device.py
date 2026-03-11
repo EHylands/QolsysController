@@ -346,6 +346,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         if "status" in data:
             self._status = data.get("status", "")
 
+        if "node_battery_level_value" in data:
+            self._node_battery_level_value = data.get("node_battery_level_value", "")
+
         if "extras" in data:
             self.extras = data.get("extras", "")
 
