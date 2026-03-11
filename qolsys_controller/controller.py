@@ -28,9 +28,10 @@ from qolsys_controller.mqtt_command import (
     MQTTCommand_Automation,
     MQTTCommand_Panel,
     MQTTCommand_ZWave,
+    MQTTCommand_ZWave_Old,
 )
 
-from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus, QolsysTemperatureUnit
+from .enum import PartitionAlarmState, PartitionArmingType, PartitionSystemStatus, QolsysPanelType, QolsysTemperatureUnit
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass
 from .errors import QolsysMqttError, QolsysSslError, QolsysUserCodeError
 from .mdns import QolsysMDNS
@@ -974,7 +975,14 @@ class QolsysController:
         if status:
             level = 255
 
-        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.SwitchBinary, 1, level])
+        switch_set = [ZwaveCommandClass.SwitchBinary.value, 1, level]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [switch_set])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, switch_set)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
         return response
@@ -992,7 +1000,14 @@ class QolsysController:
             LOGGER.error("switch_multilevel_set - No LightServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.SwitchMultilevel, 1, level])
+        switch_set = [ZwaveCommandClass.SwitchMultilevel.value, 1, level]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [switch_set])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, switch_set)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving set_zwave_multilevel_switch command")
         return response
@@ -1015,7 +1030,14 @@ class QolsysController:
         if locked:
             lock_mode = 255
 
-        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.DoorLock, 1, lock_mode])
+        doorlock_set = [ZwaveCommandClass.DoorLock.value, 1, lock_mode]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [doorlock_set])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, doorlock_set)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
         return response
@@ -1063,7 +1085,14 @@ class QolsysController:
             setpoint,
             zwave_bytes,
         )
-        command = MQTTCommand_ZWave(self, node_id, endpoint, zwave_bytes)
+
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [zwave_bytes])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, zwave_bytes)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
         return response
@@ -1083,7 +1112,14 @@ class QolsysController:
             LOGGER.error("thermostat_mode_set - no ThermostatServiceZwave found for node_id %s endpoint %s", node_id, endpoint)
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatMode, 1, int(mode)])
+        mode_command = [ZwaveCommandClass.ThermostatMode.value, 1, int(mode)]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [mode_command])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, mode_command)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
         return response
@@ -1105,7 +1141,14 @@ class QolsysController:
             )
             return None
 
-        command = MQTTCommand_ZWave(self, node_id, endpoint, [ZwaveCommandClass.ThermostatFanMode, 1, fan_mode])
+        fan_command = [ZwaveCommandClass.ThermostatFanMode.value, 1, fan_mode]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self, node_id, int(endpoint), secure_level, [fan_command])
+        else:
+            command = MQTTCommand_ZWave(self, node_id, endpoint, fan_command)
+
         response = await command.send_command()
         LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
         return response

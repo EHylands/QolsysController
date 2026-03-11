@@ -56,10 +56,10 @@ class LockService(AutomationService):
 
     @is_locked.setter
     def is_locked(self, value: bool) -> None:
-        # if self._is_locked != value:
-        self._is_locked = value
-        self.automation_device.notify()
-        LOGGER.debug("%s - is_locked: %s", self.prefix, value)
+        if self._is_locked != value:
+            self._is_locked = value
+            self.automation_device.notify()
+            LOGGER.debug("%s - is_locked: %s", self.prefix, value)
 
     @property
     def is_locking(self) -> bool:

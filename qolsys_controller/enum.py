@@ -1,6 +1,12 @@
 from enum import IntEnum, StrEnum
 
 
+class QolsysPanelType(StrEnum):
+    IQ_PANEL_2_PLUS = "msm8226"
+    IQ_PANEL_4 = "msm8953_64"
+    UNKNOWN = "Unknown"
+
+
 class QolsysEvent(StrEnum):
     EVENT_PANEL_PARTITION_ADD = "EVENT_PANEL_PARTITION_ADD"
     EVENT_PANEL_ZONE_ADD = "EVENT_PANEL_ZONE_ADD"

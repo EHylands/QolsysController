@@ -291,6 +291,17 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         return commands
 
     @property
+    def secure_command_class_list(self) -> list[ZwaveCommandClass]:
+        commands = []
+        array = self._node_secure_cmd_cls.strip("[]").split(",")
+        for command in array:
+            try:
+                commands.append(ZwaveCommandClass(int(command)))
+            except (ValueError, TypeError):
+                continue
+        return commands
+
+    @property
     def multisensor_capabilities(self) -> str:
         return self._multisensor_capabilities
 

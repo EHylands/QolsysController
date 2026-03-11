@@ -3,6 +3,8 @@ import logging
 import uuid
 from typing import TYPE_CHECKING, Any
 
+from qolsys_controller.enum_zwave import ZwaveCommandClass
+
 from .errors import QolsysMqttError
 
 if TYPE_CHECKING:
@@ -120,6 +122,68 @@ class MQTTCommand_ZWave(MQTTCommand_IpcCall):
                 # Callback ?
                 "dataType": "byteArray",
                 "dataValue": [0],
+            },
+        ]
+
+        self.append_ipc_request(ipc_request)
+
+
+class MQTTCommand_ZWave_Old(MQTTCommand_IpcCall):
+    def __init__(
+        self,
+        controller: "QolsysController",
+        node_id: str,
+        endpoint: int,
+        secure_level: int,
+        zwave_command_array: list[list[int]],
+    ) -> None:
+        super().__init__(
+            controller=controller,
+            ipc_service_name="zwaveservice",
+            ipc_interface_name="zwaveservice",
+            ipc_transaction_id=28,
+        )
+
+        def convert_to_multi_endpoint_command(zwave_command: list[int], endpoint: int) -> list[int]:
+            modified_command = [ZwaveCommandClass.MultiChannel.value, 0x0D, 0, endpoint]
+            modified_command.extend(zwave_command)
+            return modified_command
+
+        final_command: list[int] = []
+        final_command.append(len(zwave_command_array))
+
+        for command in zwave_command_array:
+            if endpoint != 0:
+                command = convert_to_multi_endpoint_command(command, endpoint)
+
+            final_command.append(len(command))
+            final_command.append(secure_level)
+            final_command.extend(command)
+
+        ipc_request: list[dict[str, Any]] = [
+            {
+                # Node ID
+                "dataType": "int",
+                "dataValue": int(node_id),
+            },
+            {
+                # Priority
+                "dataType": "int",
+                "dataValue": 104,
+            },
+            {
+                "dataType": "int",
+                "dataValue": 0,
+            },
+            {
+                # Command Array Length
+                "dataType": "int",
+                "dataValue": len(final_command),
+            },
+            {
+                # Command Array
+                "dataType": "byteArray",
+                "dataValue": final_command,
             },
         ]
 
