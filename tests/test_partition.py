@@ -14,13 +14,13 @@ def _make_partition(**overrides: object) -> QolsysPartition:
         "EXIT_SOUNDS": "ON",
         "ENTRY_DELAYS": "ON",
     }
-    partition_dict.update(overrides.get("partition", {}))
-    settings_dict.update(overrides.get("settings", {}))
+    partition_dict.update(overrides.get("partition", {}))  # type: ignore[call-overload]
+    settings_dict.update(overrides.get("settings", {}))  # type: ignore[call-overload]
     return QolsysPartition(
         partition_dict,
         settings_dict,
-        alarm_state=overrides.get("alarm_state", PartitionAlarmState.NONE),
-        alarm_type_array=overrides.get("alarm_types", []),
+        alarm_state=overrides.get("alarm_state", PartitionAlarmState.NONE),  # type: ignore[arg-type]
+        alarm_type_array=overrides.get("alarm_types", []),  # type: ignore[arg-type]
     )
 
 

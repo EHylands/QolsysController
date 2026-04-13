@@ -2,8 +2,6 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING, Any
 
-# from qolsys_controller.mqtt_bridge.auth_plugin import AuthPlugin
-
 LOGGER = logging.getLogger(__name__)
 logging.getLogger("transitions.core").setLevel(logging.ERROR)
 logging.getLogger("amqtt").setLevel(logging.ERROR)
