@@ -8,6 +8,7 @@ from qolsys_controller.automation.service_sensor import SensorService
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
+from qolsys_controller.automation_zwave.service_outlet import OutletServiceZwave
 from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
 from qolsys_controller.automation_zwave.service_siren import SirenServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
@@ -145,6 +146,11 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                 else:
                     LOGGER.warning("Unexpected Binary Switch value 0x%02X for node %s", payload[2], self.virtual_node_id)
 
+            # Update Outlet Service at specified endpoint
+            outlet_service = self.service_get(OutletServiceZwave, endpoint)
+            if isinstance(outlet_service, OutletServiceZwave):
+                outlet_service.is_on = payload[2] == 0xFF
+
     def parse_command_32(self, payload: bytes, endpoint: int) -> None:
         command = payload[1]
 
@@ -234,6 +240,13 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                                 self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
                             )
                             await zwave_command.send_command()
+
+                if isinstance(service, OutletServiceZwave):
+                    if ZwaveCommandClass.SwitchBinary in self.command_class_list:
+                        zwave_command = MQTTCommand_ZWave(
+                            self._controller, self.virtual_node_id, str(service.endpoint), [ZwaveCommandClass.SwitchBinary, 0x02]
+                        )
+                        await zwave_command.send_command()
 
     def to_dict_zwave(self) -> dict[str, str]:
         return {

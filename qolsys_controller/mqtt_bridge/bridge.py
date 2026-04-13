@@ -91,8 +91,8 @@ class MqttBridge:
 
     @property
     def panel_unique_id(self) -> str:
-        if self._controller.settings._mqtt_bridge_friendly_name != "":
-            return self._controller.settings._mqtt_bridge_friendly_name
+        if self._controller.settings.mqtt_bridge_friendly_name != "":
+            return self._controller.settings.mqtt_bridge_friendly_name
         return self._controller.panel.unique_id
 
     @property
@@ -101,7 +101,7 @@ class MqttBridge:
 
     @property
     def base_topic(self) -> str:
-        return f"{self._controller.settings._mqtt_bridge_root_topic}/v{self.version}/{self.panel_unique_id}"
+        return f"{self._controller.settings.mqtt_bridge_root_topic}/v{self.version}/{self.panel_unique_id}"
 
     @property
     def automation_topic(self) -> str:

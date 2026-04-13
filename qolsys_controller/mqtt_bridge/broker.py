@@ -21,8 +21,8 @@ class MqttBridgeBroker:
     def __init__(self, bridge: "MqttBridge") -> None:
         self._bridge: MqttBridge = bridge
         self._controller: QolsysController = bridge._controller
-        self._config: dict[str, Any] = self._build_config()
-        self._broker = self._create_broker()
+        self._config: dict[str, Any] = {}
+        self._broker: Any = None
         self._is_running: bool = False
         self._broker_task: asyncio.Task[None] | None = None
         self._stop_event = asyncio.Event()
@@ -53,7 +53,7 @@ class MqttBridgeBroker:
         LOGGER.info(
             "MQTT Bridge Broker: Starting: %s:%s ...",
             self._controller.settings.plugin_ip,
-            self._controller.settings._mqtt_bridge_port,
+            self._controller.settings.mqtt_bridge_port,
         )
 
         startup_event = asyncio.Event()
@@ -84,6 +84,12 @@ class MqttBridgeBroker:
         try:
             if self._controller.settings.mqtt_bridge_tls_enabled:
                 await self._check_or_create_certificates()
+            self._config = self._build_config()
+            self._broker = self._create_broker()
+            if self._broker is None:
+                startup_result["started"] = False
+                startup_event.set()
+                return
             await self._broker.start()
             await self.wait_for_broker_start()
             self._broker.on_client_connected = self._on_client_connected
@@ -159,16 +165,18 @@ class MqttBridgeBroker:
         if not self._controller.settings.mqtt_bridge_enabled:
             return {}
 
-        listeners = {
-            "default": {
-                "type": "tcp",
-                "bind": f"{self._controller.settings.plugin_ip}:{self._controller.settings.mqtt_bridge_port}",
-                "ssl": self._controller.settings.mqtt_bridge_tls_enabled,
-                "max_connections": self._controller.settings.mqtt_bridge_max_connections,
-                "certfile": str(self._controller._pki.mqtt_bridge_cer_file_path),
-                "keyfile": str(self._controller._pki.mqtt_bridge_key_file_path),
-            }
+        listener: dict[str, Any] = {
+            "type": "tcp",
+            "bind": f"{self._controller.settings.plugin_ip}:{self._controller.settings.mqtt_bridge_port}",
+            "ssl": self._controller.settings.mqtt_bridge_tls_enabled,
+            "max_connections": self._controller.settings.mqtt_bridge_max_connections,
         }
+
+        if self._controller.settings.mqtt_bridge_tls_enabled:
+            listener["certfile"] = str(self._controller._pki.mqtt_bridge_cer_file_path)
+            listener["keyfile"] = str(self._controller._pki.mqtt_bridge_key_file_path)
+
+        listeners = {"default": listener}
 
         # Plugin selection
         plugins: dict[str, dict[str, Any]] = {}

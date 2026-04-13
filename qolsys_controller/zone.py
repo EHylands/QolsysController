@@ -20,7 +20,11 @@ class QolsysZone(QolsysObservable):
 
         self._zone_id: str = data.get("zoneid", "")
         self._sensorname: str = data.get("sensorname", "")
-        self._sensorstatus: ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
+        try:
+            self._sensorstatus: ZoneStatus = ZoneStatus(data.get("sensorstatus", ""))
+        except ValueError:
+            self._sensorstatus = ZoneStatus.UNKNOWN
+            LOGGER.warning("Unknown ZoneStatus: %s", data.get("sensorstatus", ""))
         self._sensorgroup: str = data.get("sensorgroup", "")
         self._battery_status: str = data.get("battery_status", "")
         self._averagedBm: str = data.get("averagedBm", "")
@@ -170,7 +174,10 @@ class QolsysZone(QolsysObservable):
             self.sensorname = data.get("sensorname", "")
 
         if "sensorstatus" in data:
-            self.sensorstatus = ZoneStatus(data.get("sensorstatus", ""))
+            try:
+                self.sensorstatus = ZoneStatus(data.get("sensorstatus", ""))
+            except ValueError:
+                LOGGER.warning("Unknown ZoneStatus: %s", data.get("sensorstatus", ""))
 
         if "battery_status" in data:
             self.battery_status = data.get("battery_status", "")
@@ -552,6 +559,15 @@ class QolsysZone(QolsysObservable):
             "parent_node": self._parent_node,
         }
 
+    def _safe_sensor_group(self) -> str:
+        if not self.sensorgroup:
+            return "unknown"
+        try:
+            return ZoneSensorGroup(self.sensorgroup).name.lower()
+        except ValueError:
+            LOGGER.warning("Unknown ZoneSensorGroup: %s, please report", self.sensorgroup)
+            return self.sensorgroup
+
     def to_dict_event(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "id": int(self.zone_id),
@@ -573,8 +589,8 @@ class QolsysZone(QolsysObservable):
             "attributes": {
                 "name": self.sensorname,
                 "device_type": self.sensortype.name.lower(),
-                "partition_id": int(self.partition_id),
-                "group": ZoneSensorGroup(self.sensorgroup).name.lower(),
+                "partition_id": int(self.partition_id) if self.partition_id else 0,
+                "group": self._safe_sensor_group(),
             },
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "version": 1,

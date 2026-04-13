@@ -105,7 +105,9 @@ class ZoneStatus(StrEnum):
     TAMPERED = "Tampered"
     SYNCHRONIZING = "Synchronizing"
     DISCONNECTED = "disconnected"
+    HIGH_TEMP_ALERT = "High Temp Alert"
     TROUBLE = "Trouble"
+    UNKNOWN = "Unknown"
     VACANT = "Vacant"
 
 
@@ -213,6 +215,11 @@ class ZoneSensorGroup(StrEnum):
     STAY_INSTANT_MOTION = "stayinstantmotion"
     STAY_DELAY_MOTION = "staydelaymotion"
     AWAY_DELAY_MOTION = "awaydelaymotion"
+    SHOCK_AWAY_ONLY = "shockawayonly"
+    SIREN = "Siren"
+    TEMPERATURE = "Temperature"
+    TEMPERATURE_CMS = "Temperature CMS"
+    TRANSLATOR = "translator"
     WATER = "WaterSensor"
     WATER_NON_REPORTING = "Water_Non_Reporting"
 

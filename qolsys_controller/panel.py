@@ -931,12 +931,15 @@ class QolsysPanel:
                     "Water Valve",
                 ]:
                     zwave_id = zwave_device.get("node_id", "")
-                    for temp_device in automation_devices:
-                        if temp_device.virtual_node_id == zwave_id:
-                            LOGGER.debug(
-                                "AutDev%s: Z-Wave device with the same virtual_node_id already exists, skipping", zwave_id
-                            )
-                            break
+                    if not zwave_id:
+                        LOGGER.debug("Skipping Z-Wave device with empty node_id")
+                        continue
+
+                    if any(d.virtual_node_id == zwave_id for d in automation_devices):
+                        LOGGER.debug(
+                            "AutDev%s: Z-Wave device with the same virtual_node_id already exists, skipping", zwave_id
+                        )
+                        continue
 
                     new_zwave_device = QolsysAutomationDeviceZwave(self._controller, zwave_device, {})
                     new_zwave_device.virtual_node_id = zwave_id
@@ -948,10 +951,14 @@ class QolsysPanel:
             adc_devices = self.db.get_adc_devices()
             for adc_device in adc_devices:
                 adc_id = adc_device.get("device_id", "")
-                for temp_device in automation_devices:
-                    if temp_device.virtual_node_id == adc_id:
-                        LOGGER.debug("AutDev%s: ADC device with the same virtual_node_id already exists, skipping", adc_id)
-                        break
+                if not adc_id:
+                    LOGGER.debug("Skipping ADC device with empty device_id")
+                    continue
+
+                if any(d.virtual_node_id == adc_id for d in automation_devices):
+                    LOGGER.debug("AutDev%s: ADC device with the same virtual_node_id already exists, skipping", adc_id)
+                    continue
+
                 new_adc_device = QolsysAutomationDeviceADC(self._controller, adc_device)
                 automation_devices.append(new_adc_device)
 

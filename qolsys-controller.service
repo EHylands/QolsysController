@@ -1,0 +1,42 @@
+# QolsysController — systemd service unit
+#
+# Create a dedicated service user:
+#   sudo useradd -r -s /usr/sbin/nologin -d /opt/qolsys qolsys
+#   sudo chown -R qolsys:qolsys /opt/qolsys
+#
+# Installation:
+#   1. Copy to /etc/systemd/system/qolsys-controller.service
+#   2. Edit User, WorkingDirectory, ExecStart to match your setup
+#   3. sudo systemctl daemon-reload
+#   4. sudo systemctl enable --now qolsys-controller
+#
+# Logs:
+#   journalctl -u qolsys-controller -f
+
+[Unit]
+Description=QolsysController — Qolsys IQ Panel bridge
+Documentation=https://github.com/EHylands/QolsysController
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=qolsys
+WorkingDirectory=/opt/qolsys
+
+# uv installs into .venv by default; pip does too with python3 -m venv .venv
+ExecStart=/opt/qolsys/.venv/bin/qolsys-controller --config /opt/qolsys/config/config.json
+
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=120
+TimeoutStopSec=10
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/opt/qolsys/config
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

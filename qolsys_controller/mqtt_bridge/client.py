@@ -12,6 +12,7 @@ from qolsys_controller.automation.service import AutomationService
 from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
+from qolsys_controller.automation.service_outlet import OutletService
 from qolsys_controller.automation.service_siren import SirenService
 from qolsys_controller.automation.service_thermostat import ThermostatService
 from qolsys_controller.automation.service_valve import ValveService
@@ -86,7 +87,7 @@ class MqttBridgeClient:
                     password=self._bridge._internal_password,
                     protocol=ProtocolVersion.V311,
                     hostname=self._bridge._controller.settings.plugin_ip,
-                    port=self._bridge._controller.settings._mqtt_bridge_port,
+                    port=self._bridge._controller.settings.mqtt_bridge_port,
                     tls_context=tls_context if self._bridge._controller.settings.mqtt_bridge_tls_enabled else None,
                     identifier=self._client_id,
                 ) as self._client:
@@ -308,6 +309,8 @@ class MqttBridgeClient:
             "COVER_POSITION": self._cmd_cover_position,
             "SIREN_ON": self._cmd_siren_on,
             "SIREN_OFF": self._cmd_siren_off,
+            "OUTLET_ON": self._cmd_outlet_on,
+            "OUTLET_OFF": self._cmd_outlet_off,
             "VALVE_OPEN": self._cmd_valve_open,
             "VALVE_CLOSE": self._cmd_valve_close,
             "VALVE_STOP": self._cmd_valve_stop,
@@ -520,7 +523,7 @@ class MqttBridgeClient:
                 response_dict = {
                     "success": False,
                     "error": "valve_position_missing",
-                    "error_msg": "Automation Command - Missing position for {command} command",
+                    "error_msg": f"Automation Command - Missing position for {command} command",
                     "command_id": command_id,
                 }
 
@@ -690,6 +693,18 @@ class MqttBridgeClient:
     async def _cmd_siren_off(self, device: QolsysAutomationDevice, endpoint: int, data: dict[str, Any]) -> None:
         service = await self._get_service(device, SirenService, endpoint, data)
         if isinstance(service, SirenService):
+            await service.turn_off()
+            await self._send_success(data)
+
+    async def _cmd_outlet_on(self, device: QolsysAutomationDevice, endpoint: int, data: dict[str, Any]) -> None:
+        service = await self._get_service(device, OutletService, endpoint, data)
+        if isinstance(service, OutletService):
+            await service.turn_on()
+            await self._send_success(data)
+
+    async def _cmd_outlet_off(self, device: QolsysAutomationDevice, endpoint: int, data: dict[str, Any]) -> None:
+        service = await self._get_service(device, OutletService, endpoint, data)
+        if isinstance(service, OutletService):
             await service.turn_off()
             await self._send_success(data)
 

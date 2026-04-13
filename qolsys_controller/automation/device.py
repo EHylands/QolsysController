@@ -10,6 +10,7 @@ from qolsys_controller.automation.service_cover import CoverService
 from qolsys_controller.automation.service_light import LightService
 from qolsys_controller.automation.service_lock import LockService
 from qolsys_controller.automation.service_meter import MeterService
+from qolsys_controller.automation.service_outlet import OutletService
 from qolsys_controller.automation.service_sensor import SensorService
 from qolsys_controller.automation.service_siren import SirenService
 from qolsys_controller.automation.service_status import StatusService
@@ -26,6 +27,7 @@ from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwa
 from qolsys_controller.automation_zwave.service_cover import CoverServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
+from qolsys_controller.automation_zwave.service_outlet import OutletServiceZwave
 from qolsys_controller.automation_zwave.service_sensor import SensorServiceZwave
 from qolsys_controller.automation_zwave.service_siren import SirenServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
@@ -81,6 +83,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             LightService,
             LockService,
             MeterService,
+            OutletService,
             SensorService,
             SirenService,
             StatusService,
@@ -117,7 +120,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 pass
 
             case "Smart Socket":
-                pass
+                self.service_add_outlet_service(int(self._end_point))
 
     def info(self) -> None:
         pass
@@ -209,6 +212,23 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         if siren_service is not None:
             self.service_add(siren_service)
+            return
+
+    def service_add_outlet_service(self, endpoint: int = 0) -> None:
+        outlet_service: AutomationService | None = None
+
+        match self.protocol:
+            case AutomationDeviceProtocol.ADC:
+                pass
+
+            case AutomationDeviceProtocol.POWERG:
+                pass
+
+            case AutomationDeviceProtocol.ZWAVE:
+                outlet_service = OutletServiceZwave(automation_device=self, endpoint=endpoint)
+
+        if outlet_service is not None:
+            self.service_add(outlet_service)
             return
 
     def service_add_thermostat_service(self, endpoint: int = 0) -> None:

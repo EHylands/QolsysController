@@ -205,7 +205,7 @@ class QolsysController:
             await self._mqtt_bridge.shutdown()
 
         self.connected = False
-        self.notifiy_panel_status_update()
+        self.notify_panel_status_update()
 
     def _to_event_dict(self) -> dict[str, Any]:
         return {
@@ -216,7 +216,7 @@ class QolsysController:
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         }
 
-    def notifiy_panel_status_update(self) -> None:
+    def notify_panel_status_update(self) -> None:
         self.state.notify(Event(QolsysNotification.PANEL_STATUS_UPDATE, self.panel, self._to_event_dict()))
 
     async def mqtt_connect_task(self, reconnect: bool, run_forever: bool) -> None:
@@ -300,12 +300,12 @@ class QolsysController:
                     self.state.dump()
 
                 self.connected = True
-                self.notifiy_panel_status_update()
+                self.notify_panel_status_update()
                 self._task_manager.run(self.mqtt_zwave_meter_update(), self._mqtt_task_zwave_meter_update_label)
 
                 if not run_forever:
                     self.connected = False
-                    self.notifiy_panel_status_update()
+                    self.notify_panel_status_update()
                     self._task_manager.cancel(self._mqtt_task_listen_label)
                     self._task_manager.cancel(self._mqtt_task_ping_label)
                     await self.aiomqtt.__aexit__(None, None, None)
@@ -315,7 +315,7 @@ class QolsysController:
             except aiomqtt.MqttError as err:
                 # Receive pannel network error
                 self.connected = False
-                self.notifiy_panel_status_update()
+                self.notify_panel_status_update()
                 self.aiomqtt = None
 
                 if reconnect:
@@ -329,7 +329,7 @@ class QolsysController:
                 # We cannot recover from this error automaticly
                 # Pannels need to be re-paired
                 self.connected = False
-                self.notifiy_panel_status_update()
+                self.notify_panel_status_update()
                 self.aiomqtt = None
                 raise QolsysSslError from err
 
@@ -385,7 +385,7 @@ class QolsysController:
 
         except aiomqtt.MqttError as err:
             self.connected = False
-            self.notifiy_panel_status_update()
+            self.notify_panel_status_update()
 
             LOGGER.debug("%s: Listen - Reconnecting in %s seconds ...", err, self.settings.mqtt_timeout)
             await asyncio.sleep(self.settings.mqtt_timeout)
