@@ -244,7 +244,10 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                 if isinstance(service, OutletServiceZwave):
                     if ZwaveCommandClass.SwitchBinary in self.command_class_list:
                         zwave_command = MQTTCommand_ZWave(
-                            self._controller, self.virtual_node_id, str(service.endpoint), [ZwaveCommandClass.SwitchBinary, 0x02]
+                            self._controller,
+                            self.virtual_node_id,
+                            str(service.endpoint),
+                            [ZwaveCommandClass.SwitchBinary, 0x02],
                         )
                         await zwave_command.send_command()
 
