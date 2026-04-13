@@ -31,7 +31,7 @@ class TestOutletServiceZwave:
         service.update_automation_service()
         assert service.is_on is True
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore[untyped-decorator]
     async def test_turn_on(self) -> None:
         device = _make_mock_device()
         service = OutletServiceZwave(automation_device=device, endpoint=0)
@@ -39,7 +39,7 @@ class TestOutletServiceZwave:
         await service.turn_on()
         device.controller.command_zwave_switch_binary_set.assert_awaited_once_with("8", "0", True)
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio  # type: ignore[untyped-decorator]
     async def test_turn_on_already_on_skips(self) -> None:
         device = _make_mock_device()
         service = OutletServiceZwave(automation_device=device, endpoint=0)
