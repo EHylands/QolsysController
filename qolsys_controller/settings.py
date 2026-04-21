@@ -33,22 +33,32 @@ class QolsysSettings:
         self._pairing_resume: bool = False
         self._pairing_progress_file: str = "pairing_progress.txt"
 
-        # MQTT Panel CLIENT
+        # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 600
         self._mqtt_qos: int = 0
         self._mqtt_remote_client_id: str = ""
         self._log_mqtt_messages: bool = False
+        self._mqtt_command_timeout: int = 30
 
         # MQTT BRIDGE
         self._mqtt_bridge_enabled: bool = True
+        self._mqtt_bridge_port: int = 1883
+        self._mqtt_bridge_hostname: str = ""
         self._mqtt_bridge_tls_enabled: bool = True
-        self._mqtt_bridge_port: int = 8883
-        self._mqtt_bridge_max_connections: int = 5
-        self._mqtt_bridge_allowed_users: dict[str, str] = {}
+        self._mqtt_bridge_folder = "mqtt_bridge"
+
+        # MQTT BRIDGE CLIENT
         self._mqtt_bridge_root_topic: str = "qolsys"
         self._mqtt_bridge_friendly_name: str = "iq_panel"
-        self._mqtt_bridge_folder = "mqtt_bridge"
+        self._mqtt_bridge_cliend_id = "qolsys_controller_mqtt_bridge_client"
+        self._mqtt_bridge_client_username: str = ""
+        self._mqtt_bridge_client_password: str = ""
+
+        # MQTT BRIDGE BROOKER
+        self._mqtt_bridge_brooker_enabled: bool = False
+        self._mqtt_bridge_brooker_allowed_users: dict[str, str] = {}
+        self._mqtt_bridge_max_connections: int = 5
         self._mqtt_bridge_cerfile: str = "mqtt_bridge.cer"
         self._mqtt_bridge_keyfile: str = "mqtt_bridge.key"
 
@@ -87,6 +97,14 @@ class QolsysSettings:
         self._mqtt_bridge_enabled = value
 
     @property
+    def mqtt_bridge_brooker_enabled(self) -> bool:
+        return self._mqtt_bridge_brooker_enabled
+
+    @mqtt_bridge_brooker_enabled.setter
+    def mqtt_bridge_brooker_enabled(self, value: bool) -> None:
+        self._mqtt_bridge_brooker_enabled = value
+
+    @property
     def mqtt_bridge_port(self) -> int:
         return self._mqtt_bridge_port
 
@@ -119,12 +137,12 @@ class QolsysSettings:
         self._mqtt_bridge_max_connections = max_connections
 
     @property
-    def mqtt_bridge_allowed_users(self) -> dict[str, str]:
-        return self._mqtt_bridge_allowed_users
+    def mqtt_bridge_brooker_allowed_users(self) -> dict[str, str]:
+        return self._mqtt_bridge_brooker_allowed_users
 
-    @mqtt_bridge_allowed_users.setter
-    def mqtt_bridge_allowed_users(self, allowed_users: dict[str, str]) -> None:
-        self._mqtt_bridge_allowed_users = allowed_users
+    @mqtt_bridge_brooker_allowed_users.setter
+    def mqtt_bridge_brooker_allowed_users(self, allowed_users: dict[str, str]) -> None:
+        self._mqtt_bridge_brooker_allowed_users = allowed_users
 
     @property
     def mqtt_bridge_tls_enabled(self) -> bool:

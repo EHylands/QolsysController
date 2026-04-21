@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from typing import TYPE_CHECKING
@@ -26,7 +28,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
-    def __init__(self, controller: "QolsysController", zwave_dict: dict[str, str], dict: dict[str, str]) -> None:
+    def __init__(self, controller: QolsysController, zwave_dict: dict[str, str], dict: dict[str, str]) -> None:
         super().__init__(controller, dict)
 
         # Base Z-Wave Device Properties

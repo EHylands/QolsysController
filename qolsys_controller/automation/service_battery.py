@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
@@ -13,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BatteryService(AutomationService):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "BatteryService"
         self._battery_level: int | None = None

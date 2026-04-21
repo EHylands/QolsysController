@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
+logging.getLogger("passlib").setLevel(logging.WARNING)
 
 
 class MqttBridge:
@@ -41,12 +42,14 @@ class MqttBridge:
         self._internal_password = "".join(secrets.choice(alphabet) for _ in range(16))
 
         # Check if internal_user in allowed_users database
-        if self._internal_user in self._controller.settings.mqtt_bridge_allowed_users:
+        if self._internal_user in self._controller.settings.mqtt_bridge_brooker_allowed_users:
             LOGGER.error(
                 "MQTT Bridge: Internal user '%s' already exists in allowed_users. This is a security risk. Please remove the internal user from allowed_users and restart the MQTT Bridge.",
                 self._internal_user,
             )
-        self._controller.settings.mqtt_bridge_allowed_users[self._internal_user] = sha512_crypt.hash(self._internal_password)
+        self._controller.settings.mqtt_bridge_brooker_allowed_users[self._internal_user] = sha512_crypt.hash(
+            self._internal_password
+        )
 
     async def start(self) -> bool:
         if self._is_running:
@@ -55,14 +58,20 @@ class MqttBridge:
 
         LOGGER.info("MQTT Bridge Starting ...")
 
-        # Create MQTT Bridge Broker if not already created
-        if not self._broker:
+        # Create MQTT Internal Broker if enabled and not already created
+        if self._controller.settings._mqtt_bridge_brooker_enabled and not self._broker:
             self._broker = MqttBridgeBroker(self)
 
-        # Start MQTT Bridge Broker
-        if not await self._broker.start():
-            LOGGER.error("MQTT Bridge Broker failed to start. MQTT Bridge will not start.")
-            return False
+        # Start MQTT Bridge Broker if configured
+        if self._broker:
+            if not await self._broker.start():
+                LOGGER.error("MQTT Bridge Broker failed to start. MQTT Bridge will not start.")
+                return False
+
+            # If broker is enabled, the client will connect to the local broker
+            self._controller._settings._mqtt_bridge_hostname = self._controller.settings.plugin_ip
+            self._controller._settings._mqtt_bridge_client_username = self._internal_user
+            self._controller._settings._mqtt_bridge_client_password = self._internal_password
 
         # Create MQTT Bridge Client if not already created
         if not self._client:

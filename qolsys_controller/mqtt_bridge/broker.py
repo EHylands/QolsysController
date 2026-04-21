@@ -49,7 +49,7 @@ class MqttBridgeBroker:
             return False
 
         LOGGER.info(
-            "MQTT Bridge Broker: Starting: %s:%s ...",
+            "MQTT Bridge Broker: Listenning on %s:%s",
             self._controller.settings.plugin_ip,
             self._controller.settings.mqtt_bridge_port,
         )
@@ -180,7 +180,7 @@ class MqttBridgeBroker:
         plugins: dict[str, dict[str, Any]] = {}
         if self._controller.settings.mqtt_bridge_enabled:
             plugins["qolsys_controller.mqtt_bridge.auth_plugin.AuthPlugin"] = {
-                "allowed_users": self._controller.settings.mqtt_bridge_allowed_users
+                "allowed_users": self._controller.settings.mqtt_bridge_brooker_allowed_users
             }
 
         return {"listeners": listeners, "plugins": plugins}

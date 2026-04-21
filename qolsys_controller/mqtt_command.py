@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import uuid
@@ -18,7 +20,7 @@ LOGGER = logging.getLogger(__name__)
 class MQTTCommand:
     def __init__(
         self,
-        controller: "QolsysController",
+        controller: QolsysController,
         eventName: str,
     ) -> None:
         self._controller: QolsysController = controller
@@ -43,14 +45,18 @@ class MQTTCommand:
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
+        LOGGER.debug("Sending MQTT Command: %s with payload: %s", self._eventName, self._payload)
+
         await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
-        return await self._controller.mqtt_command_queue.wait_for_response(self._requestID)
+        return await self._controller.mqtt_command_queue.wait_for_response(
+            self._requestID, timeout=self._controller.settings._mqtt_command_timeout
+        )
 
 
 class MQTTCommand_IpcCall(MQTTCommand):
     def __init__(
         self,
-        controller: "QolsysController",
+        controller: QolsysController,
         ipc_service_name: str,
         ipc_interface_name: str,
         ipc_transaction_id: int,

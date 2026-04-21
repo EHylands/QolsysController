@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from typing import TYPE_CHECKING, Any
@@ -15,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MeterServiceZwave(MeterService):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     def update_zwave_service(self, data: dict[str, Any], update_meter_value: bool = True) -> None:

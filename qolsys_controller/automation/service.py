@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
@@ -6,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class AutomationService(ABC):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         self._automation_device = automation_device
         self._endpoint: int = endpoint
         self._service_name: str = "AutomationService"

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = ["MeterService"]
 
 import logging
@@ -16,8 +18,8 @@ LOGGER = logging.getLogger(__name__)
 class QolsysMeter:
     def __init__(
         self,
-        parent_device: "QolsysAutomationDevice",
-        parent_service: "MeterService",
+        parent_device: QolsysAutomationDevice,
+        parent_service: MeterService,
         unit: QolsysMeterScale,
     ) -> None:
         self._parent_device: QolsysAutomationDevice = parent_device

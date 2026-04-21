@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -14,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 class CoverServiceZwave(CoverService):
     def __init__(
         self,
-        automation_device: "QolsysAutomationDevice",
+        automation_device: QolsysAutomationDevice,
         endpoint: int,
     ) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)

@@ -31,7 +31,7 @@ class ControllerConfig:
     check_user_code_on_disarm: bool
     mqtt_bridge_enabled: bool
     mqtt_bridge_tls_enabled: bool
-    mqtt_bridge_allowed_users: dict[str, str] = field(default_factory=dict)
+    mqtt_bridge_brooker_allowed_users: dict[str, str] = field(default_factory=dict)
     mqtt_bridge_max_connections: int = 5
     mqtt_bridge_root_topic: str = "qolsys"
     mqtt_bridge_friendly_name: str = "iq_panel"
@@ -67,7 +67,7 @@ def load_config(path: str) -> ControllerConfig:
             check_user_code_on_disarm=bool(raw.get("check_user_code_on_disarm", False)),
             mqtt_bridge_enabled=bool(raw.get("mqtt_bridge_enabled", False)),
             mqtt_bridge_tls_enabled=bool(raw.get("mqtt_bridge_tls_enabled", True)),
-            mqtt_bridge_allowed_users=raw.get("mqtt_bridge_allowed_users", {}),
+            mqtt_bridge_brooker_allowed_users=raw.get("mqtt_bridge_brooker_allowed_users", {}),
             mqtt_bridge_max_connections=int(raw.get("mqtt_bridge_max_connections", 5)),
             mqtt_bridge_root_topic=raw.get("mqtt_bridge_root_topic", "qolsys"),
             mqtt_bridge_friendly_name=raw.get("mqtt_bridge_friendly_name", "iq_panel"),
@@ -98,7 +98,7 @@ class QolsysController:
         settings.pairing_resume = self.config.pairing_resume
         settings.mqtt_bridge_enabled = self.config.mqtt_bridge_enabled
         settings.mqtt_bridge_tls_enabled = self.config.mqtt_bridge_tls_enabled
-        settings.mqtt_bridge_allowed_users = self.config.mqtt_bridge_allowed_users
+        settings.mqtt_bridge_brooker_allowed_users = self.config.mqtt_bridge_brooker_allowed_users
         settings.mqtt_bridge_max_connections = self.config.mqtt_bridge_max_connections
         settings.mqtt_bridge_root_topic = self.config.mqtt_bridge_root_topic
         settings.mqtt_bridge_friendly_name = self.config.mqtt_bridge_friendly_name

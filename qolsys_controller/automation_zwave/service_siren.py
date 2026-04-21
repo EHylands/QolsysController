@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -11,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class SirenServiceZwave(SirenService):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "SirenService"
         self._is_on: bool = False

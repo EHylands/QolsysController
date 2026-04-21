@@ -123,30 +123,6 @@ class QolsysDB:
         self._table_array.append(self.table_shades)
         self._table_array.append(self.table_nest_device)
 
-        # Other Table not Implemented
-        # content://com.qolsys.qolsysprovider.AllSensorsContentProvider/all_sensor
-        # content://com.qolsys.qolsysprovider.CameraRequestContentProvider/camerarequest
-        # content://com.qolsys.qolsysprovider.FAQContentProvider/faq
-        # content://com.qolsys.qolsysprovider.HomeAutomationEventsContentProvider/home_automation_event
-        # content://com.qolsys.qolsysprovider.HomeAutomationPendingContentProvider/home_automation_pending
-        # content://com.qolsys.qolsysprovider.HomeAutomationRulesContentProvider/home_automation_rule
-        # content://com.qolsys.qolsysprovider.ZigbeeSmartEnergyContentProvider/zigbee_smart_energy
-        # content://com.qolsys.qolsysprovider.ProvisionListContentProvider/provision_list
-        # content://com.qolsys.qolsysprovider.PowerGSignalStrengthContentProvider/powerg_signal_strength
-        # content://com.qolsys.qolsysprovider.ProximityTagContentProvider/proximity_tag
-        # content://com.qolsys.qolsysprovider.IQCameraContentProvider/iqcamera
-        # content://com.qolsys.qolsysprovider.CorbusDeviceContentProvider/corbus_device
-        # content://com.qolsys.qolsysprovider.AutomationRulesContentProvider/automation_rules
-        # content://com.qolsys.qolsysprovider.WifiClientsContentProvider/wifi_clients_table
-        # content://com.qolsys.qolsysprovider.MxLoopControllerContentProvider/mx_loop_controller
-        # content://com.qolsys.qolsysprovider.SystemCheckContentProvider/system_check
-        # content://com.qolsys.qolsysprovider.BluetoothDevicesContentProvider/bluetooth_devices
-        # content://com.qolsys.qolsysprovider.AxonDeviceContentProvider/axon_device
-        # content://com.qolsys.qolsysprovider.AxonSignalStrengthContentProvider/axon_signal_strength
-        # content://com.qolsys.qolsysprovider.PanelInfoContentProvider/panel_info
-        # content://com.qolsys.qolsysprovider.AxonRSSIContentProvider/axon_rssi_table
-        # content://com.qolsys.qolsysprovider.PowerGRSSIContentProvider/powerg_rssi_table
-
     @property
     def db(self) -> sqlite3.Connection:
         return self._db

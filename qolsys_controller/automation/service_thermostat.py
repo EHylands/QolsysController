@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from abc import abstractmethod
@@ -26,7 +28,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ThermostatService(AutomationService):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "ThermostatService"
         self._hvac_mode: QolsysHvacMode | None = None

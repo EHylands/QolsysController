@@ -4,6 +4,7 @@ from enum import IntEnum, StrEnum
 class QolsysPanelType(StrEnum):
     IQ_PANEL_2_PLUS = "msm8226"
     IQ_PANEL_4 = "msm8953_64"
+    IQ_HUB_5 = "bengal"
     UNKNOWN = "Unknown"
 
 

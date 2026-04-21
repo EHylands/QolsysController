@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 class MqttBridgeClient:
     def __init__(self, bridge: "MqttBridge") -> None:
         self._bridge = bridge
-        self._client_id = "InternalClient"
         self._task: asyncio.Task[None] | None = None
         self._stop_event = asyncio.Event()
         self._ready_event = asyncio.Event()
@@ -75,7 +74,11 @@ class MqttBridgeClient:
 
     async def _run(self) -> None:
         while not self._stop_event.is_set():
-            LOGGER.debug("MQTT Bridge Client: Connecting...")
+            LOGGER.debug(
+                "MQTT Bridge Client: Connecting to %s:%s ...",
+                self._bridge._controller.settings._mqtt_bridge_hostname,
+                self._bridge._controller.settings._mqtt_bridge_port,
+            )
 
             try:
                 tls_context = ssl.create_default_context()
@@ -83,13 +86,13 @@ class MqttBridgeClient:
                 tls_context.verify_mode = ssl.CERT_NONE
 
                 async with aiomqtt.Client(
-                    username=self._bridge._internal_user,
-                    password=self._bridge._internal_password,
+                    username=self._bridge._controller.settings._mqtt_bridge_client_username,
+                    password=self._bridge._controller.settings._mqtt_bridge_client_password,
                     protocol=ProtocolVersion.V311,
-                    hostname=self._bridge._controller.settings.plugin_ip,
+                    hostname=self._bridge._controller.settings._mqtt_bridge_hostname,
                     port=self._bridge._controller.settings.mqtt_bridge_port,
                     tls_context=tls_context if self._bridge._controller.settings.mqtt_bridge_tls_enabled else None,
-                    identifier=self._client_id,
+                    identifier=self._bridge._controller.settings._mqtt_bridge_cliend_id,
                 ) as self._client:
                     LOGGER.debug("MQTT Bridge Client: Connected")
 

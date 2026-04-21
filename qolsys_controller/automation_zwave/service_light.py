@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from json import JSONDecodeError
@@ -14,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LightServiceZwave(LightService):
-    def __init__(self, automation_device: "QolsysAutomationDevice", endpoint: int = 0) -> None:
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     async def turn_on(self) -> None:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC
 from datetime import datetime, timezone
@@ -43,7 +45,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysAutomationDevice(QolsysObservable, ABC):
-    def __init__(self, controller: "QolsysController", dev_dict: dict[str, str]) -> None:
+    def __init__(self, controller: QolsysController, dev_dict: dict[str, str]) -> None:
         super().__init__()
 
         self._controller: QolsysController = controller
@@ -397,7 +399,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     # -----------------------------
 
     @property
-    def controller(self) -> "QolsysController":
+    def controller(self) -> QolsysController:
         return self._controller
 
     @property

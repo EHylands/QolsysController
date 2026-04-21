@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -12,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class QolsysAutomationDevicePowerG(QolsysAutomationDevice):
-    def __init__(self, controller: "QolsysController", dict: dict[str, str]) -> None:
+    def __init__(self, controller: QolsysController, dict: dict[str, str]) -> None:
         super().__init__(controller, dict)
 
         self._short_device_id: str = ""
