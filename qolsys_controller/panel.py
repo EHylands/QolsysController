@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
+from qolsys_controller.automation_zigbee.device import QolsysAutomationDeviceZigbee
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.observable import Event
 
@@ -886,7 +887,12 @@ class QolsysPanel:
         return -1
 
     def get_automation_devices_from_db(self) -> list[QolsysAutomationDevice]:
-        allowed_protocols = [AutomationDeviceProtocol.POWERG, AutomationDeviceProtocol.ZWAVE, AutomationDeviceProtocol.ADC]
+        allowed_protocols = [
+            AutomationDeviceProtocol.POWERG,
+            AutomationDeviceProtocol.ZIGBEE,
+            AutomationDeviceProtocol.ZWAVE,
+            AutomationDeviceProtocol.ADC,
+        ]
 
         automation_devices: list[QolsysAutomationDevice] = []
         devices_list = self.db.get_automation_devices()
@@ -910,8 +916,12 @@ class QolsysPanel:
                     if zwave_node is not None:
                         new_device = QolsysAutomationDeviceZwave(self._controller, zwave_node, device)
 
+                case AutomationDeviceProtocol.ZIGBEE:
+                    new_device = QolsysAutomationDeviceZigbee(self._controller, device)
+
                 case _:
                     LOGGER.debug("Unknown protocol for automation device: %s", protocol)
+                    LOGGER.debug(device)
 
             if new_device is not None and protocol in allowed_protocols:
                 automation_devices.append(new_device)

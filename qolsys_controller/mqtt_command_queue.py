@@ -11,7 +11,6 @@ class QolsysMqttCommandQueue:
         self.waiters: dict[str, asyncio.Future[Any]] = {}
 
     async def handle_response(self, response: dict[str, str]) -> None:
-        LOGGER.debug("MQTT Command response received: %s", response)
         requestID = response.get("requestID")
 
         if not requestID:
@@ -25,7 +24,7 @@ class QolsysMqttCommandQueue:
             future.set_result(response)
 
     async def wait_for_response(self, request_id: str, timeout: int = 30) -> dict[str, Any]:  # type: ignore[return]
-        LOGGER.debug("Waiting for MQTT Command response with request_id: %s", request_id)
+        #LOGGER.debug("Waiting for MQTT Command response with request_id: %s", request_id)
         future = asyncio.get_running_loop().create_future()
         async with self.lock:
             if request_id == "":

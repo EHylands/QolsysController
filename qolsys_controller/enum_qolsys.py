@@ -134,6 +134,7 @@ class DeviceCapability(StrEnum):
 class AutomationDeviceProtocol(StrEnum):
     ADC = "ADC"
     POWERG = "PowerG"
+    ZIGBEE = "Zigbee"
     ZWAVE = "Z-Wave"
     UNKNOWN = "Unknown"
 

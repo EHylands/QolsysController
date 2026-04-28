@@ -25,6 +25,9 @@ from qolsys_controller.automation_powerg.service_battery import BatteryServicePo
 from qolsys_controller.automation_powerg.service_light import LightServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
 from qolsys_controller.automation_powerg.service_status import StatusServicePowerG
+from qolsys_controller.automation_zigbee.service_battery import BatteryServiceZigbee
+from qolsys_controller.automation_zigbee.service_light import LightServiceZigbee
+from qolsys_controller.automation_zigbee.service_status import StatusServiceZigbee
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_cover import CoverServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
@@ -280,6 +283,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             case AutomationDeviceProtocol.ZWAVE:
                 light_service = LightServiceZwave(automation_device=self, endpoint=endpoint)
 
+            case AutomationDeviceProtocol.ZIGBEE:
+                light_service = LightServiceZigbee(automation_device=self, endpoint=endpoint)
+
         if light_service is not None:
             self.service_add(light_service)
             return
@@ -310,6 +316,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             case AutomationDeviceProtocol.ZWAVE:
                 battery_service = BatteryServiceZwave(automation_device=self, endpoint=endpoint)
 
+            case AutomationDeviceProtocol.ZIGBEE:
+                battery_service = BatteryServiceZigbee(automation_device=self, endpoint=endpoint)
+
             case AutomationDeviceProtocol.ADC:
                 pass
 
@@ -331,6 +340,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
             case AutomationDeviceProtocol.ZWAVE:
                 service = StatusServiceZwave(automation_device=self, endpoint=endpoint)
+
+            case AutomationDeviceProtocol.ZIGBEE:
+                service = StatusServiceZigbee(automation_device=self, endpoint=endpoint)
 
         if service is not None:
             self.service_add(service)
