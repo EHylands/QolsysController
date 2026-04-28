@@ -45,7 +45,7 @@ class MQTTCommand:
             LOGGER.error("MQTT Client not configured")
             raise QolsysMqttError
 
-        #LOGGER.debug("Sending MQTT Command: %s with payload: %s", self._eventName, self._payload)
+        # LOGGER.debug("Sending MQTT Command: %s with payload: %s", self._eventName, self._payload)
 
         await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
         return await self._controller.mqtt_command_queue.wait_for_response(
