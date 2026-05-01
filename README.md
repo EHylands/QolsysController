@@ -40,17 +40,17 @@ qolsys-controller --verbose --config 'path_to_config_file'
 |                        | Average and Latest dBm               | ✅     |
 
 
-| Automation Devices| Z-Wave | PowerG | Alarm.com |
-|-----------------|--------|--------|-------|
-| Door Lock        | ✅     | ✅     | ❌    |
-| Energy Clamp     | ✅     | ❌     | ❌    |
-| External Siren   | ✅     | ❌     | ❌    |
-| Garage Door      | ✅     | ❌     | ✅    |
-| Lights           | ✅     | 🛠️     | ✅    |
-| Smart Outlet     | 🛠️     | ❌     | ❌    |
-| Thermometer      | ✅     | ❌     | ❌    |
-| Thermostat       | ✅     | ❌     | ❌    |
-| Water Valve      | 🛠️     | ❌     | ❌    |
+| Automation Devices| Z-Wave | PowerG | Zigbee | Alarm.com |
+|-----------------|--------|--------|-------|-------|
+| Door Lock        | ✅     | ✅     | ✅    | ❌    |
+| Energy Clamp     | ✅     | ❌     | ❌    | ❌    |
+| External Siren   | ✅     | ❌     | ❌    | ❌    |
+| Garage Door      | ✅     | ❌     | ❌    | ✅    |
+| Lights           | ✅     | ✅     | ✅    | ✅    |
+| Smart Outlet     | 🛠️     | ❌     | ❌    | ❌    |
+| Thermometer      | ✅     | ❌     | ❌    | ❌    |
+| Thermostat       | ✅     | ❌     | ❌    | ❌    |
+| Water Valve      | 🛠️     | ❌     | ❌    | ❌    |
 
 🛠️ = partially supported or untested
 
