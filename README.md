@@ -9,7 +9,7 @@ A Python module that emulates a virtual IQ Remote device, enabling full **local 
 - 🔐 Pairs by only using **Installer Code** (same procedure as standard IQ Remote pairing)
 - 🔢 Supports **4-digit user codes**
 - ⚠️ Uses a **custom local usercode database** (panel internal validation is not yet supported)
-- 🌐 Now includes a built-in MQTT broker - [**MQTT Bridge**](./docs/info_mqtt_bridge.md), enabling seamless publishing of panel updates and handling of incoming commands
+- 🌐 Now includes a built-in MQTT Bridge - [**MQTT Bridge**](./docs/info_mqtt_bridge.md), enabling seamless publishing of panel updates and handling of incoming commands
 
 ## 📦 Installation
 
@@ -46,7 +46,7 @@ qolsys-controller --verbose --config 'path_to_config_file'
 | Energy Clamp     | ✅     | ❌     | ❌    | ❌    |
 | External Siren   | ✅     | ❌     | ❌    | ❌    |
 | Garage Door      | ✅     | ❌     | ❌    | ✅    |
-| Lights           | ✅     | ✅     | ✅    | ✅    |
+| Light            | ✅     | ✅     | ✅    | ✅    |
 | Smart Outlet     | 🛠️     | ❌     | ❌    | ❌    |
 | Thermometer      | ✅     | ❌     | ❌    | ❌    |
 | Thermostat       | ✅     | ❌     | ❌    | ❌    |

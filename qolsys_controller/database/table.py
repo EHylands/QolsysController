@@ -15,6 +15,7 @@ class QolsysTable:
         self._columns: list[str] = []
         self._abort_on_error: bool = False
         self._implemented: bool = False
+        self._report_new_columns: bool = True
 
     @property
     def uri(self) -> str:
@@ -88,7 +89,7 @@ class QolsysTable:
                     new_columns.append(key)
 
             # Warn if new column found in iq2meid database
-            if new_columns:
+            if new_columns and self._report_new_columns:
                 LOGGER.warning("New column found in iq2meid database")
                 LOGGER.warning("Table: %s", self.table)
                 LOGGER.warning("New Columns: %s", new_columns)
@@ -141,7 +142,7 @@ class QolsysTable:
                         new_columns.append(key)
 
             # Warn for unknown columns
-            if new_columns:
+            if new_columns and self._report_new_columns:
                 LOGGER.warning("New column found in iq2meid database")
                 LOGGER.warning("Table: %s", self.table)
                 LOGGER.warning("New Columns: %s", new_columns)

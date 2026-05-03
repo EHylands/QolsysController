@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from qolsys_controller.errors import QolsysConfigError
+
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -35,7 +37,7 @@ class QolsysSettings:
 
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
-        self._mqtt_ping: int = 600
+        self._mqtt_ping: int = 300
         self._mqtt_qos: int = 0
         self._mqtt_remote_client_id: str = ""
         self._log_mqtt_messages: bool = False
@@ -111,6 +113,30 @@ class QolsysSettings:
     @mqtt_bridge_port.setter
     def mqtt_bridge_port(self, port: int) -> None:
         self._mqtt_bridge_port = port
+
+    @property
+    def mqtt_bridge_hostname(self) -> str:
+        return self._mqtt_bridge_hostname
+
+    @mqtt_bridge_hostname.setter
+    def mqtt_bridge_hostname(self, hostname: str) -> None:
+        self._mqtt_bridge_hostname = hostname
+
+    @property
+    def mqtt_bridge_client_username(self) -> str:
+        return self._mqtt_bridge_client_username
+
+    @mqtt_bridge_client_username.setter
+    def mqtt_bridge_client_username(self, username: str) -> None:
+        self._mqtt_bridge_client_username = username
+
+    @property
+    def mqtt_bridge_client_password(self) -> str:
+        return self._mqtt_bridge_client_password
+
+    @mqtt_bridge_client_password.setter
+    def mqtt_bridge_client_password(self, password: str) -> None:
+        self._mqtt_bridge_client_password = password
 
     @property
     def mqtt_bridge_root_topic(self) -> str:
@@ -304,22 +330,20 @@ class QolsysSettings:
     def pairing_progress_file(self, value: str) -> None:
         self._pairing_progress_file = value
 
-    def check_config_directory(self, create: bool = True) -> bool:  # noqa: PLR0911
+    def check_config_directory(self, create: bool = True) -> None:
         if not self.config_directory.is_dir():
             if not create:
-                LOGGER.debug("config_directory not found:  %s", self.config_directory)
-                return False
+                raise QolsysConfigError(f"config_directory not found and create is set to False:  {self.config_directory}")
 
             # Create config directory if not found
             LOGGER.debug("Creating config_directory: %s", self.config_directory)
             try:
                 self.config_directory.mkdir(parents=True)
             except PermissionError:
-                LOGGER.exception("Permission denied: Unable to create: %s", self.config_directory)
-                return False
+                raise QolsysConfigError(f"Permission denied: Unable to create: {self.config_directory}")
+
             except Exception:
-                LOGGER.exception("Error creating config_directory: %s", self.config_directory)
-                return False
+                raise QolsysConfigError(f"Error creating config_directory: {self.config_directory}")
 
         LOGGER.debug("Using config_directory: %s", self.config_directory.resolve())
 
@@ -329,11 +353,9 @@ class QolsysSettings:
             try:
                 self.pki_directory.mkdir(parents=True)
             except PermissionError:
-                LOGGER.exception("Permission denied: Unable to create: %s", self.pki_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Permission denied: Unable to create: {self.pki_directory.resolve()}")
             except Exception:
-                LOGGER.exception("Error creating pki_directory: %s", self.pki_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Error creating pki_directory: {self.pki_directory.resolve()}")
 
         LOGGER.debug("Using pki_directory: %s", self.pki_directory.resolve())
 
@@ -343,11 +365,9 @@ class QolsysSettings:
             try:
                 self._media_directory.mkdir(parents=True)
             except PermissionError:
-                LOGGER.exception("Permission denied: Unable to create: %s", self._media_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Permission denied: Unable to create: {self._media_directory.resolve()}")
             except Exception:
-                LOGGER.exception("Error creating media_directory: %s", self._media_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Error creating media_directory: {self._media_directory.resolve()}")
 
         LOGGER.debug("Using media_directory: %s", self._media_directory.resolve())
 
@@ -357,12 +377,10 @@ class QolsysSettings:
             try:
                 self.mqtt_bridge_directory.mkdir(parents=True)
             except PermissionError:
-                LOGGER.exception("Permission denied: Unable to create: %s", self.mqtt_bridge_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Permission denied: Unable to create: {self.mqtt_bridge_directory.resolve()}")
             except Exception:
-                LOGGER.exception("Error creating media_directory: %s", self.mqtt_bridge_directory.resolve())
-                return False
+                raise QolsysConfigError(f"Error creating mqtt_bridge_directory: {self.mqtt_bridge_directory.resolve()}")
 
         LOGGER.debug("Using mqtt_bridge: %s", self.mqtt_bridge_directory.resolve())
 
-        return True
+        return

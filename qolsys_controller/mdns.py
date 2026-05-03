@@ -25,3 +25,4 @@ class QolsysMDNS:
 
     async def stop_mdns(self) -> None:
         await self.azc.async_unregister_service(self.mdns_info)
+        await self.azc.async_close()

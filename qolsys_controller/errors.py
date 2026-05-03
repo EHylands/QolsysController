@@ -24,6 +24,11 @@ class QolsysMqttError(QolsysError):
         super().__init__("QolsysMqttError")
 
 
+class QolsysConfigError(QolsysError):
+    def __init__(self, message: str) -> None:
+        super().__init__(f"QolsysConfigError - {message}")
+
+
 class QolsysSqlError(QolsysError):
     def __init__(self, operation: dict[str, Any]) -> None:
         super().__init__("QolsysSqlError")

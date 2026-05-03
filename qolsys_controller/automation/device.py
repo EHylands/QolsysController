@@ -27,6 +27,7 @@ from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
 from qolsys_controller.automation_powerg.service_status import StatusServicePowerG
 from qolsys_controller.automation_zigbee.service_battery import BatteryServiceZigbee
 from qolsys_controller.automation_zigbee.service_light import LightServiceZigbee
+from qolsys_controller.automation_zigbee.service_lock import LockServiceZigbee
 from qolsys_controller.automation_zigbee.service_status import StatusServiceZigbee
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_cover import CoverServiceZwave
@@ -170,13 +171,6 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                     )
                     return
                 self._services.setdefault(service.endpoint, []).append(service)
-
-                LOGGER.debug(
-                    "%s - Adding %s to endpoint%s",
-                    self.prefix,
-                    service.service_name,
-                    service.endpoint,
-                )
                 return
 
         LOGGER.error(
@@ -299,6 +293,9 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
             case AutomationDeviceProtocol.ZWAVE:
                 lock_service = LockServiceZwave(self, endpoint=endpoint)
+
+            case AutomationDeviceProtocol.ZIGBEE:
+                lock_service = LockServiceZigbee(self, endpoint=endpoint)
 
         if lock_service is not None:
             self.service_add(lock_service)

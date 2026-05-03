@@ -46,11 +46,11 @@ class MQTTCommand:
             raise QolsysMqttError
 
         # LOGGER.debug("Sending MQTT Command: %s with payload: %s", self._eventName, self._payload)
-
-        await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
-        return await self._controller.mqtt_command_queue.wait_for_response(
-            self._requestID, timeout=self._controller.settings._mqtt_command_timeout
-        )
+        async with self._controller._lock_mqtt:
+            await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
+            return await self._controller.mqtt_command_queue.wait_for_response(
+                self._requestID, timeout=self._controller.settings._mqtt_command_timeout
+            )
 
 
 class MQTTCommand_IpcCall(MQTTCommand):

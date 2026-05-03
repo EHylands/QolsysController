@@ -117,7 +117,6 @@ class MqttBridgeClient:
                     await self._run_connected(self._client)
 
             except asyncio.CancelledError:
-                LOGGER.info("MQTT Bridge Client: Shutting down ...")
                 break
 
             except aiomqtt.MqttError as err:

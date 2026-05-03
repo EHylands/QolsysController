@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from qolsys_controller.controller import QolsysController as qolsys_controller
-from qolsys_controller.errors import QolsysMqttError, QolsysSqlError, QolsysSslError
+from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
 
 @dataclass
@@ -29,8 +29,12 @@ class ControllerConfig:
     start_pairing: bool
     check_user_code_on_arm: bool
     check_user_code_on_disarm: bool
+    mqtt_bridge_hostname: str
+    mqtt_bridge_client_username: str
+    mqtt_bridge_client_password: str
     mqtt_bridge_enabled: bool
     mqtt_bridge_tls_enabled: bool
+    mqtt_bridge_brooker_enabled: bool
     mqtt_bridge_brooker_allowed_users: dict[str, str] = field(default_factory=dict)
     mqtt_bridge_max_connections: int = 5
     mqtt_bridge_root_topic: str = "qolsys"
@@ -66,7 +70,11 @@ def load_config(path: str) -> ControllerConfig:
             check_user_code_on_arm=bool(raw.get("check_user_code_on_arm", False)),
             check_user_code_on_disarm=bool(raw.get("check_user_code_on_disarm", False)),
             mqtt_bridge_enabled=bool(raw.get("mqtt_bridge_enabled", False)),
+            mqtt_bridge_hostname=raw.get("mqtt_bridge_hostname", ""),
+            mqtt_bridge_client_username=raw.get("mqtt_bridge_client_username", ""),
+            mqtt_bridge_client_password=raw.get("mqtt_bridge_client_password", ""),
             mqtt_bridge_tls_enabled=bool(raw.get("mqtt_bridge_tls_enabled", True)),
+            mqtt_bridge_brooker_enabled=bool(raw.get("mqtt_bridge_brooker_enabled", False)),
             mqtt_bridge_brooker_allowed_users=raw.get("mqtt_bridge_brooker_allowed_users", {}),
             mqtt_bridge_max_connections=int(raw.get("mqtt_bridge_max_connections", 5)),
             mqtt_bridge_root_topic=raw.get("mqtt_bridge_root_topic", "qolsys"),
@@ -97,19 +105,19 @@ class QolsysController:
         settings.check_user_code_on_disarm = self.config.check_user_code_on_disarm
         settings.pairing_resume = self.config.pairing_resume
         settings.mqtt_bridge_enabled = self.config.mqtt_bridge_enabled
+        settings.mqtt_bridge_hostname = self.config.mqtt_bridge_hostname
+        settings.mqtt_bridge_client_username = self.config.mqtt_bridge_client_username
+        settings.mqtt_bridge_client_password = self.config.mqtt_bridge_client_password
         settings.mqtt_bridge_tls_enabled = self.config.mqtt_bridge_tls_enabled
+        settings.mqtt_bridge_brooker_enabled = self.config.mqtt_bridge_brooker_enabled
         settings.mqtt_bridge_brooker_allowed_users = self.config.mqtt_bridge_brooker_allowed_users
         settings.mqtt_bridge_max_connections = self.config.mqtt_bridge_max_connections
         settings.mqtt_bridge_root_topic = self.config.mqtt_bridge_root_topic
         settings.mqtt_bridge_friendly_name = self.config.mqtt_bridge_friendly_name
         settings.mqtt_bridge_port = self.config.mqtt_bridge_port
 
-        configured = await self.controller.config(start_pairing=self.config.start_pairing)
-        if not configured:
-            raise RuntimeError("Failed to configure qolsys-controller (pairing/config issue)")
-
         try:
-            await self.controller.start_operation()
+            await self.controller.start_operation(reconnect=False, run_once=False, start_pairing=self.config.start_pairing)
 
         except QolsysMqttError:
             raise RuntimeError("Failed to start qolsys-controller due to MQTT error. Check logs for details.")
@@ -119,6 +127,13 @@ class QolsysController:
 
         except QolsysSqlError:
             raise RuntimeError("Failed to start qolsys-controller due to SQL error. Check logs for details.")
+
+        except QolsysConfigError as err:
+            raise RuntimeError(err)
+
+        except asyncio.CancelledError:
+            self.log.info("Controller start cancelled")
+            raise
 
         if not self.controller.connected:
             self.log.error("qolsys-controller not ready for operation")
@@ -158,9 +173,15 @@ async def _main_async() -> None:
             with contextlib.suppress(NotImplementedError):
                 loop.add_signal_handler(sig, _handle_signal)
 
-        await bridge.start()
-        await stop_event.wait()
-        await bridge.stop()
+        task = asyncio.create_task(bridge.start())
+
+        try:
+            await stop_event.wait()
+        finally:
+            await bridge.stop()
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await task
 
     except Exception as e:
         log.error("Fatal error: %s", e)
@@ -179,3 +200,7 @@ if sys.platform.lower() == "win32" or os.name.lower() == "nt":
 
 def main() -> None:
     asyncio.run(_main_async())
+
+
+if __name__ == "__main__":
+    main()

@@ -344,7 +344,6 @@ class QolsysDB:
         row = self.cursor.fetchone()
 
         if row is None:
-            LOGGER.debug("%s value not found", setting)
             return ""
 
         return str(row[0])

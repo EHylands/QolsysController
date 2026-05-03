@@ -116,14 +116,14 @@ class CoverService(AutomationService):
         self.is_closed = self.automation_device.status.lower() == "closed"
 
     def info(self) -> list[str]:
-        str = []
-        str.append(f"{self.prefix} - is_closed: {self.is_closed}")
-        str.append(f"{self.prefix} - current_position: {self.current_position}")
-        str.append(f"{self.prefix} - supports_open: {self.supports_open()}")
-        str.append(f"{self.prefix} - supports_close: {self.supports_close()}")
-        str.append(f"{self.prefix} - supports_stop: {self.supports_stop()}")
-        str.append(f"{self.prefix} - supports_position: {self.supports_position()}")
-        return str
+        info_str = []
+        info_str.append(f"{self.prefix} - is_closed: {self.is_closed}")
+        info_str.append(f"{self.prefix} - current_position: {self.current_position}")
+        info_str.append(f"{self.prefix} - supports_open: {self.supports_open()}")
+        info_str.append(f"{self.prefix} - supports_close: {self.supports_close()}")
+        info_str.append(f"{self.prefix} - supports_stop: {self.supports_stop()}")
+        info_str.append(f"{self.prefix} - supports_position: {self.supports_position()}")
+        return info_str
 
     def to_dict_event(self) -> dict[str, Any]:
         payload: dict[str, Any] = {

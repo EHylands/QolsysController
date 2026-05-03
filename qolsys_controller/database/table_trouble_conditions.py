@@ -13,6 +13,7 @@ class QolsysTableTroubleConditions(QolsysTable):
         self._table = "trouble_conditions"
         self._abort_on_error = False
         self._implemented = True
+        self._report_new_columns = True
 
         self._columns = [
             "_id",

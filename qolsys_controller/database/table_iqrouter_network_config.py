@@ -13,6 +13,7 @@ class QolsysTableIqRouterNetworkConfig(QolsysTable):
         self._table = "iqrouter_network_config_table"
         self._abort_on_error = False
         self._implemented = False
+        self._report_new_columns = True
 
         self._columns = [
             "_id",

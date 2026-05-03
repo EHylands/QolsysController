@@ -13,6 +13,7 @@ class QolsysTableZigbeeDevice(QolsysTable):
         self._table = "zigbee_device"
         self._implemented = True
         self._abort_on_error = False
+        self._report_new_columns = True
 
         self._columns = [
             "_id",

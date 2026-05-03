@@ -13,6 +13,7 @@ class QolsysTableNestDevice(QolsysTable):
         self._table = "nest_device"
         self._abort_on_error = False
         self._implemented = False
+        self._report_new_columns = True
 
         self._columns = [
             "_id",

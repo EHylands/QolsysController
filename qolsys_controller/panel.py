@@ -11,6 +11,7 @@ from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zigbee.device import QolsysAutomationDeviceZigbee
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.errors import QolsysConfigError
 from qolsys_controller.observable import Event
 
 from .database.db import QolsysDB
@@ -128,7 +129,7 @@ class QolsysPanel:
         self._imei: str = ""
         self._product_type: QolsysPanelType = QolsysPanelType.UNKNOWN
 
-    def read_users_file(self) -> bool:
+    def read_users_file(self) -> None:
         # Loading user_code data from users.conf file if exists
         if self._controller.settings.users_file_path.is_file():
             try:
@@ -143,14 +144,12 @@ class QolsysPanel:
                             self._users.append(qolsys_user)
 
                     except json.JSONDecodeError:
-                        LOGGER.exception("users.conf file json error")
-                        return False
+                        raise QolsysConfigError("users.conf file json error")
 
             except FileNotFoundError:
-                LOGGER.exception("users.conf file not found")
-                return False
+                raise QolsysConfigError("users.conf file not found")
 
-        return True
+        return
 
     @property
     def db(self) -> QolsysDB:
