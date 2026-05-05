@@ -202,8 +202,6 @@ class ZoneSensorGroup(StrEnum):
     FREEZE_NON_REPORTING = "Freeze_Non_Reporting"
     GLASS_BREAK = "glassbreak"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
-    GLASS_BREAK = "glassbreak"
-    GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
     INSTANT_PERIMETER_DW = "instantperimeter"
     INSTANT_INTERIOR_DOOR = "instantinterior"
     LOCAL_SAFETY_SENSOR = "localsafety"
