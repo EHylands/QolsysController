@@ -70,3 +70,7 @@ commit_parser = "conventional"
 
 [tool.semantic_release.changelog]
 file = "CHANGELOG.md"
+
+[tool.semantic_release.remote]
+name = "origin"
+type = "github"
