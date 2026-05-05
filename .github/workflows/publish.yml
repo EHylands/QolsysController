@@ -58,12 +58,14 @@ jobs:
       - name: Install semantic-release
         run: pip install python-semantic-release
 
-      - name: Run semantic-release
+      - name: Run semantic-release (version + tag)
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release version
+        run: |
+          VERSION=$(semantic-release version --print)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
 
   github_release:
@@ -76,11 +78,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install semantic-release
+        run: pip install python-semantic-release
+
+      # --- Generate latest release notes only ---
+      - name: Generate latest release notes only
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          CURRENT_TAG=$(git describe --tags --abbrev=0)
+
+          if [ -z "$LAST_TAG" ]; then
+            git log --pretty=format:"- %s (%h)" > release_notes.md
+          else
+            git log $LAST_TAG..HEAD --pretty=format:"- %s (%h)" > release_notes.md
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.release.outputs.version }}
-          body_path: CHANGELOG.md
+          body_path: release_notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
