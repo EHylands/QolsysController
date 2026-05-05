@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v1.0.4 (2026-05-05)
+
+### Bug Fixes
+
+- Ci-cd
+  ([`a40a417`](https://github.com/EHylands/QolsysController/commit/a40a417b5b9c07039c7810da20333104a0fa3221))
+
+- Ci-cd
+  ([`4bafdff`](https://github.com/EHylands/QolsysController/commit/4bafdff12c5612a1e8f62f4dbd8f4d2fa0ead059))
+
+- Zone sensor group takeovermodule and nightmotion
+  ([#38](https://github.com/EHylands/QolsysController/pull/38),
+  [`25e6784`](https://github.com/EHylands/QolsysController/commit/25e6784af955f90dc269d145dd0340de62d94435))
+
+### Chores
+
+- Ci-cd
+  ([`3d7f2ad`](https://github.com/EHylands/QolsysController/commit/3d7f2ad9b59ad5a6999057ddca84bd3726f9d384))
+
+
 ## v1.0.3 (2026-05-05)
 
 
