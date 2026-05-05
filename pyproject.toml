@@ -1,6 +1,6 @@
 [project]
 name = "qolsys-controller"
-version = "0.5.8"
+version = "1.0.0"
 authors = [
   { name="Eric Hylands", email="" },
 ]
@@ -61,3 +61,12 @@ max-complexity = 25
 
 [project.scripts]
 qolsys-controller = "qolsys_controller.cli:main"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+branch = "main"
+tag_format = "v{version}"
+commit_parser = "conventional"
+
+[tool.semantic_release.changelog]
+file = "CHANGELOG.md"
