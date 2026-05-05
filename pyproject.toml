@@ -66,7 +66,6 @@ qolsys-controller = "qolsys_controller.cli:main"
 version_toml = ["pyproject.toml:project.version"]
 tag_format = "v{version}"
 branch = "main"
-changelog = true
 commit_parser = "conventional"
 
 [tool.semantic_release.changelog]
