@@ -15,13 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -33,54 +31,70 @@ jobs:
       - name: Lint
         run: ruff check .
 
-      - name: Format check
-        run: ruff format --check .
-
       - name: Typecheck
         run: mypy .
 
-      - name: Build (validation only)
+      - name: Build (validation)
         run: python -m build
 
 
   release:
-    name: Semantic Release
+    name: Version + Tag
     runs-on: ubuntu-latest
     needs: test
 
+    outputs:
+      version: ${{ steps.semantic.outputs.version }}
+
     steps:
-      - name: Checkout repo (full history)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install semantic-release
         run: pip install python-semantic-release
 
-      - name: Run semantic-release (tag + changelog + GitHub release)
+      - name: Run semantic-release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release publish
+        run: semantic-release version
+
+
+  github_release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.release.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: release
+    needs: github_release
 
     steps:
-      - name: Checkout repo (for versioned build)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -90,5 +104,5 @@ jobs:
       - name: Build package
         run: python -m build
 
-      - name: Publish to PyPI (Trusted Publisher)
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

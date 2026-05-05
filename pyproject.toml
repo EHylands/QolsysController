@@ -64,8 +64,8 @@ qolsys-controller = "qolsys_controller.cli:main"
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-branch = "main"
 tag_format = "v{version}"
+branch = "main"
 commit_parser = "conventional"
 
 [tool.semantic_release.changelog]
