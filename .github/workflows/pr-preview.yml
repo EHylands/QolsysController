@@ -13,42 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-<<<<<<< HEAD
-<<<<<<< HEAD
       # ------------------------------------------------------------
       # Checkout full history (required for semantic-release)
       # ------------------------------------------------------------
-=======
->>>>>>> 243cd38 (chore: ci-cd)
-=======
-      # ------------------------------------------------------------
-      # Checkout full history (required for semantic-release)
-      # ------------------------------------------------------------
->>>>>>> 676419b (fix: ci-cd)
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-<<<<<<< HEAD
-<<<<<<< HEAD
       # ------------------------------------------------------------
       # Python setup
       # ------------------------------------------------------------
-=======
->>>>>>> 243cd38 (chore: ci-cd)
-=======
-      # ------------------------------------------------------------
-      # Python setup
-      # ------------------------------------------------------------
->>>>>>> 676419b (fix: ci-cd)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
       # ------------------------------------------------------------
       # Install semantic-release
       # ------------------------------------------------------------
@@ -77,48 +57,10 @@ jobs:
       # ------------------------------------------------------------
       # Generate changelog preview (no scopes required)
       # ------------------------------------------------------------
-=======
-=======
-      # ------------------------------------------------------------
-      # Install semantic-release
-      # ------------------------------------------------------------
->>>>>>> 676419b (fix: ci-cd)
-      - name: Install semantic-release
-        run: pip install python-semantic-release
-
-      # ------------------------------------------------------------
-      # Force evaluation against main branch (avoids detached HEAD issues)
-      # ------------------------------------------------------------
-      - name: Prepare main branch context
-        run: |
-          git fetch origin main:main
-          git checkout main
-
-      # ------------------------------------------------------------
-      # Get next version
-      # ------------------------------------------------------------
-      - name: Get next version
-        run: |
-          echo "## 📦 Semantic Release Preview" > preview.txt
-          echo "" >> preview.txt
-          echo "### Next Version" >> preview.txt
-          semantic-release version --print >> preview.txt
-          echo "" >> preview.txt
-
-<<<<<<< HEAD
-      # --- CHANGELOG PREVIEW (NO SCOPES) ---
->>>>>>> 243cd38 (chore: ci-cd)
-=======
-      # ------------------------------------------------------------
-      # Generate changelog preview (no scopes required)
-      # ------------------------------------------------------------
->>>>>>> 676419b (fix: ci-cd)
       - name: Generate changelog preview
         run: |
           echo "### Changelog Preview" >> preview.txt
           semantic-release changelog >> preview.txt || true
-<<<<<<< HEAD
-<<<<<<< HEAD
           echo "" >> preview.txt
 
       # ------------------------------------------------------------
@@ -132,28 +74,6 @@ jobs:
       # Post PR comment
       # ------------------------------------------------------------
       - name: Post comment on PR
-=======
-=======
-          echo "" >> preview.txt
->>>>>>> 676419b (fix: ci-cd)
-
-      # ------------------------------------------------------------
-      # Format PR comment
-      # ------------------------------------------------------------
-      - name: Build PR comment
-        run: |
-          cat preview.txt > comment.md
-
-<<<<<<< HEAD
-      # --- POST COMMENT ---
-      - name: Post PR comment
->>>>>>> 243cd38 (chore: ci-cd)
-=======
-      # ------------------------------------------------------------
-      # Post PR comment
-      # ------------------------------------------------------------
-      - name: Post comment on PR
->>>>>>> 676419b (fix: ci-cd)
         uses: thollander/actions-comment-pull-request@v2
         with:
           filePath: comment.md

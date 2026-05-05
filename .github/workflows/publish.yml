@@ -80,10 +80,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.release.outputs.version }}
-<<<<<<< HEAD
-=======
-          generate_release_notes: true
->>>>>>> 243cd38 (chore: ci-cd)
           body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
