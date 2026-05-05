@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.0.1 (2026-05-04)
+
+### Bug Fixes
+
+- Ci-cd pipeline
+  ([`50c322f`](https://github.com/EHylands/QolsysController/commit/50c322f7286ff65f66dd079b5a1d78e6c27bc014))
+
+- Trigger 1.0.1 release
+  ([`8a27882`](https://github.com/EHylands/QolsysController/commit/8a278825f898315a04517a97218e8d4a97813930))
+
+- Trigger next release
+  ([`1559963`](https://github.com/EHylands/QolsysController/commit/1559963dc197c41271f7df6dab4a968f7c334ecf))
+
+
 ## v1.0.0 (2026-05-04)
 
 
