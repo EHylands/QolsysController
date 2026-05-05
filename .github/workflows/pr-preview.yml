@@ -1,0 +1,53 @@
+name: Semantic Release Preview (PR)
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    name: Semantic Release Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install semantic-release
+        run: pip install python-semantic-release
+
+      # --- VERSION PREVIEW ---
+      - name: Get next version
+        run: |
+          echo "### Next Version" > preview.txt
+          semantic-release version --print >> preview.txt
+          echo "" >> preview.txt
+
+      # --- CHANGELOG PREVIEW (NO SCOPES) ---
+      - name: Generate changelog preview
+        run: |
+          echo "### Changelog Preview" >> preview.txt
+          semantic-release changelog >> preview.txt || true
+
+      # --- FORMAT COMMENT ---
+      - name: Format PR comment
+        run: |
+          echo "## 📦 Semantic Release Preview" > comment.md
+          echo "" >> comment.md
+          cat preview.txt >> comment.md
+
+      # --- POST COMMENT ---
+      - name: Post PR comment
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: comment.md
