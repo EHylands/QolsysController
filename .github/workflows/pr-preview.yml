@@ -13,22 +13,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+<<<<<<< HEAD
       # ------------------------------------------------------------
       # Checkout full history (required for semantic-release)
       # ------------------------------------------------------------
+=======
+>>>>>>> 243cd38 (chore: ci-cd)
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+<<<<<<< HEAD
       # ------------------------------------------------------------
       # Python setup
       # ------------------------------------------------------------
+=======
+>>>>>>> 243cd38 (chore: ci-cd)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+<<<<<<< HEAD
       # ------------------------------------------------------------
       # Install semantic-release
       # ------------------------------------------------------------
@@ -57,10 +64,24 @@ jobs:
       # ------------------------------------------------------------
       # Generate changelog preview (no scopes required)
       # ------------------------------------------------------------
+=======
+      - name: Install semantic-release
+        run: pip install python-semantic-release
+
+      # --- VERSION PREVIEW ---
+      - name: Get next version
+        run: |
+          echo "### Next Version" > preview.txt
+          semantic-release version --print >> preview.txt
+          echo "" >> preview.txt
+
+      # --- CHANGELOG PREVIEW (NO SCOPES) ---
+>>>>>>> 243cd38 (chore: ci-cd)
       - name: Generate changelog preview
         run: |
           echo "### Changelog Preview" >> preview.txt
           semantic-release changelog >> preview.txt || true
+<<<<<<< HEAD
           echo "" >> preview.txt
 
       # ------------------------------------------------------------
@@ -74,6 +95,18 @@ jobs:
       # Post PR comment
       # ------------------------------------------------------------
       - name: Post comment on PR
+=======
+
+      # --- FORMAT COMMENT ---
+      - name: Format PR comment
+        run: |
+          echo "## 📦 Semantic Release Preview" > comment.md
+          echo "" >> comment.md
+          cat preview.txt >> comment.md
+
+      # --- POST COMMENT ---
+      - name: Post PR comment
+>>>>>>> 243cd38 (chore: ci-cd)
         uses: thollander/actions-comment-pull-request@v2
         with:
           filePath: comment.md
