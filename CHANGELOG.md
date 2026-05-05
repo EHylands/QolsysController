@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2026-05-05)
+
+### Bug Fixes
+
+- Ci-cd pipeline
+  ([`a3cd266`](https://github.com/EHylands/QolsysController/commit/a3cd26611747d5bca2bc561d3828c6683c30285e))
+
+
 ## v1.0.1 (2026-05-04)
 
 ### Bug Fixes
