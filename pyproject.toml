@@ -74,3 +74,4 @@ file = "CHANGELOG.md"
 [tool.semantic_release.remote]
 name = "origin"
 type = "github"
+upload_to_release = true
