@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.0.10 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd 3 pipeline
+  ([`9d8dac0`](https://github.com/EHylands/QolsysController/commit/9d8dac0c3afb414e3100e775476ed9aae864be19))
+
+### Chores
+
+- Save local changes
+  ([`74784ad`](https://github.com/EHylands/QolsysController/commit/74784adb0fa7249a583f332915ed51074c5a3cf4))
+
+
 ## v1.0.9 (2026-05-06)
 
 ### Bug Fixes
