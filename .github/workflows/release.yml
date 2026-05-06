@@ -58,6 +58,7 @@ jobs:
 
       - name: Run semantic-release (tag only)
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: semantic-release version
 
