@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.17 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd push tags
+  ([`ccab9ea`](https://github.com/EHylands/QolsysController/commit/ccab9eac37aa4bcd92a8a9d8b5e8ccadf1c6629f))
+
+
 ## v1.0.16 (2026-05-06)
 
 ### Bug Fixes
