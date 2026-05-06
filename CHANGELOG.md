@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.19 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd last try
+  ([`74eb86b`](https://github.com/EHylands/QolsysController/commit/74eb86b7c591a52938f1ec67713480d5e8501b33))
+
+
 ## v1.0.18 (2026-05-06)
 
 ### Bug Fixes
