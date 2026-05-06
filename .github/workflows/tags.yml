@@ -1,4 +1,4 @@
-name: Crate New Tag and Release on Push to Main
+name: Create New Tag and Release on Push to Main
 
 on:
   push:
