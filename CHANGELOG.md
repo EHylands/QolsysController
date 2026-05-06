@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.8 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd (separate in 2 files)
+  ([`c8f3250`](https://github.com/EHylands/QolsysController/commit/c8f32501516e4714e09d4be290168c1f3bdd079a))
+
+
 ## v1.0.7 (2026-05-06)
 
 ### Bug Fixes
