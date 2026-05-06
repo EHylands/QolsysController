@@ -2,8 +2,6 @@ name: Create New Github Release on New Tags
 
 on:
   push:
-    branches:
-      - main
     tags:
       - "v*"
 
