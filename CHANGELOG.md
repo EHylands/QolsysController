@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.15 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd publish
+  ([`cadc771`](https://github.com/EHylands/QolsysController/commit/cadc771af75a6ebe88b2ca3da0214ba8851c08ea))
+
+
 ## v1.0.14 (2026-05-06)
 
 ### Bug Fixes
