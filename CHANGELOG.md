@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.0.18 (2026-05-06)
+
+### Bug Fixes
+
+- Trigger CI rebuild
+  ([`c34f4e1`](https://github.com/EHylands/QolsysController/commit/c34f4e141d8ee06e97573d3adea6bb3dae8d8f82))
+
+- Trigger ci-cd
+  ([`16d254c`](https://github.com/EHylands/QolsysController/commit/16d254ced6eefdbd579bf13940b990ea30f61143))
+
+
 ## v1.0.17 (2026-05-06)
 
 ### Bug Fixes
