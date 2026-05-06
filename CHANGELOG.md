@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.0.7 (2026-05-06)
+
+### Bug Fixes
+
+- (ci-cd) publish.yml
+  ([`f061a52`](https://github.com/EHylands/QolsysController/commit/f061a52f005a26373e22e73ca6cb9e2ba6ef475f))
+
+- Ci-cd
+  ([`a5d4cb8`](https://github.com/EHylands/QolsysController/commit/a5d4cb802ba2a3ffffa87de904255c24d6d455bc))
+
+
 ## v1.0.4 (2026-05-05)
 
 ### Bug Fixes
