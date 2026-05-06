@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.13 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd release on new tag
+  ([`9e342a2`](https://github.com/EHylands/QolsysController/commit/9e342a2005deab36b6e41bffb04f35d798a83ca3))
+
+
 ## v1.0.12 (2026-05-06)
 
 ### Bug Fixes
