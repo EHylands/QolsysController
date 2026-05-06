@@ -12,8 +12,8 @@ permissions:
   id-token: write
 
 jobs:
-  test:
-    name: Lint + Typecheck + Build
+  lint:
+    name: Lint + Typecheck
     runs-on: ubuntu-latest
     if: github.ref_type == 'branch'
 
@@ -29,22 +29,19 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install ruff mypy build
+          pip install ruff mypy
 
-      - name: Lint
+      - name: Ruff
         run: ruff check .
 
-      - name: Typecheck
+      - name: Mypy
         run: mypy .
-
-      - name: Build (validation)
-        run: python -m build
 
 
   release:
     name: Semantic Release (version + tag)
     runs-on: ubuntu-latest
-    needs: test
+    needs: lint
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -59,11 +56,11 @@ jobs:
       - name: Install semantic-release
         run: pip install python-semantic-release
 
-      - name: Run semantic-release
+      - name: Run semantic-release (tag only)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release publish
+        run: semantic-release version
 
 
   github_release:
@@ -76,7 +73,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # --- Generate latest release notes only ---
       - name: Generate latest release notes only
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
