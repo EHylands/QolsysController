@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.16 (2026-05-06)
+
+### Bug Fixes
+
+- Ci-cd pypi on tag
+  ([`1904ec0`](https://github.com/EHylands/QolsysController/commit/1904ec042c932b5b0c14bd579d2686b695a5ce2a))
+
+
 ## v1.0.15 (2026-05-06)
 
 ### Bug Fixes
