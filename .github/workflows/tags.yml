@@ -1,4 +1,4 @@
-name: Release Pipeline
+name: Release Tags
 
 on:
   push:
