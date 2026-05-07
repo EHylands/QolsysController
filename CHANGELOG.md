@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.20 (2026-05-07)
+
+### Bug Fixes
+
+- Removing break from final statement
+  ([`c03c034`](https://github.com/EHylands/QolsysController/commit/c03c034e40b1eafacd7b85e49160b75b57a4f7d3))
+
+
 ## v1.0.19 (2026-05-06)
 
 ### Bug Fixes
