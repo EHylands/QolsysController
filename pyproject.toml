@@ -68,6 +68,7 @@ tag_format = "v{version}"
 branch = "main"
 commit_parser = "conventional"
 
+
 [tool.semantic_release.changelog]
 file = "CHANGELOG.md"
 

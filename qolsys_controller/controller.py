@@ -269,7 +269,6 @@ class QolsysController:
 
                 if self._shutdown:
                     LOGGER.debug("MQTT Panel Client - Supervisor exiting (shutdown requested)")
-                    break
 
                 if reconnect:
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
