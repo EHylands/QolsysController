@@ -66,7 +66,7 @@ from .settings import QolsysSettings
 from .state import QolsysState
 from .utils_mqtt import generate_random_mac
 
-logging.getLogger("aiomqtt").setLevel(logging.ERROR)
+logging.getLogger("mqtt").setLevel(logging.ERROR)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -174,7 +174,7 @@ class QolsysController:
 
         # Read user file for access codes
         loop = asyncio.get_running_loop()
-        loop.run_in_executor(None, self.panel.read_users_file)
+        await loop.run_in_executor(None, self.panel.read_users_file)
 
         # Config PKI
         if self.settings.auto_discover_pki:
@@ -195,6 +195,10 @@ class QolsysController:
                 raise QolsysConfigError("Panel not paired and start_pairing=False")
 
             await self.start_initial_pairing()
+
+        # Set mqtt_remote_client_id
+        self.settings.mqtt_remote_client_id = "qolsys-controller-" + self._pki.formatted_id()
+        LOGGER.debug("MQTT Panel Client - Using remoteClientID: %s", self.settings.mqtt_remote_client_id)
 
         # Everything is configured
         return
@@ -220,7 +224,7 @@ class QolsysController:
         while True:
             try:
                 # Configure controller
-                if start_config:
+                if start_config and self._initial_run:
                     await self.config_task(start_pairing)
 
                 # Open transport
@@ -241,44 +245,43 @@ class QolsysController:
                     tg.create_task(self.mqtt_ping_task())
                     tg.create_task(self.mqtt_zwave_meter_update())
 
-            except asyncio.CancelledError:
+            except* asyncio.CancelledError:
                 raise
 
-            except aiomqtt.MqttError as err:
-                LOGGER.debug("MQTT Panel Client - Supervisor detected MQTT Error: %s", err)
+            except* aiomqtt.exceptions.MqttError as err:
+                for exc in err.exceptions:
+                    LOGGER.debug("MQTT Panel Client - Supervisor detected MQTT Error: %r", exc)
+
                 if not reconnect:
                     raise QolsysMqttError from err
 
-            except ssl.SSLError as err:
+            except* ssl.SSLError as err:
                 # SSL error is and authentication error with invalid certificates en pki
                 # We cannot recover from this error automaticly
                 LOGGER.debug("MQTT Panel Client - Supervisor detected SSL Error: %s", err)
                 raise QolsysSslError from err
 
-            except Exception as e:
-                LOGGER.debug("MQTT Panel Client - Supervisor detected failure: %s", e)
+            except* Exception as err:
+                for exc in err.exceptions:  # type: ignore[assignment]
+                    LOGGER.error("MQTT Panel Client - Supervisor detected failure: %r", exc)
 
             finally:
-                if self.aiomqtt:
-                    with contextlib.suppress(Exception):
-                        await self.aiomqtt.__aexit__(None, None, None)
-                        self.aiomqtt = None
+                if self.aiomqtt is not None:
+                    await self.aiomqtt.__aexit__(None, None, None)
+                    self.aiomqtt = None
 
                 self.connected = False
                 self.notify_panel_status_update()
 
                 if self._shutdown:
                     LOGGER.debug("MQTT Panel Client - Supervisor exiting (shutdown requested)")
+                    return
 
                 if reconnect:
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
 
     async def mqtt_open_transport_task(self) -> None:
-        # Set mqtt_remote_client_id
-        self.settings.mqtt_remote_client_id = "qolsys-controller-" + self._pki.formatted_id()
-        LOGGER.debug("MQTT Panel Client - Using remoteClientID: %s", self.settings.mqtt_remote_client_id)
-
         # Configure TLS context for MQTT connection
         def create_tls_context(self: QolsysController) -> ssl.SSLContext:
             ctx = ssl.create_default_context(
@@ -295,7 +298,7 @@ class QolsysController:
             )
             return ctx
 
-        LOGGER.info("MQTT Panel Client: Connecting ...")
+        LOGGER.debug("MQTT Panel Client - Connecting ...")
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
