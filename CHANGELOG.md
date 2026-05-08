@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.0.21 (2026-05-08)
+
+### Bug Fixes
+
+- Resolve issue where panel failed to reconnect after stop_operation() was called
+  ([`bd0169c`](https://github.com/EHylands/QolsysController/commit/bd0169c08e5f352b1b5b57ccebccf0c2e6ff1d0d))
+
+### Chores
+
+- Update Readme.md
+  ([`7110813`](https://github.com/EHylands/QolsysController/commit/71108131750d36d1c82881c1871cb1ac72c266ea))
+
+
 ## v1.0.20 (2026-05-07)
 
 ### Bug Fixes
