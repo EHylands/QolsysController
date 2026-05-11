@@ -152,17 +152,11 @@ class MqttBridgeBroker:
             await self._controller._pki.create_mqtt_bridge_certificates()
 
     def _create_broker(self) -> Any:
-        if not self._controller.settings.mqtt_bridge_enabled:
-            return None
-
         Broker, _, _, _ = self._import_amqtt()
         broker = Broker(self._config)
         return broker
 
     def _build_config(self) -> dict[str, Any]:
-        if not self._controller.settings.mqtt_bridge_enabled:
-            return {}
-
         listener: dict[str, Any] = {
             "type": "tcp",
             "bind": f"{self._controller.settings.plugin_ip}:{self._controller.settings.mqtt_bridge_port}",
@@ -178,10 +172,9 @@ class MqttBridgeBroker:
 
         # Plugin selection
         plugins: dict[str, dict[str, Any]] = {}
-        if self._controller.settings.mqtt_bridge_enabled:
-            plugins["qolsys_controller.mqtt_bridge.auth_plugin.AuthPlugin"] = {
-                "allowed_users": self._controller.settings.mqtt_bridge_broker_allowed_users
-            }
+        plugins["qolsys_controller.mqtt_bridge.auth_plugin.AuthPlugin"] = {
+            "allowed_users": self._controller.settings.mqtt_bridge_broker_allowed_users
+        }
 
         return {"listeners": listeners, "plugins": plugins}
 

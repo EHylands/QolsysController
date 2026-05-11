@@ -15,6 +15,8 @@ from typing import Any
 from qolsys_controller.controller import QolsysController as qolsys_controller
 from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
+LOGGER = logging.getLogger(__name__)
+
 
 @dataclass
 class ControllerConfig:
@@ -58,8 +60,15 @@ def load_config(path: str) -> ControllerConfig:
     with open(path, "r", encoding="utf-8") as handle:
         raw = json.load(handle)
 
-        return ControllerConfig(
+        brooker_enabled = raw.get("mqtt_bridge_brooker_enabled")
+        if brooker_enabled is not None:
+            LOGGER.warning("'mqtt_bridge_brooker_enabled' is deprecated, use 'mqtt_bridge_broker_enabled'")
 
+        brooker_allowed_users = raw.get("mqtt_bridge_brooker_allowed_users")
+        if brooker_allowed_users is not None:
+            LOGGER.warning("'mqtt_bridge_brooker_allowed_users' is deprecated, use 'mqtt_bridge_broker_allowed_users'")
+
+        return ControllerConfig(
             panel_ip=raw["panel_ip"],
             panel_mac=raw.get("panel_mac", ""),
             random_mac=raw.get("random_mac", ""),
@@ -75,8 +84,8 @@ def load_config(path: str) -> ControllerConfig:
             mqtt_bridge_client_username=raw.get("mqtt_bridge_client_username", ""),
             mqtt_bridge_client_password=raw.get("mqtt_bridge_client_password", ""),
             mqtt_bridge_tls_enabled=bool(raw.get("mqtt_bridge_tls_enabled", True)),
-            mqtt_bridge_broker_enabled=bool(raw.get("mqtt_bridge_broker_enabled", False)),
-            mqtt_bridge_broker_allowed_users=raw.get("mqtt_bridge_broker_allowed_users", {}),
+            mqtt_bridge_broker_enabled=bool(raw.get("mqtt_bridge_broker_enabled", brooker_enabled or False)),
+            mqtt_bridge_broker_allowed_users=raw.get("mqtt_bridge_broker_allowed_users", brooker_allowed_users or {}),
             mqtt_bridge_max_connections=int(raw.get("mqtt_bridge_max_connections", 5)),
             mqtt_bridge_root_topic=raw.get("mqtt_bridge_root_topic", "qolsys"),
             mqtt_bridge_friendly_name=raw.get("mqtt_bridge_friendly_name", "iq_panel"),

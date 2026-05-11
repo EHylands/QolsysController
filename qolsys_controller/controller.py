@@ -66,7 +66,7 @@ from .settings import QolsysSettings
 from .state import QolsysState
 from .utils_mqtt import generate_random_mac
 
-logging.getLogger("mqtt").setLevel(logging.ERROR)
+logging.getLogger("mqtt").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -275,9 +275,8 @@ class QolsysController:
 
                 if self._shutdown:
                     LOGGER.debug("MQTT Panel Client - Supervisor exiting (shutdown requested)")
-                    return
 
-                if reconnect:
+                if reconnect and not self._shutdown:
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
 
@@ -525,10 +524,6 @@ class QolsysController:
 
         # We have client sgined certificate at this point
         # Connect to Panel MQTT to send pairing command
-        # await self.run_supervised(reconnect=False, run_once=True, start_pairing=False, start_config=False)
-        # LOGGER.debug("Plugin Pairing Completed ")
-        # await self._pki.pairing_resume_pki_set(False)
-        # return
 
     async def handle_key_exchange_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:  # noqa: PLR0915
         received_panel_mac = False

@@ -76,8 +76,8 @@ class MqttBridgeClient:
         while not self._stop_event.is_set():
             LOGGER.debug(
                 "MQTT Bridge Client: Connecting to %s:%s ...",
-                self._bridge._controller.settings._mqtt_bridge_hostname,
-                self._bridge._controller.settings._mqtt_bridge_port,
+                self._bridge._controller.settings.mqtt_bridge_hostname,
+                self._bridge._controller.settings.mqtt_bridge_port,
             )
 
             try:
@@ -86,13 +86,13 @@ class MqttBridgeClient:
                 tls_context.verify_mode = ssl.CERT_NONE
 
                 async with aiomqtt.Client(
-                    username=self._bridge._controller.settings._mqtt_bridge_client_username,
-                    password=self._bridge._controller.settings._mqtt_bridge_client_password,
+                    username=self._bridge._controller.settings.mqtt_bridge_client_username,
+                    password=self._bridge._controller.settings.mqtt_bridge_client_password,
                     protocol=ProtocolVersion.V311,
-                    hostname=self._bridge._controller.settings._mqtt_bridge_hostname,
+                    hostname=self._bridge._controller.settings.mqtt_bridge_hostname,
                     port=self._bridge._controller.settings.mqtt_bridge_port,
                     tls_context=tls_context if self._bridge._controller.settings.mqtt_bridge_tls_enabled else None,
-                    identifier=self._bridge._controller.settings._mqtt_bridge_cliend_id,
+                    identifier=self._bridge._controller.settings._mqtt_bridge_client_id,
                 ) as self._client:
                     LOGGER.debug("MQTT Bridge Client: Connected")
 
@@ -117,7 +117,7 @@ class MqttBridgeClient:
                     await self._run_connected(self._client)
 
             except asyncio.CancelledError:
-                break
+                raise
 
             except aiomqtt.MqttError as err:
                 LOGGER.debug("MQTT Bridge Client: Connection error: %s", err)

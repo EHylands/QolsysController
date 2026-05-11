@@ -51,15 +51,17 @@ class MqttBridge:
             self._internal_password
         )
 
+        if self._controller.settings._mqtt_bridge_broker_enabled:
+            self._controller.settings.mqtt_bridge_client_username = self._internal_user
+            self._controller.settings.mqtt_bridge_client_password = self._internal_password
+
     async def start(self) -> bool:
         if self._is_running:
             LOGGER.warning("MQTT Bridge: Allready running")
             return True
 
-        LOGGER.info("MQTT Bridge Starting ...")
-
         # Create MQTT Internal Broker if enabled and not already created
-        if self._controller.settings._mqtt_bridge_broker_enabled and not self._broker:
+        if self._controller.settings.mqtt_bridge_broker_enabled and not self._broker:
             self._broker = MqttBridgeBroker(self)
 
         # Start MQTT Bridge Broker if configured
