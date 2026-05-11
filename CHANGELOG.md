@@ -2,6 +2,47 @@
 
 <!-- version list -->
 
+## v1.0.22 (2026-05-11)
+
+### Bug Fixes
+
+- Fix Brooker typo and reset cryptography dependency
+  ([`c70c8b6`](https://github.com/EHylands/QolsysController/commit/c70c8b6cb45fa82c56c8249106b4301fc6e43a25))
+
+### Chores
+
+- Broker typo
+  ([`00712b6`](https://github.com/EHylands/QolsysController/commit/00712b6400fe2a83e69578fce7bb0b6fc6113e50))
+
+- Fix "brooker" typo to "broker"
+  ([`c7991b1`](https://github.com/EHylands/QolsysController/commit/c7991b1e2fdfae6a482a7420426dffceccf0a5c1))
+
+- Fix "brooker" typo to "broker"
+  ([`5769d4c`](https://github.com/EHylands/QolsysController/commit/5769d4cf61b145334d6ee36d2a66ec4170559d62))
+
+- Reset cryptography dependency to older versio
+  ([`42386e5`](https://github.com/EHylands/QolsysController/commit/42386e5d5517bee30b2c2c11cbd6f91ed5b7a014))
+
+- Update CI-CD job names
+  ([`976d4f4`](https://github.com/EHylands/QolsysController/commit/976d4f4f55bcc87f542858634053292dd4b5e807))
+
+- **deps**: Bump actions/checkout from 4 to 6
+  ([#45](https://github.com/EHylands/QolsysController/pull/45),
+  [`a4b9299`](https://github.com/EHylands/QolsysController/commit/a4b9299d54037c0fd6925dc23a991a24ac0f29e3))
+
+- **deps**: Bump actions/setup-python from 5 to 6
+  ([#44](https://github.com/EHylands/QolsysController/pull/44),
+  [`04e5bb6`](https://github.com/EHylands/QolsysController/commit/04e5bb6c0c41b2a540557c0e21e39c038a94f4cb))
+
+- **deps**: Bump cryptography from 47.0.0 to 48.0.0
+  ([#42](https://github.com/EHylands/QolsysController/pull/42),
+  [`9d9755b`](https://github.com/EHylands/QolsysController/commit/9d9755b7c5ac00c3b8e5a67e2c915921e7afb4c2))
+
+- **deps**: Bump wagoid/commitlint-github-action from 5 to 6
+  ([#43](https://github.com/EHylands/QolsysController/pull/43),
+  [`f206016`](https://github.com/EHylands/QolsysController/commit/f206016d51d83b921c8c106ad3c00368ed061ee7))
+
+
 ## v1.0.21 (2026-05-08)
 
 ### Bug Fixes
