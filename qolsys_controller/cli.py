@@ -34,8 +34,8 @@ class ControllerConfig:
     mqtt_bridge_client_password: str
     mqtt_bridge_enabled: bool
     mqtt_bridge_tls_enabled: bool
-    mqtt_bridge_brooker_enabled: bool
-    mqtt_bridge_brooker_allowed_users: dict[str, str] = field(default_factory=dict)
+    mqtt_bridge_broker_enabled: bool
+    mqtt_bridge_broker_allowed_users: dict[str, str] = field(default_factory=dict)
     mqtt_bridge_max_connections: int = 5
     mqtt_bridge_root_topic: str = "qolsys"
     mqtt_bridge_friendly_name: str = "iq_panel"
@@ -59,6 +59,7 @@ def load_config(path: str) -> ControllerConfig:
         raw = json.load(handle)
 
         return ControllerConfig(
+
             panel_ip=raw["panel_ip"],
             panel_mac=raw.get("panel_mac", ""),
             random_mac=raw.get("random_mac", ""),
@@ -74,8 +75,8 @@ def load_config(path: str) -> ControllerConfig:
             mqtt_bridge_client_username=raw.get("mqtt_bridge_client_username", ""),
             mqtt_bridge_client_password=raw.get("mqtt_bridge_client_password", ""),
             mqtt_bridge_tls_enabled=bool(raw.get("mqtt_bridge_tls_enabled", True)),
-            mqtt_bridge_brooker_enabled=bool(raw.get("mqtt_bridge_brooker_enabled", False)),
-            mqtt_bridge_brooker_allowed_users=raw.get("mqtt_bridge_brooker_allowed_users", {}),
+            mqtt_bridge_broker_enabled=bool(raw.get("mqtt_bridge_broker_enabled", False)),
+            mqtt_bridge_broker_allowed_users=raw.get("mqtt_bridge_broker_allowed_users", {}),
             mqtt_bridge_max_connections=int(raw.get("mqtt_bridge_max_connections", 5)),
             mqtt_bridge_root_topic=raw.get("mqtt_bridge_root_topic", "qolsys"),
             mqtt_bridge_friendly_name=raw.get("mqtt_bridge_friendly_name", "iq_panel"),
@@ -109,8 +110,8 @@ class QolsysController:
         settings.mqtt_bridge_client_username = self.config.mqtt_bridge_client_username
         settings.mqtt_bridge_client_password = self.config.mqtt_bridge_client_password
         settings.mqtt_bridge_tls_enabled = self.config.mqtt_bridge_tls_enabled
-        settings.mqtt_bridge_brooker_enabled = self.config.mqtt_bridge_brooker_enabled
-        settings.mqtt_bridge_brooker_allowed_users = self.config.mqtt_bridge_brooker_allowed_users
+        settings.mqtt_bridge_broker_enabled = self.config.mqtt_bridge_broker_enabled
+        settings.mqtt_bridge_broker_allowed_users = self.config.mqtt_bridge_broker_allowed_users
         settings.mqtt_bridge_max_connections = self.config.mqtt_bridge_max_connections
         settings.mqtt_bridge_root_topic = self.config.mqtt_bridge_root_topic
         settings.mqtt_bridge_friendly_name = self.config.mqtt_bridge_friendly_name

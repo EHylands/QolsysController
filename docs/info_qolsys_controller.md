@@ -81,10 +81,10 @@ MQTT Bridge Client Username (if connectif to external Brooker)
 ### `mqtt_bridge_client_password`
 MQTT Bridge Client Password (if connectif to external Brooker)
 
-### `mqtt_bridge_brooker_enabled`
+### `mqtt_bridge_broker_enabled`
 Enable the internal MQTT bridge Brooker
 
-### `mqtt_bridge_brooker_allowed_users`: 
+### `mqtt_bridge_broker_allowed_users`: 
 Dictionary of allowed users for MQTT authentication. External clients will not be able to authenticate unless explicitly configured.
 
 Keys: usernames
@@ -134,7 +134,7 @@ Enable TLS for secure MQTT connections.
   
   "mqtt_bridge_enabled": true,
   "mqtt_bridge_tls_enabled": true,
-  "mqtt_bridge_brooker_allowed_users": {},
+  "mqtt_bridge_broker_allowed_users": {},
   "mqtt_bridge_max_connections": 5,
   "mqtt_bridge_root_topic": "qolsys",
   "mqtt_bridge_friendly_name": "iq_Panel",

@@ -53,13 +53,13 @@ class QolsysSettings:
         # MQTT BRIDGE CLIENT
         self._mqtt_bridge_root_topic: str = "qolsys"
         self._mqtt_bridge_friendly_name: str = "iq_panel"
-        self._mqtt_bridge_cliend_id = "qolsys_controller_mqtt_bridge_client"
+        self._mqtt_bridge_client_id = "qolsys_controller_mqtt_bridge_client"
         self._mqtt_bridge_client_username: str = ""
         self._mqtt_bridge_client_password: str = ""
 
         # MQTT BRIDGE BROOKER
-        self._mqtt_bridge_brooker_enabled: bool = False
-        self._mqtt_bridge_brooker_allowed_users: dict[str, str] = {}
+        self._mqtt_bridge_broker_enabled: bool = False
+        self._mqtt_bridge_broker_allowed_users: dict[str, str] = {}
         self._mqtt_bridge_max_connections: int = 5
         self._mqtt_bridge_cerfile: str = "mqtt_bridge.cer"
         self._mqtt_bridge_keyfile: str = "mqtt_bridge.key"
@@ -99,12 +99,12 @@ class QolsysSettings:
         self._mqtt_bridge_enabled = value
 
     @property
-    def mqtt_bridge_brooker_enabled(self) -> bool:
-        return self._mqtt_bridge_brooker_enabled
+    def mqtt_bridge_broker_enabled(self) -> bool:
+        return self._mqtt_bridge_broker_enabled
 
-    @mqtt_bridge_brooker_enabled.setter
-    def mqtt_bridge_brooker_enabled(self, value: bool) -> None:
-        self._mqtt_bridge_brooker_enabled = value
+    @mqtt_bridge_broker_enabled.setter
+    def mqtt_bridge_broker_enabled(self, value: bool) -> None:
+        self._mqtt_bridge_broker_enabled = value
 
     @property
     def mqtt_bridge_port(self) -> int:
@@ -163,12 +163,12 @@ class QolsysSettings:
         self._mqtt_bridge_max_connections = max_connections
 
     @property
-    def mqtt_bridge_brooker_allowed_users(self) -> dict[str, str]:
-        return self._mqtt_bridge_brooker_allowed_users
+    def mqtt_bridge_broker_allowed_users(self) -> dict[str, str]:
+        return self._mqtt_bridge_broker_allowed_users
 
-    @mqtt_bridge_brooker_allowed_users.setter
-    def mqtt_bridge_brooker_allowed_users(self, allowed_users: dict[str, str]) -> None:
-        self._mqtt_bridge_brooker_allowed_users = allowed_users
+    @mqtt_bridge_broker_allowed_users.setter
+    def mqtt_bridge_broker_allowed_users(self, allowed_users: dict[str, str]) -> None:
+        self._mqtt_bridge_broker_allowed_users = allowed_users
 
     @property
     def mqtt_bridge_tls_enabled(self) -> bool:
