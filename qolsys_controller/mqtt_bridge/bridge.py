@@ -42,12 +42,12 @@ class MqttBridge:
         self._internal_password = "".join(secrets.choice(alphabet) for _ in range(16))
 
         # Check if internal_user in allowed_users database
-        if self._internal_user in self._controller.settings.mqtt_bridge_brooker_allowed_users:
+        if self._internal_user in self._controller.settings.mqtt_bridge_broker_allowed_users:
             LOGGER.error(
                 "MQTT Bridge: Internal user '%s' already exists in allowed_users. This is a security risk. Please remove the internal user from allowed_users and restart the MQTT Bridge.",
                 self._internal_user,
             )
-        self._controller.settings.mqtt_bridge_brooker_allowed_users[self._internal_user] = sha512_crypt.hash(
+        self._controller.settings.mqtt_bridge_broker_allowed_users[self._internal_user] = sha512_crypt.hash(
             self._internal_password
         )
 
@@ -59,7 +59,7 @@ class MqttBridge:
         LOGGER.info("MQTT Bridge Starting ...")
 
         # Create MQTT Internal Broker if enabled and not already created
-        if self._controller.settings._mqtt_bridge_brooker_enabled and not self._broker:
+        if self._controller.settings._mqtt_bridge_broker_enabled and not self._broker:
             self._broker = MqttBridgeBroker(self)
 
         # Start MQTT Bridge Broker if configured
