@@ -2,7 +2,7 @@ name: Publish to PyPI on New Release
 
 on:
   workflow_run:
-    workflows: ["Create New Tag and Release"]
+    workflows: ["Build"]
     types:
       - completed
 
