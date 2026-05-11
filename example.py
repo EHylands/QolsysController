@@ -11,8 +11,7 @@ from qolsys_controller.controller import QolsysController
 from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s - %(module)s: %(message)s")
-logging.getLogger("aiomqtt").setLevel(logging.ERROR)
-logging.getLogger("aiomqtt").disabled = True
+logging.getLogger("aiomqtt").setLevel(logging.DEBUG)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,8 +30,8 @@ async def main() -> None:  # noqa: D103
     remote.settings.auto_discover_pki = True
     remote.settings.pairing_resume = True  # Enable to resume pairing process if it was interrupted before completion
 
-    remote.settings.mqtt_bridge_enabled = False
-    remote.settings._mqtt_bridge_brooker_enabled = False
+    remote.settings.mqtt_bridge_enabled = True
+    remote.settings._mqtt_bridge_broker_enabled = True
     remote.settings.mqtt_bridge_port = 1883
     remote.settings.mqtt_bridge_tls_enabled = False
 
