@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.23 (2026-05-11)
+
+### Bug Fixes
+
+- Cryptography>=44.0.1,<=47.0.0 requirement
+  ([`04d3520`](https://github.com/EHylands/QolsysController/commit/04d352072c92371932fe17663e10120803460c66))
+
+
 ## v1.0.22 (2026-05-11)
 
 ### Bug Fixes
