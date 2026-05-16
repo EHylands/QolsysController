@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from qolsys_controller.enum_qolsys import PartitionAlarmState, PartitionAlarmType, PartitionSystemStatus
 from qolsys_controller.partition import QolsysPartition
 
@@ -17,6 +19,7 @@ def _make_partition(**overrides: object) -> QolsysPartition:
     partition_dict.update(overrides.get("partition", {}))  # type: ignore[call-overload]
     settings_dict.update(overrides.get("settings", {}))  # type: ignore[call-overload]
     return QolsysPartition(
+        MagicMock(),  # controller
         partition_dict,
         settings_dict,
         alarm_state=overrides.get("alarm_state", PartitionAlarmState.NONE),  # type: ignore[arg-type]
