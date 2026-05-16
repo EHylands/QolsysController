@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.0.24 (2026-05-16)
+
+### Bug Fixes
+
+- Mqtt publish queue and operation error management
+  ([`13fff28`](https://github.com/EHylands/QolsysController/commit/13fff28b511658d03355bd100edad8af4a70a15f))
+
+- Mqtt publish queue and operation error management
+  ([`ad0860d`](https://github.com/EHylands/QolsysController/commit/ad0860d969b51360a2522e6207f5c0d7fb85f576))
+
+
 ## v1.0.23 (2026-05-11)
 
 ### Bug Fixes
