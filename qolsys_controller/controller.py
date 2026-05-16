@@ -898,11 +898,6 @@ class QolsysController:
             LOGGER.debug("MQTT Panel Client - Cannot arm: Open Safety Zones: %s", open_safety_zones)
             raise QolsysZoneBypassError(open_safety_zones)
 
-        # Cannot bypass zone that cannot be bypassed - return error
-        if open_zone_list:
-            LOGGER.debug("MQTT Panel Client - Cannot arm: Open Zones (unbypassable): %s", open_zone_list)
-            raise QolsysZoneBypassError(open_zone_list)
-
         # Cannot bypass open zones if auto_bypass is disabled - return error
         if bypass_open_zone_list and self.panel.AUTO_BYPASS == "false":
             LOGGER.debug(
