@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-05-16)
+
+### Features
+
+- Partion last_error
+  ([`549c09e`](https://github.com/EHylands/QolsysController/commit/549c09e58739fde6ac29372652c19138a2f1baad))
+
+
 ## v1.0.24 (2026-05-16)
 
 ### Bug Fixes
