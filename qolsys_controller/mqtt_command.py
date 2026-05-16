@@ -7,11 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.enum_zwave import ZwaveCommandClass
 
-from .errors import QolsysMqttError
-
 if TYPE_CHECKING:
-    import aiomqtt
-
     from .controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
@@ -24,7 +20,6 @@ class MQTTCommand:
         eventName: str,
     ) -> None:
         self._controller: QolsysController = controller
-        self._client: aiomqtt.Client | None = controller.aiomqtt
         self._topic: str = "mastermeid"
         self._eventName: str = eventName
         self._payload: dict[str, Any] = {}
@@ -41,16 +36,10 @@ class MQTTCommand:
         self._payload[argument] = value
 
     async def send_command(self) -> dict[str, Any]:
-        if self._client is None:
-            LOGGER.error("MQTT Client not configured")
-            raise QolsysMqttError
-
-        # LOGGER.debug("Sending MQTT Command: %s with payload: %s", self._eventName, self._payload)
-        async with self._controller._lock_mqtt:
-            await self._client.publish(topic=self._topic, payload=json.dumps(self._payload), qos=self._qos)
-            return await self._controller.mqtt_command_queue.wait_for_response(
-                self._requestID, timeout=self._controller.settings._mqtt_command_timeout
-            )
+        self._controller.enqueue_mqtt_command(self)
+        return await self._controller.mqtt_command_queue.wait_for_response(
+            self._requestID, timeout=self._controller.settings._mqtt_command_timeout
+        )
 
 
 class MQTTCommand_IpcCall(MQTTCommand):

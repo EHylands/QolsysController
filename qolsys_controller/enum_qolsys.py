@@ -54,6 +54,14 @@ class PartitionAlarmState(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class PartitionError(StrEnum):
+    NONE = "None"
+    USER_CODE_ERROR = "user_code_error"
+    ZONE_BYPASS_ERROR = "zone_bypass_error"
+    PANEL_TIMEOUT = "panel_timeout"
+    UNKNOWN = "UNKNOWN"
+
+
 class PartitionAlarmType(StrEnum):
     POLICE_EMERGENCY = "Police Emergency"
     FIRE_EMERGENCY = "Fire Emergency"

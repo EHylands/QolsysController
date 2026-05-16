@@ -2,6 +2,8 @@ import asyncio
 import logging
 from typing import Any
 
+from qolsys_controller.errors import QolsysOperationTimeoutError
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -23,7 +25,7 @@ class QolsysMqttCommandQueue:
         if future and not future.done():
             future.set_result(response)
 
-    async def wait_for_response(self, request_id: str, timeout: int = 30) -> dict[str, Any]:  # type: ignore[return]
+    async def wait_for_response(self, request_id: str, timeout: int = 30) -> dict[str, Any]:
         future = asyncio.get_running_loop().create_future()
         async with self.lock:
             if request_id == "":
@@ -39,6 +41,8 @@ class QolsysMqttCommandQueue:
             return await asyncio.wait_for(future, timeout=timeout)
         except asyncio.TimeoutError:
             LOGGER.debug(f"MQTT Command timed out for request_id: {request_id}")
+            raise QolsysOperationTimeoutError
+
         finally:
             # Ensure cleanup even if timeout or cancellation happens
             async with self.lock:

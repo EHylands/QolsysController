@@ -1034,7 +1034,7 @@ class QolsysPanel:
 
             alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE", partition_id) or "UNKNOWN")
 
-            partition = QolsysPartition(partition_dict, settings_dict, alarm_state, alarm_type)
+            partition = QolsysPartition(self._controller, partition_dict, settings_dict, alarm_state, alarm_type)
             partitions.append(partition)
 
         return partitions

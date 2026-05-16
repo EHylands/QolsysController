@@ -1,14 +1,23 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+from qolsys_controller.errors import QolsysOperationTimeoutError, QolsysUserCodeError, QolsysZoneBypassError
 
 from .enum_qolsys import (
     PartitionAlarmState,
     PartitionAlarmType,
+    PartitionArmingType,
+    PartitionError,
     PartitionSystemStatus,
     QolsysNotification,
 )
 from .observable import Event, QolsysObservable
+
+if TYPE_CHECKING:
+    from qolsys_controller.controller import QolsysController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,6 +28,7 @@ class QolsysPartition(QolsysObservable):
 
     def __init__(
         self,
+        controller: QolsysController,
         partition_dict: dict[str, str],
         settings_dict: dict[str, str],
         alarm_state: PartitionAlarmState,
@@ -26,10 +36,15 @@ class QolsysPartition(QolsysObservable):
     ) -> None:
         super().__init__()
 
+        self._controller: QolsysController = controller
+
         # Partition info (partition table)
         self._id: str = partition_dict.get("partition_id", "")
         self._name: str = partition_dict.get("name", "")
         self._devices = partition_dict.get("devices", "")
+        self._last_error: PartitionError = PartitionError.NONE
+        self._last_error_at: datetime | None = None
+        self._open_zones: list[int] = []
 
         # Partition Settings (qolsyssettings table)
         self._system_status: PartitionSystemStatus = PartitionSystemStatus(settings_dict.get("SYSTEM_STATUS", ""))
@@ -111,6 +126,53 @@ class QolsysPartition(QolsysObservable):
             "EXIT_SOUNDS": self._exit_sounds,
             "ENTRY_DELAYS": self._entry_delays,
         }
+
+    # -----------------------------
+    # command methods
+    # -----------------------------
+
+    async def arm(self, arming_type: PartitionArmingType, user_code: str = "") -> None:
+        try:
+            self.last_error = PartitionError.NONE
+
+            await self._controller.command_arm(
+                self.id,
+                arming_type,
+                user_code,
+                self.command_exit_sounds,
+                self.command_arm_stay_instant,
+                self.command_arm_entry_delay,
+            )
+
+        except QolsysUserCodeError as err:
+            LOGGER.debug("MQTT: arm command error - user_code error")
+            self.last_error = PartitionError.USER_CODE_ERROR
+            raise err
+
+        except QolsysZoneBypassError as err:
+            LOGGER.debug("MQTT: arm command error - open zones preventing arming: %s", err.zones)
+            self.last_error = PartitionError.ZONE_BYPASS_ERROR
+            raise err
+
+        except QolsysOperationTimeoutError as err:
+            LOGGER.debug("MQTT: arm command error - operation timed out")
+            self.last_error = PartitionError.PANEL_TIMEOUT
+            raise err
+
+    async def disarm(self, user_code: str = "") -> None:
+        try:
+            self.last_error = PartitionError.NONE
+            await self._controller.command_disarm(self.id, user_code, self.command_arm_stay_silent_disarming)
+
+        except QolsysUserCodeError as err:
+            LOGGER.debug("MQTT: disarm command error - user_code error")
+            self.last_error = PartitionError.USER_CODE_ERROR
+            raise err
+
+        except QolsysOperationTimeoutError as err:
+            LOGGER.debug("MQTT: disarm command error - operation timed out")
+            self.last_error = PartitionError.PANEL_TIMEOUT
+            raise err
 
     # -----------------------------
     # properties + setters
@@ -255,6 +317,36 @@ class QolsysPartition(QolsysObservable):
         LOGGER.debug("Partition%s (%s) - command_arm_entry_delay: %s", self._id, self._name, value)
         self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
+    @property
+    def open_zones(self) -> list[int]:
+        return self._open_zones
+
+    @property
+    def last_error(self) -> PartitionError:
+        return self._last_error
+
+    @last_error.setter
+    def last_error(self, value: PartitionError) -> None:
+        if self._last_error != value:
+            LOGGER.debug("Partition%s (%s) - last_error: %s", self._id, self._name, value)
+            self._last_error = value
+            if value != PartitionError.NONE:
+                self.last_error_at = datetime.now(timezone.utc)
+            else:
+                self.last_error_at = None
+            self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+
+    @property
+    def last_error_at(self) -> datetime | None:
+        return self._last_error_at
+
+    @last_error_at.setter
+    def last_error_at(self, value: datetime | None) -> None:
+        if self._last_error_at != value:
+            LOGGER.debug("Partition%s (%s) - last_error_at: %s", self._id, self._name, value)
+            self._last_error_at = value
+            self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+
     def append_alarm_type(self, new_alarm_type_array: list[PartitionAlarmType]) -> None:
         data_changed = False
 
@@ -329,6 +421,8 @@ class QolsysPartition(QolsysObservable):
                 .replace("+00:00", "Z"),
                 "entry_delays": self.entry_delays,
                 "exit_sounds": self.exit_sounds,
+                "last_error": self.last_error.value,
+                "last_error_at": self.last_error_at.isoformat().replace("+00:00", "Z") if self.last_error_at else None,
             },
             "attributes": {
                 "name": self.name,

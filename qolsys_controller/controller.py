@@ -52,9 +52,11 @@ from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMod
 from .errors import (
     InvalidVirtualNodeError,
     QolsysConfigError,
+    QolsysInvalidPartitionIdError,
     QolsysMqttError,
     QolsysSslError,
     QolsysUserCodeError,
+    QolsysZoneBypassError,
     ServiceNotFoundError,
 )
 from .mdns import QolsysMDNS
@@ -66,7 +68,6 @@ from .settings import QolsysSettings
 from .state import QolsysState
 from .utils_mqtt import generate_random_mac
 
-logging.getLogger("mqtt").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -78,10 +79,9 @@ class QolsysController:
         self._pki = QolsysPKI(settings=self.settings)
 
         self._initial_run: bool = True
-        self._shutdown: bool = False
+        self._shutdown_requested: bool = False
         self.connected: bool = False
 
-        self._lock_mqtt = asyncio.Lock()
         self._task_supervisor: asyncio.Task[None] | None = None
         self._event_panel_connected = asyncio.Event()
         self._event_pairing_done = asyncio.Event()
@@ -94,7 +94,8 @@ class QolsysController:
         self._zone_id: str = "1"
 
         # MQTT Panel Client
-        self.aiomqtt: aiomqtt.Client | None = None
+        self._aiomqtt: aiomqtt.Client | None = None
+        self._mqtt_publish_queue: asyncio.Queue[MQTTCommand] = asyncio.Queue()
 
         # MQTT Bridge
         self._mqtt_bridge: MqttBridge | None = None
@@ -140,7 +141,7 @@ class QolsysController:
 
     async def stop_operation(self) -> None:
         LOGGER.debug("Stopping Plugin Operation")
-        self._shutdown = True
+        self._shutdown_requested = True
 
         if self.certificate_exchange_server is not None:
             self.certificate_exchange_server.close()
@@ -155,10 +156,6 @@ class QolsysController:
             self._task_supervisor.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await self._task_supervisor
-
-        if self.aiomqtt is not None:
-            await self.aiomqtt.__aexit__(None, None, None)
-            self.aiomqtt = None
 
         if self._mqtt_bridge is not None:
             await self._mqtt_bridge.shutdown()
@@ -228,22 +225,31 @@ class QolsysController:
                     await self.config_task(start_pairing)
 
                 # Open transport
-                await self.mqtt_open_transport_task()
+                mqtt_panel_client: aiomqtt.Client = await self.mqtt_open_transport_task()
 
-                # Managed task lifecycle
-                async with asyncio.TaskGroup() as tg:
-                    tg.create_task(self.mqtt_listen_task())
+                async with mqtt_panel_client:
+                    await mqtt_panel_client.subscribe("iq2meid")
+                    await mqtt_panel_client.subscribe("response_" + self.settings.random_mac, qos=self.settings.mqtt_qos)
+                    await mqtt_panel_client.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
 
-                    # Initialize session before background loops
-                    await self.mqtt_initialize_session_task()
+                    if self.settings.log_mqtt_messages:
+                        await mqtt_panel_client.subscribe("mastermeid", qos=self.settings.mqtt_qos)
 
-                    if run_once:
-                        LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
-                        self._shutdown = True
-                        return
+                    # Managed Background Tasks
+                    async with asyncio.TaskGroup() as tg:
+                        tg.create_task(self.mqtt_listen_task(mqtt_panel_client))
+                        tg.create_task(self.mqtt_publish_task(mqtt_panel_client))
 
-                    tg.create_task(self.mqtt_ping_task())
-                    tg.create_task(self.mqtt_zwave_meter_update())
+                        # Initialize session before background loops
+                        await self.mqtt_initialize_session_task()
+
+                        if run_once:
+                            LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
+                            self._shutdown_requested = True
+                            return
+
+                        tg.create_task(self.mqtt_ping_task(mqtt_panel_client))
+                        tg.create_task(self.mqtt_zwave_meter_update(mqtt_panel_client))
 
             except* asyncio.CancelledError:
                 raise
@@ -263,24 +269,22 @@ class QolsysController:
 
             except* Exception as err:
                 for exc in err.exceptions:  # type: ignore[assignment]
-                    LOGGER.error("MQTT Panel Client - Supervisor detected failure: %r", exc)
+                    LOGGER.exception("MQTT Panel Client - Supervisor detected failure: %r", exc)
+                    raise
 
             finally:
-                if self.aiomqtt is not None:
-                    await self.aiomqtt.__aexit__(None, None, None)
-                    self.aiomqtt = None
-
+                self._mqtt_publish_queue.empty()
                 self.connected = False
                 self.notify_panel_status_update()
 
-                if self._shutdown:
+                if self._shutdown_requested:
                     LOGGER.debug("MQTT Panel Client - Supervisor exiting (shutdown requested)")
 
-                if reconnect and not self._shutdown:
+                if reconnect and not self._shutdown_requested:
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
 
-    async def mqtt_open_transport_task(self) -> None:
+    async def mqtt_open_transport_task(self) -> aiomqtt.Client:
         # Configure TLS context for MQTT connection
         def create_tls_context(self: QolsysController) -> ssl.SSLContext:
             ctx = ssl.create_default_context(
@@ -301,39 +305,45 @@ class QolsysController:
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
-        self.aiomqtt = aiomqtt.Client(
+        self._aiomqtt = aiomqtt.Client(
             hostname=self.settings.panel_ip,
             port=8883,
             tls_context=ctx,
             tls_insecure=True,
             clean_session=True,
-            timeout=self.settings.mqtt_timeout,
+            keepalive=self.settings.mqtt_timeout,
             identifier=self.settings.mqtt_remote_client_id,
         )
 
-        await self.aiomqtt.__aenter__()
+        return self._aiomqtt
 
-        async with self._lock_mqtt:
-            # Subscribe to panel internal database updates
-            await self.aiomqtt.subscribe("iq2meid")
+    def enqueue_mqtt_command(self, command: MQTTCommand) -> None:
+        self._mqtt_publish_queue.put_nowait(command)
 
-            # Subscribte to MQTT private response
-            await self.aiomqtt.subscribe("response_" + self.settings.random_mac, qos=self.settings.mqtt_qos)
+    async def mqtt_publish_task(self, client: aiomqtt.Client) -> None:
+        LOGGER.debug("MQTT Panel Client - publish worker started")
 
-            # Subscribe to Z-Wave response
-            await self.aiomqtt.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
+        while not self._shutdown_requested:
+            try:
+                command: MQTTCommand = await self._mqtt_publish_queue.get()
+                payload = json.dumps(command._payload)
 
-            # Only log all traffic for debug purposes
-            # Enabling this option may render panel unstable
-            if self.settings.log_mqtt_messages:
-                # Subscribe to MQTT commands send to panel by other devices
-                await self.aiomqtt.subscribe("mastermeid", qos=self.settings.mqtt_qos)
+                await client.publish(command._topic, payload, command._qos)
 
-        LOGGER.debug("MQTT Panel Client: Transport ready")
+            except asyncio.CancelledError:
+                raise
 
-    async def mqtt_listen_task(self) -> None:
-        async for message in self.aiomqtt.messages:  # type: ignore[union-attr]
-            if self._shutdown:
+            except aiomqtt.MqttError:
+                LOGGER.exception("MQTT Panel Client - error while publishing command %s", command._eventName)
+                raise
+
+            except Exception as err:
+                LOGGER.exception("MQTT Panel Client - publish worker error: %s", err)
+                raise
+
+    async def mqtt_listen_task(self, client: aiomqtt.Client) -> None:
+        async for message in client.messages:
+            if self._shutdown_requested:
                 break
 
             # Log all MQTT messages for debug purposes if enabled in settings
@@ -359,11 +369,8 @@ class QolsysController:
                     data = json.loads(message.payload.decode())
                     self.panel.parse_zwave_message(data)
 
-    async def mqtt_publish_task(self) -> None:
-        pass
-
     async def mqtt_initialize_session_task(self) -> None:
-        LOGGER.info("MQTT Panel Client: Initializing session")
+        LOGGER.debug("MQTT Panel Client - Initializing session")
         response_connect = await self.command_connect()
         self.panel.imei = response_connect.get("master_imei", "")
         self.panel.product_type = response_connect.get("primary_product_type", "")
@@ -386,18 +393,18 @@ class QolsysController:
         self.connected = True
         self.notify_panel_status_update()
 
-        LOGGER.info("MQTT Panel Client: Connected")
+        LOGGER.info("MQTT Panel Client - Connected")
         self._event_panel_connected.set()
 
-    async def mqtt_ping_task(self) -> None:
-        while not self._shutdown:
-            if self.aiomqtt is not None and self.connected:
+    async def mqtt_ping_task(self, client: aiomqtt.Client) -> None:
+        while not self._shutdown_requested:
+            if client is not None and self.connected:
                 await self.command_pingevent()
             await asyncio.sleep(self.settings.mqtt_ping)
 
-    async def mqtt_zwave_meter_update(self) -> None:
-        while not self._shutdown:
-            if self.aiomqtt is not None and self.connected:
+    async def mqtt_zwave_meter_update(self, client: aiomqtt.Client) -> None:
+        while not self._shutdown_requested:
+            if client is not None and self.connected:
                 for autdev in self.state.automation_devices:
                     if not isinstance(autdev, QolsysAutomationDeviceZwave):
                         continue
@@ -602,7 +609,7 @@ class QolsysController:
                 self.certificate_exchange_server.close()
 
     async def command_connect(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending connect command")
+        LOGGER.debug("MQTT Panel Client: Sending connect command")
 
         dhcpInfo = {
             "ipaddress": "",
@@ -639,11 +646,11 @@ class QolsysController:
         command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving connect command")
+        LOGGER.debug("MQTT Panel Client: Receiving connect command")
         return response
 
     async def command_pairing_request(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending pairing_request command")
+        LOGGER.debug("MQTT Panel Client: Sending pairing_request command")
         command = MQTTCommand(self, "connect_v204")
 
         dhcpInfo = {
@@ -669,11 +676,11 @@ class QolsysController:
         command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving pairing_request command")
+        LOGGER.debug("MQTT Panel Client: Receiving pairing_request command")
         return response
 
     async def command_pingevent(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending pingevent command")
+        LOGGER.debug("MQTT Panel Client: Sending pingevent command")
         command = MQTTCommand(self, "pingevent")
         command.append("remote_panel_status", "Active")
         command.append("macAddress", self.settings.random_mac)
@@ -691,55 +698,55 @@ class QolsysController:
         command.append("remote_panel_plugged", 1)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving pingevent command")
+        LOGGER.debug("MQTT Panel Client: Receiving pingevent command")
         return response
 
     async def command_timesync(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending timeSync command")
+        LOGGER.debug("MQTT Panel Client: Sending timeSync command")
         command = MQTTCommand(self, "timeSync")
         command.append("startTimestamp", int(time.time()))
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving timeSync command")
+        LOGGER.debug("MQTT Panel Client: Receiving timeSync command")
         return response
 
     async def command_sync_database(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending syncdatabase command")
+        LOGGER.debug("MQTT Panel Client: Sending syncdatabase command")
         command = MQTTCommand(self, "syncdatabase")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving syncdatabase command")
+        LOGGER.debug("MQTT Panel Client: Receiving syncdatabase command")
         return response
 
     async def command_acstatus(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending acStatus command")
+        LOGGER.debug("MQTT Panel Client: Sending acStatus command")
         command = MQTTCommand(self, "acStatus")
         command.append("acStatus", "Connected")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving acStatus command")
+        LOGGER.debug("MQTT Panel Client: Receiving acStatus command")
         return response
 
     async def command_dealer_logo(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending dealerLogo command")
+        LOGGER.debug("MQTT Panel Client: Sending dealerLogo command")
         command = MQTTCommand(self, "dealerLogo")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving dealerLogo command")
+        LOGGER.debug("MQTT Panel Client: Receiving dealerLogo command")
         return response
 
     async def command_pair_status_request(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending pair_status_request command")
+        LOGGER.debug("MQTT Panel Client: Sending pair_status_request command")
         command = MQTTCommand(self, "pair_status_request")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving pair_status_request command")
+        LOGGER.debug("MQTT Panel Client: Receiving pair_status_request command")
         return response
 
     async def command_disconnect(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending disconnect command")
+        LOGGER.debug("MQTT Panel Client: Sending disconnect command")
         command = MQTTCommand(self, "disconnect")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving disconnect command")
+        LOGGER.debug("MQTT Panel Client: Receiving disconnect command")
         return response
 
     async def command_ui_delay(self, partition_id: str, silent_disarming: bool = False) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending ui_delay command")
+        LOGGER.debug("MQTT Panel Client: Sending ui_delay command")
         command = MQTTCommand_Panel(self)
 
         # partition state needs to be sent for ui_delay to work
@@ -767,23 +774,21 @@ class QolsysController:
 
         command.append("ipcRequest", ipcRequest)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving ui_delay command")
+        LOGGER.debug("MQTT Panel Client: Receiving ui_delay command")
         return response
 
-    async def command_disarm(
-        self, partition_id: str, user_code: str = "", silent_disarming: bool = False
-    ) -> dict[str, Any] | None:
+    async def command_disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str, Any]:
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.error("MQTT: disarm command error - Unknow Partition")
-            return None
+            LOGGER.error("MQTT Panel Client: disarm command error - Unknow Partition")
+            raise QolsysInvalidPartitionIdError(partition_id)
 
         # Do local user code verification
         user_id = 1
         if self.settings.check_user_code_on_disarm:
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
-                LOGGER.debug("MQTT: disarm command error - user_code error")
+                LOGGER.debug("MQTT Panel Client: disarm command error - user_code error")
                 raise QolsysUserCodeError()
 
         async def get_mqtt_disarm_command(silent_disarming: bool) -> str:
@@ -806,7 +811,7 @@ class QolsysController:
             return "disarm_from_openlearn_sensor"
 
         mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
-        LOGGER.debug("MQTT: Sending disarm command - check_user_code:%s", self.settings.check_user_code_on_disarm)
+        LOGGER.debug("MQTT Panel Client: Sending disarm command - check_user_code:%s", self.settings.check_user_code_on_disarm)
 
         disarm_command = {
             "operation_name": mqtt_disarm_command,
@@ -826,7 +831,7 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving disarm command")
+        LOGGER.debug("MQTT Panel Client: Receiving disarm command")
         return response
 
     async def command_arm(
@@ -837,9 +842,9 @@ class QolsysController:
         exit_sounds: bool = False,
         instant_arm: bool = False,
         entry_delay: bool = True,
-    ) -> dict[str, str] | None:
+    ) -> dict[str, str]:
         LOGGER.debug(
-            "MQTT: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+            "MQTT Panel Client: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
             partition_id,
             arming_type,
             exit_sounds,
@@ -851,14 +856,14 @@ class QolsysController:
 
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT: arm command error - Unknow Partition")
-            return None
+            LOGGER.debug("MQTT Panel Client: arm command error - Unknow Partition")
+            raise QolsysInvalidPartitionIdError(partition_id)
 
         if self.settings.check_user_code_on_arm:
             # Do local user code verification to arm
             user_id = self.panel.check_user(user_code)
             if user_id == -1:
-                LOGGER.debug("MQTT: arm command error - user_code error")
+                LOGGER.debug("MQTT Panel Client: arm command error - user_code error")
                 raise QolsysUserCodeError()
 
         exitSoundValue = "ON"
@@ -869,23 +874,44 @@ class QolsysController:
         if not entry_delay:
             entryDelay = "OFF"
 
-        bypass_zone_list: list[int] = []
-        # Bypass Zone if AutoBypass is enabled
+        open_zone_list: list[str] = []
+        bypass_open_zone_list: list[str] = []
+        open_safety_zones: list[str] = []
 
-        if self.panel.AUTO_BYPASS == "true":
-            for zone in self.state.zones:
-                if zone.partition_id == partition_id:
-                    # Skip safety zones
-                    if zone.sensorgroup in SafetyZoneSensorGroup:
-                        continue
+        for zone in self.state.zones:
+            if zone.partition_id == partition_id and zone.sensorstatus in TroubleZoneStatus:
+                # Open Safety Zones
+                if zone.sensorgroup in SafetyZoneSensorGroup:
+                    open_safety_zones.append(zone.zone_id)
+                    continue
 
-                    # Add bypass capable zones in trouble status
-                    if zone.sensortype in BypassCapableZoneSensorType and zone.sensorstatus in TroubleZoneStatus:
-                        LOGGER.debug("Bypassing Zone%s - %s: %s", zone.zone_id, zone.sensortype, zone.sensorstatus)
-                        bypass_zone_list.append(int(zone.zone_id))
+                # Open Zones that can be bypassed
+                if zone.sensortype in BypassCapableZoneSensorType:
+                    bypass_open_zone_list.append(zone.zone_id)
+                    continue
 
-        bypass_zone_str = "[" + ",".join(map(str, bypass_zone_list)) + "]"
-        LOGGER.debug("Bypass Zone List: %s", bypass_zone_str)
+                # Open Zone not in bypass capable list
+                open_zone_list.append(zone.zone_id)
+
+        # Cannot bypass open safety zones, return error
+        if open_safety_zones:
+            LOGGER.debug("MQTT Panel Client - Cannot arm: Open Safety Zones: %s", open_safety_zones)
+            raise QolsysZoneBypassError(open_safety_zones)
+
+        # Cannot bypass zone that cannot be bypassed - return error
+        if open_zone_list:
+            LOGGER.debug("MQTT Panel Client - Cannot arm: Open Zones (unbypassable): %s", open_zone_list)
+            raise QolsysZoneBypassError(open_zone_list)
+
+        # Cannot bypass open zones if auto_bypass is disabled - return error
+        if bypass_open_zone_list and self.panel.AUTO_BYPASS == "false":
+            LOGGER.debug(
+                "MQTT Panel Client - Cannot arm: Open Zones that can be bypassed but AUTO_BYPASS is disabled: %s",
+                bypass_open_zone_list,
+            )
+            raise QolsysZoneBypassError(bypass_open_zone_list)
+
+        bypass_zone_str = "[" + ",".join(map(str, bypass_open_zone_list)) + "]"
 
         arming_command = {
             "operation_name": arming_type,
@@ -912,14 +938,14 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving arm command: partition%s", partition_id)
+        LOGGER.debug("MQTT Panel Client: Receiving arm command: partition%s", partition_id)
         return response
 
     async def command_panel_execute_scene(self, scene_id: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending execute_scene command")
+        LOGGER.debug("MQTT Panel Client: Sending execute_scene command")
         scene = self.state.scene(scene_id)
         if not scene:
-            LOGGER.debug("MQTT: command_execute_scene Erro - Unknow Scene: %s", scene_id)
+            LOGGER.debug("MQTT Panel Client: command_execute_scene Erro - Unknow Scene: %s", scene_id)
             return None
 
         scene_command = {
@@ -939,14 +965,17 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving execute_scene command")
+        LOGGER.debug("MQTT Panel Client: Receiving execute_scene command")
         return response
 
     async def command_panel_virtual_device_action(
         self, device_id: str, service_id: int, state: vdFuncState
     ) -> dict[str, Any] | None:
         LOGGER.debug(
-            "MQTT: Sending virtual_device_action device: %s, service: %s state: %s", device_id, service_id, state.name
+            "MQTT Panel Client: Sending virtual_device_action device: %s, service: %s state: %s",
+            device_id,
+            service_id,
+            state.name,
         )
 
         device = self.state.automation_device(device_id)
@@ -990,15 +1019,15 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving virtual_device command: %s", response)
+        LOGGER.debug("MQTT Panel Client: Receiving virtual_device command: %s", response)
         return response
 
     async def command_panel_trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending panel_trigger_police command")
+        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_police command")
 
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT: command_panel_trigger_police Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client: command_panel_trigger_police Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -1020,15 +1049,15 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving panel_trigger_police command")
+        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_police command")
         return response
 
     async def command_panel_trigger_auxilliary(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending panel_trigger_auxilliary command")
+        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_auxilliary command")
 
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT: command_panel_trigger_auxilliary Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client: command_panel_trigger_auxilliary Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -1050,15 +1079,15 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving panel_trigger_auxilliary command")
+        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_auxilliary command")
         return response
 
     async def command_panel_trigger_fire(self, partition_id: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending panel_trigger_fire command")
+        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_fire command")
 
         partition = self.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT: command_panel_trigger_fire Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client: command_panel_trigger_fire Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -1080,11 +1109,11 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving panel_trigger_fire command")
+        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_fire command")
         return response
 
     async def command_panel_speak(self, text: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT: Sending panel_speak command")
+        LOGGER.debug("MQTT Panel Client: Sending panel_speak command")
 
         speak_command = {
             "operation_name": "speak_text",
@@ -1103,11 +1132,11 @@ class QolsysController:
         command = MQTTCommand_Panel(self)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving panel_speak command")
+        LOGGER.debug("MQTT Panel Client: Receiving panel_speak command")
         return response
 
     async def command_zwave_switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending zwave_switch_binary_set command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT Panel Client: Sending zwave_switch_binary_set command  - Node(%s) - Status(%s)", node_id, status)
         node = self.state.automation_device(node_id)
 
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1130,11 +1159,11 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, switch_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving set_zwave_switch_binary command")
+        LOGGER.debug("MQTT Panel Client: Receiving set_zwave_switch_binary command")
         return response
 
     async def command_zwave_switch_multilevel_set(self, node_id: str, endpoint: str, level: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
+        LOGGER.debug("MQTT Panel Client: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
 
         node = self.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1153,11 +1182,11 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, switch_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving switch_multilevel_set command")
+        LOGGER.debug("MQTT Panel Client: Receiving switch_multilevel_set command")
         return response
 
     async def command_zwave_barrier_operator_set(self, node_id: str, endpoint: str, status: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending barrier_operator_set command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT Panel Client: Sending barrier_operator_set command  - Node(%s) - Status(%s)", node_id, status)
 
         node = self.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1176,11 +1205,11 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, barrier_operator_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving barrier_operator_set command")
+        LOGGER.debug("MQTT Panel Client: Receiving barrier_operator_set command")
         return response
 
     async def command_zwave_doorlock_set(self, node_id: str, endpoint: str, locked: bool) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
+        LOGGER.debug("MQTT Panel Client: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
         node = self.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1204,7 +1233,7 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, doorlock_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving zwave_doorlock_set command")
+        LOGGER.debug("MQTT Panel Client: Receiving zwave_doorlock_set command")
         return response
 
     async def command_zwave_thermostat_setpoint_set(
@@ -1240,7 +1269,7 @@ class QolsysController:
         ] + list(temp_bytes)
 
         LOGGER.debug(
-            "MQTT: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            "MQTT Panel Client: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
             node_id,
             mode.value,
             setpoint,
@@ -1255,11 +1284,11 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, zwave_bytes)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command:%s", response)
+        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_mode_set command:%s", response)
         return response
 
     async def command_zwave_thermostat_mode_set(self, node_id: str, endpoint: str, mode: ThermostatMode) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
+        LOGGER.debug("MQTT Panel Client: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
         node = self.state.automation_device(node_id)
 
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1278,13 +1307,15 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, mode_command)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving zwave_thermostat_mode_set command")
+        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_mode_set command")
         return response
 
     async def command_zwave_thermostat_fan_mode_set(
         self, node_id: str, endpoint: str, fan_mode: ThermostatFanMode
     ) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode.name)
+        LOGGER.debug(
+            "MQTT Panel Client: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode.name
+        )
 
         node = self.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -1303,11 +1334,11 @@ class QolsysController:
             command = MQTTCommand_ZWave(self, node_id, endpoint, fan_command)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving zwave_thermostat_fan_mode_set command")
+        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_fan_mode_set command")
         return response
 
     async def command_automation_door_lock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending automation_door_lock command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client: Sending automation_door_lock command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self.state.automation_device(str(virtual_node_id))
@@ -1316,11 +1347,11 @@ class QolsysController:
 
         command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=5, result="status_Locked")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving automation_door_lock command: %s", response)
+        LOGGER.debug("MQTT Panel Client: Receiving automation_door_lock command: %s", response)
         return response
 
     async def command_automation_door_unlock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending automation_door_unlock command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client: Sending automation_door_unlock command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self.state.automation_device(str(virtual_node_id))
@@ -1329,11 +1360,11 @@ class QolsysController:
 
         command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=6, result="status_Unlocked")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving  automation_door_unlock command: %s", response)
+        LOGGER.debug("MQTT Panel Client: Receiving  automation_door_unlock command: %s", response)
         return response
 
     async def command_automation_light_on(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending automation_light_on command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client: Sending automation_light_on command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self.state.automation_device(str(virtual_node_id))
@@ -1342,11 +1373,11 @@ class QolsysController:
 
         command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=1, result="status_On")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving automation_light_on command")
+        LOGGER.debug("MQTT Panel Client: Receiving automation_light_on command")
         return response
 
     async def command_automation_light_off(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT: Sending automation_light_off command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client: Sending automation_light_off command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self.state.automation_device(str(virtual_node_id))
@@ -1355,5 +1386,5 @@ class QolsysController:
 
         command = MQTTCommand_Automation(self, virtual_node_id, endpoint, operation_type=0, result="status_Off")
         response = await command.send_command()
-        LOGGER.debug("MQTT: Receiving automation_light_off command")
+        LOGGER.debug("MQTT Panel Client: Receiving automation_light_off command")
         return response
