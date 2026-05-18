@@ -1,10 +1,8 @@
 name: Publish to PyPI on New Release
 
 on:
-  push:
-    tags:
-      - "v*"
-
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
