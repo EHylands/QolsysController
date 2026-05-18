@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-05-18)
+
+### Bug Fixes
+
+- Stop reconnect loop on configuration error
+  ([`e200e3c`](https://github.com/EHylands/QolsysController/commit/e200e3c4706728c45fcce25587cd2ebb1a45fe59))
+
+- Stop reconnect loop on configuration error
+  ([`53cf5bd`](https://github.com/EHylands/QolsysController/commit/53cf5bdd2dc3b7938fb4734b57c8e31fe6ac3686))
+
+### Chores
+
+- Publish new pypi version on new tag
+  ([`d68fdc8`](https://github.com/EHylands/QolsysController/commit/d68fdc810fa1a90a03adaa13d9307b5a4acfb5f1))
+
+
 ## v1.1.0 (2026-05-16)
 
 ### Features
