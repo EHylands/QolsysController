@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-05-18)
+
+### Chores
+
+- Publish to pypi on tag creation
+  ([`fe27318`](https://github.com/EHylands/QolsysController/commit/fe27318f799d7d353fb09d1c6a85e21e1eec35a1))
+
+- **deps**: Bump zeroconf from 0.148.0 to 0.149.4
+  ([#48](https://github.com/EHylands/QolsysController/pull/48),
+  [`3006907`](https://github.com/EHylands/QolsysController/commit/3006907f63b63f02f3fb9088a7436f0b55d2d7e7))
+
+### Features
+
+- Now allow external zeroconf instance as ha requirement
+  ([`5b3a178`](https://github.com/EHylands/QolsysController/commit/5b3a1786d884572790f17ae9e985ed729a1680dc))
+
+
 ## v1.1.2 (2026-05-18)
 
 ### Bug Fixes
