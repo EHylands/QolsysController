@@ -128,11 +128,18 @@ class QolsysController:
             self.run_supervised(reconnect=reconnect, run_once=run_once, start_pairing=start_pairing),
             name="MQTT Panel Client Supervisor",
         )
-        try:
-            await self._event_panel_connected.wait()
-        except asyncio.CancelledError:
-            LOGGER.debug("start_operation cancelled while waiting for panel")
-            raise
+
+        wait_task = asyncio.create_task(self._event_panel_connected.wait())
+
+        done, _ = await asyncio.wait(
+            [wait_task, self._task_supervisor],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+
+        # supervisor exited first -> propagate exception
+        if self._task_supervisor in done:
+            wait_task.cancel()
+            await self._task_supervisor
 
         # Start MQTT Bridge Broker
         await self.start_mqtt_bridge()
@@ -254,6 +261,11 @@ class QolsysController:
             except* asyncio.CancelledError:
                 raise
 
+            except* QolsysConfigError as err:
+                self._shutdown_requested = True
+                LOGGER.exception("MQTT Panel Client - Supervisor detected configuration error: %s", err)
+                raise
+
             except* aiomqtt.exceptions.MqttError as err:
                 for exc in err.exceptions:
                     LOGGER.debug("MQTT Panel Client - Supervisor detected MQTT Error: %r", exc)
@@ -276,9 +288,6 @@ class QolsysController:
                 self._mqtt_publish_queue.empty()
                 self.connected = False
                 self.notify_panel_status_update()
-
-                if self._shutdown_requested:
-                    LOGGER.debug("MQTT Panel Client - Supervisor exiting (shutdown requested)")
 
                 if reconnect and not self._shutdown_requested:
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
@@ -327,7 +336,6 @@ class QolsysController:
             try:
                 command: MQTTCommand = await self._mqtt_publish_queue.get()
                 payload = json.dumps(command._payload)
-
                 await client.publish(command._topic, payload, command._qos)
 
             except asyncio.CancelledError:
@@ -338,10 +346,12 @@ class QolsysController:
                 raise
 
             except Exception as err:
-                LOGGER.exception("MQTT Panel Client - publish worker error: %s", err)
+                LOGGER.exception("MQTT Panel Client - publish task error: %s", err)
                 raise
 
     async def mqtt_listen_task(self, client: aiomqtt.Client) -> None:
+        LOGGER.debug("MQTT Panel Client - Listen task started")
+
         async for message in client.messages:
             if self._shutdown_requested:
                 break
@@ -397,12 +407,23 @@ class QolsysController:
         self._event_panel_connected.set()
 
     async def mqtt_ping_task(self, client: aiomqtt.Client) -> None:
+        LOGGER.debug("MQTT Panel Client - Ping task started")
         while not self._shutdown_requested:
-            if client is not None and self.connected:
-                await self.command_pingevent()
-            await asyncio.sleep(self.settings.mqtt_ping)
+            try:
+                if client is not None and self.connected:
+                    await asyncio.sleep(self.settings.mqtt_ping)
+                    LOGGER.debug("MQTT Panel Client - Sending ping event")
+                    await self.command_pingevent()
+
+            except asyncio.CancelledError:
+                raise
+
+            except Exception as err:
+                LOGGER.exception("MQTT Panel Client - error in ping task: %s", err)
+                raise
 
     async def mqtt_zwave_meter_update(self, client: aiomqtt.Client) -> None:
+        LOGGER.debug("MQTT Panel Client - Z-Wave meter update task started")
         while not self._shutdown_requested:
             if client is not None and self.connected:
                 for autdev in self.state.automation_devices:
@@ -509,18 +530,6 @@ class QolsysController:
             )
             LOGGER.debug("Certificate Exchange Server Waiting for Panel")
             LOGGER.debug("Press Pair Button in IQ Remote Config Page ...")
-
-            # async with self.certificate_exchange_server:
-            #    try:
-            #        await self.certificate_exchange_server.serve_forever()
-
-            #    except asyncio.CancelledError:
-            #        raise
-
-            #    finally:
-            #        if self._mdns_server:
-            #            await self._mdns_server.stop_mdns()
-            #            self._mdns_server = None
 
             self._event_pairing_done = asyncio.Event()
             self._server_task = asyncio.create_task(self.certificate_exchange_server.serve_forever())

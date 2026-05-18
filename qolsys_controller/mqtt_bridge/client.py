@@ -75,7 +75,7 @@ class MqttBridgeClient:
     async def _run(self) -> None:
         while not self._stop_event.is_set():
             LOGGER.debug(
-                "MQTT Bridge Client: Connecting to %s:%s ...",
+                "MQTT Bridge Client: Connecting to %s:%s",
                 self._bridge._controller.settings.mqtt_bridge_hostname,
                 self._bridge._controller.settings.mqtt_bridge_port,
             )
