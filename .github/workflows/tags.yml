@@ -67,8 +67,8 @@ jobs:
 
       - name: Run semantic-release (bump + tag)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           semantic-release version
-          git push --tags
+          git push --follow-tags
