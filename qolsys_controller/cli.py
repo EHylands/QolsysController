@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import asyncio
-import contextlib
 import json
 import logging
 import os
@@ -180,7 +179,6 @@ async def _main_async() -> None:
         loop.add_signal_handler(signal.SIGINT, stop_event.set)
         loop.add_signal_handler(signal.SIGTERM, stop_event.set)
 
-
         task = asyncio.create_task(bridge.start(), name="bridge-start-task")
         stop_task = asyncio.create_task(stop_event.wait(), name="stop-event-task")
 
@@ -199,6 +197,7 @@ async def _main_async() -> None:
 
     except Exception as e:
         log.error("Fatal error: %s", e)
+
 
 # Change to the "Selector" event loop if platform is Windows
 if sys.platform.lower() == "win32" or os.name.lower() == "nt":

@@ -2,7 +2,7 @@
   "panel_ip": "192.168.10.220",
   "panel_mac": "",
   "random_mac": "",
-  "config_dir": "../config",
+  "config_dir": "config",
   "plugin_ip": "",
   "auto_discover_pki": true,
   "start_pairing": false,
@@ -11,7 +11,7 @@
   "check_user_code_on_disarm": false,
   "log_mqtt_messages": false,
   
-  "mqtt_bridge_enabled": true,
+  "mqtt_bridge_enabled": false,
   "mqtt_bridge_hostname": "",
   "mqtt_bridge_client_username": "",
   "mqtt_bridge_client_password": "",

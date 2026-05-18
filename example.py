@@ -30,7 +30,7 @@ async def main() -> None:  # noqa: D103
     remote.settings.auto_discover_pki = True
     remote.settings.pairing_resume = True  # Enable to resume pairing process if it was interrupted before completion
 
-    remote.settings.mqtt_bridge_enabled = True
+    remote.settings.mqtt_bridge_enabled = False
     remote.settings._mqtt_bridge_broker_enabled = True
     remote.settings.mqtt_bridge_port = 1883
     remote.settings.mqtt_bridge_tls_enabled = False
@@ -53,23 +53,22 @@ async def main() -> None:  # noqa: D103
 
         await stop_event.wait()
 
-    except QolsysConfigError as e:
-        LOGGER.debug(e)
+    except* QolsysConfigError:
+        pass
 
-    except QolsysMqttError:
+    except* QolsysMqttError:
         LOGGER.debug("QolsysMqttError")
 
-    except (QolsysSslError, ssl.SSLError):
+    except* (QolsysSslError, ssl.SSLError):
         LOGGER.debug("QolsysSslError")
 
-    except QolsysSqlError:
+    except* QolsysSqlError:
         LOGGER.debug("QolsysSqlError")
 
-    except asyncio.CancelledError:
+    except* asyncio.CancelledError:
         LOGGER.debug("Operation cancelled")
 
     finally:
-        LOGGER.info("Shutdown initiated... cleaning up")
         await remote.stop_operation()
         LOGGER.info("Cleanup complete")
 
