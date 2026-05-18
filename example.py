@@ -7,6 +7,8 @@ import signal
 import ssl
 import sys
 
+from zeroconf.asyncio import AsyncZeroconf
+
 from qolsys_controller.controller import QolsysController
 from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
@@ -34,6 +36,9 @@ async def main() -> None:  # noqa: D103
     remote.settings._mqtt_bridge_broker_enabled = True
     remote.settings.mqtt_bridge_port = 1883
     remote.settings.mqtt_bridge_tls_enabled = False
+
+    aiozc = AsyncZeroconf()
+    remote.settings.shared_zeroconf_instance = aiozc
 
     try:
         await remote.start_operation(reconnect=True, run_once=False, start_pairing=True)

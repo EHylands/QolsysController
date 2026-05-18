@@ -227,6 +227,10 @@ class QolsysController:
     ) -> None:
         while True:
             try:
+                # Fresh outbound queue per connection attempt so stale commands
+                # from a previous session don't get sent on reconnect.
+                self._mqtt_publish_queue = asyncio.Queue()
+
                 # Configure controller
                 if start_config and self._initial_run:
                     await self.config_task(start_pairing)
@@ -286,7 +290,7 @@ class QolsysController:
                     raise
 
             finally:
-                self._mqtt_publish_queue.empty()
+                self.mqtt_command_queue.fail_all_pending(QolsysMqttError("MQTT Command failed due to disconnection"))
                 self.connected = False
                 self.notify_panel_status_update()
 
@@ -331,7 +335,7 @@ class QolsysController:
         self._mqtt_publish_queue.put_nowait(command)
 
     async def mqtt_publish_task(self, client: aiomqtt.Client) -> None:
-        LOGGER.debug("MQTT Panel Client - publish worker started")
+        LOGGER.debug("MQTT Panel Client - Publish worker started")
 
         while not self._shutdown_requested:
             try:
@@ -344,10 +348,12 @@ class QolsysController:
 
             except aiomqtt.MqttError:
                 LOGGER.exception("MQTT Panel Client - error while publishing command %s", command._eventName)
+                self.mqtt_command_queue.fail_waiter(command._requestID, QolsysMqttError("Failed to publish MQTT command"))
                 raise
 
             except Exception as err:
                 LOGGER.exception("MQTT Panel Client - publish task error: %s", err)
+                self._mqtt_command_queue.fail_waiter(command._requestID, err)
                 raise
 
     async def mqtt_listen_task(self, client: aiomqtt.Client) -> None:
@@ -413,7 +419,6 @@ class QolsysController:
             try:
                 if client is not None and self.connected:
                     await asyncio.sleep(self.settings.mqtt_ping)
-                    LOGGER.debug("MQTT Panel Client - Sending ping event")
                     await self.command_pingevent()
 
             except asyncio.CancelledError:
@@ -508,7 +513,7 @@ class QolsysController:
 
             # Start Pairing mDNS Brodcast
             LOGGER.debug("Starting mDNS Service Discovery: %s:%s", self.settings.plugin_ip, str(pairing_port))
-            self._mdns_server = QolsysMDNS(self.settings.plugin_ip, pairing_port)
+            self._mdns_server = QolsysMDNS(self.settings.plugin_ip, pairing_port, self.settings.shared_zeroconf_instance)
 
             try:
                 await self._mdns_server.start_mdns()
@@ -516,6 +521,9 @@ class QolsysController:
                 raise QolsysConfigError(
                     "mDNS Service Discovery Error: NonUniqueNameException - Another device on the network is using the same IP address or mDNS name"
                 )
+            except Exception as err:
+                LOGGER.exception("mDNS Service Discovery Error: %s", err)
+                raise QolsysConfigError(f"mDNS Service Discovery Error: {err}") from err
 
             # Start Key Exchange Server
             LOGGER.debug("Starting Certificate Exchange Server")

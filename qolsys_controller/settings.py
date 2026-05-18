@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from zeroconf.asyncio import AsyncZeroconf
+
 from qolsys_controller.errors import QolsysConfigError
 
 LOGGER = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ class QolsysSettings:
         self._random_mac: str = ""
         self._panel_mac: str = ""
         self._panel_ip: str = ""
+        self._shared_zeroconf_instance: AsyncZeroconf | None = None
 
         # Path
         self._config_directory: Path = Path()
@@ -89,6 +92,14 @@ class QolsysSettings:
     # -----------------------------
     # properties + setters
     # -----------------------------
+
+    @property
+    def shared_zeroconf_instance(self) -> AsyncZeroconf | None:
+        return self._shared_zeroconf_instance
+
+    @shared_zeroconf_instance.setter
+    def shared_zeroconf_instance(self, zeroconf: AsyncZeroconf) -> None:
+        self._shared_zeroconf_instance = zeroconf
 
     @property
     def mqtt_bridge_enabled(self) -> bool:
