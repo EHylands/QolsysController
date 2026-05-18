@@ -277,6 +277,7 @@ class QolsysController:
                 # SSL error is and authentication error with invalid certificates en pki
                 # We cannot recover from this error automaticly
                 LOGGER.debug("MQTT Panel Client - Supervisor detected SSL Error: %s", err)
+                self._shutdown_requested = True
                 raise QolsysSslError from err
 
             except* Exception as err:
