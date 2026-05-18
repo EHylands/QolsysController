@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.2 (2026-05-18)
+
+### Bug Fixes
+
+- Stop_operation on ssl error
+  ([`d9e504e`](https://github.com/EHylands/QolsysController/commit/d9e504efc902723aed18c176c219ef154299a353))
+
+### Chores
+
+- Publish to pypi on new release
+  ([`4373195`](https://github.com/EHylands/QolsysController/commit/4373195f355720632d69763e0e699e09f2a4604e))
+
+
 ## v1.1.1 (2026-05-18)
 
 ### Bug Fixes
