@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.2.1 (2026-05-23)
+
+### Bug Fixes
+
+- Hardening key exchange for special characters
+  ([`59463dd`](https://github.com/EHylands/QolsysController/commit/59463dd6961e4784dcb1b75b6cc6a2c71f95b2c3))
+
+### Chores
+
+- Use personnal token
+  ([`5948f8d`](https://github.com/EHylands/QolsysController/commit/5948f8dd0114ffb63604e44f55b1d443763bbe47))
+
+
 ## v1.2.0 (2026-05-18)
 
 ### Chores
