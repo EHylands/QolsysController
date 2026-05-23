@@ -1,4 +1,46 @@
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
+
+
+class ControllerState(Enum):
+    STOPPED = auto()
+    CONFIGURING = auto()
+    PAIRING = auto()
+    CONNECTING = auto()
+    CONNECTED = auto()
+    RECONNECTING = auto()
+    SHUTTING_DOWN = auto()
+
+
+VALID_CONTROLLER_TRANSITIONS = {
+    ControllerState.STOPPED: {
+        ControllerState.CONFIGURING,
+    },
+    ControllerState.CONFIGURING: {
+        ControllerState.PAIRING,
+        ControllerState.CONNECTING,
+        ControllerState.SHUTTING_DOWN,
+    },
+    ControllerState.PAIRING: {
+        ControllerState.CONNECTING,
+        ControllerState.SHUTTING_DOWN,
+    },
+    ControllerState.CONNECTING: {
+        ControllerState.CONNECTED,
+        ControllerState.RECONNECTING,
+        ControllerState.SHUTTING_DOWN,
+    },
+    ControllerState.CONNECTED: {
+        ControllerState.RECONNECTING,
+        ControllerState.SHUTTING_DOWN,
+    },
+    ControllerState.RECONNECTING: {
+        ControllerState.CONNECTING,
+        ControllerState.SHUTTING_DOWN,
+    },
+    ControllerState.SHUTTING_DOWN: {
+        ControllerState.STOPPED,
+    },
+}
 
 
 class QolsysPanelType(StrEnum):

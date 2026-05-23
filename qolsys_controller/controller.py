@@ -38,7 +38,9 @@ from qolsys_controller.mqtt_command import (
 from qolsys_controller.observable import Event
 
 from .enum_qolsys import (
+    VALID_CONTROLLER_TRANSITIONS,
     BypassCapableZoneSensorType,
+    ControllerState,
     PartitionAlarmState,
     PartitionArmingType,
     PartitionSystemStatus,
@@ -50,6 +52,7 @@ from .enum_qolsys import (
 )
 from .enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode, ZwaveCommandClass
 from .errors import (
+    InvalidControllerStateTransitionError,
     InvalidVirtualNodeError,
     QolsysConfigError,
     QolsysInvalidPartitionIdError,
@@ -78,12 +81,13 @@ class QolsysController:
         self._panel = QolsysPanel(self)
         self._pki = QolsysPKI(settings=self.settings)
 
+        self._controller_state = ControllerState.STOPPED
+        self._controller_state_condition = asyncio.Condition()
         self._initial_run: bool = True
         self._shutdown_requested: bool = False
         self.connected: bool = False
 
         self._task_supervisor: asyncio.Task[None] | None = None
-        self._event_panel_connected = asyncio.Event()
         self._event_pairing_done = asyncio.Event()
         self._pairing_was_started: bool = False
 
@@ -121,16 +125,13 @@ class QolsysController:
     ###########################################################################
 
     async def start_operation(self, reconnect: bool = True, run_once: bool = False, start_pairing: bool = False) -> None:
-        # Connect to Qolsys Panel MQTT and start listening for messages
         LOGGER.debug("Starting Plugin Operation")
-        self._event_panel_connected.clear()
         self._task_supervisor = asyncio.create_task(
             self.run_supervised(reconnect=reconnect, run_once=run_once, start_pairing=start_pairing),
             name="MQTT Panel Client Supervisor",
         )
 
-        wait_task = asyncio.create_task(self._event_panel_connected.wait())
-
+        wait_task = asyncio.create_task(self.wait_until_connected(), name="MQTT Panel Client Initial Connection Wait")
         done, _ = await asyncio.wait(
             [wait_task, self._task_supervisor],
             return_when=asyncio.FIRST_COMPLETED,
@@ -147,12 +148,11 @@ class QolsysController:
         LOGGER.info("Qolsys Controller Ready for operation")
 
     async def stop_operation(self) -> None:
-        LOGGER.debug("Stopping Plugin Operation")
+        await self.set_controller_state(ControllerState.SHUTTING_DOWN)
         self._shutdown_requested = True
 
         if self.certificate_exchange_server is not None:
             self.certificate_exchange_server.close()
-            # await self.certificate_exchange_server.wait_closed()
             self.certificate_exchange_server = None
 
         if self._mdns_server is not None:
@@ -169,9 +169,10 @@ class QolsysController:
 
         self.connected = False
         self.notify_panel_status_update()
+        await self.set_controller_state(ControllerState.STOPPED)
 
     async def config_task(self, start_pairing: bool) -> None:
-        LOGGER.debug("Configuring Plugin")
+        await self.set_controller_state(ControllerState.CONFIGURING)
 
         # Check and created config_directory
         self.settings.check_config_directory(create=start_pairing)
@@ -236,6 +237,7 @@ class QolsysController:
                     await self.config_task(start_pairing)
 
                 # Open transport
+                await self.set_controller_state(ControllerState.CONNECTING)
                 mqtt_panel_client: aiomqtt.Client = await self.mqtt_open_transport_task()
 
                 async with mqtt_panel_client:
@@ -253,6 +255,7 @@ class QolsysController:
 
                         # Initialize session before background loops
                         await self.mqtt_initialize_session_task()
+                        await self.set_controller_state(ControllerState.CONNECTED)
 
                         if run_once:
                             LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
@@ -295,6 +298,7 @@ class QolsysController:
                 self.notify_panel_status_update()
 
                 if reconnect and not self._shutdown_requested:
+                    await self.set_controller_state(ControllerState.RECONNECTING)
                     LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds...", self.settings.mqtt_timeout)
                     await asyncio.sleep(self.settings.mqtt_timeout)
 
@@ -315,7 +319,6 @@ class QolsysController:
             )
             return ctx
 
-        LOGGER.debug("MQTT Panel Client - Connecting ...")
         loop = asyncio.get_running_loop()
         ctx = await loop.run_in_executor(None, create_tls_context, self)
 
@@ -366,25 +369,41 @@ class QolsysController:
             # Log all MQTT messages for debug purposes if enabled in settings
             if self.settings.log_mqtt_messages:
                 if isinstance(message.payload, bytes):
-                    LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
+                    try:
+                        LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
+                    except json.JSONDecodeError:
+                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
+                        continue
 
             # Panel response to MQTT Commands and Panel Commands to IQ Remote
             if message.topic.matches("response_" + self.settings.random_mac):  # noqa: SIM102
                 if isinstance(message.payload, bytes):
-                    data = json.loads(message.payload.decode())
-                    await self._mqtt_command_queue.handle_response(data)
+                    try:
+                        data = json.loads(message.payload.decode())
+                        await self._mqtt_command_queue.handle_response(data)
+                    except json.JSONDecodeError:
+                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
+                        continue
 
             # Panel updates to IQ2MEID database
             if message.topic.matches("iq2meid"):  # noqa: SIM102
                 if isinstance(message.payload, bytes):
-                    data = json.loads(message.payload.decode())
-                    self.panel.parse_iq2meid_message(data)
+                    try:
+                        data = json.loads(message.payload.decode())
+                        self.panel.parse_iq2meid_message(data)
+                    except json.JSONDecodeError:
+                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
+                        continue
 
             # Panel Z-Wave response
             if message.topic.matches("ZWAVE_RESPONSE"):  # noqa: SIM102
                 if isinstance(message.payload, bytes):
-                    data = json.loads(message.payload.decode())
-                    self.panel.parse_zwave_message(data)
+                    try:
+                        data = json.loads(message.payload.decode())
+                        self.panel.parse_zwave_message(data)
+                    except json.JSONDecodeError:
+                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
+                        continue
 
     async def mqtt_initialize_session_task(self) -> None:
         LOGGER.debug("MQTT Panel Client - Initializing session")
@@ -409,9 +428,6 @@ class QolsysController:
 
         self.connected = True
         self.notify_panel_status_update()
-
-        LOGGER.info("MQTT Panel Client - Connected")
-        self._event_panel_connected.set()
 
     async def mqtt_ping_task(self, client: aiomqtt.Client) -> None:
         LOGGER.debug("MQTT Panel Client - Ping task started")
@@ -555,12 +571,18 @@ class QolsysController:
         received_signed_client_certificate = False
         received_qolsys_cer = False
 
+        start_token = b"-----BEGIN CERTIFICATE-----\n"
+        end_token = b"-----END CERTIFICATE-----\n"
+
         try:
             continue_pairing = True
             while continue_pairing:
                 # Plugin is receiving panel_mac from panel
                 if not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
                     request = await reader.read(2048)
+
+                    LOGGER.debug("Receiving raw repr: %r", request)
+
                     mac = request.decode()
 
                     address, port = writer.get_extra_info("peername")
@@ -590,10 +612,9 @@ class QolsysController:
 
                 # Read signed certificate data
                 if received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
-                    request = await reader.readuntil(b"sent")
-                    if request.endswith(b"sent"):
-                        request = request[:-4]
-
+                    await reader.readuntil(start_token)
+                    request = start_token + await reader.readuntil(end_token)
+                    LOGGER.debug("Receiving raw repr: %r", request)
                     LOGGER.debug("Saving [Signed Client Certificate]")
                     async with aiofiles.open(self._pki.secure_file_path, mode="wb") as f:
                         await f.write(request)
@@ -601,10 +622,9 @@ class QolsysController:
 
                 # Read qolsys certificate data
                 if received_panel_mac and received_signed_client_certificate and not received_qolsys_cer:
-                    request = await reader.readuntil(b"sent")
-                    if request.endswith(b"sent"):
-                        request = request[:-4]
-
+                    await reader.readuntil(start_token)
+                    request = start_token + await reader.readuntil(end_token)
+                    LOGGER.debug("Receiving raw repr: %r", request)
                     LOGGER.debug("Saving [Qolsys Certificate]")
                     async with aiofiles.open(self._pki.qolsys_cer_file_path, mode="wb") as f:
                         await f.write(request)
@@ -1401,3 +1421,21 @@ class QolsysController:
         response = await command.send_command()
         LOGGER.debug("MQTT Panel Client: Receiving automation_light_off command")
         return response
+
+    @property
+    def controller_state(self) -> ControllerState:
+        return self._controller_state
+
+    async def set_controller_state(self, new_state: ControllerState) -> None:
+        async with self._controller_state_condition:
+            if new_state not in VALID_CONTROLLER_TRANSITIONS[self._controller_state]:
+                raise InvalidControllerStateTransitionError(f"{self._controller_state.name} -> {new_state.name}")
+
+            LOGGER.debug("Controller state transition: %s -> %s", self._controller_state.name, new_state.name)
+
+            self._controller_state = new_state
+            self._controller_state_condition.notify_all()
+
+    async def wait_until_connected(self) -> None:
+        async with self._controller_state_condition:
+            await self._controller_state_condition.wait_for(lambda: self._controller_state == ControllerState.CONNECTED)

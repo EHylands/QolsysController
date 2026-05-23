@@ -10,6 +10,10 @@ class QolsysError(Exception):
     pass
 
 
+class InvalidControllerStateTransitionError(Exception):
+    pass
+
+
 #
 # Generic operational errors
 #
