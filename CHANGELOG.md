@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.1 (2026-05-25)
+
+### Bug Fixes
+
+- Allow stopped to connecting state transition
+  ([`838b7a9`](https://github.com/EHylands/QolsysController/commit/838b7a9a363e72f4dd1e1c61253991fc193b74d4))
+
+
 ## v1.3.0 (2026-05-25)
 
 ### Features
