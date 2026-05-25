@@ -14,6 +14,7 @@ class ControllerState(Enum):
 VALID_CONTROLLER_TRANSITIONS = {
     ControllerState.STOPPED: {
         ControllerState.CONFIGURING,
+        ControllerState.CONNECTING
     },
     ControllerState.CONFIGURING: {
         ControllerState.PAIRING,
