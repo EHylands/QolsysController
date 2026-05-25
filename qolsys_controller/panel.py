@@ -130,6 +130,9 @@ class QolsysPanel:
         self._product_type: QolsysPanelType = QolsysPanelType.UNKNOWN
 
     def read_users_file(self) -> None:
+        # Clear existing users list
+        self._users.clear()
+
         # Loading user_code data from users.conf file if exists
         if self._controller.settings.users_file_path.is_file():
             try:

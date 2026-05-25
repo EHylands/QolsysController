@@ -17,12 +17,12 @@ class LightServicePowerG(LightService):
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     async def turn_on(self) -> None:
-        await self._automation_device.controller.command_automation_light_on(
+        await self._automation_device.controller.commands.automation.light_on(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
 
     async def turn_off(self) -> None:
-        await self.automation_device.controller.command_automation_light_off(
+        await self.automation_device.controller.commands.automation.light_off(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
 

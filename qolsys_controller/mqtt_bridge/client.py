@@ -396,14 +396,14 @@ class MqttBridgeClient:
                 message = await self._require_field(data, "message", "panel_speak_message_missing")
                 if not message:
                     return
-                await self._bridge._controller.command_panel_speak(message)
+                await self._bridge._controller.commands.panel.speak(message)
                 await self._send_success(data)
 
             case "EXECUTE_SCENE":
                 scene_id = await self._require_field(data, "scene_id", "invalid_scene_id")
                 if not scene_id:
                     return
-                await self._bridge._controller.command_panel_execute_scene(str(scene_id))
+                await self._bridge._controller.commands.panel.execute_scene(str(scene_id))
                 await self._send_success(data)
 
     async def _handle_partition_command(self, topic_partition_id: str | None, payload: str) -> None:
@@ -817,7 +817,7 @@ class MqttBridgeClient:
     async def _cmd_disarm(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
         user_code: str = data.get("user_code", "")
         silent_disarm: bool = data.get("silent_disarm", False)
-        await self._bridge._controller.command_disarm(partition.id, user_code, silent_disarm)
+        await self._bridge._controller.commands.panel.disarm(partition.id, user_code, silent_disarm)
         await self._send_success(data)
 
     async def _cmd_arm_stay(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
@@ -825,7 +825,7 @@ class MqttBridgeClient:
         exit_delay: bool = data.get("exit_delay", True)
         exit_sounds: bool = data.get("exit_sounds", True)
         instant_arm: bool = data.get("instant_arm", False)
-        await self._bridge._controller.command_arm(
+        await self._bridge._controller.commands.panel.arm(
             partition.id, PartitionArmingType.ARM_STAY, user_code, exit_delay, exit_sounds, instant_arm
         )
         await self._send_success(data)
@@ -835,7 +835,7 @@ class MqttBridgeClient:
         exit_delay: bool = data.get("exit_delay", True)
         exit_sounds: bool = data.get("exit_sounds", True)
         instant_arm: bool = data.get("instant_arm", False)
-        await self._bridge._controller.command_arm(
+        await self._bridge._controller.commands.panel.arm(
             partition.id, PartitionArmingType.ARM_AWAY, user_code, exit_delay, exit_sounds, instant_arm
         )
         await self._send_success(data)
@@ -845,27 +845,27 @@ class MqttBridgeClient:
         exit_delay: bool = data.get("exit_delay", True)
         exit_sounds: bool = data.get("exit_sounds", True)
         instant_arm: bool = data.get("instant_arm", False)
-        await self._bridge._controller.command_arm(
+        await self._bridge._controller.commands.panel.arm(
             partition.id, PartitionArmingType.ARM_NIGHT, user_code, exit_delay, exit_sounds, instant_arm
         )
         await self._send_success(data)
 
     async def _cmd_trigger_police_emergency_silent(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
-        await self._bridge._controller.command_panel_trigger_police(partition.id, silent=True)
+        await self._bridge._controller.commands.panel.trigger_police(partition.id, silent=True)
         await self._send_success(data)
 
     async def _cmd_trigger_police_emergency(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
-        await self._bridge._controller.command_panel_trigger_police(partition.id, silent=False)
+        await self._bridge._controller.commands.panel.trigger_police(partition.id, silent=False)
         await self._send_success(data)
 
     async def _cmd_trigger_auxiliary_emergency(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
-        await self._bridge._controller.command_panel_trigger_auxilliary(partition.id, silent=False)
+        await self._bridge._controller.commands.panel.trigger_auxilliary(partition.id, silent=False)
         await self._send_success(data)
 
     async def _cmd_trigger_auxiliary_emergency_silent(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
-        await self._bridge._controller.command_panel_trigger_auxilliary(partition.id, silent=True)
+        await self._bridge._controller.commands.panel.trigger_auxilliary(partition.id, silent=True)
         await self._send_success(data)
 
     async def _cmd_trigger_fire_emergency(self, partition: QolsysPartition, data: dict[str, Any]) -> None:
-        await self._bridge._controller.command_panel_trigger_fire(partition.id)
+        await self._bridge._controller.commands.panel.trigger_fire(partition.id)
         await self._send_success(data)

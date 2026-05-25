@@ -21,7 +21,7 @@ class ThermostatServiceZwave(ThermostatService):
         pass
 
     async def turn_off(self) -> None:
-        await self.automation_device.controller.command_zwave_thermostat_mode_set(
+        await self.automation_device.controller.commands.zwave.thermostat_mode_set(
             self.automation_device.virtual_node_id, str(self.endpoint), ThermostatMode.OFF
         )
 
@@ -48,7 +48,7 @@ class ThermostatServiceZwave(ThermostatService):
         if mode == QolsysHvacMode.COOL:
             setpoint_mode = ThermostatSetpointMode.COOLING
 
-        await self.automation_device.controller.command_zwave_thermostat_setpoint_set(
+        await self.automation_device.controller.commands.zwave.thermostat_setpoint_set(
             self.automation_device.virtual_node_id, str(self.endpoint), setpoint_mode, int(temperature)
         )
 
@@ -63,7 +63,7 @@ class ThermostatServiceZwave(ThermostatService):
             )
             return
 
-        await self.automation_device.controller.command_zwave_thermostat_mode_set(
+        await self.automation_device.controller.commands.zwave.thermostat_mode_set(
             self.automation_device.virtual_node_id, str(self.endpoint), zwave_thermostat_mode
         )
 
@@ -77,7 +77,7 @@ class ThermostatServiceZwave(ThermostatService):
                 fan_mode,
             )
             return
-        await self.automation_device.controller.command_zwave_thermostat_fan_mode_set(
+        await self.automation_device.controller.commands.zwave.thermostat_fan_mode_set(
             self.automation_device.virtual_node_id, str(self.endpoint), zwave_fan_mode
         )
 

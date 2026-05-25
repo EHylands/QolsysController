@@ -135,7 +135,7 @@ class QolsysPartition(QolsysObservable):
         try:
             self.last_error = PartitionError.NONE
 
-            await self._controller.command_arm(
+            await self._controller.commands.panel.arm(
                 self.id,
                 arming_type,
                 user_code,
@@ -162,7 +162,7 @@ class QolsysPartition(QolsysObservable):
     async def disarm(self, user_code: str = "") -> None:
         try:
             self.last_error = PartitionError.NONE
-            await self._controller.command_disarm(self.id, user_code, self.command_arm_stay_silent_disarming)
+            await self._controller.commands.panel.disarm(self.id, user_code, self.command_arm_stay_silent_disarming)
 
         except QolsysUserCodeError as err:
             LOGGER.debug("MQTT: disarm command error - user_code error")

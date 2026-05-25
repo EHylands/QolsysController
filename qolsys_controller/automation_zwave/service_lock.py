@@ -43,7 +43,7 @@ class LockServiceZwave(LockService):
         )
         self._is_locking = False
 
-        await self.automation_device.controller.command_zwave_doorlock_set(
+        await self.automation_device.controller.commands.zwave.doorlock_set(
             self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
@@ -63,7 +63,7 @@ class LockServiceZwave(LockService):
         )
         self._is_unlocking = False
 
-        await self.automation_device.controller.command_zwave_doorlock_set(
+        await self.automation_device.controller.commands.zwave.doorlock_set(
             self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 

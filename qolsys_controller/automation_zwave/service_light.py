@@ -23,7 +23,7 @@ class LightServiceZwave(LightService):
         if self.supports_level():
             await self.set_level(0xFF)  # Return to last known level
         else:
-            await self.automation_device.controller.command_zwave_switch_binary_set(
+            await self.automation_device.controller.commands.zwave.switch_binary_set(
                 self.automation_device.virtual_node_id, str(self.endpoint), True
             )
 
@@ -31,12 +31,12 @@ class LightServiceZwave(LightService):
         if self.supports_level():
             await self.set_level(0)
         else:
-            await self.automation_device.controller.command_zwave_switch_binary_set(
+            await self.automation_device.controller.commands.zwave.switch_binary_set(
                 self.automation_device.virtual_node_id, str(self.endpoint), False
             )
 
     async def set_level(self, level: int) -> None:
-        await self.automation_device.controller.command_zwave_switch_multilevel_set(
+        await self.automation_device.controller.commands.zwave.switch_multilevel_set(
             self.automation_device.virtual_node_id, str(self.endpoint), level
         )
 

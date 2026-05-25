@@ -34,6 +34,7 @@ VALID_CONTROLLER_TRANSITIONS = {
         ControllerState.SHUTTING_DOWN,
     },
     ControllerState.RECONNECTING: {
+        ControllerState.CONFIGURING,
         ControllerState.CONNECTING,
         ControllerState.SHUTTING_DOWN,
     },

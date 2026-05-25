@@ -25,12 +25,12 @@ class LightServiceADC(LightService):
         return self._func_type
 
     async def turn_on(self) -> None:
-        await self.automation_device.controller.command_panel_virtual_device_action(
+        await self.automation_device.controller.commands.adc.virtual_device_action(
             self.automation_device.virtual_node_id, self.endpoint, vdFuncState.ON
         )
 
     async def turn_off(self) -> None:
-        await self.automation_device.controller.command_panel_virtual_device_action(
+        await self.automation_device.controller.commands.adc.virtual_device_action(
             self.automation_device.virtual_node_id, self.endpoint, vdFuncState.OFF
         )
 

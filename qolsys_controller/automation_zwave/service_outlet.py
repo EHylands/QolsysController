@@ -25,7 +25,7 @@ class OutletServiceZwave(OutletService):
             LOGGER.error("%s - outlet does not support SwitchBinary command class", self.prefix)
             return
 
-        await self.automation_device.controller.command_zwave_switch_binary_set(
+        await self.automation_device.controller.commands.zwave.switch_binary_set(
             self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
@@ -38,7 +38,7 @@ class OutletServiceZwave(OutletService):
             LOGGER.error("%s - outlet does not support SwitchBinary command class", self.prefix)
             return
 
-        await self.automation_device.controller.command_zwave_switch_binary_set(
+        await self.automation_device.controller.commands.zwave.switch_binary_set(
             self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 

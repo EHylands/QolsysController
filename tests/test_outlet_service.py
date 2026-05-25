@@ -16,7 +16,7 @@ def _make_mock_device() -> MagicMock:
     device.device_name = "Smart Plug"
     device.protocol.name = "ZWAVE"
     device.controller = MagicMock()
-    device.controller.command_zwave_switch_binary_set = AsyncMock()
+    device.controller.commands.zwave.switch_binary_set = AsyncMock()
     device.status = "off"
     device.command_class_list = [ZwaveCommandClass.SwitchBinary]
     device.to_dict_event.return_value = {}
@@ -37,7 +37,7 @@ class TestOutletServiceZwave:
         service = OutletServiceZwave(automation_device=device, endpoint=0)
         service._is_on = False
         await service.turn_on()
-        device.controller.command_zwave_switch_binary_set.assert_awaited_once_with("8", "0", True)
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("8", "0", True)
 
     @pytest.mark.asyncio  # type: ignore[untyped-decorator]
     async def test_turn_on_already_on_skips(self) -> None:
@@ -45,7 +45,7 @@ class TestOutletServiceZwave:
         service = OutletServiceZwave(automation_device=device, endpoint=0)
         service._is_on = True
         await service.turn_on()
-        device.controller.command_zwave_switch_binary_set.assert_not_awaited()
+        device.controller.commands.zwave.switch_binary_set.assert_not_awaited()
 
     def test_is_on_notifies(self) -> None:
         device = _make_mock_device()

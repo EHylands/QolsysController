@@ -128,10 +128,6 @@ class QolsysController:
         try:
             await self.controller.start_operation(reconnect=False, run_once=False, start_pairing=self.config.start_pairing)
 
-            if not self.controller.connected:
-                self.log.error("qolsys-controller not ready for operation")
-                return
-
         except* QolsysMqttError:
             raise RuntimeError("Failed to start qolsys-controller due to MQTT error. Check logs for details.")
 

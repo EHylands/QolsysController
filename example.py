@@ -43,10 +43,6 @@ async def main() -> None:  # noqa: D103
     try:
         await remote.start_operation(reconnect=True, run_once=False, start_pairing=True)
 
-        if not remote.connected:
-            LOGGER.error("Panel not ready for operation")
-            return
-
         # Use an asyncio.Event to keep the program running efficiently
         stop_event = asyncio.Event()
 

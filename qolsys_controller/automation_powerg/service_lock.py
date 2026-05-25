@@ -40,7 +40,7 @@ class LockServicePowerG(LockService):
         self.is_unlocking = False
         self.automation_device.notify
         self._is_locking = False  # Dont fire notify again, will update when status comes back
-        await self.automation_device.controller.command_automation_door_lock(
+        await self.automation_device.controller.commands.automation.door_lock(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
 
@@ -59,7 +59,7 @@ class LockServicePowerG(LockService):
             Event(QolsysNotification.AUTOMATION_UPDATE, self.automation_device, self.automation_device.to_dict_event())
         )
         self._is_unlocking = False  # Dont fire notify again, will update when status comes back
-        await self.automation_device.controller.command_automation_door_unlock(
+        await self.automation_device.controller.commands.automation.door_unlock(
             int(self.automation_device.virtual_node_id), self.endpoint
         )
 
