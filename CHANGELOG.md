@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-05-25)
+
+### Features
+
+- Updated pairing_server and reconnection logic
+  ([`d4f2664`](https://github.com/EHylands/QolsysController/commit/d4f26644fdc4f177829614fd5950cfdd2c0fa418))
+
+
 ## v1.2.1 (2026-05-23)
 
 ### Bug Fixes
