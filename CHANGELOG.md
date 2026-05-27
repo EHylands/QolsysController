@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.3.2 (2026-05-27)
+
+### Bug Fixes
+
+- **deps**: Bump cryptography to v48.0.0
+  ([`2f5dd70`](https://github.com/EHylands/QolsysController/commit/2f5dd706bbaeaf65d0db16213fcaeb9c12938be4))
+
+### Chores
+
+- **deps**: Update cryptography requirement
+  ([#47](https://github.com/EHylands/QolsysController/pull/47),
+  [`502e953`](https://github.com/EHylands/QolsysController/commit/502e95389cb15977bbdd8d48f92b3d4f6f30286e))
+
+
 ## v1.3.1 (2026-05-25)
 
 ### Bug Fixes
