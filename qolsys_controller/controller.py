@@ -237,7 +237,9 @@ class QolsysController:
                         tg.create_task(self.mqtt_zwave_meter_update())
 
             except* asyncio.CancelledError:
-                raise
+                LOGGER.debug("Supervisor cancelled during shutdown")
+                self._shutdown_requested = True
+                # raise
 
             except* QolsysConfigError as err:
                 self._shutdown_requested = True

@@ -126,7 +126,7 @@ class QolsysController:
         settings.mqtt_bridge_port = self.config.mqtt_bridge_port
 
         try:
-            await self.controller.start_operation(reconnect=False, run_once=False, start_pairing=self.config.start_pairing)
+            await self.controller.start_operation(reconnect=True, run_once=False, start_pairing=self.config.start_pairing)
 
         except* QolsysMqttError:
             raise RuntimeError("Failed to start qolsys-controller due to MQTT error. Check logs for details.")
@@ -164,35 +164,32 @@ async def _main_async() -> None:
     args = parse_args()
     configure_logging(args.verbose)
     log = logging.getLogger("qolsys-controller")
+    exit_code = 0
 
     try:
         config = load_config(args.config)
         bridge = QolsysController(config, log)
+        await bridge.start()
 
-        # Register a signal handler for SIGINT (Ctrl+C)
         stop_event = asyncio.Event()
         loop = asyncio.get_running_loop()
         loop.add_signal_handler(signal.SIGINT, stop_event.set)
         loop.add_signal_handler(signal.SIGTERM, stop_event.set)
-
-        task = asyncio.create_task(bridge.start(), name="bridge-start-task")
-        stop_task = asyncio.create_task(stop_event.wait(), name="stop-event-task")
-
-        done, pending = await asyncio.wait([task, stop_task], return_when=asyncio.FIRST_COMPLETED)
-
-        if task in done:
-            await task
-        else:
-            await bridge.stop()
+        await stop_event.wait()
 
         LOGGER.info("Shutdown initiated, waiting for tasks to complete...")
-        await asyncio.gather(*pending, return_exceptions=True)
+        await bridge.stop()
+        LOGGER.info("Shutdown complete")
 
     except asyncio.CancelledError:
         log.info("Main task cancelled")
 
     except Exception as e:
         log.error("Fatal error: %s", e)
+        exit_code = 1
+
+    if exit_code:
+        sys.exit(exit_code)
 
 
 # Change to the "Selector" event loop if platform is Windows
