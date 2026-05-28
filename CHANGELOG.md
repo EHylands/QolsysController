@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.3.3 (2026-05-28)
+
+### Bug Fixes
+
+- Prevent cli.py from shutting down on startup
+  ([`58ec1ce`](https://github.com/EHylands/QolsysController/commit/58ec1ce30e99de9c75912eb70949644e64f60c30))
+
+### Chores
+
+- **deps**: Bump zeroconf from 0.149.4 to 0.149.16
+  ([#49](https://github.com/EHylands/QolsysController/pull/49),
+  [`113e0b0`](https://github.com/EHylands/QolsysController/commit/113e0b0f91db8638c35a401118637ebdee376a77))
+
+
 ## v1.3.2 (2026-05-27)
 
 ### Bug Fixes
