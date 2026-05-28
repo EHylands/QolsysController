@@ -142,7 +142,6 @@ class QolsysController:
 
         except* asyncio.CancelledError:
             self.log.info("Controller start cancelled")
-            raise
 
     async def stop(self) -> None:
         await self.controller.stop_operation()
@@ -165,6 +164,7 @@ async def _main_async() -> None:
     configure_logging(args.verbose)
     log = logging.getLogger("qolsys-controller")
     exit_code = 0
+    bridge = None
 
     try:
         config = load_config(args.config)
@@ -177,16 +177,21 @@ async def _main_async() -> None:
         loop.add_signal_handler(signal.SIGTERM, stop_event.set)
         await stop_event.wait()
 
-        LOGGER.info("Shutdown initiated, waiting for tasks to complete...")
-        await bridge.stop()
-        LOGGER.info("Shutdown complete")
-
     except asyncio.CancelledError:
         log.info("Main task cancelled")
 
     except Exception as e:
         log.error("Fatal error: %s", e)
         exit_code = 1
+
+    finally:
+        if bridge is not None:
+            LOGGER.info("Shutdown initiated, waiting for tasks to complete...")
+            try:
+                await bridge.stop()
+            except Exception:
+                LOGGER.exception("Error during shutdown")
+            LOGGER.info("Shutdown complete")
 
     if exit_code:
         sys.exit(exit_code)
