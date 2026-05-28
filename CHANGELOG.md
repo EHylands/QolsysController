@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.4 (2026-05-28)
+
+### Bug Fixes
+
+- Prevent cli.py from shutting down on startup
+  ([`72a1820`](https://github.com/EHylands/QolsysController/commit/72a1820a0528b91ef243e21226aeae5affed0672))
+
+
 ## v1.3.3 (2026-05-28)
 
 ### Bug Fixes
