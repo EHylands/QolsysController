@@ -4,7 +4,7 @@ cffi==2.0.0
 cryptography>=44.0.1,<48.0.1,
 ifaddr==0.2.0
 paho-mqtt>=2.1.0
-zeroconf==0.149.4
+zeroconf==0.149.16
 types-aiofiles
 passlib>=1.7.4
 amqtt>=0.10.0
