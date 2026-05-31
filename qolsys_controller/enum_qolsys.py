@@ -1,6 +1,13 @@
 from enum import Enum, IntEnum, StrEnum, auto
 
 
+class ExitReason(Enum):
+    OK = auto()
+    ERROR = auto()
+    CANCELLED = auto()
+    SHUTDOWN = auto()
+
+
 class ControllerState(Enum):
     STOPPED = auto()
     CONFIGURING = auto()

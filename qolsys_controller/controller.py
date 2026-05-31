@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import json
 import logging
 import ssl
@@ -55,9 +54,6 @@ class QolsysController:
 
         self._initial_run: bool = True
         self._is_configured: bool = False
-        self._shutdown_requested: bool = False
-
-        self._task_supervisor: asyncio.Task[None] | None = None
         self._pairing_was_started: bool = False
 
         # Plugin
@@ -92,50 +88,54 @@ class QolsysController:
     # Controller Operations
     ###########################################################################
 
-    async def start_operation(self, reconnect: bool = True, run_once: bool = False, start_pairing: bool = False) -> None:
+    async def run_forever(self, reconnect: bool = True, run_once: bool = False, start_pairing: bool = False) -> None:
         LOGGER.debug("Starting Qolsys Controller Operation")
-        self._shutdown_requested = False
-        self._task_supervisor = asyncio.create_task(
-            self.run_supervised(reconnect=reconnect, run_once=run_once, start_pairing=start_pairing),
-            name="MQTT Panel Client Supervisor",
-        )
+        try:
+            async with asyncio.TaskGroup() as tg:
+                # Start MQTT Panel Client Supervisor
+                supervisor_task = tg.create_task(
+                    self.run_supervised(reconnect=reconnect, start_pairing=start_pairing),
+                    name="MQTT Panel Client Supervisor",
+                )
+                await self.wait_until_connected()
 
-        wait_task = asyncio.create_task(self.wait_until_connected(), name="MQTT Panel Client Initial Connection Wait")
-        done, _ = await asyncio.wait(
-            [wait_task, self._task_supervisor],
-            return_when=asyncio.FIRST_COMPLETED,
-        )
+                # Start MQTT Bridge Broker
+                bridge_task = None
+                if self.settings.mqtt_bridge_enabled:
+                    self._mqtt_bridge = MqttBridge(self)
+                    bridge_task = tg.create_task(self._mqtt_bridge.run_bridge(), name="MQTT Bridge")
+                    await self._mqtt_bridge.wait_for_bridge_start()
 
-        # supervisor exited first -> propagate exception
-        if self._task_supervisor in done:
-            wait_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await wait_task
-            await self._task_supervisor
+                LOGGER.info("Qolsys Controller Ready for Operation")
+                if run_once:
+                    LOGGER.debug("Qolsys Controller - Exiting after initialization (run_once=True)")
+                    if supervisor_task is not None:
+                        supervisor_task.cancel()
 
-        # Start MQTT Bridge Broker
-        await self.start_mqtt_bridge()
+                    if bridge_task is not None:
+                        bridge_task.cancel()
+                    return
 
-        LOGGER.info("Qolsys Controller Ready for Operation")
+                await asyncio.Future()  # Run until cancelled or exception
 
-    async def stop_operation(self) -> None:
-        await self.set_controller_state(ControllerState.SHUTTING_DOWN)
-        self._shutdown_requested = True
+        except* asyncio.CancelledError:
+            LOGGER.debug("Controller - Shutting down ...")
+            await self.set_controller_state(ControllerState.SHUTTING_DOWN)
 
-        if self._pairing_server is not None:
-            await self._pairing_server.stop()
-            self._pairing_server = None
+        except* Exception as e:
+            LOGGER.exception("Controller - TaskGroup failed with exception: %s", e)
+            raise
 
-        if self._task_supervisor is not None and not self._task_supervisor.done():
-            self._task_supervisor.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await self._task_supervisor
+        finally:
+            if self._pairing_server is not None:
+                await self._pairing_server.stop()
+                self._pairing_server = None
 
-        if self._mqtt_bridge is not None:
-            await self._mqtt_bridge.shutdown()
-
-        await self.set_controller_state(ControllerState.STOPPED)
-        self.notify_panel_status_update()
+            LOGGER.debug("Controller - Shutdown completed")
+            try:
+                await self.set_controller_state(ControllerState.STOPPED)
+            except InvalidControllerStateTransitionError:
+                pass  # already stopped or invalid transition — ignore
 
     async def config_task(self, start_pairing: bool) -> None:
         await self.set_controller_state(ControllerState.CONFIGURING)
@@ -190,12 +190,14 @@ class QolsysController:
     # MQTT Panel Client
     ###########################################################################
 
-    async def run_supervised(self, reconnect: bool = True, run_once: bool = False, start_pairing: bool = False) -> None:
-        while not self._shutdown_requested:
+    async def run_supervised(self, reconnect: bool = True, start_pairing: bool = False) -> None:
+        self._reconnect_attempt = 0
+        while True:
             try:
                 # Fresh outbound queue per connection attempt so stale commands
                 # from a previous session don't get sent on reconnect.
                 self._mqtt_publish_queue = asyncio.Queue()
+                LOGGER.debug("MQTT Panel Client - Starting")
 
                 # Configure controller
                 if not self._is_configured:
@@ -218,31 +220,32 @@ class QolsysController:
                         tg.create_task(self.mqtt_listen_task(mqtt_panel_client))
                         tg.create_task(self.mqtt_publish_task(mqtt_panel_client))
 
-                        await asyncio.sleep(
-                            2
-                        )  # Short delay to ensure listen and publish tasks are running before initializing session
+                        await asyncio.sleep(2)
 
                         # Initialize session before background loops
                         await self.mqtt_initialize_session_task()
-                        await self.set_controller_state(ControllerState.CONNECTED)
-                        self.notify_panel_status_update()
-                        self._reconnect_attempt = 0
-
-                        if run_once:
-                            LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
-                            self._shutdown_requested = True
-                            return
 
                         tg.create_task(self.mqtt_ping_task(mqtt_panel_client))
                         tg.create_task(self.mqtt_zwave_meter_update())
 
+                        await self.set_controller_state(ControllerState.CONNECTED)
+                        LOGGER.info("MQTT Panel Client - Connected")
+                        self.notify_panel_status_update()
+
+                        # if run_once:
+                        #    LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
+                        #    return
+
+                        await asyncio.Future()  # Run until cancelled or exception
+
             except* asyncio.CancelledError:
-                LOGGER.debug("Supervisor cancelled during shutdown")
-                self._shutdown_requested = True
-                # raise
+                task = asyncio.current_task()
+                if task is not None and task.cancelling() > 0:
+                    await self.set_controller_state(ControllerState.SHUTTING_DOWN)
+                    LOGGER.debug("MQTT Panel Client - Shutting down ...")
+                raise
 
             except* QolsysConfigError as err:
-                self._shutdown_requested = True
                 LOGGER.exception("MQTT Panel Client - Supervisor detected configuration error: %s", err)
                 raise
 
@@ -254,10 +257,7 @@ class QolsysController:
                     raise QolsysMqttError from err
 
             except* ssl.SSLError as err:
-                # SSL error is and authentication error with invalid certificates en pki
-                # We cannot recover from this error automaticly
                 LOGGER.debug("MQTT Panel Client - Supervisor detected SSL Error: %s", err)
-                self._shutdown_requested = True
                 raise QolsysSslError from err
 
             except* Exception as err:
@@ -269,7 +269,7 @@ class QolsysController:
                 self.mqtt_command_queue.fail_all_pending(QolsysMqttError("MQTT Command failed due to disconnection"))
                 self.notify_panel_status_update()
 
-                if reconnect and not self._shutdown_requested and self.controller_state != ControllerState.SHUTTING_DOWN:
+                if reconnect and self.controller_state != ControllerState.SHUTTING_DOWN:
                     MAX_RECONNECT_DELAY = 300
                     delay = min(1 * (2**self._reconnect_attempt), MAX_RECONNECT_DELAY)
                     self._reconnect_attempt += 1
@@ -281,6 +281,9 @@ class QolsysController:
                         self._reconnect_attempt,
                     )
                     await asyncio.sleep(delay)
+                else:
+                    LOGGER.info("MQTT Panel Client - Shutdown completed")
+                    break
 
     async def mqtt_open_transport_task(self) -> aiomqtt.Client:
         # Configure TLS context for MQTT connection
@@ -317,9 +320,8 @@ class QolsysController:
 
     async def mqtt_publish_task(self, client: aiomqtt.Client) -> None:
         LOGGER.debug("MQTT Panel Client - Publish task started")
-
         command: MQTTCommand | None = None
-        while not self._shutdown_requested:
+        while True:
             try:
                 command = await self._mqtt_publish_queue.get()
                 payload = json.dumps(command._payload)
@@ -342,49 +344,29 @@ class QolsysController:
 
     async def mqtt_listen_task(self, client: aiomqtt.Client) -> None:
         LOGGER.debug("MQTT Panel Client - Listen task started")
-
         async for message in client.messages:
-            if self._shutdown_requested:
-                break
+            try:
+                data_str = message.payload.decode()
+                data_json = json.loads(data_str)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                LOGGER.warning("Invalid JSON payload on topic %s: %s", message.topic, message.payload)
+                continue
 
             # Log all MQTT messages for debug purposes if enabled in settings
             if self.settings.log_mqtt_messages:
-                if isinstance(message.payload, bytes):
-                    try:
-                        LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, message.payload.decode())
-                    except json.JSONDecodeError:
-                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
-                        continue
+                LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, data_str)
 
             # Panel response to MQTT Commands and Panel Commands to IQ Remote
             if message.topic.matches("response_" + self.settings.random_mac):  # noqa: SIM102
-                if isinstance(message.payload, bytes):
-                    try:
-                        data = json.loads(message.payload.decode())
-                        await self._mqtt_command_queue.handle_response(data)
-                    except json.JSONDecodeError:
-                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
-                        continue
+                await self._mqtt_command_queue.handle_response(data_json)
 
             # Panel updates to IQ2MEID database
-            if message.topic.matches("iq2meid"):  # noqa: SIM102
-                if isinstance(message.payload, bytes):
-                    try:
-                        data = json.loads(message.payload.decode())
-                        self.panel.parse_iq2meid_message(data)
-                    except json.JSONDecodeError:
-                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
-                        continue
+            elif message.topic.matches("iq2meid"):
+                self.panel.parse_iq2meid_message(data_json)
 
             # Panel Z-Wave response
-            if message.topic.matches("ZWAVE_RESPONSE"):  # noqa: SIM102
-                if isinstance(message.payload, bytes):
-                    try:
-                        data = json.loads(message.payload.decode())
-                        self.panel.parse_zwave_message(data)
-                    except json.JSONDecodeError:
-                        LOGGER.warning("Invalid JSON payload on topic %s", message.topic)
-                        continue
+            elif message.topic.matches("ZWAVE_RESPONSE"):
+                self.panel.parse_zwave_message(data_json)
 
     async def mqtt_initialize_session_task(self) -> None:
         LOGGER.debug("MQTT Panel Client - Initializing session")
@@ -409,7 +391,7 @@ class QolsysController:
 
     async def mqtt_ping_task(self, client: aiomqtt.Client) -> None:
         LOGGER.debug("MQTT Panel Client - Ping task started")
-        while not self._shutdown_requested:
+        while True:
             try:
                 if self.controller_state == ControllerState.CONNECTED:
                     await self.commands.panel.pingevent()
@@ -424,12 +406,9 @@ class QolsysController:
 
     async def mqtt_zwave_meter_update(self) -> None:
         LOGGER.debug("MQTT Panel Client - Z-Wave meter update task started")
-        while not self._shutdown_requested:
+        while True:
             if self.controller_state == ControllerState.CONNECTED:
                 for autdev in self.state.automation_devices:
-                    if self._shutdown_requested:
-                        return
-
                     if not isinstance(autdev, QolsysAutomationDeviceZwave):
                         continue
 
@@ -442,24 +421,6 @@ class QolsysController:
                             await asyncio.sleep(5)
 
             await asyncio.sleep(300)
-
-    ###########################################################################
-    # MQTT Bridge
-    ###########################################################################
-
-    async def start_mqtt_bridge(self) -> None:
-        # Start MQTT Bridge if enabled
-        LOGGER.debug("MQTT Bridge Enabled: %s", self.settings.mqtt_bridge_enabled)
-        if self.settings.mqtt_bridge_enabled:
-            # Create MQTT Bridge if not already created
-            if not self._mqtt_bridge:
-                self._mqtt_bridge = MqttBridge(self)
-
-            # Start MQTT Bridge
-            if not await self._mqtt_bridge.start():
-                LOGGER.error("MQTT Bridge failed to start")
-                await self.stop_operation()
-                return
 
     def _to_event_dict(self) -> dict[str, Any]:
         return {
@@ -522,10 +483,13 @@ class QolsysController:
 
     async def set_controller_state(self, new_state: ControllerState) -> None:
         async with self._controller_state_condition:
+            if new_state == self._controller_state:
+                return
+
             if new_state not in VALID_CONTROLLER_TRANSITIONS[self._controller_state]:
                 raise InvalidControllerStateTransitionError(f"{self._controller_state.name} -> {new_state.name}")
 
-            LOGGER.debug("Controller State: %s -> %s", self._controller_state.name, new_state.name)
+            LOGGER.debug("Controller State - %s -> %s", self._controller_state.name, new_state.name)
 
             self._controller_state = new_state
             self._controller_state_condition.notify_all()

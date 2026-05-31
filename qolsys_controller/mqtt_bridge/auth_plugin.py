@@ -16,24 +16,24 @@ class AuthPlugin(BaseAuthPlugin):  # type: ignore[misc]
 
     async def authenticate(self, *, session: Session) -> bool | None:
         if not session:
-            LOGGER.debug("MQTT Bridge Broker: Authentication failure: no session provided")
+            LOGGER.debug("MQTT Bridge Broker - Authentication failure: no session provided")
             return None
 
         if not session.username or not session.password:
-            LOGGER.debug("MQTT Bridge Broker: Authentication failure: session username or password is empty")
+            LOGGER.debug("MQTT Bridge Broker - Authentication failure: session username or password is empty")
             return None
 
         allowed_password_hash = self.allowed_users.get(session.username)
 
         if not allowed_password_hash:
-            LOGGER.debug("MQTT Bridge Broker: Authentication failure: username %s", session.username)
+            LOGGER.debug("MQTT Bridge Broker - Authentication failure: username %s", session.username)
             return False
 
         if sha512_crypt.verify(session.password, allowed_password_hash):
-            LOGGER.info("MQTT Bridge Broker: Authentication success for username: %s", session.username)
+            LOGGER.info("MQTT Bridge Broker - Authentication success for username: %s", session.username)
             return True
         else:
-            LOGGER.debug("MQTT Bridge Broker: Authentication failure: username %s", session.username)
+            LOGGER.debug("MQTT Bridge Broker - Authentication failure: username %s", session.username)
 
         return False
 

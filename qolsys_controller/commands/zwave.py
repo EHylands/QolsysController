@@ -26,7 +26,7 @@ class ZWaveCommands:
         self._controller = controller
 
     async def barrier_operator_set(self, node_id: str, endpoint: str, status: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending barrier_operator_set command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT Panel Client - Sending barrier_operator_set command  - Node(%s) - Status(%s)", node_id, status)
 
         node = self._controller.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -45,11 +45,11 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, barrier_operator_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving barrier_operator_set command")
+        LOGGER.debug("MQTT Panel Client - Receiving barrier_operator_set command")
         return response
 
     async def doorlock_set(self, node_id: str, endpoint: str, locked: bool) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
+        LOGGER.debug("MQTT Panel Client - Sending zwave_doorlock_set command - Node(%s) - Locked(%s)", node_id, locked)
 
         node = self._controller.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -73,11 +73,11 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, doorlock_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving zwave_doorlock_set command")
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_doorlock_set command")
         return response
 
     async def switch_multilevel_set(self, node_id: str, endpoint: str, level: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
+        LOGGER.debug("MQTT Panel Client - Sending switch_multilevel_set command  - Node(%s) - Level(%s)", node_id, level)
 
         node = self._controller.state.automation_device(node_id)
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -96,11 +96,11 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, switch_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving switch_multilevel_set command")
+        LOGGER.debug("MQTT Panel Client - Receiving switch_multilevel_set command")
         return response
 
     async def switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending zwave_switch_binary_set command  - Node(%s) - Status(%s)", node_id, status)
+        LOGGER.debug("MQTT Panel Client - Sending zwave_switch_binary_set command  - Node(%s) - Status(%s)", node_id, status)
         node = self._controller.state.automation_device(node_id)
 
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -123,12 +123,14 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, switch_set)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving set_zwave_switch_binary command")
+        LOGGER.debug("MQTT Panel Client - Receiving set_zwave_switch_binary command")
         return response
 
     async def thermostat_fan_mode_set(self, node_id: str, endpoint: str, fan_mode: ThermostatFanMode) -> dict[str, Any]:
         LOGGER.debug(
-            "MQTT Panel Client: Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)", node_id, fan_mode.name
+            "MQTT Panel Client - Sending zwave_thermostat_fan_mode_set command - Node(%s) - FanMode(%s)",
+            node_id,
+            fan_mode.name,
         )
 
         node = self._controller.state.automation_device(node_id)
@@ -148,11 +150,11 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, fan_command)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_fan_mode_set command")
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_fan_mode_set command")
         return response
 
     async def thermostat_mode_set(self, node_id: str, endpoint: str, mode: ThermostatMode) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
+        LOGGER.debug("MQTT Panel Client - Sending zwave_thermostat_mode_set command - Node(%s) - Mode(%s)", node_id, mode.name)
         node = self._controller.state.automation_device(node_id)
 
         if not isinstance(node, QolsysAutomationDeviceZwave):
@@ -171,7 +173,7 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, mode_command)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_mode_set command")
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_mode_set command")
         return response
 
     async def thermostat_setpoint_set(
@@ -207,7 +209,7 @@ class ZWaveCommands:
         ] + list(temp_bytes)
 
         LOGGER.debug(
-            "MQTT Panel Client: Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
+            "MQTT Panel Client - Sending zwave_thermostat_setpoint_set - Node(%s) - Mode(%s) - Setpoint(%s): %s",
             node_id,
             mode.value,
             setpoint,
@@ -222,5 +224,5 @@ class ZWaveCommands:
             command = MQTTCommand_ZWave(self._controller, node_id, endpoint, zwave_bytes)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving zwave_thermostat_setpoint_set command:%s", response)
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_setpoint_set command:%s", response)
         return response

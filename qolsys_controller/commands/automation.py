@@ -17,7 +17,7 @@ class AutomationCommands:
         self._controller = controller
 
     async def door_lock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending automation_door_lock command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client - Sending automation_door_lock command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self._controller.state.automation_device(str(virtual_node_id))
@@ -26,11 +26,11 @@ class AutomationCommands:
 
         command = MQTTCommand_Automation(self._controller, virtual_node_id, endpoint, operation_type=5, result="status_Locked")
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving automation_door_lock command: %s", response)
+        LOGGER.debug("MQTT Panel Client - Receiving automation_door_lock command: %s", response)
         return response
 
     async def door_unlock(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending automation_door_unlock command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client - Sending automation_door_unlock command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self._controller.state.automation_device(str(virtual_node_id))
@@ -41,11 +41,11 @@ class AutomationCommands:
             self._controller, virtual_node_id, endpoint, operation_type=6, result="status_Unlocked"
         )
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving  automation_door_unlock command: %s", response)
+        LOGGER.debug("MQTT Panel Client - Receiving  automation_door_unlock command: %s", response)
         return response
 
     async def light_on(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending automation_light_on command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client - Sending automation_light_on command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self._controller.state.automation_device(str(virtual_node_id))
@@ -54,11 +54,11 @@ class AutomationCommands:
 
         command = MQTTCommand_Automation(self._controller, virtual_node_id, endpoint, operation_type=1, result="status_On")
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving automation_light_on command")
+        LOGGER.debug("MQTT Panel Client - Receiving automation_light_on command")
         return response
 
     async def light_off(self, virtual_node_id: int, endpoint: int) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending automation_light_off command - Node(%s)(%s)", virtual_node_id, endpoint)
+        LOGGER.debug("MQTT Panel Client - Sending automation_light_off command - Node(%s)(%s)", virtual_node_id, endpoint)
 
         # Check if virtual_node_id exist
         virtual_node = self._controller.state.automation_device(str(virtual_node_id))
@@ -67,5 +67,5 @@ class AutomationCommands:
 
         command = MQTTCommand_Automation(self._controller, virtual_node_id, endpoint, operation_type=0, result="status_Off")
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving automation_light_off command")
+        LOGGER.debug("MQTT Panel Client - Receiving automation_light_off command")
         return response

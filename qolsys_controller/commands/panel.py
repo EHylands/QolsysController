@@ -46,11 +46,11 @@ class PanelCommands:
         self._controller = controller
 
     async def ac_status(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending ac_status command")
+        LOGGER.debug("MQTT Panel Client - Sending ac_status command")
         command = MQTTCommand(self._controller, PanelCommandStrings.AC_STATUS)
         command.append("acStatus", "Connected")
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving ac_status command")
+        LOGGER.debug("MQTT Panel Client - Receiving ac_status command")
         return response
 
     async def arm(
@@ -63,7 +63,7 @@ class PanelCommands:
         entry_delay: bool = True,
     ) -> dict[str, str]:
         LOGGER.debug(
-            "MQTT Panel Client: Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+            "MQTT Panel Client - Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
             partition_id,
             arming_type,
             exit_sounds,
@@ -75,14 +75,14 @@ class PanelCommands:
 
         partition = self._controller.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT Panel Client: arm command error - Unknown Partition")
+            LOGGER.debug("MQTT Panel Client - arm command error - Unknown Partition")
             raise QolsysInvalidPartitionIdError(partition_id)
 
         if self._controller.settings.check_user_code_on_arm:
             # Do local user code verification to arm
             user_id = self._controller.panel.check_user(user_code)
             if user_id == -1:
-                LOGGER.debug("MQTT Panel Client: arm command error - user_code error")
+                LOGGER.debug("MQTT Panel Client - arm command error - user_code error")
                 raise QolsysUserCodeError()
 
         exitSoundValue = "ON"
@@ -152,11 +152,11 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving arm command: partition%s", partition_id)
+        LOGGER.debug("MQTT Panel Client - Receiving arm command: partition%s", partition_id)
         return response
 
     async def connect(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending connect command")
+        LOGGER.debug("MQTT Panel Client - Sending connect command")
 
         dhcpInfo = {
             "ipaddress": "",
@@ -193,20 +193,20 @@ class PanelCommands:
         command.append("dhcpInfo", json.dumps(dhcpInfo))
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving connect command")
+        LOGGER.debug("MQTT Panel Client - Receiving connect command")
         return response
 
     async def dealer_logo(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending dealerLogo command")
+        LOGGER.debug("MQTT Panel Client - Sending dealerLogo command")
         command = MQTTCommand(self._controller, PanelCommandStrings.DEALER_LOGO)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving dealerLogo command")
+        LOGGER.debug("MQTT Panel Client - Receiving dealerLogo command")
         return response
 
     async def disarm(self, partition_id: str, user_code: str = "", silent_disarming: bool = False) -> dict[str, Any]:
         partition = self._controller.state.partition(partition_id)
         if not partition:
-            LOGGER.error("MQTT Panel Client: disarm command error - Unknow Partition")
+            LOGGER.error("MQTT Panel Client - disarm command error - Unknow Partition")
             raise QolsysInvalidPartitionIdError(partition_id)
 
         # Do local user code verification
@@ -214,7 +214,7 @@ class PanelCommands:
         if self._controller.settings.check_user_code_on_disarm:
             user_id = self._controller.panel.check_user(user_code)
             if user_id == -1:
-                LOGGER.debug("MQTT Panel Client: disarm command error - user_code error")
+                LOGGER.debug("MQTT Panel Client - disarm command error - user_code error")
                 raise QolsysUserCodeError()
 
         async def get_mqtt_disarm_command(silent_disarming: bool) -> str:
@@ -238,7 +238,7 @@ class PanelCommands:
 
         mqtt_disarm_command = await get_mqtt_disarm_command(silent_disarming)
         LOGGER.debug(
-            "MQTT Panel Client: Sending disarm command - check_user_code:%s",
+            "MQTT Panel Client - Sending disarm command - check_user_code:%s",
             self._controller.settings.check_user_code_on_disarm,
         )
 
@@ -260,28 +260,28 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving disarm command")
+        LOGGER.debug("MQTT Panel Client - Receiving disarm command")
         return response
 
     async def disconnect(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending disconnect command")
+        LOGGER.debug("MQTT Panel Client - Sending disconnect command")
         command = MQTTCommand(self._controller, PanelCommandStrings.DISCONNECT)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving disconnect command")
+        LOGGER.debug("MQTT Panel Client - Receiving disconnect command")
         return response
 
     async def pair_status_request(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending pair_status_request command")
+        LOGGER.debug("MQTT Panel Client - Sending pair_status_request command")
         command = MQTTCommand(self._controller, PanelCommandStrings.PAIR_STATUS_REQUEST)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving pair_status_request command")
+        LOGGER.debug("MQTT Panel Client - Receiving pair_status_request command")
         return response
 
     async def execute_scene(self, scene_id: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending execute_scene command")
+        LOGGER.debug("MQTT Panel Client - Sending execute_scene command")
         scene = self._controller.state.scene(scene_id)
         if not scene:
-            LOGGER.debug("MQTT Panel Client: command_execute_scene Erro - Unknown Scene: %s", scene_id)
+            LOGGER.debug("MQTT Panel Client - command_execute_scene Erro - Unknown Scene: %s", scene_id)
             return None
 
         scene_command = {
@@ -301,11 +301,11 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving execute_scene command")
+        LOGGER.debug("MQTT Panel Client - Receiving execute_scene command")
         return response
 
     async def pingevent(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending pingevent command")
+        LOGGER.debug("MQTT Panel Client - Sending pingevent command")
         command = MQTTCommand(self._controller, "pingevent")
         command.append("remote_panel_status", "Active")
         command.append("macAddress", self._controller.settings.random_mac)
@@ -323,11 +323,11 @@ class PanelCommands:
         command.append("remote_panel_plugged", 1)
 
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving pingevent command")
+        LOGGER.debug("MQTT Panel Client - Receiving pingevent command")
         return response
 
     async def speak(self, text: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending panel_speak command")
+        LOGGER.debug("MQTT Panel Client - Sending panel_speak command")
 
         speak_command = {
             "operation_name": PanelCommandStrings.SPEAK,
@@ -346,30 +346,30 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving panel_speak command")
+        LOGGER.debug("MQTT Panel Client - Receiving panel_speak command")
         return response
 
     async def sync_database(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending syncdatabase command")
+        LOGGER.debug("MQTT Panel Client - Sending syncdatabase command")
         command = MQTTCommand(self._controller, PanelCommandStrings.SYNC_DATABASE)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving syncdatabase command")
+        LOGGER.debug("MQTT Panel Client - Receiving syncdatabase command")
         return response
 
     async def timesync(self) -> dict[str, Any]:
-        LOGGER.debug("MQTT Panel Client: Sending timeSync command")
+        LOGGER.debug("MQTT Panel Client - Sending timeSync command")
         command = MQTTCommand(self._controller, PanelCommandStrings.TIMESYNC)
         command.append("startTimestamp", int(time.time()))
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving timeSync command")
+        LOGGER.debug("MQTT Panel Client - Receiving timeSync command")
         return response
 
     async def trigger_auxilliary(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_auxilliary command")
+        LOGGER.debug("MQTT Panel Client - Sending panel_trigger_auxilliary command")
 
         partition = self._controller.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT Panel Client: command_panel_trigger_auxilliary Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client - command_panel_trigger_auxilliary Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -391,15 +391,15 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_auxilliary command")
+        LOGGER.debug("MQTT Panel Client - Receiving panel_trigger_auxilliary command")
         return response
 
     async def trigger_police(self, partition_id: str, silent: bool) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_police command")
+        LOGGER.debug("MQTT Panel Client - Sending panel_trigger_police command")
 
         partition = self._controller.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT Panel Client: command_panel_trigger_police Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client - command_panel_trigger_police Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -421,15 +421,15 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_police command")
+        LOGGER.debug("MQTT Panel Client - Receiving panel_trigger_police command")
         return response
 
     async def trigger_fire(self, partition_id: str) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending panel_trigger_fire command")
+        LOGGER.debug("MQTT Panel Client - Sending panel_trigger_fire command")
 
         partition = self._controller.state.partition(partition_id)
         if not partition:
-            LOGGER.debug("MQTT Panel Client: command_panel_trigger_fire Error - Unknow Partition: %s", partition_id)
+            LOGGER.debug("MQTT Panel Client - command_panel_trigger_fire Error - Unknow Partition: %s", partition_id)
             return None
 
         trigger_command = {
@@ -451,11 +451,11 @@ class PanelCommands:
         command = MQTTCommand_Panel(self._controller)
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving panel_trigger_fire command")
+        LOGGER.debug("MQTT Panel Client - Receiving panel_trigger_fire command")
         return response
 
     async def ui_delay(self, partition_id: str, silent_disarming: bool = False) -> dict[str, Any] | None:
-        LOGGER.debug("MQTT Panel Client: Sending ui_delay command")
+        LOGGER.debug("MQTT Panel Client - Sending ui_delay command")
         command = MQTTCommand_Panel(self._controller)
 
         # partition state needs to be sent for ui_delay to work
@@ -483,5 +483,5 @@ class PanelCommands:
 
         command.append("ipcRequest", ipcRequest)
         response = await command.send_command()
-        LOGGER.debug("MQTT Panel Client: Receiving ui_delay command")
+        LOGGER.debug("MQTT Panel Client - Receiving ui_delay command")
         return response

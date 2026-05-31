@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import asyncio
 import logging
 import secrets
 import string
@@ -16,14 +19,14 @@ logging.getLogger("passlib").setLevel(logging.WARNING)
 
 
 class MqttBridge:
-    def __init__(self, controller: "QolsysController") -> None:
+    def __init__(self, controller: QolsysController) -> None:
         self._controller = controller
         self._broker: MqttBridgeBroker | None = None
         self._client: MqttBridgeClient | None = None
         self._is_running = False
+        self._ready_event = asyncio.Event()
 
         self._version = "1"
-        self._mqtt_timeout = 15
         self._mqtt_qos = 1
 
         self._settings_topic = "settings"
@@ -44,7 +47,7 @@ class MqttBridge:
         # Check if internal_user in allowed_users database
         if self._internal_user in self._controller.settings.mqtt_bridge_broker_allowed_users:
             LOGGER.error(
-                "MQTT Bridge: Internal user '%s' already exists in allowed_users. This is a security risk. Please remove the internal user from allowed_users and restart the MQTT Bridge.",
+                "MQTT Bridge - Internal user '%s' already exists in allowed_users. This is a security risk. Please remove the internal user from allowed_users and restart the MQTT Bridge.",
                 self._internal_user,
             )
         self._controller.settings.mqtt_bridge_broker_allowed_users[self._internal_user] = sha512_crypt.hash(
@@ -55,50 +58,58 @@ class MqttBridge:
             self._controller.settings.mqtt_bridge_client_username = self._internal_user
             self._controller.settings.mqtt_bridge_client_password = self._internal_password
 
-    async def start(self) -> bool:
+    async def wait_for_bridge_start(self, timeout: int = 5) -> None:
+        await asyncio.wait_for(self._ready_event.wait(), timeout)
+
+    async def run_bridge(self) -> None:
         if self._is_running:
-            LOGGER.warning("MQTT Bridge: Allready running")
-            return True
+            LOGGER.warning("MQTT Bridge - Allready running")
+            return
 
-        # Create MQTT Internal Broker if enabled and not already created
-        if self._controller.settings.mqtt_bridge_broker_enabled and not self._broker:
-            self._broker = MqttBridgeBroker(self)
-
-        # Start MQTT Bridge Broker if configured
-        if self._broker:
-            if not await self._broker.start():
-                LOGGER.error("MQTT Bridge Broker failed to start. MQTT Bridge will not start.")
-                return False
-
-            # If broker is enabled, the client will connect to the local broker
-            self._controller._settings._mqtt_bridge_hostname = self._controller.settings.plugin_ip
-            self._controller._settings._mqtt_bridge_client_username = self._internal_user
-            self._controller._settings._mqtt_bridge_client_password = self._internal_password
-
-        # Create MQTT Bridge Client if not already created
-        if not self._client:
-            self._client = MqttBridgeClient(self)
-
-        # Start MQTT Bridge Client
-        if not await self._client.start():
-            LOGGER.error("MQTT Bridge Client failed to connect. MQTT Bridge will not start.")
-            return False
-
-        LOGGER.info("MQTT Bridge Running")
         self._is_running = True
-        return True
+        self._ready_event.clear()
 
-    async def shutdown(self) -> None:
-        LOGGER.debug("MQTT Bridge: Shutting down ...")
-        self._is_running = False
         try:
-            if self._client:
-                await self._client.shutdown()
-        finally:
-            if self._broker:
-                await self._broker.shutdown()
+            async with asyncio.TaskGroup() as tg:
+                LOGGER.debug("MQTT Bridge - Starting")
 
-        LOGGER.debug("MQTT Bridge: Shutdown complete")
+                # Create MQTT Internal Broker if enabled and not already created
+                if self._controller.settings.mqtt_bridge_broker_enabled:
+                    if not self._broker:
+                        self._broker = MqttBridgeBroker(self)
+
+                    startup_event = asyncio.Event()
+                    startup_result: dict[str, bool | Exception] = {"started": False}
+                    tg.create_task(self._broker.run_bridge_broker(startup_event, startup_result))
+                    await startup_event.wait()
+                    result = startup_result.get("started")
+                    if result is False:
+                        raise RuntimeError("MQTT Bridge Broker failed to start")
+
+                    # If broker is enabled, the client will connect to the local broker
+                    self._controller._settings._mqtt_bridge_hostname = self._controller.settings.plugin_ip
+                    self._controller._settings._mqtt_bridge_client_username = self._internal_user
+                    self._controller._settings._mqtt_bridge_client_password = self._internal_password
+
+                # Run MQTT Bridge Client
+                self._client = MqttBridgeClient(self)
+                tg.create_task(self._client.run_bridge_client())
+                await self._client.wait_for_client_start()
+                LOGGER.info("MQTT Bridge - Running")
+                self._ready_event.set()
+
+                await asyncio.Future()  # Run until cancelled
+
+        except* asyncio.CancelledError:
+            LOGGER.debug("MQTT Bridge - Shutting down ...")
+
+        except* Exception as err:
+            LOGGER.error("MQTT Bridge - Failed to start: %s", err)
+            raise
+
+        finally:
+            self._is_running = False
+            LOGGER.info("MQTT Bridge - Shutdown completed")
 
     @property
     def panel_unique_id(self) -> str:
@@ -157,10 +168,6 @@ class MqttBridge:
             self.partition_command_topic,
             self.panel_command_topic,
         ]
-
-    @property
-    def mqtt_timeout(self) -> int:
-        return self._mqtt_timeout
 
     @property
     def mqtt_qos(self) -> int:

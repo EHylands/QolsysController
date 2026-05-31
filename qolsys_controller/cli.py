@@ -4,14 +4,13 @@ import asyncio
 import json
 import logging
 import os
-import signal
 import socket
 import ssl
 import sys
 from dataclasses import dataclass, field
 from typing import Any
 
-from qolsys_controller.controller import QolsysController as qolsys_controller
+from qolsys_controller.controller import QolsysController
 from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
 LOGGER = logging.getLogger(__name__)
@@ -46,11 +45,11 @@ class ControllerConfig:
 
 def _detect_local_ip() -> Any:
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("8.8.8.8", 80))
-        ip = sock.getsockname()[0]
-        sock.close()
-        return ip
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("8.8.8.8", 80))
+            ip = sock.getsockname()[0]
+            sock.close()
+            return ip
     except Exception:
         return "127.0.0.1"
 
@@ -93,11 +92,11 @@ def load_config(path: str) -> ControllerConfig:
         )
 
 
-class QolsysController:
+class Controller:
     def __init__(self, config: ControllerConfig, log: logging.Logger) -> None:
         self.config = config
         self.log = log
-        self.controller = qolsys_controller()
+        self.controller = QolsysController()
 
     async def start(self) -> None:
         os.makedirs(self.config.config_dir, exist_ok=True)
@@ -126,7 +125,7 @@ class QolsysController:
         settings.mqtt_bridge_port = self.config.mqtt_bridge_port
 
         try:
-            await self.controller.start_operation(reconnect=True, run_once=False, start_pairing=self.config.start_pairing)
+            await self.controller.run_forever(reconnect=True, run_once=False, start_pairing=self.config.start_pairing)
 
         except* QolsysMqttError:
             raise RuntimeError("Failed to start qolsys-controller due to MQTT error. Check logs for details.")
@@ -139,12 +138,6 @@ class QolsysController:
 
         except* QolsysConfigError as err:
             raise RuntimeError(f"Failed to start qolsys-controller due to configuration error: {err}") from err
-
-        except* asyncio.CancelledError:
-            self.log.info("Controller start cancelled")
-
-    async def stop(self) -> None:
-        await self.controller.stop_operation()
 
 
 def configure_logging(verbose: bool) -> None:
@@ -164,36 +157,22 @@ async def _main_async() -> None:
     configure_logging(args.verbose)
     log = logging.getLogger("qolsys-controller")
     exit_code = 0
-    bridge = None
 
     try:
         config = load_config(args.config)
-        bridge = QolsysController(config, log)
+        bridge = Controller(config, log)
         await bridge.start()
-
-        stop_event = asyncio.Event()
-        loop = asyncio.get_running_loop()
-        loop.add_signal_handler(signal.SIGINT, stop_event.set)
-        loop.add_signal_handler(signal.SIGTERM, stop_event.set)
-        await stop_event.wait()
 
     except asyncio.CancelledError:
         log.info("Main task cancelled")
+        raise
 
     except Exception as e:
         log.error("Fatal error: %s", e)
         exit_code = 1
 
-    finally:
-        if bridge is not None:
-            LOGGER.info("Shutdown initiated, waiting for tasks to complete...")
-            try:
-                await bridge.stop()
-            except Exception:
-                LOGGER.exception("Error during shutdown")
-            LOGGER.info("Shutdown complete")
-
     if exit_code:
+        LOGGER.error("Exiting with code %d", exit_code)
         sys.exit(exit_code)
 
 
