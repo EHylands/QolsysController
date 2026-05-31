@@ -60,7 +60,7 @@ class QolsysSettings:
         self._mqtt_bridge_client_username: str = ""
         self._mqtt_bridge_client_password: str = ""
 
-        # MQTT BRIDGE BROOKER
+        # MQTT BRIDGE BROKER
         self._mqtt_bridge_broker_enabled: bool = False
         self._mqtt_bridge_broker_allowed_users: dict[str, str] = {}
         self._mqtt_bridge_max_connections: int = 5

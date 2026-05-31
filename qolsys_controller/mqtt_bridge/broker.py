@@ -61,7 +61,7 @@ class MqttBridgeBroker:
             await self._broker.start()
 
             LOGGER.info(
-                "MQTT Bridge Broker - Listenning on %s:%s",
+                "MQTT Bridge Broker - Listening on %s:%s",
                 self._controller.settings.plugin_ip,
                 self._controller.settings.mqtt_bridge_port,
             )

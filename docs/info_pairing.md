@@ -22,7 +22,7 @@
 )
 ```
 
-- QolsysController starts a KeyExchangeServer (TLS Socket) listenning on `plugin_ip`:`plugin_pairing_port`
+- QolsysController starts a KeyExchangeServer (TLS Socket) listening on `plugin_ip`:`plugin_pairing_port`
 
 On Panel, go to IQ Remote pairing config page:
 

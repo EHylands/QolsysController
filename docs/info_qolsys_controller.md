@@ -73,16 +73,16 @@ Log all MQTT traffic between the IQ Panel and qolsys-controller.
 Enable the internal MQTT bridge.
 
 ### `mqtt_bridge_hostname`
-MQTT Bridge Hostname (if connectif to external Brooker)
+MQTT Bridge Hostname (if connecting to external Broker)
 
 ### `mqtt_bridge_client_username`
-MQTT Bridge Client Username (if connectif to external Brooker)
+MQTT Bridge Client Username (if connecting to external Broker)
 
 ### `mqtt_bridge_client_password`
-MQTT Bridge Client Password (if connectif to external Brooker)
+MQTT Bridge Client Password (if connecting to external Broker)
 
 ### `mqtt_bridge_broker_enabled`
-Enable the internal MQTT bridge Brooker
+Enable the internal MQTT bridge Broker
 
 ### `mqtt_bridge_broker_allowed_users`: 
 Dictionary of allowed users for MQTT authentication. External clients will not be able to authenticate unless explicitly configured.
