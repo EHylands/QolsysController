@@ -278,12 +278,6 @@ class QolsysController:
                 await self.set_controller_state(ControllerState.SHUTTING_DOWN)
                 raise
 
-            LOGGER.debug(
-                "MQTT Panel Client - Reconnecting in %s seconds (attempt %d)",
-                delay,
-                self._reconnect_attempt,
-            )
-
     async def mqtt_open_transport_task(self) -> aiomqtt.Client:
         # Configure TLS context for MQTT connection
         def create_tls_context() -> ssl.SSLContext:
