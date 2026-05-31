@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.5 (2026-05-31)
+
+### Bug Fixes
+
+- Use TaskGroup for concurrent task management
+  ([`fbdc0a1`](https://github.com/EHylands/QolsysController/commit/fbdc0a188e4c7def2b62e06edae7f42fe23cae4c))
+
+
 ## v1.3.4 (2026-05-28)
 
 ### Bug Fixes
