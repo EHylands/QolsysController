@@ -11,7 +11,7 @@
   "check_user_code_on_disarm": false,
   "log_mqtt_messages": false,
   
-  "mqtt_bridge_enabled": false,
+  "mqtt_bridge_enabled": true,
   "mqtt_bridge_hostname": "",
   "mqtt_bridge_client_username": "",
   "mqtt_bridge_client_password": "",

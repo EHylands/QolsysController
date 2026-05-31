@@ -283,7 +283,6 @@ class QolsysController:
                 delay,
                 self._reconnect_attempt,
             )
-            await asyncio.sleep(delay)
 
     async def mqtt_open_transport_task(self) -> aiomqtt.Client:
         # Configure TLS context for MQTT connection
