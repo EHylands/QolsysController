@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.8 (2026-05-31)
+
+### Bug Fixes
+
+- Remove extra await asyncio.sleep(delay)
+  ([`a95151d`](https://github.com/EHylands/QolsysController/commit/a95151d656e2aa41f2d06fd86faec996e52921a4))
+
+
 ## v1.3.7 (2026-05-31)
 
 ### Bug Fixes
