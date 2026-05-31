@@ -198,9 +198,9 @@ class QolsysPKI:
         return self._settings.mqtt_bridge_directory.joinpath(self._settings._mqtt_bridge_keyfile)
 
     async def create_mqtt_bridge_certificates(self) -> bool:
-        # Check for MQTT Bridge Broker certificate and key file colision
+        # Check for MQTT Bridge Broker certificate and key file collision
         if await self.check_mqtt_bridge_cer_file() or await self.check_mqtt_bridge_key_file():
-            LOGGER.error("MQTT Bridge Broker: Certificate or Key File Colision")
+            LOGGER.error("MQTT Bridge Broker: Certificate or Key File Collision")
             return False
 
         LOGGER.debug("MQTT Bridge Broker: Creating KEY")
@@ -264,24 +264,24 @@ class QolsysPKI:
             LOGGER.error("Create Directory Collision")
             return False
 
-        # Check for private key colision
+        # Check for private key collision
         if await self.check_key_file():
-            LOGGER.error("Create KEY File Colision")
+            LOGGER.error("Create KEY File Collision")
             return False
 
-        # Check for CER file colision
+        # Check for CER file collision
         if await self.check_cer_file():
-            LOGGER.error("Create CER File Colision")
+            LOGGER.error("Create CER File Collision")
             return False
 
-        # Check for CSR file colision
+        # Check for CSR file collision
         if await self.check_csr_file():
-            LOGGER.error("Create CSR File Colision")
+            LOGGER.error("Create CSR File Collision")
             return False
 
-        # Check for CER file colision
+        # Check for CER file collision
         if await self.check_cer_file():
-            LOGGER.error("Create Signed Certificate File Colision")
+            LOGGER.error("Create Signed Certificate File Collision")
             return False
 
         LOGGER.debug("Creating PKI: %s", self.formatted_id())
