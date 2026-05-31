@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.6 (2026-05-31)
+
+### Bug Fixes
+
+- Improve asyncio lifecycle and signal handling
+  ([`e356b33`](https://github.com/EHylands/QolsysController/commit/e356b33d321c2ac7601a6bc3b577d233f3d54e13))
+
+
 ## v1.3.5 (2026-05-31)
 
 ### Bug Fixes
