@@ -232,10 +232,6 @@ class QolsysController:
                         LOGGER.info("MQTT Panel Client - Connected")
                         self.notify_panel_status_update()
 
-                        # if run_once:
-                        #    LOGGER.debug("MQTT Panel Client - Exiting after initialization (run_once=True)")
-                        #    return
-
                         await asyncio.Future()  # Run until cancelled or exception
 
             except* asyncio.CancelledError:
@@ -269,21 +265,25 @@ class QolsysController:
                 self.mqtt_command_queue.fail_all_pending(QolsysMqttError("MQTT Command failed due to disconnection"))
                 self.notify_panel_status_update()
 
-                if reconnect and self.controller_state != ControllerState.SHUTTING_DOWN:
-                    MAX_RECONNECT_DELAY = 300
-                    delay = min(1 * (2**self._reconnect_attempt), MAX_RECONNECT_DELAY)
-                    self._reconnect_attempt += 1
+            # Only reached on MqttError with reconnect=True; all other paths raise.
+            MAX_RECONNECT_DELAY = 300
+            delay = min(1 * (2**self._reconnect_attempt), MAX_RECONNECT_DELAY)
+            self._reconnect_attempt += 1
 
-                    await self.set_controller_state(ControllerState.RECONNECTING)
-                    LOGGER.debug(
-                        "MQTT Panel Client - Reconnecting in %s seconds (attempt %d)",
-                        delay,
-                        self._reconnect_attempt,
-                    )
-                    await asyncio.sleep(delay)
-                else:
-                    LOGGER.info("MQTT Panel Client - Shutdown completed")
-                    break
+            try:
+                await self.set_controller_state(ControllerState.RECONNECTING)
+                LOGGER.debug("MQTT Panel Client - Reconnecting in %s seconds (attempt %d)", delay, self._reconnect_attempt)
+                await asyncio.sleep(delay)
+            except asyncio.CancelledError:
+                await self.set_controller_state(ControllerState.SHUTTING_DOWN)
+                raise
+
+            LOGGER.debug(
+                "MQTT Panel Client - Reconnecting in %s seconds (attempt %d)",
+                delay,
+                self._reconnect_attempt,
+            )
+            await asyncio.sleep(delay)
 
     async def mqtt_open_transport_task(self) -> aiomqtt.Client:
         # Configure TLS context for MQTT connection

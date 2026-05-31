@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import signal
 import socket
 import ssl
 import sys
@@ -158,6 +159,14 @@ async def _main_async() -> None:
     log = logging.getLogger("qolsys-controller")
     exit_code = 0
 
+    if main_task := asyncio.current_task():
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            try:
+                loop.add_signal_handler(sig, main_task.cancel)
+            except NotImplementedError:
+                pass  # Windows
+
     try:
         config = load_config(args.config)
         bridge = Controller(config, log)
@@ -167,8 +176,8 @@ async def _main_async() -> None:
         log.info("Main task cancelled")
         raise
 
-    except Exception as e:
-        log.error("Fatal error: %s", e)
+    except Exception:
+        log.exception("Fatal error")
         exit_code = 1
 
     if exit_code:
