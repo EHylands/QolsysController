@@ -60,7 +60,6 @@ async def main() -> None:  # noqa: D103
 
     finally:
         try:
-            await remote.stop()
             await asyncio.shield(aiozc.async_close())
         except asyncio.CancelledError:
             LOGGER.debug("Ignoring cancellation during shutdown")

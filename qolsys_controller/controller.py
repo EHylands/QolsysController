@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import secrets
 import ssl
 from datetime import datetime, timezone
 from typing import Any
@@ -180,7 +181,7 @@ class QolsysController:
             await self.start_initial_pairing()
 
         # Set mqtt_remote_client_id
-        self.settings.mqtt_remote_client_id = "qolsys-controller-" + self._pki.formatted_id()
+        self.settings.mqtt_remote_client_id = "qolsys-controller-" + secrets.token_hex(6)
         LOGGER.debug("MQTT Panel Client - Using remoteClientID: %s", self.settings.mqtt_remote_client_id)
 
         # Everything is configured
