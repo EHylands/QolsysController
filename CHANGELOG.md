@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.11 (2026-06-08)
+
+### Bug Fixes
+
+- Use random mqtt client_id
+  ([`79df97b`](https://github.com/EHylands/QolsysController/commit/79df97b55d45b88a93c6beb03442d5ed3bdb6e65))
+
+
 ## v1.3.10 (2026-06-08)
 
 ### Bug Fixes
