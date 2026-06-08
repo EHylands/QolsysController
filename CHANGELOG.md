@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.13 (2026-06-08)
+
+### Bug Fixes
+
+- Enable auto-bypass for safety sensor when enabled on pane;
+  ([`354ad5d`](https://github.com/EHylands/QolsysController/commit/354ad5d263985eded277c13621cf730e906cd3f4))
+
+
 ## v1.3.12 (2026-06-08)
 
 ### Bug Fixes
