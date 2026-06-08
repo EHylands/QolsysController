@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.10 (2026-06-08)
+
+### Bug Fixes
+
+- Reconnect on operation timeout error
+  ([`de3a74d`](https://github.com/EHylands/QolsysController/commit/de3a74da056a80c1c012c5961ec8b2d5d3057371))
+
+
 ## v1.3.9 (2026-05-31)
 
 ### Bug Fixes
