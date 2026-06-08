@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.12 (2026-06-08)
+
+### Bug Fixes
+
+- Auto-bypass safety sensor if enabled on main panel
+  ([`9a0c3a8`](https://github.com/EHylands/QolsysController/commit/9a0c3a848210b7b33766cb1627aac2b0689c7e8d))
+
+
 ## v1.3.11 (2026-06-08)
 
 ### Bug Fixes
