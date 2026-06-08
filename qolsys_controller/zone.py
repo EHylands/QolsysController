@@ -4,7 +4,15 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from .enum_qolsys import DeviceCapability, QolsysNotification, ZoneSensorGroup, ZoneSensorType, ZoneStatus
+from .enum_qolsys import (
+    BypassCapableZoneSensorType,
+    DeviceCapability,
+    QolsysNotification,
+    SafetyZoneSensorGroup,
+    ZoneSensorGroup,
+    ZoneSensorType,
+    ZoneStatus,
+)
 from .observable import Event, QolsysObservable
 from .settings import QolsysSettings
 
@@ -98,6 +106,31 @@ class QolsysZone(QolsysObservable):
 
     def is_average_dbm_enabled(self) -> bool:
         return self.averagedBm is not None
+
+    def is_bypassable(self) -> bool:
+        # extra parameter overrules is_bypassable, intentional
+        try:
+            dict_extras = json.loads(self._extras) if self._extras else {}
+        except (json.JSONDecodeError, TypeError):
+            dict_extras = {}
+
+        if dict_extras:
+            bypass = dict_extras.get("BYPASS", "")
+            if bypass == "Enabled":
+                return True
+
+            elif bypass:
+                LOGGER.error("Zone: Please report New Bypass Value: %s", bypass)
+
+        # Safety Zone Cannot be bypassed
+        if self.is_safety():
+            return False
+
+        # Check if zone is allowed to b bypass
+        return self.sensortype in BypassCapableZoneSensorType
+
+    def is_safety(self) -> bool:
+        return self.sensorgroup in SafetyZoneSensorGroup
 
     def supports_averagedbm(self) -> bool:
         return self.averagedBm is not None

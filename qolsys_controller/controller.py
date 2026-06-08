@@ -147,7 +147,7 @@ class QolsysController:
             LOGGER.debug("Supervisor Task Already Completed")
             return
 
-        LOGGER.debug("Stoping Supervisor Task")
+        LOGGER.debug("Qolsys Controller - Stoping Operation")
         self._supervisor_task.cancel()
 
     async def config_task(self, start_pairing: bool) -> None:

@@ -7,11 +7,9 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.enum_qolsys import (
-    BypassCapableZoneSensorType,
     PartitionAlarmState,
     PartitionArmingType,
     PartitionSystemStatus,
-    SafetyZoneSensorGroup,
     TroubleZoneStatus,
 )
 from qolsys_controller.errors import QolsysInvalidPartitionIdError, QolsysUserCodeError, QolsysZoneBypassError
@@ -98,24 +96,25 @@ class PanelCommands:
         open_safety_zones: list[str] = []
 
         for zone in self._controller.state.zones:
-            if zone.partition_id == partition_id and zone.sensorstatus in TroubleZoneStatus:
-                # Open Safety Zones
-                if zone.sensorgroup in SafetyZoneSensorGroup:
-                    open_safety_zones.append(zone.zone_id)
-                    continue
+            if zone.partition_id != partition_id or zone.sensorstatus not in TroubleZoneStatus:
+                continue
 
-                # Open Zones that can be bypassed
-                if zone.sensortype in BypassCapableZoneSensorType:
-                    bypass_open_zone_list.append(zone.zone_id)
-                    continue
-
-                # Open Zone not in bypass capable list
+            if zone.is_bypassable():
+                bypass_open_zone_list.append(zone.zone_id)
+            elif zone.is_safety():
+                open_safety_zones.append(zone.zone_id)
+            else:
                 open_zone_list.append(zone.zone_id)
 
         # Cannot bypass open safety zones, return error
         if open_safety_zones:
             LOGGER.debug("MQTT Panel Client - Cannot arm: Open Safety Zones: %s", open_safety_zones)
             raise QolsysZoneBypassError(open_safety_zones)
+
+        # Cannot open zone that cannot be bypassed
+        if open_zone_list:
+            LOGGER.debug("MQTT Panel Client - Cannot arm: Open Zones: %s", open_zone_list)
+            raise QolsysZoneBypassError(open_zone_list)
 
         # Cannot bypass open zones if auto_bypass is disabled - return error
         if bypass_open_zone_list and self._controller.panel.AUTO_BYPASS == "false":
