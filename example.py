@@ -31,7 +31,7 @@ async def main() -> None:  # noqa: D103
     remote.settings.auto_discover_pki = True
     remote.settings.pairing_resume = True  # Enable to resume pairing process if it was interrupted before completion
 
-    remote.settings.mqtt_bridge_enabled = True
+    remote.settings.mqtt_bridge_enabled = False
     remote.settings._mqtt_bridge_broker_enabled = True
     remote.settings.mqtt_bridge_port = 1883
     remote.settings.mqtt_bridge_tls_enabled = False
@@ -59,7 +59,11 @@ async def main() -> None:  # noqa: D103
         LOGGER.debug("Main task cancelled")
 
     finally:
-        await aiozc.async_close()
+        try:
+            await remote.stop()
+            await asyncio.shield(aiozc.async_close())
+        except asyncio.CancelledError:
+            LOGGER.debug("Ignoring cancellation during shutdown")
 
 
 # Change to the "Selector" event loop if platform is Windows
@@ -71,4 +75,8 @@ if sys.platform.lower() == "win32" or os.name.lower() == "nt":  #
 
     set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
-asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass

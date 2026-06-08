@@ -135,8 +135,7 @@ class MqttBridgeClient:
                         await asyncio.sleep(delay)
                     else:
                         LOGGER.info("MQTT Bridge Client - Shutdown completed")
-                        break
-        finally:  # ← outer finally, single reset point
+        finally:
             self._is_running = False
 
     async def _listener(self, client: aiomqtt.Client) -> None:

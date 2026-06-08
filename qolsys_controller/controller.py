@@ -28,6 +28,7 @@ from .errors import (
     InvalidControllerStateTransitionError,
     QolsysConfigError,
     QolsysMqttError,
+    QolsysOperationTimeoutError,
     QolsysSslError,
 )
 from .mqtt_bridge.bridge import MqttBridge
@@ -60,6 +61,7 @@ class QolsysController:
         self._mqtt_command_queue = QolsysMqttCommandQueue()
         self._zone_id: str = "1"
         self._pairing_server: QolsysPairingServer | None = None
+        self._supervisor_task: asyncio.Task[None] | None = None
 
         # MQTT Panel Client
         self._reconnect_attempt: int = 0
@@ -93,7 +95,7 @@ class QolsysController:
         try:
             async with asyncio.TaskGroup() as tg:
                 # Start MQTT Panel Client Supervisor
-                supervisor_task = tg.create_task(
+                self._supervisor_task = tg.create_task(
                     self.run_supervised(reconnect=reconnect, start_pairing=start_pairing),
                     name="MQTT Panel Client Supervisor",
                 )
@@ -109,9 +111,7 @@ class QolsysController:
                 LOGGER.info("Qolsys Controller Ready for Operation")
                 if run_once:
                     LOGGER.debug("Qolsys Controller - Exiting after initialization (run_once=True)")
-                    if supervisor_task is not None:
-                        supervisor_task.cancel()
-
+                    self._supervisor_task.cancel()
                     if bridge_task is not None:
                         bridge_task.cancel()
                     return
@@ -135,7 +135,19 @@ class QolsysController:
             try:
                 await self.set_controller_state(ControllerState.STOPPED)
             except InvalidControllerStateTransitionError:
-                pass  # already stopped or invalid transition — ignore
+                pass
+
+    async def stop(self) -> None:
+        if self._supervisor_task is None:
+            LOGGER.debug("No Supervisor Task to Stop")
+            return
+
+        if self._supervisor_task.done():
+            LOGGER.debug("Supervisor Task Already Completed")
+            return
+
+        LOGGER.debug("Stoping Supervisor Task")
+        self._supervisor_task.cancel()
 
     async def config_task(self, start_pairing: bool) -> None:
         await self.set_controller_state(ControllerState.CONFIGURING)
@@ -173,7 +185,6 @@ class QolsysController:
 
         # Everything is configured
         self._is_configured = True
-        return
 
     async def is_paired(self) -> bool:
         return (
@@ -251,6 +262,12 @@ class QolsysController:
 
                 if not reconnect:
                     raise QolsysMqttError from err
+
+            except* QolsysOperationTimeoutError as err:
+                LOGGER.debug("MQTT Panel Client - Supervisor detected Operation Time out Error: %r", err)
+
+                if not reconnect:
+                    raise QolsysOperationTimeoutError from err
 
             except* ssl.SSLError as err:
                 LOGGER.debug("MQTT Panel Client - Supervisor detected SSL Error: %s", err)
@@ -350,7 +367,7 @@ class QolsysController:
                 LOGGER.debug("MQTT TOPIC: %s\n%s", message.topic, data_str)
 
             # Panel response to MQTT Commands and Panel Commands to IQ Remote
-            if message.topic.matches("response_" + self.settings.random_mac):  # noqa: SIM102
+            if message.topic.matches("response_" + self.settings.random_mac):
                 await self._mqtt_command_queue.handle_response(data_json)
 
             # Panel updates to IQ2MEID database
@@ -453,7 +470,7 @@ class QolsysController:
         if not self.settings.check_plugin_ip():
             raise QolsysConfigError("Plugin IP Address not configured")
 
-        # If we dont allready have client signed certificate, start the pairing server
+        # If we don't already have client signed certificate, start the pairing server
         if (
             not await self._pki.check_secure_file()
             or not await self._pki.check_qolsys_cer_file()
