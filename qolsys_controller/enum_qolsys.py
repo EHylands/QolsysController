@@ -256,6 +256,7 @@ class ZoneSensorGroup(StrEnum):
     FIXED_SILENT_AUXILIARY = "fixedsilentmedical"
     FREEZE = "freeze"
     FREEZE_NON_REPORTING = "Freeze_Non_Reporting"
+    GARAGE_TILT_1 = "garageTilt1"
     GLASS_BREAK = "glassbreak"
     GLASS_BREAK_AWAY_ONLY = "glassbreakawayonly"
     INSTANT_PERIMETER_DW = "instantperimeter"
