@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.3.14 (2026-06-14)
+
+### Bug Fixes
+
+- Add garageTilt1 zone sensor group
+  ([`81329b6`](https://github.com/EHylands/QolsysController/commit/81329b608ee76322f19fa0dcd76112f22200b7eb))
+
+
 ## v1.3.13 (2026-06-08)
 
 ### Bug Fixes
