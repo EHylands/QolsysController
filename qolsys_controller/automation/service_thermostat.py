@@ -357,7 +357,14 @@ class ThermostatService(AutomationService):
 
     def _set_fan_modes_from_bitmask(self, fan_modes_bitmask: str) -> None:
         supported_fan_modes: list[QolsysFanMode] = []
-        int_list = [int(x) for x in fan_modes_bitmask.strip("[]").split(",") if x.strip()]
+        LOGGER.debug("fan modes string: %s", fan_modes_bitmask)
+
+        int_list = []
+        if isinstance(fan_modes_bitmask, list):
+            int_list = [int(x) for x in fan_modes_bitmask]
+        elif isinstance(fan_modes_bitmask, str):
+            int_list = [int(x) for x in fan_modes_bitmask.strip("[]").split(",") if x.strip()]
+
         bitmask = int.from_bytes(bytes(int_list), byteorder="little")
         for bit, fan_mode in BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE.items():
             if bitmask & (1 << bit):
