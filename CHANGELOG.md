@@ -2,6 +2,52 @@
 
 <!-- version list -->
 
+## v1.3.16 (2026-06-24)
+
+### Bug Fixes
+
+- Crypto
+  ([`55fe28b`](https://github.com/EHylands/QolsysController/commit/55fe28b74de5eb0d5c97994140f71d93c5fe4edd))
+
+### Chores
+
+- Create commitlint.config.js
+  ([`eb1e0f6`](https://github.com/EHylands/QolsysController/commit/eb1e0f65ff4648bffe7ce9756b19625f6eb02989))
+
+- Disable commitlin
+  ([`aedd159`](https://github.com/EHylands/QolsysController/commit/aedd1596109b8b7a7290f5c41b98a5094e784c12))
+
+- Pdate commitlint.config.mjs
+  ([`09b01f4`](https://github.com/EHylands/QolsysController/commit/09b01f4decbb174e865fc2cb67e31d4e7cf40764))
+
+- Rename commitlint.config.js to commitlint.config.mjs
+  ([`4188ff2`](https://github.com/EHylands/QolsysController/commit/4188ff2c2a377d94084ec4bfdcd7a15717b27fe8))
+
+- Update tags.yml
+  ([`4db401d`](https://github.com/EHylands/QolsysController/commit/4db401d0bb2953b54ab919a13620de2d969c83c4))
+
+- Update tags.yml
+  ([`17f2e78`](https://github.com/EHylands/QolsysController/commit/17f2e78e5bbf3799a16b72799a3382db4b5b88c4))
+
+- Update tags.yml
+  ([`57c526f`](https://github.com/EHylands/QolsysController/commit/57c526fdda8c2ae551972d0a4bdf3dcaea1004b7))
+
+- Update tags.yml
+  ([`eb436be`](https://github.com/EHylands/QolsysController/commit/eb436be24aa6686ea73c0556686d5f8f1873e383))
+
+- **deps**: Bump actions/checkout from 6 to 7
+  ([#55](https://github.com/EHylands/QolsysController/pull/55),
+  [`cc25258`](https://github.com/EHylands/QolsysController/commit/cc252581262dc8bb0a8640ac882fc46ec0f59608))
+
+- **deps**: Bump zeroconf from 0.149.16 to 0.149.17
+  ([#56](https://github.com/EHylands/QolsysController/pull/56),
+  [`197ea36`](https://github.com/EHylands/QolsysController/commit/197ea3658303db342616f6d11022c55c111b60e9))
+
+- **deps**: Update cryptography requirement
+  ([#54](https://github.com/EHylands/QolsysController/pull/54),
+  [`ae37b9c`](https://github.com/EHylands/QolsysController/commit/ae37b9c6d36dd4c47e808f9c6614d701bd6613fa))
+
+
 ## v1.3.15 (2026-06-21)
 
 ### Bug Fixes
