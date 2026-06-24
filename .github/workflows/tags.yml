@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   commitlint:
-    if: false
     name: Commit Message Lint
     runs-on: ubuntu-latest
 
