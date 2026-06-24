@@ -21,6 +21,8 @@ pip install qolsys-controller
 qolsys-controller --verbose --config 'path_to_config_file'
 ```
 
+## Troubleshooting
+
 ## Functionality Highlights
 
 | Category               | Feature                              | Status |
