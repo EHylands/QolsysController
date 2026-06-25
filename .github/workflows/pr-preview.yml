@@ -74,6 +74,6 @@ jobs:
       # Post PR comment
       # ------------------------------------------------------------
       - name: Post comment on PR
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           filePath: comment.md
