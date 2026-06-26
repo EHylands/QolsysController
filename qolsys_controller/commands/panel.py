@@ -33,6 +33,7 @@ class PanelCommandStrings(StrEnum):
     GENERATE_EMERGENCY = "generate_emergency"
     PAIR_STATUS_REQUEST = "pair_status_request"
     PINGEVENT = "pingevent"
+    QUICK_EXIT_STATE = "quick_exit_state"
     SPEAK = "speak_text"
     SYNC_DATABASE = "syncdatabase"
     TIMESYNC = "timeSync"
@@ -147,6 +148,43 @@ class PanelCommands:
         command.append_ipc_request(ipc_request)
         response = await command.send_command()
         LOGGER.debug("MQTT Panel Client - Receiving arm command: partition%s", partition_id)
+        return response
+
+    async def quick_exit(self, partition_id: str, delay_page_time: int = 120) -> dict[str, Any] | None:
+        LOGGER.debug(
+            "MQTT Panel Client - Sending quick_exit command: partition%s, delay_page_time:%s",
+            partition_id,
+            delay_page_time,
+        )
+
+        partition = self._controller.state.partition(partition_id)
+        if not partition:
+            LOGGER.debug("MQTT Panel Client - quick_exit command error - Unknown Partition: %s", partition_id)
+            raise QolsysInvalidPartitionIdError(partition_id)
+
+        # Panel honors quick_exit only while ARM-STAY and not in Alarm (QuickExitAPI), with no
+        # user-code or operation_source gating. operation_source/macAddress mirror arm() for parity.
+        quick_exit_command = {
+            "operation_name": PanelCommandStrings.QUICK_EXIT_STATE,
+            "quick_exit_state": "Started",
+            "delayPageTime": delay_page_time,
+            "stateChangeTime": int(time.time() * 1000),
+            "partitionID": int(partition_id),  # Expect Int
+            "operation_source": 1,
+            "macAddress": self._controller.settings.random_mac,
+        }
+
+        ipc_request = [
+            {
+                "dataType": "string",
+                "dataValue": json.dumps(quick_exit_command),
+            }
+        ]
+
+        command = MQTTCommand_Panel(self._controller)
+        command.append_ipc_request(ipc_request)
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving quick_exit command: partition%s", partition_id)
         return response
 
     async def connect(self) -> dict[str, Any]:
