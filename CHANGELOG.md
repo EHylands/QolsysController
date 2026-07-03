@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.3.17 (2026-07-03)
+
+### Bug Fixes
+
+- Adding SAFETY_SENSOR_QUICK_EXIT setting
+  ([`5e7f286`](https://github.com/EHylands/QolsysController/commit/5e7f2867d594f4c1f31d58237d09bfdb0f69e4d2))
+
+- Adding SAFETY_SENSOR_QUICK_EXIT setting
+  ([`8e98c91`](https://github.com/EHylands/QolsysController/commit/8e98c91e3cb104c09a066b15d53a3f6485765a3e))
+
+
 ## v1.3.16 (2026-06-24)
 
 ### Bug Fixes
