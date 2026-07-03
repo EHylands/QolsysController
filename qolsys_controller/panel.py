@@ -123,7 +123,7 @@ class QolsysPanel:
         self._SYSTEM_LOGGED_IN_USER: str = ""
         self._PANEL_SCENES_SETTING: str = ""
         self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N: str = ""
-        self._SAFETY_SENSOR_QUICK_EXIT:str = ""
+        self._SAFETY_SENSOR_QUICK_EXIT: str = ""
 
         self._users: list[QolsysUser] = []
         self._unique_id: str = ""
@@ -338,7 +338,7 @@ class QolsysPanel:
     def LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N(self) -> str:
         self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = self.db.get_setting_panel("LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N")
         return self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N
-    
+
     @property
     def SAFETY_SENSOR_QUICK_EXIT(self) -> str:
         self._SAFETY_SENSOR_QUICK_EXIT = self.db.get_setting_panel("SAFETY_SENSOR_QUICK_EXIT")
@@ -751,7 +751,7 @@ class QolsysPanel:
 
                             # Insert Settings Content Provider
                             case self.db.table_qolsyssettings.uri:
-                                self.db.table_qolsyssettings.insert(data=content_values)                           
+                                self.db.table_qolsyssettings.insert(data=content_values)
                                 # Update Partition setting - Send notification if setting has changed
                                 name = content_values.get("name", "")
                                 new_value = content_values.get("value", "")
