@@ -73,6 +73,7 @@ class QolsysPanel:
             "AUXILIARY_PANIC_ENABLED",
             "NIGHTMODE_SETTINGS",
             "NIGHT_SETTINGS_STATE",
+            "SAFETY_SENSOR_QUICK_EXIT",
             "PARTITIONS",
             "SIX_DIGIT_USER_CODE",
             "SHOW_SECURITY_SENSORS",
@@ -122,6 +123,7 @@ class QolsysPanel:
         self._SYSTEM_LOGGED_IN_USER: str = ""
         self._PANEL_SCENES_SETTING: str = ""
         self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N: str = ""
+        self._SAFETY_SENSOR_QUICK_EXIT:str = ""
 
         self._users: list[QolsysUser] = []
         self._unique_id: str = ""
@@ -336,6 +338,11 @@ class QolsysPanel:
     def LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N(self) -> str:
         self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N = self.db.get_setting_panel("LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N")
         return self._LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N
+    
+    @property
+    def SAFETY_SENSOR_QUICK_EXIT(self) -> str:
+        self._SAFETY_SENSOR_QUICK_EXIT = self.db.get_setting_panel("SAFETY_SENSOR_QUICK_EXIT")
+        return self._SAFETY_SENSOR_QUICK_EXIT
 
     @property
     def imei(self) -> str:
@@ -373,7 +380,6 @@ class QolsysPanel:
 
     async def load_database(self, database: Any | None) -> None:
         self.db.load_db(database)
-        self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
         self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
@@ -745,8 +751,7 @@ class QolsysPanel:
 
                             # Insert Settings Content Provider
                             case self.db.table_qolsyssettings.uri:
-                                self.db.table_qolsyssettings.insert(data=content_values)
-
+                                self.db.table_qolsyssettings.insert(data=content_values)                           
                                 # Update Partition setting - Send notification if setting has changed
                                 name = content_values.get("name", "")
                                 new_value = content_values.get("value", "")
@@ -1116,6 +1121,7 @@ class QolsysPanel:
         LOGGER.debug("Night Mode Settings: %s", self.NIGHTMODE_SETTINGS)
         LOGGER.debug("Night Mode Settings Stage: %s", self.NIGHT_SETTINGS_STATE)
         LOGGER.debug("Show Security Sensors: %s", self.SHOW_SECURITY_SENSORS)
+        LOGGER.debug("Safety Sensor Quick Exit: %s", self.SAFETY_SENSOR_QUICK_EXIT)
 
         LOGGER.debug("Users list:")
         for user in self._users:
