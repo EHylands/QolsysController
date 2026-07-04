@@ -42,7 +42,7 @@ class QolsysPanel:
 
         # Partition settings
         self.settings_partition = ["SYSTEM_STATUS", "EXIT_SOUNDS", "ENTRY_DELAYS", "SYSTEM_STATUS_CHANGED_TIME"]
-        self.state_partition = ["ALARM_STATE"]
+        self.state_partition = ["ALARM_STATE", "QUICK_EXIT_STATE"]
 
         # Panel settings
         self.settings_panel = [
@@ -508,6 +508,18 @@ class QolsysPanel:
                                         match name:
                                             case "ALARM_STATE":
                                                 partition.alarm_state = PartitionAlarmState(new_value)
+                                            case "QUICK_EXIT_STATE":
+                                                delay = 0
+                                                start_time = 0
+                                                extra = content_values.get("extraparams", "")
+                                                if extra:
+                                                    try:
+                                                        extra_json = json.loads(extra)
+                                                        delay = int(extra_json.get("delayPageTime", 0) or 0)
+                                                        start_time = int(extra_json.get("stateChangeTime", 0) or 0)
+                                                    except (ValueError, TypeError, json.JSONDecodeError):
+                                                        pass
+                                                partition.update_quick_exit(new_value, delay, start_time)
 
                             # Update heat_map
                             case self.db.table_heat_map.uri:

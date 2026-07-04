@@ -59,6 +59,11 @@ class QolsysPartition(QolsysObservable):
         self._alarm_type_array: list[PartitionAlarmType] = []
         self.append_alarm_type(alarm_type_array)
 
+        # Quick Exit State (state table) - "None" / "Started" / "Completed"
+        self._quick_exit_state: str = "None"
+        self._quick_exit_delay: int = 0
+        self._quick_exit_start_time: int = 0
+
         # Other
         self._command_exit_sounds: bool = True
         self._command_arm_stay_instant: bool = True
@@ -276,6 +281,32 @@ class QolsysPartition(QolsysObservable):
             LOGGER.debug("Partition%s (%s) - entry_delays: %s", self._id, self._name, value)
             self._entry_delays = value
             self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+
+    @property
+    def quick_exit_active(self) -> bool:
+        return self._quick_exit_state == "Started"
+
+    @property
+    def quick_exit_state(self) -> str:
+        return self._quick_exit_state
+
+    @property
+    def quick_exit_delay(self) -> int:
+        return self._quick_exit_delay
+
+    @property
+    def quick_exit_start_time(self) -> int:
+        return self._quick_exit_start_time
+
+    def update_quick_exit(self, value: str, delay: int = 0, start_time: int = 0) -> None:
+        if self._quick_exit_state == value:
+            return
+
+        LOGGER.debug("Partition%s (%s) - quick_exit_state: %s", self._id, self._name, value)
+        self._quick_exit_state = value
+        self._quick_exit_delay = delay
+        self._quick_exit_start_time = start_time
+        self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
     @property
     def command_exit_sounds(self) -> bool:
