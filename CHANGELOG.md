@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.5.0 (2026-07-04)
+
+### Chores
+
+- **deps**: Bump zeroconf from 0.149.17 to 0.150.0
+  ([#57](https://github.com/EHylands/QolsysController/pull/57),
+  [`50e6773`](https://github.com/EHylands/QolsysController/commit/50e6773ba44655bf5aedc5273daf1799d8ba8a9d))
+
+### Features
+
+- Add quick_exit() panel command ([#59](https://github.com/EHylands/QolsysController/pull/59),
+  [`75760f4`](https://github.com/EHylands/QolsysController/commit/75760f46eeb1e7731e2a208f8077fc36e55fa9ad))
+
+- Parse quick_exit_state and expose it on the partition
+  ([#59](https://github.com/EHylands/QolsysController/pull/59),
+  [`75760f4`](https://github.com/EHylands/QolsysController/commit/75760f46eeb1e7731e2a208f8077fc36e55fa9ad))
+
+- Quick exit ([#59](https://github.com/EHylands/QolsysController/pull/59),
+  [`75760f4`](https://github.com/EHylands/QolsysController/commit/75760f46eeb1e7731e2a208f8077fc36e55fa9ad))
+
+
 ## v1.4.0 (2026-07-04)
 
 ### Features
