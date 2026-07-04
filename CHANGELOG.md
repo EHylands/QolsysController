@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-07-04)
+
+### Features
+
+- Add quick_exit() panel command ([#58](https://github.com/EHylands/QolsysController/pull/58),
+  [`33f23ad`](https://github.com/EHylands/QolsysController/commit/33f23ad44b8c5e8733da7a3681731e1ae5257ba7))
+
+- Parse quick_exit_state and expose it on the partition
+  ([#58](https://github.com/EHylands/QolsysController/pull/58),
+  [`33f23ad`](https://github.com/EHylands/QolsysController/commit/33f23ad44b8c5e8733da7a3681731e1ae5257ba7))
+
+- Quick exit ([#58](https://github.com/EHylands/QolsysController/pull/58),
+  [`33f23ad`](https://github.com/EHylands/QolsysController/commit/33f23ad44b8c5e8733da7a3681731e1ae5257ba7))
+
+
 ## v1.3.17 (2026-07-03)
 
 ### Bug Fixes
