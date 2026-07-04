@@ -19,6 +19,7 @@ from .enum_qolsys import (
     AutomationDeviceProtocol,
     PartitionAlarmState,
     PartitionAlarmType,
+    PartitionQuickExitState,
     PartitionSystemStatus,
     QolsysNotification,
     QolsysPanelType,
@@ -380,6 +381,7 @@ class QolsysPanel:
 
     async def load_database(self, database: Any | None) -> None:
         self.db.load_db(database)
+        self._controller.state.sync_partitions_data(self.get_partitions_from_db())
         self._controller.state.sync_zones_data(self.get_zones_from_db())
         self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
@@ -519,7 +521,16 @@ class QolsysPanel:
                                                         start_time = int(extra_json.get("stateChangeTime", 0) or 0)
                                                     except (ValueError, TypeError, json.JSONDecodeError):
                                                         pass
-                                                partition.update_quick_exit(new_value, delay, start_time)
+                                                try:
+                                                    quick_exit_state = PartitionQuickExitState(new_value)
+                                                    partition.update_quick_exit(quick_exit_state, delay, start_time)
+                                                except ValueError:
+                                                    LOGGER.error(
+                                                        "Partition%s (%s) - Invalid quick_exit_state: %s",
+                                                        partition._id,
+                                                        partition._name,
+                                                        new_value,
+                                                    )
 
                             # Update heat_map
                             case self.db.table_heat_map.uri:
@@ -1054,7 +1065,11 @@ class QolsysPanel:
 
             alarm_state = PartitionAlarmState(self.db.get_state_partition("ALARM_STATE", partition_id) or "UNKNOWN")
 
-            partition = QolsysPartition(self._controller, partition_dict, settings_dict, alarm_state, alarm_type)
+            quick_exit_state = PartitionQuickExitState(self.db.get_state_partition("QUICK_EXIT_STATE", partition_id) or "None")
+
+            partition = QolsysPartition(
+                self._controller, partition_dict, settings_dict, alarm_state, alarm_type, quick_exit_state
+            )
             partitions.append(partition)
 
         return partitions

@@ -12,7 +12,12 @@ from qolsys_controller.enum_qolsys import (
     PartitionSystemStatus,
     TroubleZoneStatus,
 )
-from qolsys_controller.errors import QolsysInvalidPartitionIdError, QolsysUserCodeError, QolsysZoneBypassError
+from qolsys_controller.errors import (
+    CommandExecutionError,
+    QolsysInvalidPartitionIdError,
+    QolsysUserCodeError,
+    QolsysZoneBypassError,
+)
 from qolsys_controller.mqtt_command import MQTTCommand, MQTTCommand_Panel
 
 if TYPE_CHECKING:
@@ -162,7 +167,15 @@ class PanelCommands:
             LOGGER.debug("MQTT Panel Client - quick_exit command error - Unknown Partition: %s", partition_id)
             raise QolsysInvalidPartitionIdError(partition_id)
 
-        # Panel honors quick_exit only while ARM-STAY and not in Alarm (QuickExitAPI), with no
+        if partition.system_status not in {PartitionSystemStatus.ARM_STAY, PartitionSystemStatus.ARM_NIGHT}:
+            LOGGER.debug(
+                "MQTT Panel Client - quick_exit command error - Partition %s is not in ARM_STAY or ARM_NIGHT state: %s",
+                partition_id,
+                partition.system_status,
+            )
+            raise CommandExecutionError(f"Partition {partition_id} is not in ARM_STAY or ARM_NIGHT state: {partition.system_status}")
+
+        # Panel honors quick_exit only while ARM-STAY and not in Alarm, with no
         # user-code or operation_source gating. operation_source/macAddress mirror arm() for parity.
         quick_exit_command = {
             "operation_name": PanelCommandStrings.QUICK_EXIT_STATE,

@@ -301,6 +301,9 @@ class QolsysState(QolsysObservable):
                         state_partition.update_settings(db_partition.to_dict_settings())
                         state_partition.alarm_type_array = db_partition.alarm_type_array
                         state_partition.alarm_state = db_partition.alarm_state
+                        state_partition.quick_exit_state = db_partition.quick_exit_state
+                        state_partition.quick_exit_delay = db_partition.quick_exit_delay
+                        state_partition.quick_exit_start_time = db_partition.quick_exit_start_time
                         break
 
         # Delete partitions
@@ -332,6 +335,7 @@ class QolsysState(QolsysObservable):
 
             LOGGER.debug("Partition%s (%s) - exit_sounds: %s", pid, name, partition.exit_sounds)
             LOGGER.debug("Partition%s (%s) - entry_delays: %s", pid, name, partition.entry_delays)
+            LOGGER.debug("Partition%s (%s) - quick_exit_state: %s", pid, name, partition.quick_exit_state)
 
         for zone in self.zones:
             zid = zone.zone_id

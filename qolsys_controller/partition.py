@@ -11,6 +11,7 @@ from .enum_qolsys import (
     PartitionAlarmType,
     PartitionArmingType,
     PartitionError,
+    PartitionQuickExitState,
     PartitionSystemStatus,
     QolsysNotification,
 )
@@ -33,6 +34,7 @@ class QolsysPartition(QolsysObservable):
         settings_dict: dict[str, str],
         alarm_state: PartitionAlarmState,
         alarm_type_array: list[PartitionAlarmType],
+        quick_exit_state: PartitionQuickExitState,
     ) -> None:
         super().__init__()
 
@@ -59,8 +61,8 @@ class QolsysPartition(QolsysObservable):
         self._alarm_type_array: list[PartitionAlarmType] = []
         self.append_alarm_type(alarm_type_array)
 
-        # Quick Exit State (state table) - "None" / "Started" / "Completed"
-        self._quick_exit_state: str = "None"
+        # Quick Exit State
+        self._quick_exit_state: PartitionQuickExitState = quick_exit_state
         self._quick_exit_delay: int = 0
         self._quick_exit_start_time: int = 0
 
@@ -287,26 +289,45 @@ class QolsysPartition(QolsysObservable):
         return self._quick_exit_state == "Started"
 
     @property
-    def quick_exit_state(self) -> str:
+    def quick_exit_state(self) -> PartitionQuickExitState:
         return self._quick_exit_state
+    
+    @quick_exit_state.setter
+    def quick_exit_state(self, value: PartitionQuickExitState) -> None:
+        if self._quick_exit_state != value:
+            LOGGER.debug("Partition%s (%s) - quick_exit_state: %s", self._id, self._name, value)
+            self._quick_exit_state = value
+            self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
     @property
     def quick_exit_delay(self) -> int:
         return self._quick_exit_delay
+    
+    @quick_exit_delay.setter
+    def quick_exit_delay(self, value: int) -> None:
+        if self._quick_exit_delay != value:
+            LOGGER.debug("Partition%s (%s) - quick_exit_delay: %s", self._id, self._name, value)
+            self._quick_exit_delay = value
+            self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
     @property
     def quick_exit_start_time(self) -> int:
         return self._quick_exit_start_time
+    
+    @quick_exit_start_time.setter
+    def quick_exit_start_time(self, value: int) -> None:
+        if self._quick_exit_start_time != value:
+            LOGGER.debug("Partition%s (%s) - quick_exit_start_time: %s", self._id, self._name, value)
+            self._quick_exit_start_time = value
+            self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
-    def update_quick_exit(self, value: str, delay: int = 0, start_time: int = 0) -> None:
+    def update_quick_exit(self, value: PartitionQuickExitState, delay: int = 0, start_time: int = 0) -> None:
         if self._quick_exit_state == value:
             return
-
-        LOGGER.debug("Partition%s (%s) - quick_exit_state: %s", self._id, self._name, value)
-        self._quick_exit_state = value
-        self._quick_exit_delay = delay
-        self._quick_exit_start_time = start_time
-        self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+        
+        self.quick_exit_state = value
+        self.quick_exit_delay = delay
+        self.quick_exit_start_time = start_time
 
     @property
     def command_exit_sounds(self) -> bool:
@@ -452,6 +473,9 @@ class QolsysPartition(QolsysObservable):
                 .replace("+00:00", "Z"),
                 "entry_delays": self.entry_delays,
                 "exit_sounds": self.exit_sounds,
+                "quick_exit_state": self.quick_exit_state.value,
+                "quick_exit_delay": self.quick_exit_delay,
+                "quick_exit_start_time": self.quick_exit_start_time,
                 "last_error": self.last_error.value,
                 "last_error_at": self.last_error_at.isoformat().replace("+00:00", "Z") if self.last_error_at else None,
             },

@@ -102,6 +102,13 @@ class PartitionAlarmState(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+class PartitionQuickExitState(StrEnum):
+    NONE = "None"
+    STARTED = "Started"
+    COMPLETED = "Completed"
+    UNKNOWN = "UNKNOWN"
+
+
 class PartitionError(StrEnum):
     NONE = "None"
     USER_CODE_ERROR = "user_code_error"
