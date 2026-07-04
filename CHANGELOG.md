@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.5.1 (2026-07-04)
+
+### Bug Fixes
+
+- Quick_exit_state
+  ([`b274a62`](https://github.com/EHylands/QolsysController/commit/b274a629bc105edb3ce16e43900fce13796c49ff))
+
+- Quick_exit_state
+  ([`0491a3c`](https://github.com/EHylands/QolsysController/commit/0491a3cb87da51449c8fbc24d0a881a8b9619375))
+
+
 ## v1.5.0 (2026-07-04)
 
 ### Chores
