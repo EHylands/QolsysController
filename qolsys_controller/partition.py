@@ -291,7 +291,7 @@ class QolsysPartition(QolsysObservable):
     @property
     def quick_exit_state(self) -> PartitionQuickExitState:
         return self._quick_exit_state
-    
+
     @quick_exit_state.setter
     def quick_exit_state(self, value: PartitionQuickExitState) -> None:
         if self._quick_exit_state != value:
@@ -302,7 +302,7 @@ class QolsysPartition(QolsysObservable):
     @property
     def quick_exit_delay(self) -> int:
         return self._quick_exit_delay
-    
+
     @quick_exit_delay.setter
     def quick_exit_delay(self, value: int) -> None:
         if self._quick_exit_delay != value:
@@ -313,7 +313,7 @@ class QolsysPartition(QolsysObservable):
     @property
     def quick_exit_start_time(self) -> int:
         return self._quick_exit_start_time
-    
+
     @quick_exit_start_time.setter
     def quick_exit_start_time(self, value: int) -> None:
         if self._quick_exit_start_time != value:
@@ -324,7 +324,7 @@ class QolsysPartition(QolsysObservable):
     def update_quick_exit(self, value: PartitionQuickExitState, delay: int = 0, start_time: int = 0) -> None:
         if self._quick_exit_state == value:
             return
-        
+
         self.quick_exit_state = value
         self.quick_exit_delay = delay
         self.quick_exit_start_time = start_time

@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from qolsys_controller.enum_qolsys import PartitionAlarmState, PartitionAlarmType, PartitionSystemStatus, PartitionQuickExitState
+from qolsys_controller.enum_qolsys import (
+    PartitionAlarmState,
+    PartitionAlarmType,
+    PartitionQuickExitState,
+    PartitionSystemStatus,
+)
 from qolsys_controller.partition import QolsysPartition
 
 
