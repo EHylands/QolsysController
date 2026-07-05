@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.5.2 (2026-07-05)
+
+### Bug Fixes
+
+- Adding completed quick exit state
+  ([`90bcde1`](https://github.com/EHylands/QolsysController/commit/90bcde1048bfa363e8236caa7a7f8714f669dfec))
+
+
 ## v1.5.1 (2026-07-04)
 
 ### Bug Fixes
