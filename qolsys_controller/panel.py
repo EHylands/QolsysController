@@ -522,8 +522,9 @@ class QolsysPanel:
                                                     except (ValueError, TypeError, json.JSONDecodeError):
                                                         pass
                                                 try:
-                                                    quick_exit_state = PartitionQuickExitState(new_value)
-                                                    partition.update_quick_exit(quick_exit_state, delay, start_time)
+                                                    partition.quick_exit_state = PartitionQuickExitState(new_value)
+                                                    partition.quick_exit_delay = delay
+                                                    partition.quick_exit_start_time = start_time
                                                 except ValueError:
                                                     LOGGER.error(
                                                         "Partition%s (%s) - Invalid quick_exit_state: %s",

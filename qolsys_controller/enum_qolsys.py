@@ -106,6 +106,7 @@ class PartitionQuickExitState(StrEnum):
     NONE = "None"
     STARTED = "Started"
     COMPLETED = "Completed"
+    CANCELLED = "Cancelled"
     UNKNOWN = "UNKNOWN"
 
 

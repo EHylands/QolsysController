@@ -173,7 +173,9 @@ class PanelCommands:
                 partition_id,
                 partition.system_status,
             )
-            raise CommandExecutionError(f"Partition {partition_id} is not in ARM_STAY or ARM_NIGHT state: {partition.system_status}")
+            raise CommandExecutionError(
+                f"Partition {partition_id} is not in ARM_STAY or ARM_NIGHT state: {partition.system_status}"
+            )
 
         # Panel honors quick_exit only while ARM-STAY and not in Alarm, with no
         # user-code or operation_source gating. operation_source/macAddress mirror arm() for parity.

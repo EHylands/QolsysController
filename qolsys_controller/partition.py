@@ -321,14 +321,6 @@ class QolsysPartition(QolsysObservable):
             self._quick_exit_start_time = value
             self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
-    def update_quick_exit(self, value: PartitionQuickExitState, delay: int = 0, start_time: int = 0) -> None:
-        if self._quick_exit_state == value:
-            return
-
-        self.quick_exit_state = value
-        self.quick_exit_delay = delay
-        self.quick_exit_start_time = start_time
-
     @property
     def command_exit_sounds(self) -> bool:
         return self._command_exit_sounds
