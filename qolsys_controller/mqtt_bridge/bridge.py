@@ -63,7 +63,7 @@ class MqttBridge:
 
     async def run_bridge(self) -> None:
         if self._is_running:
-            LOGGER.warning("MQTT Bridge - Allready running")
+            LOGGER.warning("MQTT Bridge - Already running")
             return
 
         self._is_running = True

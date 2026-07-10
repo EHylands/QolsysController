@@ -129,7 +129,7 @@ class MeterService(AutomationService):
     def meter_add(self, new_meter: QolsysMeter) -> None:
         meter = self.meter(new_meter.unit)
         if meter is not None:
-            LOGGER.error("Error Adding meter, unit allready present")
+            LOGGER.error("Error Adding meter, unit already present")
             return
 
         self._meters.append(new_meter)

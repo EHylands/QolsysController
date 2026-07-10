@@ -279,8 +279,8 @@ class QolsysPKI:
             LOGGER.error("Create CSR File Collision")
             return False
 
-        # Check for CER file collision
-        if await self.check_cer_file():
+        # Check for Signed Certificate file collision
+        if await self.check_secure_file():
             LOGGER.error("Create Signed Certificate File Collision")
             return False
 

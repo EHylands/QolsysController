@@ -64,7 +64,7 @@ class SensorService(AutomationService):
     def sensor_add(self, new_sensor: QolsysSensor) -> None:
         for sensor in self._sensors:
             if sensor._unit == new_sensor._unit:
-                LOGGER.error("Error Adding Sensor, unit allready present")
+                LOGGER.error("Error Adding Sensor, unit already present")
                 return
         self._sensors.append(new_sensor)
         self._automation_device.notify(

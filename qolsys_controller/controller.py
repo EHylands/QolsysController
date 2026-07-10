@@ -147,7 +147,7 @@ class QolsysController:
             LOGGER.debug("Supervisor Task Already Completed")
             return
 
-        LOGGER.debug("Qolsys Controller - Stoping Operation")
+        LOGGER.debug("Qolsys Controller - Stopping Operation")
         self._supervisor_task.cancel()
 
     async def config_task(self, start_pairing: bool) -> None:
@@ -241,6 +241,7 @@ class QolsysController:
                         tg.create_task(self.mqtt_zwave_meter_update())
 
                         await self.set_controller_state(ControllerState.CONNECTED)
+                        self._reconnect_attempt = 0
                         LOGGER.info("MQTT Panel Client - Connected")
                         self.notify_panel_status_update()
 
@@ -305,8 +306,13 @@ class QolsysController:
             )
             ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
             ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+            # Pin the panel certificate: the broker cert must chain to the .qolsys CA
+            # saved during pairing. Hostname checking stays off (we connect by IP and
+            # the panel cert has no matching SAN), and strict X.509 checks are relaxed
+            # because the panel CA lacks a critical BasicConstraints extension.
             ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
+            ctx.verify_mode = ssl.CERT_REQUIRED
+            ctx.verify_flags &= ~ssl.VERIFY_X509_STRICT
             ctx.load_cert_chain(
                 certfile=str(self._pki.secure_file_path),
                 keyfile=str(self._pki.key_file_path),

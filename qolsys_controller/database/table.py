@@ -1,4 +1,4 @@
-import logging  # noqa: INP001
+import logging
 import sqlite3
 
 from qolsys_controller.errors import QolsysSqlError
@@ -118,11 +118,11 @@ class QolsysTable:
     def update(
         self, selection: str | None, selection_argument: list[str] | str | None, content_value: dict[str, str] | None
     ) -> None:
-        # selection: 'zone_id=?, parition_id=?'
+        # selection: 'zone_id=?, partition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
 
-        # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
+        # Firmware 4.4.1: selection_argument is sent as a string and needs to be converted to an array
         if isinstance(selection_argument, str):
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]
@@ -178,11 +178,11 @@ class QolsysTable:
                 raise error from err
 
     def delete(self, selection: str | None, selection_argument: list[str] | str | None) -> None:
-        # selection: 'zone_id=?, parition_id=?'
+        # selection: 'zone_id=?, partition_id=?'
         # Firmware 4.4.1: selection_argument: '[3,1]'
         # Firmware 4.6.1: selection_argument: ['3','1']
 
-        # Firmware 4.4.1: seletion_argument is sent as a string and needs to be converted to an array
+        # Firmware 4.4.1: selection_argument is sent as a string and needs to be converted to an array
         if type(selection_argument) is str:
             selection_argument = selection_argument.strip("[]")
             selection_argument = [item.strip() for item in selection_argument.split(",")]

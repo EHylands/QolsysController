@@ -62,7 +62,7 @@ class QolsysState(QolsysObservable):
         for partition in self.partitions:
             if new_partition.id == partition.id:
                 LOGGER.debug(
-                    "Adding Partition to State, Partition%s (%s) - Allready in Partitions List",
+                    "Adding Partition to State, Partition%s (%s) - Already in Partitions List",
                     new_partition.id,
                     partition.name,
                 )
@@ -92,7 +92,7 @@ class QolsysState(QolsysObservable):
     def scene_add(self, new_scene: QolsysScene) -> None:
         for scene in self.scenes:
             if new_scene.scene_id == scene.scene_id:
-                LOGGER.debug("Adding Scene to State, Scene%s (%s) - Allready in Scene List", new_scene.scene_id, scene.name)
+                LOGGER.debug("Adding Scene to State, Scene%s (%s) - Already in Scene List", new_scene.scene_id, scene.name)
                 return
 
         self.scenes.append(new_scene)
@@ -119,7 +119,7 @@ class QolsysState(QolsysObservable):
         for automation_device in self.automation_devices:
             if new_automation_device.virtual_node_id == automation_device.virtual_node_id:
                 LOGGER.debug(
-                    "Adding AutomationDevice to State, AutDev%s (%s) - Allready in AutomationDevice List",
+                    "Adding AutomationDevice to State, AutDev%s (%s) - Already in AutomationDevice List",
                     new_automation_device.virtual_node_id,
                     automation_device.device_name,
                 )
@@ -154,9 +154,7 @@ class QolsysState(QolsysObservable):
     def zone_add(self, new_zone: QolsysZone) -> None:
         for zone in self.zones:
             if new_zone.zone_id == zone.zone_id:
-                LOGGER.debug(
-                    "Adding Zone to State, zone%s (%s) - Allready in Zone List", new_zone.zone_id, new_zone.sensorname
-                )
+                LOGGER.debug("Adding Zone to State, zone%s (%s) - Already in Zone List", new_zone.zone_id, new_zone.sensorname)
                 return
 
         self.zones.append(new_zone)
