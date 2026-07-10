@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.5.3 (2026-07-10)
+
+### Bug Fixes
+
+- Disable open safety zone bypass
+  ([`797608d`](https://github.com/EHylands/QolsysController/commit/797608d3e243aef1e4ea4354af5ad03ea727e104))
+
+
 ## v1.5.2 (2026-07-05)
 
 ### Bug Fixes
