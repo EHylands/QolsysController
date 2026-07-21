@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.0 (2026-07-21)
+
+### Features
+
+- Introducing strict typing
+  ([`96f97b1`](https://github.com/EHylands/QolsysController/commit/96f97b183eba1af7c4440361892c62fb01f8f3b1))
+
+
 ## v1.5.3 (2026-07-10)
 
 ### Bug Fixes
