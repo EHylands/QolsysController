@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.1 (2026-08-06)
+
+### Bug Fixes
+
+- Prevent controller from reporting new columns in history table
+  ([`0fc6567`](https://github.com/EHylands/QolsysController/commit/0fc6567ff0f73c1e8fa60aefa7d3780ffb78f2f8))
+
+
 ## v1.6.0 (2026-07-21)
 
 ### Features
