@@ -242,7 +242,7 @@ class QolsysController:
 
                         await self.set_controller_state(ControllerState.CONNECTED)
                         self._reconnect_attempt = 0
-                        LOGGER.info("MQTT Panel Client - Connected")
+                        LOGGER.debug("MQTT Panel Client - Connected")
                         self.notify_panel_status_update()
 
                         await asyncio.Future()  # Run until cancelled or exception
