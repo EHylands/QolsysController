@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.6.2 (2026-08-07)
+
+### Bug Fixes
+
+- Enhance pairing process reliability
+  ([`5bcd7af`](https://github.com/EHylands/QolsysController/commit/5bcd7afac30e135a15e46b3aa8f0c9ecfa3c66e1))
+
+### Chores
+
+- **deps**: Bump actions/setup-python from 6 to 7
+  ([#61](https://github.com/EHylands/QolsysController/pull/61),
+  [`0e21168`](https://github.com/EHylands/QolsysController/commit/0e211682b6c4312028b09d19e063eeedf6dd233f))
+
+- **deps**: Bump cffi from 2.0.0 to 2.1.0
+  ([#60](https://github.com/EHylands/QolsysController/pull/60),
+  [`72e9970`](https://github.com/EHylands/QolsysController/commit/72e997023c62582e77971f64ee9240fb24433dc5))
+
+
 ## v1.6.1 (2026-08-06)
 
 ### Bug Fixes
