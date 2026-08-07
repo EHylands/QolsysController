@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.6.3 (2026-08-07)
+
+### Bug Fixes
+
+- Add pairing server timeout
+  ([`e6e4878`](https://github.com/EHylands/QolsysController/commit/e6e48781ac1894611549524c4c8dc6481f30aa87))
+
+- Add pairing server timeout
+  ([`a205b86`](https://github.com/EHylands/QolsysController/commit/a205b86154340fd190446dad546bdcd10851ade1))
+
+
 ## v1.6.2 (2026-08-07)
 
 ### Bug Fixes
