@@ -50,17 +50,32 @@ class QolsysPairingServer:
         await self._start_server()
 
     async def wait_until_paired(self) -> None:
-        # Overall pairing deadline: fires even if no panel ever connects (the per-exchange
-        # timeout in handle_client only starts once a client is actually connected).
+        # Overall pairing deadline: fires even if no panel ever connects. Use a plain
+        # loop timer (not asyncio.timeout) that records the error and sets the done
+        # event, rather than cancelling this task. wait_until_paired runs inside the
+        # controller's supervisor TaskGroup, and asyncio.timeout cancelling a TaskGroup
+        # child does not reliably convert to TimeoutError - a raw CancelledError can
+        # escape, get swallowed by run_forever, and surface as an empty/half-paired
+        # result instead of a clean QolsysConfigError.
+        loop = asyncio.get_running_loop()
+        timeout_handle = loop.call_later(self._settings.pairing_timeout, self._on_pairing_timeout)
         try:
-            async with asyncio.timeout(self._settings.pairing_timeout):
-                await self._pairing_done.wait()
-        except TimeoutError:
-            raise QolsysConfigError(
-                f"Pairing timed out after {self._settings.pairing_timeout} seconds - no panel completed the exchange"
-            ) from None
+            await self._pairing_done.wait()
+        finally:
+            timeout_handle.cancel()
+
         if self._pairing_error is not None:
             raise self._pairing_error
+
+    def _on_pairing_timeout(self) -> None:
+        if self._pairing_done.is_set():
+            return
+
+        LOGGER.warning("Pairing Server - Timed out after %ss with no completed pairing", self._settings.pairing_timeout)
+        self._pairing_error = QolsysConfigError(
+            f"Pairing timed out after {self._settings.pairing_timeout} seconds - no panel completed the exchange"
+        )
+        self._pairing_done.set()
 
     async def stop(self) -> None:
         if self._closed:
@@ -88,7 +103,7 @@ class QolsysPairingServer:
             self._mdns_server = None
 
     async def _start_mdns(self) -> None:
-        LOGGER.debug("Pairing Server - Starting mDNS Service Discovery: %s:%s", self._settings.plugin_ip, self._pairing_port)
+        LOGGER.debug("Pairing Server - Starting mDNS Service: %s:%s", self._settings.plugin_ip, self._pairing_port)
 
         self._mdns_server = QolsysMDNS(
             self._settings.plugin_ip,
@@ -109,7 +124,7 @@ class QolsysPairingServer:
             raise QolsysConfigError(f"mDNS Service Discovery Error: {err}") from err
 
     async def _start_server(self) -> None:
-        LOGGER.debug("Pairing Server - Starting HTTP Server: %s:%s", self._settings.plugin_ip, self._pairing_port)
+        LOGGER.debug("Pairing Server - Starting HTTPS Server: %s:%s", self._settings.plugin_ip, self._pairing_port)
 
         context = await asyncio.to_thread(self._create_ssl_context)
 
