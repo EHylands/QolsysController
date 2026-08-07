@@ -39,7 +39,7 @@ class QolsysSettings:
         self._pairing_progress_file: str = "pairing_progress.txt"
 
         # Pairing Server
-        self._pairing_timeout: int = 60 # seconds (1 minutes)
+        self._pairing_timeout: int = 60  # seconds (1 minutes)
 
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30

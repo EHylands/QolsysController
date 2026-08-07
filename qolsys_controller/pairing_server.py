@@ -175,9 +175,7 @@ class QolsysPairingServer:
 
                     # Panel MAC is a 17-char string (AA:BB:CC:DD:EE:FF), so the length prefix must be 17
                     if length != 17:
-                        raise QolsysConfigError(
-                            f"Invalid pairing handshake from panel: expected MAC length 17, got {length}"
-                        )
+                        raise QolsysConfigError(f"Invalid pairing handshake from panel: expected MAC length 17, got {length}")
 
                     # Read Panel MAC
                     request = await reader.readexactly(length)
