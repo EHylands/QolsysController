@@ -50,7 +50,15 @@ class QolsysPairingServer:
         await self._start_server()
 
     async def wait_until_paired(self) -> None:
-        await self._pairing_done.wait()
+        # Overall pairing deadline: fires even if no panel ever connects (the per-exchange
+        # timeout in handle_client only starts once a client is actually connected).
+        try:
+            async with asyncio.timeout(self._settings.pairing_timeout):
+                await self._pairing_done.wait()
+        except TimeoutError:
+            raise QolsysConfigError(
+                f"Pairing timed out after {self._settings.pairing_timeout} seconds - no panel completed the exchange"
+            ) from None
         if self._pairing_error is not None:
             raise self._pairing_error
 
@@ -154,79 +162,78 @@ class QolsysPairingServer:
         end_token = b"-----END CERTIFICATE-----\n"
 
         try:
-            async with asyncio.timeout(self._settings.pairing_timeout):
-                continue_pairing = True
+            continue_pairing = True
 
-                while continue_pairing:
-                    # Receive panel MAC
-                    if not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
-                        address, port = writer.get_extra_info("peername")
-                        LOGGER.debug("Panel Connected from: %s:%s", address, port)
+            while continue_pairing:
+                # Receive panel MAC
+                if not received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
+                    address, port = writer.get_extra_info("peername")
+                    LOGGER.debug("Panel Connected from: %s:%s", address, port)
 
-                        # Read the first 2 bytes to get the length of the incoming message (Panel MAC)
-                        length = int.from_bytes(await reader.readexactly(2), "big")
+                    # Read the first 2 bytes to get the length of the incoming message (Panel MAC)
+                    length = int.from_bytes(await reader.readexactly(2), "big")
 
-                        # Panel MAC is a 17-char string (AA:BB:CC:DD:EE:FF), so the length prefix must be 17
-                        if length != 17:
-                            raise QolsysConfigError(
-                                f"Invalid pairing handshake from panel: expected MAC length 17, got {length}"
-                            )
+                    # Panel MAC is a 17-char string (AA:BB:CC:DD:EE:FF), so the length prefix must be 17
+                    if length != 17:
+                        raise QolsysConfigError(
+                            f"Invalid pairing handshake from panel: expected MAC length 17, got {length}"
+                        )
 
-                        # Read Panel MAC
-                        request = await reader.readexactly(length)
-                        LOGGER.debug("Receiving from Panel (raw bytes): %r", request)
-                        mac = request.decode()
-                        self._settings.panel_mac = "".join(char for char in mac if char.isprintable())
-                        self._settings.panel_ip = address
-                        received_panel_mac = True
+                    # Read Panel MAC
+                    request = await reader.readexactly(length)
+                    LOGGER.debug("Receiving from Panel (raw bytes): %r", request)
+                    mac = request.decode()
+                    self._settings.panel_mac = "".join(char for char in mac if char.isprintable())
+                    self._settings.panel_ip = address
+                    received_panel_mac = True
 
-                        # Send random MAC
-                        mac_bytes = self._settings.random_mac.encode()
-                        message = len(mac_bytes).to_bytes(2, "big") + mac_bytes
-                        LOGGER.debug("Sending to Panel (raw bytes): %r", message)
+                    # Send random MAC
+                    mac_bytes = self._settings.random_mac.encode()
+                    message = len(mac_bytes).to_bytes(2, "big") + mac_bytes
+                    LOGGER.debug("Sending to Panel (raw bytes): %r", message)
 
-                        writer.write(message)
-                        await writer.drain()
+                    writer.write(message)
+                    await writer.drain()
 
-                        # Send CSR
-                        async with aiofiles.open(self._pki.csr_file_path, mode="rb") as f:
-                            content = await f.read()
+                    # Send CSR
+                    async with aiofiles.open(self._pki.csr_file_path, mode="rb") as f:
+                        content = await f.read()
 
-                        LOGGER.debug("Sending to Panel: [CSR File Content]")
-                        writer.write(content)
-                        await writer.drain()
+                    LOGGER.debug("Sending to Panel: [CSR File Content]")
+                    writer.write(content)
+                    await writer.drain()
 
-                        # Send separator
-                        writer.write(b"sent")
-                        await writer.drain()
-                        continue
+                    # Send separator
+                    writer.write(b"sent")
+                    await writer.drain()
+                    continue
 
-                    # Receive signed client certificate
-                    if received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
-                        await reader.readuntil(start_token)
+                # Receive signed client certificate
+                if received_panel_mac and not received_signed_client_certificate and not received_qolsys_cer:
+                    await reader.readuntil(start_token)
 
-                        request = start_token + await reader.readuntil(end_token)
-                        LOGGER.debug("Saving [Signed Client Certificate]")
+                    request = start_token + await reader.readuntil(end_token)
+                    LOGGER.debug("Saving [Signed Client Certificate]")
 
-                        async with aiofiles.open(self._pki.secure_file_path, mode="wb") as f:
-                            await f.write(request)
+                    async with aiofiles.open(self._pki.secure_file_path, mode="wb") as f:
+                        await f.write(request)
 
-                        received_signed_client_certificate = True
+                    received_signed_client_certificate = True
 
-                    # Receive Qolsys certificate
-                    if received_panel_mac and received_signed_client_certificate and not received_qolsys_cer:
-                        await reader.readuntil(start_token)
+                # Receive Qolsys certificate
+                if received_panel_mac and received_signed_client_certificate and not received_qolsys_cer:
+                    await reader.readuntil(start_token)
 
-                        request = start_token + await reader.readuntil(end_token)
-                        LOGGER.debug("Saving [Qolsys Certificate]")
+                    request = start_token + await reader.readuntil(end_token)
+                    LOGGER.debug("Saving [Qolsys Certificate]")
 
-                        async with aiofiles.open(self._pki.qolsys_cer_file_path, mode="wb") as f:
-                            await f.write(request)
+                    async with aiofiles.open(self._pki.qolsys_cer_file_path, mode="wb") as f:
+                        await f.write(request)
 
-                        received_qolsys_cer = True
-                        continue_pairing = False
+                    received_qolsys_cer = True
+                    continue_pairing = False
 
-                        self._pairing_done.set()
+                    self._pairing_done.set()
 
         except asyncio.CancelledError:
             # Cooperative cancellation (normal shutdown) - not a pairing failure.

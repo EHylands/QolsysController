@@ -11,7 +11,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Any
 
-from qolsys_controller.controller import QolsysController
+from qolsys_controller import qolsys_controller
 from qolsys_controller.errors import QolsysConfigError, QolsysMqttError, QolsysSqlError, QolsysSslError
 
 LOGGER = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ class Controller:
     def __init__(self, config: ControllerConfig, log: logging.Logger) -> None:
         self.config = config
         self.log = log
-        self.controller = QolsysController()
+        self.controller = qolsys_controller()
 
     async def start(self) -> None:
         os.makedirs(self.config.config_dir, exist_ok=True)

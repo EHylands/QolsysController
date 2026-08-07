@@ -153,7 +153,6 @@ class QolsysController:
         LOGGER.debug("Qolsys Controller - Stopping Operation")
         self._supervisor_task.cancel()
         await self._shutdown_complete.wait()
-        LOGGER.debug("Qolsys Controller - Operation Stopped")
 
     async def config_task(self, start_pairing: bool) -> None:
         await self.set_controller_state(ControllerState.CONFIGURING)
@@ -246,7 +245,6 @@ class QolsysController:
 
                         await self.set_controller_state(ControllerState.CONNECTED)
                         self._reconnect_attempt = 0
-                        LOGGER.debug("MQTT Panel Client - Connected")
                         self.notify_panel_status_update()
 
                         await asyncio.Future()  # Run until cancelled or exception
