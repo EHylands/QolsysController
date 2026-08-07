@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.4 (2026-08-07)
+
+### Bug Fixes
+
+- Pairing server timeout raise qolsys configuration error
+  ([`d23f0c4`](https://github.com/EHylands/QolsysController/commit/d23f0c42de4ef7e30e4a60911ec9ea69a69120c2))
+
+
 ## v1.6.3 (2026-08-07)
 
 ### Bug Fixes
