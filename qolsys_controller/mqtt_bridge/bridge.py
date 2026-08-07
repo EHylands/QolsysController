@@ -101,7 +101,7 @@ class MqttBridge:
                 await asyncio.Future()  # Run until cancelled
 
         except* asyncio.CancelledError:
-            LOGGER.debug("MQTT Bridge - Shutting down ...")
+            pass
 
         except* Exception as err:
             LOGGER.error("MQTT Bridge - Failed to start: %s", err)
@@ -109,7 +109,7 @@ class MqttBridge:
 
         finally:
             self._is_running = False
-            LOGGER.info("MQTT Bridge - Shutdown completed")
+            LOGGER.debug("MQTT Bridge - Shutdown completed")
 
     @property
     def panel_unique_id(self) -> str:

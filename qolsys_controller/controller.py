@@ -63,6 +63,7 @@ class QolsysController:
         self._zone_id: str = "1"
         self._pairing_server: QolsysPairingServer | None = None
         self._supervisor_task: asyncio.Task[None] | None = None
+        self._shutdown_complete = asyncio.Event()
 
         # MQTT Panel Client
         self._reconnect_attempt: int = 0
@@ -93,6 +94,7 @@ class QolsysController:
 
     async def run_forever(self, reconnect: bool = True, run_once: bool = False, start_pairing: bool = False) -> None:
         LOGGER.debug("Starting Qolsys Controller Operation")
+        self._shutdown_complete.clear()
         try:
             async with asyncio.TaskGroup() as tg:
                 # Start MQTT Panel Client Supervisor
@@ -120,7 +122,6 @@ class QolsysController:
                 await asyncio.Future()  # Run until cancelled or exception
 
         except* asyncio.CancelledError:
-            LOGGER.debug("Controller - Shutting down ...")
             await self.set_controller_state(ControllerState.SHUTTING_DOWN)
 
         except* Exception as e:
@@ -138,6 +139,8 @@ class QolsysController:
             except InvalidControllerStateTransitionError:
                 pass
 
+            self._shutdown_complete.set()
+
     async def stop(self) -> None:
         if self._supervisor_task is None:
             LOGGER.debug("No Supervisor Task to Stop")
@@ -149,6 +152,8 @@ class QolsysController:
 
         LOGGER.debug("Qolsys Controller - Stopping Operation")
         self._supervisor_task.cancel()
+        await self._shutdown_complete.wait()
+        LOGGER.debug("Qolsys Controller - Operation Stopped")
 
     async def config_task(self, start_pairing: bool) -> None:
         await self.set_controller_state(ControllerState.CONFIGURING)
@@ -209,7 +214,6 @@ class QolsysController:
                 # Fresh outbound queue per connection attempt so stale commands
                 # from a previous session don't get sent on reconnect.
                 self._mqtt_publish_queue = asyncio.Queue()
-                LOGGER.debug("MQTT Panel Client - Starting")
 
                 # Configure controller
                 if not self._is_configured:
@@ -251,7 +255,6 @@ class QolsysController:
                 task = asyncio.current_task()
                 if task is not None and task.cancelling() > 0:
                     await self.set_controller_state(ControllerState.SHUTTING_DOWN)
-                    LOGGER.debug("MQTT Panel Client - Shutting down ...")
                 raise
 
             except* QolsysConfigError as err:

@@ -38,6 +38,9 @@ class QolsysSettings:
         self._pairing_resume: bool = False
         self._pairing_progress_file: str = "pairing_progress.txt"
 
+        # Pairing Server
+        self._pairing_timeout: int = 300  # seconds (5 minutes)
+
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 300
@@ -332,6 +335,14 @@ class QolsysSettings:
     @pairing_resume.setter
     def pairing_resume(self, value: bool) -> None:
         self._pairing_resume = value
+
+    @property
+    def pairing_timeout(self) -> int:
+        return self._pairing_timeout
+
+    @pairing_timeout.setter
+    def pairing_timeout(self, value: int) -> None:
+        self._pairing_timeout = value
 
     @property
     def pairing_progress_file(self) -> str:

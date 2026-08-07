@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
@@ -56,6 +57,8 @@ class QolsysPartition(QolsysObservable):
 
         # Alarm State (state table)
         self._alarm_state: PartitionAlarmState = alarm_state
+        self._delay_reset: bool = False
+        self._delay_task: asyncio.Task[None] | None = None
 
         # Alarm Type (alarmedsensor table)
         self._alarm_type_array: list[PartitionAlarmType] = []
@@ -229,6 +232,20 @@ class QolsysPartition(QolsysObservable):
     @alarm_state.setter
     def alarm_state(self, new_value: PartitionAlarmState) -> None:
         if self._alarm_state != new_value:
+            # Need to delay DELAY -> NONE transition to allow for the panel to update system_status
+            if self.alarm_state == PartitionAlarmState.DELAY and new_value == PartitionAlarmState.NONE:
+                LOGGER.debug("Partition%s (%s) - alarm_state: Dectected DELAY reset to NONE", self.id, self.name)
+                self._delay_reset = True
+
+                async def _delayed_notify() -> None:
+                    await asyncio.sleep(3)
+                    self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+
+                if self._delay_task and not self._delay_task.done():
+                    self._delay_task.cancel()
+                self._delay_task = asyncio.create_task(_delayed_notify())
+                return
+
             LOGGER.debug("Partition%s (%s) - alarm_state: %s", self.id, self.name, new_value)
             self._alarm_state = new_value
             self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
