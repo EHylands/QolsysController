@@ -43,6 +43,18 @@ from .utils_mqtt import generate_random_mac
 LOGGER = logging.getLogger(__name__)
 
 
+def _first_exception(exc: BaseException) -> BaseException:
+    """Return the first leaf exception of a (possibly nested) ExceptionGroup.
+
+    run_forever runs on an asyncio.TaskGroup, which raises (Base)ExceptionGroup.
+    Callers want the single meaningful failure (e.g. QolsysConfigError), so the
+    group is unwrapped to a plain exception before re-raising from run_forever.
+    """
+    while isinstance(exc, BaseExceptionGroup):
+        exc = exc.exceptions[0]
+    return exc
+
+
 class QolsysController:
     def __init__(self) -> None:
         self._state = QolsysState(self)
@@ -124,16 +136,19 @@ class QolsysController:
         except* asyncio.CancelledError:
             await self.set_controller_state(ControllerState.SHUTTING_DOWN)
 
-        except* Exception as e:
-            LOGGER.exception("Controller - TaskGroup failed with exception: %s", e)
-            raise
+        except* Exception as eg:
+            # asyncio.TaskGroup raises an ExceptionGroup; unwrap to the single
+            # meaningful failure so callers get a plain exception (e.g. QolsysConfigError)
+            # instead of having to flatten an ExceptionGroup.
+            exc = _first_exception(eg)
+            LOGGER.exception("Controller - TaskGroup failed with exception: %s", exc)
+            raise exc from None
 
         finally:
             if self._pairing_server is not None:
                 await self._pairing_server.stop()
                 self._pairing_server = None
 
-            LOGGER.debug("Controller - Shutdown completed")
             try:
                 await self.set_controller_state(ControllerState.STOPPED)
             except InvalidControllerStateTransitionError:
