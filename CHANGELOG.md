@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.5 (2026-08-08)
+
+### Bug Fixes
+
+- Update exception handling
+  ([`3d7da61`](https://github.com/EHylands/QolsysController/commit/3d7da61e00a923a05a4b5dd506de73e4f1da489b))
+
+
 ## v1.6.4 (2026-08-07)
 
 ### Bug Fixes
