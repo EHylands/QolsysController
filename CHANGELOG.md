@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.6 (2026-08-08)
+
+### Bug Fixes
+
+- Convert exception group to single exception
+  ([`47b50a4`](https://github.com/EHylands/QolsysController/commit/47b50a49b80aec9e4c327412ebf32c72653eabdb))
+
+
 ## v1.6.5 (2026-08-08)
 
 ### Bug Fixes
