@@ -139,9 +139,10 @@ class QolsysController:
         except* Exception as eg:
             # asyncio.TaskGroup raises an ExceptionGroup; unwrap to the single
             # meaningful failure so callers get a plain exception (e.g. QolsysConfigError)
-            # instead of having to flatten an ExceptionGroup.
+            # instead of having to flatten an ExceptionGroup. Log with exc_info=exc so the
+            # traceback is the unwrapped exception, not the ExceptionGroup wrapper.
             exc = _first_exception(eg)
-            LOGGER.exception("Controller - TaskGroup failed with exception: %s", exc)
+            LOGGER.error("Controller - TaskGroup failed with exception: %s", exc, exc_info=exc)
             raise exc from None
 
         finally:
@@ -270,9 +271,17 @@ class QolsysController:
                     await self.set_controller_state(ControllerState.SHUTTING_DOWN)
                 raise
 
-            except* QolsysConfigError as err:
-                LOGGER.exception("MQTT Panel Client - Supervisor detected configuration error: %s", err)
-                raise
+            except* QolsysConfigError as eg:
+                # config_task raises a plain QolsysConfigError (not from the inner MQTT
+                # TaskGroup); except* wraps it into a group, so unwrap and re-raise the
+                # single exception instead of an ExceptionGroup.
+                exc = _first_exception(eg)
+                LOGGER.error(
+                    "MQTT Panel Client - Supervisor detected configuration error: %s",
+                    exc,
+                    exc_info=exc,
+                )
+                raise exc from None
 
             except* aiomqtt.exceptions.MqttError as err:
                 for exc in err.exceptions:
@@ -292,7 +301,7 @@ class QolsysController:
                 raise QolsysSslError from err
 
             except* Exception as err:
-                for exc in err.exceptions:  # type: ignore[assignment]
+                for exc in err.exceptions:
                     LOGGER.exception("MQTT Panel Client - Supervisor detected failure: %r", exc)
                 raise
 
