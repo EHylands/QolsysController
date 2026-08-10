@@ -212,6 +212,12 @@ class QolsysPartition(QolsysObservable):
         if self._system_status != new_value:
             LOGGER.debug("Partition%s (%s) - system_status: %s", self.id, self.name, new_value)
             self._system_status = new_value
+
+            # If delay task is running, cancel it since system_status has changed
+            if self._delay_task and not self._delay_task.done():
+                self._delay_task.cancel()
+                self._delay_task = None
+
             self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
     @property
@@ -232,17 +238,20 @@ class QolsysPartition(QolsysObservable):
     @alarm_state.setter
     def alarm_state(self, new_value: PartitionAlarmState) -> None:
         if self._alarm_state != new_value:
-            # Need to delay DELAY -> NONE transition to allow for the panel to update system_status
+            # Need to delay DELAY -> NONE transition to allow for the panel to update system_status first
             if self.alarm_state == PartitionAlarmState.DELAY and new_value == PartitionAlarmState.NONE:
                 LOGGER.debug("Partition%s (%s) - alarm_state: Dectected DELAY reset to NONE", self.id, self.name)
                 self._delay_reset = True
 
                 async def _delayed_notify() -> None:
                     await asyncio.sleep(3)
+                    LOGGER.debug("Partition%s (%s) - alarm_state: %s", self.id, self.name, new_value)
                     self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
                 if self._delay_task and not self._delay_task.done():
                     self._delay_task.cancel()
+                    self._delay_task = None
+                self._alarm_state = new_value
                 self._delay_task = asyncio.create_task(_delayed_notify())
                 return
 
