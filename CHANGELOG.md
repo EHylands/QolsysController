@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.7 (2026-08-10)
+
+### Bug Fixes
+
+- Add pairing port setting
+  ([`8655fa0`](https://github.com/EHylands/QolsysController/commit/8655fa0588f6f08f8fef1750baa7b0faae49f01e))
+
+
 ## v1.6.6 (2026-08-08)
 
 ### Bug Fixes
