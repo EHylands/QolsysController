@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.7.0 (2026-08-10)
+
+### Chores
+
+- **deps**: Bump cffi from 2.1.0 to 2.1.1
+  ([#63](https://github.com/EHylands/QolsysController/pull/63),
+  [`a000a74`](https://github.com/EHylands/QolsysController/commit/a000a74101592bcf1b078d6637a1f8f8815663e4))
+
+- **deps**: Update cryptography requirement
+  ([#62](https://github.com/EHylands/QolsysController/pull/62),
+  [`0dec507`](https://github.com/EHylands/QolsysController/commit/0dec507114659daaf6818976041f8e116e38382b))
+
+### Features
+
+- Support entry delay pending status
+  ([`9f2f6ae`](https://github.com/EHylands/QolsysController/commit/9f2f6ae263595290a37edcd05c13b44fb9ef9ccb))
+
+
 ## v1.6.7 (2026-08-10)
 
 ### Bug Fixes
