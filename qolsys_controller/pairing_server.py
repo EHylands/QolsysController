@@ -44,7 +44,9 @@ class QolsysPairingServer:
         if not self._settings.check_plugin_ip():
             raise QolsysConfigError("Plugin IP Address not configured")
 
-        self._pairing_port = random.randint(50000, 55000)
+        # Use the configured port if set (lets the caller advertise it up front),
+        # otherwise pick a random high port.
+        self._pairing_port = self._settings.pairing_port or random.randint(50000, 55000)
 
         await self._start_mdns()
         await self._start_server()

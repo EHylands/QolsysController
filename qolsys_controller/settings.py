@@ -40,6 +40,7 @@ class QolsysSettings:
 
         # Pairing Server
         self._pairing_timeout: int = 180  # seconds (3 minutes)
+        self._pairing_port: int = 0  # 0 = pick a random high port on start
 
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
@@ -343,6 +344,14 @@ class QolsysSettings:
     @pairing_timeout.setter
     def pairing_timeout(self, value: int) -> None:
         self._pairing_timeout = value
+
+    @property
+    def pairing_port(self) -> int:
+        return self._pairing_port
+
+    @pairing_port.setter
+    def pairing_port(self, value: int) -> None:
+        self._pairing_port = value
 
     @property
     def pairing_progress_file(self) -> str:
