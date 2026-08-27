@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.7.1 (2026-08-27)
+
+### Bug Fixes
+
+- Validate thermostat mode values during parsing
+  ([`1b67bb4`](https://github.com/EHylands/QolsysController/commit/1b67bb4d5c7fbf02200159bf9c8f9804f73eb5b5))
+
+### Chores
+
+- Update semantic release
+  ([`4011a24`](https://github.com/EHylands/QolsysController/commit/4011a24a168a90129e6393ad460d870daedb1a23))
+
+- **deps**: Bump thollander/actions-comment-pull-request from 2 to 3
+  ([#46](https://github.com/EHylands/QolsysController/pull/46),
+  [`9958c6a`](https://github.com/EHylands/QolsysController/commit/9958c6a2db1a0730fe16816ae30ede445ae0e5e2))
+
+
 ## v1.7.0 (2026-08-10)
 
 ### Chores
