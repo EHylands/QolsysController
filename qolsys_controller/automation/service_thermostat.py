@@ -334,8 +334,36 @@ class ThermostatService(AutomationService):
                 self.automation_device.status,
             )
 
-    def _set_hvac_mode(self, hvac_mode: str) -> None:
-        int_hvac_mode = int(hvac_mode.strip("[]"))
+    def _set_hvac_mode(self, hvac_mode: str | int) -> None:
+        LOGGER.debug("%s - hvac_mode: %s (%s)", self.prefix, hvac_mode, type(hvac_mode).__name__)
+
+        if isinstance(hvac_mode, str):
+            if hvac_mode == "":
+                self.hvac_mode = QolsysHvacMode.AUTO
+                return
+
+            try:
+                int_hvac_mode = int(hvac_mode.strip("[]"))
+            except ValueError:
+                LOGGER.error(
+                    "%s - Invalid hvac_mode value: %r",
+                    self.prefix,
+                    hvac_mode,
+                )
+                return
+
+        elif isinstance(hvac_mode, int):
+            int_hvac_mode = hvac_mode
+
+        else:
+            LOGGER.error(
+                "%s - Invalid hvac_mode type: %s (%r)",
+                self.prefix,
+                type(hvac_mode).__name__,
+                hvac_mode,
+            )
+            return
+
         zwave_hvac_mode = ThermostatMode(int_hvac_mode)
         self.hvac_mode = self.ZWAVE_TO_QOLSYS_HVAC_MODE.get(zwave_hvac_mode, None)
 
