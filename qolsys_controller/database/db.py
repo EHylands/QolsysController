@@ -12,6 +12,7 @@ from .table_doorlock import QolsysTableDoorLock
 from .table_eu_event import QolsysTableEuEvent
 from .table_heat_map import QolsysTableHeatMap
 from .table_history import QolsysTableHistory
+from .table_ime_data import QolsysTableImeData
 from .table_iqremotesettings import QolsysTableIqRemoteSettings
 from .table_iqrouter_network_config import QolsysTableIqRouterNetworkConfig
 from .table_iqrouter_user_device import QolsysTableIqRouterUserDevice
@@ -34,6 +35,7 @@ from .table_trouble_conditions import QolsysTableTroubleConditions
 from .table_user import QolsysTableUser
 from .table_virtual_device import QolsysTableVirtualDevice
 from .table_weather import QolsysTableWeather
+from .table_yale_auth_ids import QolsysTableYaleAuthIds
 from .table_zigbee_device import QolsysTableZigbeeDevice
 from .table_zwave_association_group import QolsysTableZwaveAssociationGroup
 from .table_zwave_history import QolsysTableZwaveHistory
@@ -84,6 +86,8 @@ class QolsysDB:
         self.table_output_rules = QolsysTableOutputRules(self.db, self.cursor)
         self.table_shades = QolsysTableShades(self.db, self.cursor)
         self.table_nest_device = QolsysTableNestDevice(self.db, self.cursor)
+        self.table_yale_auth_ids = QolsysTableYaleAuthIds(self.db, self.cursor)
+        self.table_ime_data = QolsysTableImeData(self.db, self.cursor)
 
         self._table_array: list[QolsysTable] = []
         self._table_array.append(self.table_sensor)
@@ -122,6 +126,8 @@ class QolsysDB:
         self._table_array.append(self.table_output_rules)
         self._table_array.append(self.table_shades)
         self._table_array.append(self.table_nest_device)
+        self._table_array.append(self.table_yale_auth_ids)
+        self._table_array.append(self.table_ime_data)
 
     @property
     def db(self) -> sqlite3.Connection:
