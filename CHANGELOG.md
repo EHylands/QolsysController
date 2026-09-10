@@ -2,6 +2,40 @@
 
 <!-- version list -->
 
+## v1.7.2 (2026-09-10)
+
+### Bug Fixes
+
+- Adding yale_auth_ids and ime_data table
+  ([`1b664f3`](https://github.com/EHylands/QolsysController/commit/1b664f311b3865e128db9e671b19d18d399567e3))
+
+### Chores
+
+- **deps**: Bump gitpython from 3.1.43 to 3.1.58
+  ([#64](https://github.com/EHylands/QolsysController/pull/64),
+  [`22f9f6f`](https://github.com/EHylands/QolsysController/commit/22f9f6f0f9aa60058ecef8aae55e48631e4444de))
+
+- **deps**: Bump gitpython from 3.1.58 to 3.1.60
+  ([#66](https://github.com/EHylands/QolsysController/pull/66),
+  [`6fbb918`](https://github.com/EHylands/QolsysController/commit/6fbb918a79255af25f404637949afb66128c1969))
+
+- **deps**: Bump gitpython from 3.1.60 to 3.1.61
+  ([#68](https://github.com/EHylands/QolsysController/pull/68),
+  [`9c54bd8`](https://github.com/EHylands/QolsysController/commit/9c54bd8effadb601b36484260a7e5b0982d3d736))
+
+- **deps**: Bump python-semantic-release from 10.6.1 to 10.6.2
+  ([#67](https://github.com/EHylands/QolsysController/pull/67),
+  [`86d435d`](https://github.com/EHylands/QolsysController/commit/86d435d91a0a5e93c444b9e98e4fc02c274a355b))
+
+- **deps**: Bump zeroconf from 0.150.0 to 0.151.3
+  ([#69](https://github.com/EHylands/QolsysController/pull/69),
+  [`db32117`](https://github.com/EHylands/QolsysController/commit/db3211727bc91fb93db1edac9a48f8063c1e3897))
+
+- **deps**: Update cryptography requirement
+  ([#65](https://github.com/EHylands/QolsysController/pull/65),
+  [`97c4f55`](https://github.com/EHylands/QolsysController/commit/97c4f556ba28d532cc1a7050ecc19a3183d1d2da))
+
+
 ## v1.7.1 (2026-08-27)
 
 ### Bug Fixes
