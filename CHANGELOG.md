@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.0 (2026-09-12)
+
+### Features
+
+- Add change_master_volume_level and change_doorbell_volume_level commands
+  ([`3cd48d4`](https://github.com/EHylands/QolsysController/commit/3cd48d4030efecd304185d87f6c9164d29474387))
+
+
 ## v1.7.2 (2026-09-10)
 
 ### Bug Fixes
