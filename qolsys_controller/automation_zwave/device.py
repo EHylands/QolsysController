@@ -61,6 +61,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._multisensor_capabilities: str = ""
 
         self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
+        self._multi_channel_details:str = ""
         self.multi_channel_details = zwave_dict.get("multi_channel_details", "")
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
