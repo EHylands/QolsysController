@@ -61,7 +61,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._multisensor_capabilities: str = ""
 
         self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
-        self._multi_channel_details = zwave_dict.get("multi_channel_details", "")
+        self.multi_channel_details = zwave_dict.get("multi_channel_details", "")
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
@@ -409,11 +409,38 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     
     @multi_channel_details.setter
     def multi_channel_details(self, value) -> None:
-        # parse endpoint dict and add new services 
-        # If needed
-        pass
-        
-    @property
+        # parse endpoint dict and add new services
+        if self._multi_channel_details != value:
+            self._multi_channel_details = value
+
+            try:
+                details: dict[str, int | list[int]] = (
+                    json.loads(value) if isinstance(value, str) and value.strip() else {}
+                )
+            except json.JSONDecodeError:
+                details = {}
+
+            if not isinstance(details, dict):
+                details = {}
+
+            endpoints: dict[int, list[int]] = {
+                int(k): v for k, v in details.items() if k.isdigit() and isinstance(v, list)
+            }
+
+            for ep, command_classes in sorted(endpoints.items()):
+                if ZwaveCommandClass.SwitchMultiLevel in command_classes:
+                    if self.service_get(LightServiceZwave, ep) is None:
+                        self.service_add_light_service(endpoint=ep)
+
+                if ZwaveCommandClass.SwitchBinary in command_classes:
+                    # check if a service is already regisrered with pannel
+                    if (self.service_get(ValveServiceZwave, ep) is None
+                        and self.service_get(LightServiceZwave, ep) is None
+                        and self.service_get(SirenServiceZwave, ep) is None):
+                        # Add new Binary switch
+                        self.service_add_outlet_service(endpoint=ep)                   
+
+    @property(
     def node_status(self) -> str:
         return self._node_status
 
