@@ -2,6 +2,34 @@
 
 <!-- version list -->
 
+## v1.8.1 (2026-09-16)
+
+### Bug Fixes
+
+- Parse zwave multi channel details
+  ([`28f0914`](https://github.com/EHylands/QolsysController/commit/28f0914b925970984ef0dafae6ccaa59e3bd3b5f))
+
+### Chores
+
+- Add multi_channel_details property
+  ([`b855cd3`](https://github.com/EHylands/QolsysController/commit/b855cd386795c1ffb81a260d005c7a1c5bafd946))
+
+- Multi channel details
+  ([`fc74006`](https://github.com/EHylands/QolsysController/commit/fc74006d9e9fb32efbab3998b83199efc4d463a4))
+
+- Multi channel endpoint
+  ([`63fd771`](https://github.com/EHylands/QolsysController/commit/63fd7710f517f140810cac6def8f5829786d2fa6))
+
+- Multi channel endpoint
+  ([`3106d6d`](https://github.com/EHylands/QolsysController/commit/3106d6d44fa7419b7cf1778c8501c2818eed0f3c))
+
+- Multi channel endpoint
+  ([`f7e3daf`](https://github.com/EHylands/QolsysController/commit/f7e3daf4ee914edf0c127c76af041ee7f1b26c3d))
+
+- Parse multi channel details
+  ([`9f7f5a2`](https://github.com/EHylands/QolsysController/commit/9f7f5a2fb8ca51c5dfc9eca36e8a86f55c01c598))
+
+
 ## v1.8.0 (2026-09-12)
 
 ### Features
