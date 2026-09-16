@@ -403,7 +403,16 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             except json.JSONDecodeError:
                 LOGGER.error("%s - Error parsing meter_capabilities:%s", self.prefix)
                 return
-
+                
+    @property multi_channel_details(self) -> str:
+        return self._multi_channel_details
+    
+    @multi_channel_details.setter
+    def multi_channel_details(self, value) -> None:
+        # parse endpoint dict and add new services 
+        # If needed
+        pass
+        
     @property
     def node_status(self) -> str:
         return self._node_status
