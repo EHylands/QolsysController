@@ -410,7 +410,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         return self._multi_channel_details
 
     @multi_channel_details.setter
-    def multi_channel_details(self, value) -> None:
+    def multi_channel_details(self, value: str) -> None:
         # parse endpoint dict and add new services
         if self._multi_channel_details != value:
             self._multi_channel_details = value
@@ -430,7 +430,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             }
 
             for ep, command_classes in sorted(endpoints.items()):
-                if ZwaveCommandClass.SwitchMultiLevel in command_classes:
+                if ZwaveCommandClass.SwitchMultilevel in command_classes:
                     if self.service_get(LightServiceZwave, ep) is None:
                         self.service_add_light_service(endpoint=ep)
 
