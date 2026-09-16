@@ -404,7 +404,8 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                 LOGGER.error("%s - Error parsing meter_capabilities:%s", self.prefix)
                 return
                 
-    @property multi_channel_details(self) -> str:
+    @property
+    def multi_channel_details(self) -> str:
         return self._multi_channel_details
     
     @multi_channel_details.setter
@@ -440,7 +441,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         # Add new Binary switch
                         self.service_add_outlet_service(endpoint=ep)                   
 
-    @property(
+    @property
     def node_status(self) -> str:
         return self._node_status
 
