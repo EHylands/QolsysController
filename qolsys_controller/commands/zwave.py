@@ -106,8 +106,9 @@ class ZWaveCommands:
         if not isinstance(node, QolsysAutomationDeviceZwave):
             raise InvalidVirtualNodeError(node_id)
 
-        service = node.service_get(LightServiceZwave, int(endpoint))
-        if not isinstance(service, (LightServiceZwave, ValveServiceZwave, SirenServiceZwave)):
+        if (node.service_get(LightServiceZwave, int(endpoint)) is None
+            and node.service_get(ValveServiceZwave, int(endpoint)) is None
+            and node.service_get(SirenServiceZwave, int(endpoint)) is None):
             raise ServiceNotFoundError(node_id, endpoint, "LightServiceZwave, ValveService or SirenService")
 
         level = 0
