@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.2 (2026-09-16)
+
+### Bug Fixes
+
+- Update available services for zwave binary switch
+  ([`fc273bb`](https://github.com/EHylands/QolsysController/commit/fc273bbaefdceadc6ceabc7802a8b66386840aa8))
+
+
 ## v1.8.1 (2026-09-16)
 
 ### Bug Fixes
