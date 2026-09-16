@@ -407,7 +407,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     @property
     def multi_channel_details(self) -> str:
         return self._multi_channel_details
-    
+
     @multi_channel_details.setter
     def multi_channel_details(self, value) -> None:
         # parse endpoint dict and add new services
@@ -439,7 +439,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         and self.service_get(LightServiceZwave, ep) is None
                         and self.service_get(SirenServiceZwave, ep) is None):
                         # Add new Binary switch
-                        self.service_add_outlet_service(endpoint=ep)                   
+                        self.service_add_outlet_service(endpoint=ep)
 
     @property
     def node_status(self) -> str:
