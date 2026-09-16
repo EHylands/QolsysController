@@ -7,6 +7,7 @@ from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwav
 from qolsys_controller.automation_zwave.service_cover import CoverServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
+from qolsys_controller.automation_zwave.service_outlet import OutletServiceZwave
 from qolsys_controller.automation_zwave.service_siren import SirenServiceZwave
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
