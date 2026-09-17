@@ -193,6 +193,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 valve_service = ValveServiceZwave(automation_device=self, endpoint=endpoint)
 
         if valve_service is not None:
+            if endpoint == self.end_point:
+                valve_service.is_main_endpoint_service = True
             self.service_add(valve_service)
             return
 
@@ -210,6 +212,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 siren_service = SirenServiceZwave(automation_device=self, endpoint=endpoint)
 
         if siren_service is not None:
+            if endpoint == self.end_point:
+                siren_service.is_main_endpoint_service = True
             self.service_add(siren_service)
             return
 
@@ -227,6 +231,10 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 outlet_service = OutletServiceZwave(automation_device=self, endpoint=endpoint)
 
         if outlet_service is not None:
+            if endpoint == self.end_point:
+                outlet_service.is_main_endpoint_service = True
+    
+    
             self.service_add(outlet_service)
             return
 
@@ -244,6 +252,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 thermostat_service = ThermostatServiceZwave(automation_device=self, endpoint=endpoint)
 
         if thermostat_service is not None:
+            if endpoint == self.end_point:
+                thermostat_service.is_main_endpoint_service = True
             self.service_add(thermostat_service)
             return
 
@@ -261,6 +271,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 sensor_service = SensorServiceZwave(automation_device=self, endpoint=endpoint)
 
         if sensor_service is not None:
+            if endpoint == self.end_point:
+                sensor_service.is_main_endpoint_service = True
             self.service_add(sensor_service)
             return
 
@@ -281,6 +293,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 light_service = LightServiceZigbee(automation_device=self, endpoint=endpoint)
 
         if light_service is not None:
+            if endpoint == self.end_point:
+                light.service.is_main_endpoint_service = True
             self.service_add(light_service)
             return
 
@@ -298,6 +312,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 lock_service = LockServiceZigbee(self, endpoint=endpoint)
 
         if lock_service is not None:
+            if endpoint == self.end_point:
+                lock_service.is_main_endpoint_service = True
             self.service_add(lock_service)
             return
 
@@ -320,6 +336,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 pass
 
         if battery_service is not None:
+            if endpoint == self.end_point:
+                battery_service.is_main_endpoint_service = True
             self.service_add(battery_service)
             return
 
@@ -342,6 +360,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 service = StatusServiceZigbee(automation_device=self, endpoint=endpoint)
 
         if service is not None:
+            if endpoint == self.end_point:
+                service.is_main_endpoint_service = True
             self.service_add(service)
             return
 
@@ -359,13 +379,16 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
                 cover_service = CoverServiceZwave(automation_device=self, endpoint=endpoint)
 
         if cover_service is not None:
+            if endpoint == self.end_point:
+                cover_service.is_main_endpoint_service = True
             self.service_add(cover_service)
             return
 
     def update_automation_services(self) -> None:
         for endpoint, services_list in self._services.items():
             for service in services_list:
-                service.update_automation_service()
+                if service.is_main_endpoint_service:
+                    service.update_automation_service()
 
     def update_automation_device(self, data: dict[str, str]) -> None:
         # Check if we are updating same virtual_node_id
