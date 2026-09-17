@@ -408,7 +408,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     # -----------------------------
 
     @property
-    def end_point(self) -> str
+    def end_point(self) -> str:
         return self._end_point
 
     @property
