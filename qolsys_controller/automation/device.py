@@ -233,8 +233,8 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
         if outlet_service is not None:
             if endpoint == self.end_point:
                 outlet_service.is_main_endpoint_service = True
-    
-    
+
+
             self.service_add(outlet_service)
             return
 
@@ -294,7 +294,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         if light_service is not None:
             if endpoint == self.end_point:
-                light.service.is_main_endpoint_service = True
+                light_service.is_main_endpoint_service = True
             self.service_add(light_service)
             return
 
