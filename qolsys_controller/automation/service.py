@@ -19,7 +19,7 @@ class AutomationService(ABC):
         return self._is_main_endpoint_service
 
     @is_main_endpoint_service.setter
-    def is_main_automation_service(self, value: bool) -> None:
+    def is_main_endpoint_service(self, value: bool) -> None:
         self._is_main_endpoint_service = value
 
     @property
