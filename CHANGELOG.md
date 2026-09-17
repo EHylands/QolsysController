@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.8.3 (2026-09-17)
+
+### Bug Fixes
+
+- Add outlet service to binary switch command
+  ([`e6b090f`](https://github.com/EHylands/QolsysController/commit/e6b090f615cc0ef11604c623d325ba7b9bd847ce))
+
+- Ouletservice zwave
+  ([`ff81834`](https://github.com/EHylands/QolsysController/commit/ff818349c8d7e05686a20ef02a4ba04658522416))
+
+
 ## v1.8.2 (2026-09-16)
 
 ### Bug Fixes
