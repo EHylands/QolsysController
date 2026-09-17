@@ -73,19 +73,12 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._protocol = AutomationDeviceProtocol.ZWAVE
 
         # Add Base Services
-        self.service_add_status_service(endpoint=0)
-        self.service_add_battery_service(endpoint=0)
+        self.service_add_status_service(endpoint=int(self.end_point))
+        self.service_add_battery_service(endpoint=int(self.end_point))
         self.multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
         self.meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
 
         super().update_automation_services()
-
-        # Discover Z-Wave Services not already added on main IQ Panel
-        self.discover_zwave_services()
-
-    def discover_zwave_services(self) -> None:
-        for endpoint in self._endpoint_details:
-            pass
 
     def update_zwave_device(self, data: dict[str, str]) -> None:
         self.start_batch_update()
