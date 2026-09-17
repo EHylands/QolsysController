@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v1.8.4 (2026-09-17)
+
+### Bug Fixes
+
+- Only update zwave device on default endpoint
+  ([`180c0e4`](https://github.com/EHylands/QolsysController/commit/180c0e41a33338c78fd1a0f3af6b59435e634285))
+
+### Chores
+
+- Add device end_point property
+  ([`06fa860`](https://github.com/EHylands/QolsysController/commit/06fa86089b82a34f2198ec137c8dd82330df5c7a))
+
+- Add end_point property to automation device
+  ([`6582f6e`](https://github.com/EHylands/QolsysController/commit/6582f6ebc3268a1c8f544c4f7cbaf874fc1ff61b))
+
+- Add is_main_endpoint_servicd
+  ([`4d21de7`](https://github.com/EHylands/QolsysController/commit/4d21de746c8e61a11cff14775c71c979b601b09d))
+
+- Add is_main_endpoint_service
+  ([`b53cbda`](https://github.com/EHylands/QolsysController/commit/b53cbda92b0394bd742d8b779eed177f4649d55a))
+
+- Add is_main_endpoint_service
+  ([`d6ba71f`](https://github.com/EHylands/QolsysController/commit/d6ba71f35c7c45f164d0d2ca71ff46da8f86d2f3))
+
+- Add is_main_endpoint_service service property
+  ([`0557d3c`](https://github.com/EHylands/QolsysController/commit/0557d3c0bc87888ac5cf2a63c31ef82946a03a51))
+
+- Add service is_main_endpoint_service property
+  ([`c500f1f`](https://github.com/EHylands/QolsysController/commit/c500f1fd72fd8b0038c2334757dcaed2fe085e59))
+
+
 ## v1.8.3 (2026-09-17)
 
 ### Bug Fixes
