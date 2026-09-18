@@ -107,7 +107,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             match command_class:
                 case ZwaveCommandClass.SwitchBinary:
                     self.parse_command_25(payload, endpoint)
-                    
+    
                 case ZwaveCommandClass.SwitchMultilevel:
                     self.parse_command_26(payload, endpoint)    
 
@@ -128,7 +128,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
 
     def parse_command_26(self, payload: bytes, endpoint: int) -> None:
         command = payload[1]
-        
+
         if command == 0x03:
             light_service = self. service_get(LightService, endpoint)
             if isinstance(light_service, LightServiceZwave):
@@ -218,8 +218,8 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                     return
 
     def update_automation_services(self) -> None:
-        if len(self._services) > 1
-            LOGGER.debug("More than 1 one point, failing back to raw zwave update")
+        if len(self._services) > 1:
+            LOGGER.debug("More than 1 one endpoint, failing back to raw zwave update")
             return 
 
         for endpoint, services_list in self._services.items():
