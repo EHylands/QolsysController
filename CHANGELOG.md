@@ -2,6 +2,43 @@
 
 <!-- version list -->
 
+## v1.8.5 (2026-09-18)
+
+### Bug Fixes
+
+- Multilevel typo
+  ([`40507c7`](https://github.com/EHylands/QolsysController/commit/40507c7b95a1040afc3577f2fb363e65ff92b0e6))
+
+- Mypy
+  ([`2253816`](https://github.com/EHylands/QolsysController/commit/22538168b762a59192e3aacb5a45f078eb86f17d))
+
+- Parse_26 command
+  ([`68eaad2`](https://github.com/EHylands/QolsysController/commit/68eaad282be5b6c5f9ee96aa8f7841f752f2e4cf))
+
+- Ruff
+  ([`77f5c45`](https://github.com/EHylands/QolsysController/commit/77f5c453ac43afb84a61221e3762a8edda7e6c48))
+
+- Ruff
+  ([`7214a2e`](https://github.com/EHylands/QolsysController/commit/7214a2ee5b6accc705706a48ad20e3f658865374))
+
+- Ruff
+  ([`0b2d1a2`](https://github.com/EHylands/QolsysController/commit/0b2d1a27d1b777931ccaf04e638386e81e096f32))
+
+- Ruff
+  ([`531275b`](https://github.com/EHylands/QolsysController/commit/531275b0ae748d3a94edd2a046b985c46e2d491b))
+
+### Chores
+
+- Raw update light_service on 0x25 command
+  ([`1dfa291`](https://github.com/EHylands/QolsysController/commit/1dfa2910147963c078d9eb425abea867a9388434))
+
+- Remove guard
+  ([`cad5447`](https://github.com/EHylands/QolsysController/commit/cad5447e44b919c58fae4223b142788b99abd0af))
+
+- Remove reference to is_main_endpoint service
+  ([`a146bcc`](https://github.com/EHylands/QolsysController/commit/a146bcc5909aceeb66026b1030d37a445f3f3d84))
+
+
 ## v1.8.4 (2026-09-17)
 
 ### Bug Fixes
