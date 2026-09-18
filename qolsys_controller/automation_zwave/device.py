@@ -160,6 +160,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             # Update Light Service at specified endpoint
             light_service = self.service_get(LightServiceZwave, endpoint)
             if isinstance(light_service, LightServiceZwave):
+                light_service.is_on = payload[2] == 0xFF
                 return
 
             # No service found for this endpoint
