@@ -1,4 +1,4 @@
-from __future__ import annotations
+un from __future__ import annotations
 
 import json
 import logging
@@ -107,7 +107,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             match command_class:
                 case ZwaveCommandClass.SwitchBinary:
                     self.parse_command_25(payload, endpoint)
-    
+
                 case ZwaveCommandClass.SwitchMultilevel:
                     self.parse_command_26(payload, endpoint)
 
@@ -130,7 +130,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         command = payload[1]
 
         if command == 0x03:
-            light_service = self.service_get(LightService, endpoint)
+            light_service = self.service_get(LightServiceZwave, endpoint)
             if isinstance(light_service, LightServiceZwave):
                 light_service.set_level(payload[2])
 
@@ -224,7 +224,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
 
         for endpoint, services_list in self._services.items():
             for service in services_list:
-                service.update_automation_service()    
+                service.update_automation_service()
 
     async def zwave_report(self) -> None:
         for endpoint, service_list in self.services.items():
