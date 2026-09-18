@@ -108,7 +108,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                 case ZwaveCommandClass.SwitchBinary:
                     self.parse_command_25(payload, endpoint)
                     
-                case ZwaveCommandClass.SwitchMultiLevel:
+                case ZwaveCommandClass.SwitchMultilevel:
                     self.parse_command_26(payload, endpoint)    
 
                 case ZwaveCommandClass.Meter:
