@@ -385,8 +385,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
     def update_automation_services(self) -> None:
         for endpoint, services_list in self._services.items():
             for service in services_list:
-                if service.is_main_endpoint_service:
-                    service.update_automation_service()
+                service.update_automation_service()
 
     def update_automation_device(self, data: dict[str, str]) -> None:
         # Check if we are updating same virtual_node_id
