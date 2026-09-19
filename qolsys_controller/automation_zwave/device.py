@@ -133,6 +133,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             light_service = self.service_get(LightServiceZwave, endpoint)
             if isinstance(light_service, LightServiceZwave):
                 light_service.level = payload[2]
+                light_service.is_on = payload[2] != 0
 
     def parse_command_25(self, payload: bytes, endpoint: int) -> None:
         command = payload[1]
