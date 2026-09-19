@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.6 (2026-09-19)
+
+### Bug Fixes
+
+- Light service raw update is_on
+  ([`ef9f7b6`](https://github.com/EHylands/QolsysController/commit/ef9f7b6194fdb85a1bbd16bdc48612800c34ab55))
+
+
 ## v1.8.5 (2026-09-18)
 
 ### Bug Fixes
