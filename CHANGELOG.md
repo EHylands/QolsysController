@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.8.7 (2026-09-20)
+
+### Bug Fixes
+
+- Adc service regression
+  ([`3087745`](https://github.com/EHylands/QolsysController/commit/3087745065fb522ce0aebcaa4b9bc0c4c40750e5))
+
+### Chores
+
+- Adc cover service
+  ([`4e08521`](https://github.com/EHylands/QolsysController/commit/4e0852129e1c5888c0367b47d10a99f4cf40da72))
+
+- Adc light service
+  ([`af0000b`](https://github.com/EHylands/QolsysController/commit/af0000ba8127ee6a2205eecb9e14c8b3cfdaad06))
+
+
 ## v1.8.6 (2026-09-19)
 
 ### Bug Fixes
