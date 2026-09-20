@@ -19,6 +19,7 @@ class CoverServiceADC(CoverService):
     ) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._func_type: vdFuncType = vdFuncType.UNKNOWN
+        self.is_main_endpoint_service = True
 
     @property
     def func_type(self) -> vdFuncType:
