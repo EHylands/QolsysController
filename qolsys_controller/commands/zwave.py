@@ -26,6 +26,48 @@ class ZWaveCommands:
     def __init__(self, controller: QolsysController) -> None:
         self._controller = controller
 
+    async def multi_channel_endpoint_get(self, node_id: str) -> dict[str, Any]:
+        LOGGER.debug("MQTT Panel Client - Sending multi_channel_endpoint_get command  - Node(%s)", node_id)
+
+        node = self._controller.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        multi_channel_endpoint_get = [ZwaveCommandClass.MultiChannel.value, 0x07]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self._controller, node_id, 0, secure_level, [multi_channel_endpoint_get])
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, "0", multi_channel_endpoint_get)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving multi_channel_endpoint_get command")
+        return response
+
+    async def multi_channel_capability_get(self, node_id: str, endpoint: str) -> dict[str, Any]:
+        LOGGER.debug(
+            "MQTT Panel Client - Sending multi_channel_capability_get command  - Node(%s) - Endpoint(%s)", node_id, endpoint
+        )
+
+        node = self._controller.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        multi_channel_capability_get = [ZwaveCommandClass.MultiChannel.value, 0x09, int(endpoint)]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(
+                self._controller, node_id, int(endpoint), secure_level, [multi_channel_capability_get]
+            )
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, endpoint, multi_channel_capability_get)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving multi_channel_capability_get command")
+        return response
+
     async def barrier_operator_set(self, node_id: str, endpoint: str, status: int) -> dict[str, Any]:
         LOGGER.debug("MQTT Panel Client - Sending barrier_operator_set command  - Node(%s) - Status(%s)", node_id, status)
 
@@ -100,6 +142,29 @@ class ZWaveCommands:
         LOGGER.debug("MQTT Panel Client - Receiving switch_multilevel_set command")
         return response
 
+    async def switch_multilevel_get(self, node_id: str, endpoint: str) -> dict[str, Any]:
+        LOGGER.debug("MQTT Panel Client - Sending switch_multilevel_get command  - Node(%s)", node_id)
+
+        node = self._controller.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        service = node.service_get(LightServiceZwave, int(endpoint))
+        if not isinstance(service, LightServiceZwave):
+            raise ServiceNotFoundError(node_id, endpoint, "LightServiceZwave")
+
+        switch_get = [ZwaveCommandClass.SwitchMultilevel.value, 2]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self._controller, node_id, int(endpoint), secure_level, [switch_get])
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, endpoint, switch_get)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving switch_multilevel_get command")
+        return response
+
     async def switch_binary_set(self, node_id: str, endpoint: str, status: bool) -> dict[str, Any]:
         LOGGER.debug("MQTT Panel Client - Sending zwave_switch_binary_set command  - Node(%s) - Status(%s)", node_id, status)
         node = self._controller.state.automation_device(node_id)
@@ -107,10 +172,12 @@ class ZWaveCommands:
         if not isinstance(node, QolsysAutomationDeviceZwave):
             raise InvalidVirtualNodeError(node_id)
 
-        if (node.service_get(LightServiceZwave, int(endpoint)) is None
+        if (
+            node.service_get(LightServiceZwave, int(endpoint)) is None
             and node.service_get(ValveServiceZwave, int(endpoint)) is None
             and node.service_get(OutletServiceZwave, int(endpoint)) is None
-            and node.service_get(SirenServiceZwave, int(endpoint)) is None):
+            and node.service_get(SirenServiceZwave, int(endpoint)) is None
+        ):
             raise ServiceNotFoundError(node_id, endpoint, "LightServiceZwave, ValveService or SirenService")
 
         level = 0
@@ -154,6 +221,29 @@ class ZWaveCommands:
 
         response = await command.send_command()
         LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_fan_mode_set command")
+        return response
+
+    async def switch_binary_get(self, node_id: str, endpoint: str) -> dict[str, Any]:
+        LOGGER.debug("MQTT Panel Client - Sending zwave_switch_binary_get command  - Node(%s)", node_id)
+        node = self._controller.state.automation_device(node_id)
+
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        service = node.service_get(LightServiceZwave, int(endpoint))
+        if not isinstance(service, (LightServiceZwave, ValveServiceZwave, SirenServiceZwave)):
+            raise ServiceNotFoundError(node_id, endpoint, "LightServiceZwave, ValveService or SirenService")
+
+        switch_get = [ZwaveCommandClass.SwitchBinary.value, 2]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self._controller, node_id, int(endpoint), secure_level, [switch_get])
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, endpoint, switch_get)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_switch_binary_get command")
         return response
 
     async def thermostat_mode_set(self, node_id: str, endpoint: str, mode: ThermostatMode) -> dict[str, Any]:
@@ -228,4 +318,27 @@ class ZWaveCommands:
 
         response = await command.send_command()
         LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_setpoint_set command:%s", response)
+        return response
+
+    async def central_scene_supported_get(self, node_id: str, endpoint: str) -> dict[str, Any]:
+        LOGGER.debug(
+            "MQTT Panel Client - Sending central_scene_supported_get command  - Node(%s) - Endpoint(%s)", node_id, endpoint
+        )
+
+        node = self._controller.state.automation_device(node_id)
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        central_scene_supported_get = [ZwaveCommandClass.CentralScene.value, 0x02]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(
+                self._controller, node_id, int(endpoint), secure_level, [central_scene_supported_get]
+            )
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, endpoint, central_scene_supported_get)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving central_scene_supported_get command")
         return response

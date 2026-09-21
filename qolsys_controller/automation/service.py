@@ -12,7 +12,7 @@ class AutomationService(ABC):
         self._automation_device = automation_device
         self._endpoint: int = endpoint
         self._service_name: str = "AutomationService"
-        self._is_main_endpoint_service:bool = False
+        self._is_main_endpoint_service: bool = False
 
     @property
     def is_main_endpoint_service(self) -> bool:

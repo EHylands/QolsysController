@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation.service_meter import MeterService
 from qolsys_controller.automation.service_sensor import SensorService
+from qolsys_controller.automation_zwave.service_central_scene import CentralSceneServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
@@ -17,7 +18,12 @@ from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
 from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
 from qolsys_controller.enum_qolsys import AutomationDeviceProtocol, QolsysMeterType, map_to_qolsys_meter_scale
-from qolsys_controller.enum_zwave import ZwaveCommandClass, ZwaveDeviceClass
+from qolsys_controller.enum_zwave import (
+    CENTRAL_SCENE_EVENT_NAME,
+    CentralSceneKeyAttribute,
+    ZwaveCommandClass,
+    ZwaveDeviceClass,
+)
 from qolsys_controller.mqtt_command import MQTTCommand_ZWave
 
 if TYPE_CHECKING:
@@ -61,7 +67,11 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._multisensor_capabilities: str = ""
 
         self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
-        self._multi_channel_details:str = ""
+
+        # Set protocol before running setters that add protocol-specific services
+        self._protocol = AutomationDeviceProtocol.ZWAVE
+
+        self._multi_channel_details: str = ""
         self.multi_channel_details = zwave_dict.get("multi_channel_details", "")
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
@@ -69,12 +79,10 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         # Fix Meter multichannel endpoint
         self._FIX_MULTICHANNEL_METER_ENDPOINT: bool = False
 
-        # Set protocol
-        self._protocol = AutomationDeviceProtocol.ZWAVE
-
         # Add Base Services
-        self.service_add_status_service(endpoint=int(self.end_point))
-        self.service_add_battery_service(endpoint=int(self.end_point))
+        endpoint = int(self.end_point) if self.end_point.isdigit() else 0
+        self.service_add_status_service(endpoint=endpoint)
+        self.service_add_battery_service(endpoint=endpoint)
         self.multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
         self.meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
 
@@ -95,6 +103,9 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         if "command_class_list" in data:
             self._command_class_list = data.get("command_class_list", "")
 
+        if "multi_channel_details" in data:
+            self.multi_channel_details = data.get("multi_channel_details", "")
+
         self.end_batch_update()
 
     def update_raw(self, payload: bytes, endpoint: int = 0) -> None:
@@ -105,6 +116,9 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             )
 
             match command_class:
+                case ZwaveCommandClass.Basic:
+                    self.parse_command_20(payload, endpoint)
+
                 case ZwaveCommandClass.SwitchBinary:
                     self.parse_command_25(payload, endpoint)
 
@@ -120,11 +134,76 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         source_endpoint = payload[2]
                         self.update_raw(payload[4:], source_endpoint)
 
+                case ZwaveCommandClass.CentralScene:
+                    self.parse_command_5b(payload, endpoint)
+
                 case ZwaveCommandClass.ThermostatOperatingState:
                     LOGGER.debug("%s - Received ThermostatOperatingState report %s", self.prefix, payload.hex())
 
         except IndexError:
             LOGGER.debug("update_raw: invalid payload:%s", payload)
+
+    def parse_command_5b(self, payload: bytes, endpoint: int) -> None:
+        command = payload[1]
+
+        service = self.service_get(CentralSceneServiceZwave, endpoint)
+        if not isinstance(service, CentralSceneServiceZwave):
+            LOGGER.debug("%s - CentralScene report on endpoint %s but no service", self.prefix, endpoint)
+            return
+
+        if command == 0x02:  # Supported Report
+            self._parse_central_scene_supported(service, payload)
+        elif command == 0x03:  # Notification
+            self._parse_central_scene_notification(service, payload)
+
+    def _parse_central_scene_supported(self, service: CentralSceneServiceZwave, payload: bytes) -> None:
+        # Supported Report: [2]=supported scenes, [3]=properties, [4:]=per-scene key-attribute bitmasks.
+        # properties: bit0=Identical (single bitmask for all scenes), bits1-2=bitmask bytes per scene.
+        supported_scenes = payload[2]
+        properties = payload[3]
+        identical = bool(properties & 0x01)
+        num_bitmask_bytes = (properties >> 1) & 0x03
+        if num_bitmask_bytes == 0:
+            return
+
+        for scene in range(1, supported_scenes + 1):
+            start = 4 if identical else 4 + (scene - 1) * num_bitmask_bytes
+            bitmask = payload[start : start + num_bitmask_bytes]
+
+            supported: list[str] = []
+            for byte_index, byte in enumerate(bitmask):
+                for bit in range(8):
+                    if byte & (1 << bit):
+                        try:
+                            supported.append(CENTRAL_SCENE_EVENT_NAME[CentralSceneKeyAttribute(byte_index * 8 + bit)])
+                        except ValueError:
+                            continue
+
+            service.set_supported(scene, supported)
+
+    def _parse_central_scene_notification(self, service: CentralSceneServiceZwave, payload: bytes) -> None:
+        # Notification: [2]=sequence, [3]=properties (key attribute in bits 0-2), [4]=scene number
+        sequence = payload[2]
+        key_attribute = payload[3] & 0x07
+        scene_number = payload[4]
+
+        try:
+            event = CENTRAL_SCENE_EVENT_NAME[CentralSceneKeyAttribute(key_attribute)]
+        except ValueError:
+            LOGGER.debug("%s - Unknown CentralScene key attribute: 0x%02X", self.prefix, key_attribute)
+            return
+
+        service.emit_scene_event(scene_number, event, sequence)
+
+    def parse_command_20(self, payload: bytes, endpoint: int) -> None:
+        command = payload[1]
+
+        if command == 0x03:
+            light_service = self.service_get(LightServiceZwave, endpoint)
+            if isinstance(light_service, LightServiceZwave):
+                if light_service.supports_level():
+                    light_service.level = payload[2]
+                light_service.is_on = payload[2] != 0
 
     def parse_command_26(self, payload: bytes, endpoint: int) -> None:
         command = payload[1]
@@ -290,6 +369,13 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         )
                         await zwave_command.send_command()
 
+                if isinstance(service, CentralSceneServiceZwave):
+                    if ZwaveCommandClass.CentralScene in self.command_class_list:
+                        LOGGER.debug("%s - endpoint%s - sending central_scene_supported_get", self.prefix, service.endpoint)
+                        await self._controller.commands.zwave.central_scene_supported_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
+
     def to_dict_zwave(self) -> dict[str, str]:
         return {
             "_id": self._id,
@@ -431,18 +517,14 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             self._multi_channel_details = value
 
             try:
-                details: dict[str, int | list[int]] = (
-                    json.loads(value) if isinstance(value, str) and value.strip() else {}
-                )
+                details: dict[str, int | list[int]] = json.loads(value) if isinstance(value, str) and value.strip() else {}
             except json.JSONDecodeError:
                 details = {}
 
             if not isinstance(details, dict):
                 details = {}
 
-            endpoints: dict[int, list[int]] = {
-                int(k): v for k, v in details.items() if k.isdigit() and isinstance(v, list)
-            }
+            endpoints: dict[int, list[int]] = {int(k): v for k, v in details.items() if k.isdigit() and isinstance(v, list)}
 
             for ep, command_classes in sorted(endpoints.items()):
                 if ZwaveCommandClass.SwitchMultilevel in command_classes:
@@ -451,11 +533,18 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
 
                 if ZwaveCommandClass.SwitchBinary in command_classes:
                     # check if a service is already regisrered with pannel
-                    if (self.service_get(ValveServiceZwave, ep) is None
+                    if (
+                        self.service_get(ValveServiceZwave, ep) is None
                         and self.service_get(LightServiceZwave, ep) is None
-                        and self.service_get(SirenServiceZwave, ep) is None):
+                        and self.service_get(SirenServiceZwave, ep) is None
+                    ):
                         # Add new Binary switch
                         self.service_add_outlet_service(endpoint=ep)
+
+                if ZwaveCommandClass.CentralScene in command_classes:
+                    # Add central scene service; discovery is sent later in zwave_report
+                    if self.service_get(CentralSceneServiceZwave, ep) is None:
+                        self.service_add_central_scene_service(endpoint=ep)
 
     @property
     def node_status(self) -> str:

@@ -1,0 +1,20 @@
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING
+
+from qolsys_controller.automation.service_central_scene import CentralSceneService
+
+if TYPE_CHECKING:
+    from qolsys_controller.automation.device import QolsysAutomationDevice
+
+LOGGER = logging.getLogger(__name__)
+
+
+class CentralSceneServiceZwave(CentralSceneService):
+    def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
+        super().__init__(automation_device=automation_device, endpoint=endpoint)
+        self._service_name = "CentralSceneService"
+
+    def update_automation_service(self) -> None:
+        super().update_automation_service()

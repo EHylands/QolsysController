@@ -164,6 +164,7 @@ BITMASK_SUPPORTED_THERMOSTAT_FAN_MODE = {
 
 
 class ZwaveCommandClass(IntEnum):
+    Basic = 0x20
     SwitchBinary = 0x25
     SwitchMultilevel = 0x26
     SceneActivation = 0x2B
@@ -214,6 +215,28 @@ class ZwaveCommandClass(IntEnum):
 class ZwaveCommand(IntEnum):
     SET = 0x01
     GET = 0x02
+
+
+class CentralSceneKeyAttribute(IntEnum):
+    KEY_PRESSED_1X = 0x00
+    KEY_RELEASED = 0x01
+    KEY_HELD_DOWN = 0x02
+    KEY_PRESSED_2X = 0x03
+    KEY_PRESSED_3X = 0x04
+    KEY_PRESSED_4X = 0x05
+    KEY_PRESSED_5X = 0x06
+
+
+# Maps a Central Scene key attribute to a Home Assistant friendly event name.
+CENTRAL_SCENE_EVENT_NAME = {
+    CentralSceneKeyAttribute.KEY_PRESSED_1X: "single_tap",
+    CentralSceneKeyAttribute.KEY_RELEASED: "release",
+    CentralSceneKeyAttribute.KEY_HELD_DOWN: "hold",
+    CentralSceneKeyAttribute.KEY_PRESSED_2X: "double_tap",
+    CentralSceneKeyAttribute.KEY_PRESSED_3X: "triple_tap",
+    CentralSceneKeyAttribute.KEY_PRESSED_4X: "quadruple_tap",
+    CentralSceneKeyAttribute.KEY_PRESSED_5X: "quintuple_tap",
+}
 
 
 class ZwaveDeviceClass(Enum):

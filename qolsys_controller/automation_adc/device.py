@@ -158,10 +158,10 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
                             )
 
                     except ValueError as e:
-                        LOGGER.error("Error converting value:", e)
+                        LOGGER.error("Error converting value: %s", e)
                         continue
 
                 self.end_batch_update()
 
             except json.JSONDecodeError as e:
-                LOGGER.error("ADC%s - Error parsing JSON:", self.device_id, e)
+                LOGGER.error("ADC%s - Error parsing JSON: %s", self.device_id, e)

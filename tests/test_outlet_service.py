@@ -31,7 +31,7 @@ class TestOutletServiceZwave:
         service.update_automation_service()
         assert service.is_on is True
 
-    @pytest.mark.asyncio  # type: ignore[untyped-decorator]
+    @pytest.mark.asyncio
     async def test_turn_on(self) -> None:
         device = _make_mock_device()
         service = OutletServiceZwave(automation_device=device, endpoint=0)
@@ -39,11 +39,21 @@ class TestOutletServiceZwave:
         await service.turn_on()
         device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("8", "0", True)
 
-    @pytest.mark.asyncio  # type: ignore[untyped-decorator]
-    async def test_turn_on_already_on_skips(self) -> None:
+    @pytest.mark.asyncio
+    async def test_turn_on_sends_even_when_already_on(self) -> None:
+        # turn_on no longer short-circuits on state; it always sends the command.
         device = _make_mock_device()
         service = OutletServiceZwave(automation_device=device, endpoint=0)
         service._is_on = True
+        await service.turn_on()
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("8", "0", True)
+
+    @pytest.mark.asyncio
+    async def test_turn_on_skips_when_command_class_unsupported(self) -> None:
+        # The real gate is now SwitchBinary support, not the is_on state.
+        device = _make_mock_device()
+        device.command_class_list = []
+        service = OutletServiceZwave(automation_device=device, endpoint=0)
         await service.turn_on()
         device.controller.commands.zwave.switch_binary_set.assert_not_awaited()
 
