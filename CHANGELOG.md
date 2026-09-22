@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.10 (2026-09-22)
+
+### Bug Fixes
+
+- Central_scene_supported_get to 0x01
+  ([`5504e35`](https://github.com/EHylands/QolsysController/commit/5504e3505b349034d1dd40bf7e2678c30c450e6a))
+
+
 ## v1.8.9 (2026-09-22)
 
 ### Bug Fixes
