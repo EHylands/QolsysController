@@ -257,8 +257,15 @@ class TestCentralScene:
         controller.commands.zwave.central_scene_supported_get.assert_not_awaited()
 
     def test_setter_no_service_without_central_scene(self) -> None:
-        device, _ = self._make_zwave({1: [int(ZwaveCommandClass.SwitchMultilevel)]})
+        device, _ = self._make_zwave({1: [int(ZwaveCommandClass.SwitchMultilevel)]}, command_class_list="[]")
+        assert device.service_get(CentralSceneService, 0) is None
         assert device.service_get(CentralSceneService, 1) is None
+
+    def test_root_central_scene_from_command_class_list(self) -> None:
+        # A node advertising CentralScene at the root (endpoint 0) — e.g. a Zooz paddle
+        # switch — gets a root service even without a multi_channel_details entry.
+        device, _ = self._make_zwave({}, command_class_list=f"[{self._CS}]")
+        assert isinstance(device.service_get(CentralSceneService, 0), CentralSceneServiceZwave)
 
     def test_setter_does_not_duplicate(self) -> None:
         device, _ = self._make_zwave({1: [self._CS]})
@@ -266,11 +273,13 @@ class TestCentralScene:
         assert len(device.services[1]) == 1
 
     async def test_zwave_report_queries_each_endpoint(self) -> None:
+        # command_class_list carries CentralScene, so the root (endpoint 0) also gets a
+        # service, alongside the multi-channel endpoints 1 and 2.
         device, controller = self._make_zwave({1: [self._CS], 2: [self._CS]})
         await device.zwave_report()
-        assert controller.commands.zwave.central_scene_supported_get.await_count == 2
+        assert controller.commands.zwave.central_scene_supported_get.await_count == 3
         awaited = {c.args for c in controller.commands.zwave.central_scene_supported_get.await_args_list}
-        assert awaited == {("8", "1"), ("8", "2")}
+        assert awaited == {("8", "0"), ("8", "1"), ("8", "2")}
 
     async def test_zwave_report_skips_when_command_class_absent(self) -> None:
         # Service is present (from multi_channel_details) but the node doesn't list CentralScene.

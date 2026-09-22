@@ -62,7 +62,6 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._is_device_sleeping: str = zwave_dict.get("is_device_sleeping", "")
         self._is_device_hidden: str = zwave_dict.get("is_device_hidden", "")
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
-        self._command_class_list: str = zwave_dict.get("command_class_list", "")
         self._meter_capabilities: str = ""
         self._multisensor_capabilities: str = ""
 
@@ -71,8 +70,12 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         # Set protocol before running setters that add protocol-specific services
         self._protocol = AutomationDeviceProtocol.ZWAVE
 
+        self._command_class_list: str = ""
+        self.command_class_list = zwave_dict.get("command_class_list", "")
+
         self._multi_channel_details: str = ""
         self.multi_channel_details = zwave_dict.get("multi_channel_details", "")
+
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
@@ -101,7 +104,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             self.node_status = data.get("node_status", "")
 
         if "command_class_list" in data:
-            self._command_class_list = data.get("command_class_list", "")
+            self.command_class_list = data.get("command_class_list", "")
 
         if "multi_channel_details" in data:
             self.multi_channel_details = data.get("multi_channel_details", "")
@@ -434,6 +437,19 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             except (ValueError, TypeError):
                 continue
         return commands
+
+    @command_class_list.setter
+    def command_class_list(self, value: str) -> None:
+        if self._command_class_list != value:
+            self._command_class_list = value
+
+            # Update services on root endpoint (0) based on command class list
+            endpoint = 0
+
+            # Add root central scene service
+            if ZwaveCommandClass.CentralScene in self.command_class_list:
+                if self.service_get(CentralSceneServiceZwave, endpoint) is None:
+                    self.service_add_central_scene_service(endpoint=endpoint)
 
     @property
     def secure_command_class_list(self) -> list[ZwaveCommandClass]:
