@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.9 (2026-09-22)
+
+### Bug Fixes
+
+- Adding central service to root endpoint
+  ([`71e2538`](https://github.com/EHylands/QolsysController/commit/71e253819876fc20cee1c1916c7470322bc91e5c))
+
+
 ## v1.8.8 (2026-09-21)
 
 ### Bug Fixes
