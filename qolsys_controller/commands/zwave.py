@@ -329,7 +329,8 @@ class ZWaveCommands:
         if not isinstance(node, QolsysAutomationDeviceZwave):
             raise InvalidVirtualNodeError(node_id)
 
-        central_scene_supported_get = [ZwaveCommandClass.CentralScene.value, 0x02]
+        # Central Scene command ids: 0x01 = SUPPORTED_GET, 0x02 = SUPPORTED_REPORT, 0x03 = NOTIFICATION
+        central_scene_supported_get = [ZwaveCommandClass.CentralScene.value, 0x01]
         command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
         if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
             secure_level = 1
