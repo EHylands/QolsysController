@@ -261,11 +261,66 @@ class TestCentralScene:
         assert device.service_get(CentralSceneService, 0) is None
         assert device.service_get(CentralSceneService, 1) is None
 
-    def test_root_central_scene_from_command_class_list(self) -> None:
-        # A node advertising CentralScene at the root (endpoint 0) — e.g. a Zooz paddle
-        # switch — gets a root service even without a multi_channel_details entry.
-        device, _ = self._make_zwave({}, command_class_list=f"[{self._CS}]")
-        assert isinstance(device.service_get(CentralSceneService, 0), CentralSceneServiceZwave)
+    def _make_zwave_supported(self, central_scene_supported: dict[str, str]) -> QolsysAutomationDeviceZwave:
+        controller = MagicMock()
+        controller.commands.zwave.central_scene_supported_get = AsyncMock(return_value={})
+        zwave_dict = {"node_id": "74", "central_scene_supported": json.dumps(central_scene_supported)}
+        return QolsysAutomationDeviceZwave(controller, zwave_dict, {"virtual_node_id": "74", "end_point": "0"})
+
+    def test_central_scene_supported_creates_root_service_and_scenes(self) -> None:
+        # Panel-decoded support field (keyed by scene) creates the root (endpoint 0) service.
+        device = self._make_zwave_supported(
+            {
+                "1": "Key Pressed 1 time,Key Released,Key Held Down,Key Pressed 2 times",
+                "2": "Key Pressed 1 time",
+            }
+        )
+        service = device.service_get(CentralSceneService, 0)
+        assert isinstance(service, CentralSceneServiceZwave)
+        assert service.scenes[1].supported == ["single_tap", "release", "hold", "double_tap"]
+        assert service.scenes[2].supported == ["single_tap"]
+
+    def test_central_scene_supported_maps_all_panel_strings(self) -> None:
+        device = self._make_zwave_supported(
+            {
+                "1": "Key Pressed 1 time,Key Pressed 2 times,Key Pressed 3 times,"
+                "Key Pressed 4 times,Key Pressed 5 times,Key Held Down,Key Released",
+            }
+        )
+        service = device.service_get(CentralSceneService, 0)
+        assert service is not None
+        assert service.scenes[1].supported == [
+            "single_tap",
+            "double_tap",
+            "triple_tap",
+            "quadruple_tap",
+            "quintuple_tap",
+            "hold",
+            "release",
+        ]
+
+    def test_central_scene_supported_unknown_string_dropped(self) -> None:
+        device = self._make_zwave_supported({"1": "Key Pressed 1 time,Bogus Attribute"})
+        service = device.service_get(CentralSceneService, 0)
+        assert service is not None
+        assert service.scenes[1].supported == ["single_tap"]
+
+    def test_central_scene_supported_empty_dict_adds_no_service(self) -> None:
+        # A service is only added when the dictionary contains at least one scene.
+        device = self._make_zwave_supported({})
+        assert device.service_get(CentralSceneService, 0) is None
+
+    def test_central_scene_supported_invalid_json_does_not_raise(self) -> None:
+        device = self._make_zwave_supported({})  # baseline device
+        device.central_scene_supported = "{not json"
+        assert device.service_get(CentralSceneService, 0) is None
+
+    def test_central_scene_supported_via_update(self) -> None:
+        device = self._make_zwave_supported({})
+        device.update_zwave_device({"central_scene_supported": json.dumps({"1": "Key Pressed 1 time"})})
+        service = device.service_get(CentralSceneService, 0)
+        assert isinstance(service, CentralSceneServiceZwave)
+        assert service.scenes[1].supported == ["single_tap"]
 
     def test_setter_does_not_duplicate(self) -> None:
         device, _ = self._make_zwave({1: [self._CS]})
@@ -273,13 +328,11 @@ class TestCentralScene:
         assert len(device.services[1]) == 1
 
     async def test_zwave_report_queries_each_endpoint(self) -> None:
-        # command_class_list carries CentralScene, so the root (endpoint 0) also gets a
-        # service, alongside the multi-channel endpoints 1 and 2.
         device, controller = self._make_zwave({1: [self._CS], 2: [self._CS]})
         await device.zwave_report()
-        assert controller.commands.zwave.central_scene_supported_get.await_count == 3
+        assert controller.commands.zwave.central_scene_supported_get.await_count == 2
         awaited = {c.args for c in controller.commands.zwave.central_scene_supported_get.await_args_list}
-        assert awaited == {("8", "0"), ("8", "1"), ("8", "2")}
+        assert awaited == {("8", "1"), ("8", "2")}
 
     async def test_zwave_report_skips_when_command_class_absent(self) -> None:
         # Service is present (from multi_channel_details) but the node doesn't list CentralScene.
@@ -304,20 +357,24 @@ class TestCentralSceneEvents:
 
     _CS = int(ZwaveCommandClass.CentralScene)
 
-    def _make_zwave_with_service(self) -> tuple[QolsysAutomationDeviceZwave, list[dict[str, Any]], list[dict[str, Any]]]:
+    def _make_zwave_with_service(self) -> tuple[QolsysAutomationDeviceZwave, list[dict[str, Any]]]:
         controller = MagicMock()
         controller.commands.zwave.central_scene_supported_get = AsyncMock(return_value={})
+        # Scenes 1-3 are known from the panel-decoded support field (root endpoint 0).
+        supported = {
+            "1": "Key Pressed 1 time,Key Released,Key Held Down,Key Pressed 2 times,Key Pressed 3 times",
+            "2": "Key Pressed 1 time,Key Held Down,Key Pressed 2 times",
+            "3": "Key Pressed 1 time",
+        }
         zwave_dict = {
             "node_id": "8",
-            "multi_channel_details": json.dumps({"1": [self._CS]}),
             "command_class_list": f"[{self._CS}]",
+            "central_scene_supported": json.dumps(supported),
         }
         device = QolsysAutomationDeviceZwave(controller, zwave_dict, {"virtual_node_id": "8", "end_point": "0"})
         events: list[dict[str, Any]] = []
-        adds: list[dict[str, Any]] = []
         device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_EVENT, lambda e: events.append(e.data))
-        device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_ADD, lambda e: adds.append(e.data))
-        return device, events, adds
+        return device, events
 
     def _report(self, sequence: int, key_attribute: int, scene: int) -> bytes:
         return bytes([self._CS, 0x03, sequence, key_attribute, scene])
@@ -327,6 +384,7 @@ class TestCentralSceneEvents:
         device.service_add_central_scene_service(endpoint=0)
         service = device.service_get(CentralSceneService, 0)
         assert service is not None
+        service.set_supported(1, ["single_tap"])  # scene must be discovered first
 
         events: list[dict[str, Any]] = []
         device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_EVENT, lambda e: events.append(e.data))
@@ -338,11 +396,23 @@ class TestCentralSceneEvents:
         assert events[0]["endpoint"] == 0
         assert service.scenes[1].last_event == "single_tap"
 
+    def test_emit_ignores_unknown_scene(self) -> None:
+        device = _make_base_device(protocol="Z-Wave")
+        device.service_add_central_scene_service(endpoint=0)
+        service = device.service_get(CentralSceneService, 0)
+        assert service is not None
+
+        events: list[dict[str, Any]] = []
+        device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_EVENT, lambda e: events.append(e.data))
+        service.emit_scene_event(1, "single_tap", sequence=5)  # scene never discovered
+        assert events == []
+
     def test_emit_dedupes_same_sequence(self) -> None:
         device = _make_base_device(protocol="Z-Wave")
         device.service_add_central_scene_service(endpoint=0)
         service = device.service_get(CentralSceneService, 0)
         assert service is not None
+        service.set_supported(1, ["single_tap"])  # scene must be discovered first
 
         events: list[dict[str, Any]] = []
         device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_EVENT, lambda e: events.append(e.data))
@@ -353,89 +423,32 @@ class TestCentralSceneEvents:
         assert len(events) == 2
 
     def test_update_raw_fires_event(self) -> None:
-        device, events, _ = self._make_zwave_with_service()
-        device.update_raw(self._report(sequence=1, key_attribute=0x03, scene=2), endpoint=1)
+        device, events = self._make_zwave_with_service()
+        device.update_raw(self._report(sequence=1, key_attribute=0x03, scene=2), endpoint=0)
         assert len(events) == 1
         assert events[0]["event"] == "double_tap"
         assert events[0]["scene_number"] == 2
 
     def test_update_raw_maps_key_attributes(self) -> None:
-        device, events, _ = self._make_zwave_with_service()
+        device, events = self._make_zwave_with_service()
         expected = {0x00: "single_tap", 0x01: "release", 0x02: "hold", 0x03: "double_tap", 0x04: "triple_tap"}
-        for seq, (key, name) in enumerate(expected.items()):
-            device.update_raw(self._report(sequence=seq, key_attribute=key, scene=1), endpoint=1)
+        for seq, key in enumerate(expected):
+            device.update_raw(self._report(sequence=seq, key_attribute=key, scene=1), endpoint=0)
         assert [e["event"] for e in events] == list(expected.values())
 
     def test_update_raw_no_service_no_event(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        # endpoint 2 has no CentralScene service
-        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=1), endpoint=2)
+        device, events = self._make_zwave_with_service()
+        # endpoint 5 has no CentralScene service
+        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=1), endpoint=5)
         assert events == []
-        assert adds == []
+
+    def test_update_raw_unknown_scene_dropped(self) -> None:
+        # A press for a scene that is not in the service (not in central_scene_supported) is ignored.
+        device, events = self._make_zwave_with_service()
+        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=9), endpoint=0)
+        assert events == []
 
     def test_update_raw_unknown_key_attribute_ignored(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        device.update_raw(self._report(sequence=1, key_attribute=0x07, scene=1), endpoint=1)
+        device, events = self._make_zwave_with_service()
+        device.update_raw(self._report(sequence=1, key_attribute=0x07, scene=1), endpoint=0)
         assert events == []
-        assert adds == []
-
-    def test_new_scene_fires_add_before_event(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        order: list[str] = []
-        device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_ADD, lambda e: order.append("add"))
-        device.register(QolsysNotification.AUTOMATION_CENTRAL_SCENE_EVENT, lambda e: order.append("event"))
-
-        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=5), endpoint=1)
-
-        assert len(adds) == 1
-        assert adds[0]["scene_number"] == 5
-        assert adds[0]["endpoint"] == 1
-        assert adds[0]["supported"] == []  # discovered by a press, before any Supported Report
-        assert "event" not in adds[0]  # the add notification carries no key attribute
-        assert order == ["add", "event"]  # entity must be created before the press lands
-
-    def test_known_scene_does_not_readd(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=1), endpoint=1)
-        device.update_raw(self._report(sequence=2, key_attribute=0x03, scene=1), endpoint=1)
-        assert len(adds) == 1  # scene 1 added only once
-        assert len(events) == 2
-
-    def test_scenes_built_from_reports(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        device.update_raw(self._report(sequence=1, key_attribute=0x00, scene=1), endpoint=1)
-        device.update_raw(self._report(sequence=2, key_attribute=0x00, scene=3), endpoint=1)
-        service = device.service_get(CentralSceneService, 1)
-        assert service is not None
-        assert sorted(service.scenes) == [1, 3]
-        assert {a["scene_number"] for a in adds} == {1, 3}
-
-    def _supported_report(self, supported_scenes: int, properties: int, *bitmasks: int) -> bytes:
-        return bytes([self._CS, 0x02, supported_scenes, properties, *bitmasks])
-
-    def test_supported_report_populates_per_scene(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        # properties 0x02 -> identical=0, 1 bitmask byte per scene.
-        # scene 1 mask 0x09 = bit0 (single_tap) + bit3 (double_tap); scene 2 mask 0x04 = bit2 (hold).
-        device.update_raw(self._supported_report(2, 0x02, 0x09, 0x04), endpoint=1)
-
-        service = device.service_get(CentralSceneService, 1)
-        assert service is not None
-        assert sorted(service.scenes) == [1, 2]
-        assert service.scenes[1].supported == ["single_tap", "double_tap"]
-        assert service.scenes[2].supported == ["hold"]
-        # A Supported Report discovers scenes (fires ADD with the supported list) but is not a press.
-        assert {a["scene_number"] for a in adds} == {1, 2}
-        assert adds[0]["supported"] == ["single_tap", "double_tap"]
-        assert events == []
-
-    def test_supported_report_identical_applies_to_all_scenes(self) -> None:
-        device, events, adds = self._make_zwave_with_service()
-        # properties 0x03 -> identical=1, 1 bitmask byte; single mask 0x05 = bit0 (single_tap) + bit2 (hold).
-        device.update_raw(self._supported_report(3, 0x03, 0x05), endpoint=1)
-
-        service = device.service_get(CentralSceneService, 1)
-        assert service is not None
-        assert sorted(service.scenes) == [1, 2, 3]
-        for scene in (1, 2, 3):
-            assert service.scenes[scene].supported == ["single_tap", "hold"]

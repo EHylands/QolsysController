@@ -239,6 +239,18 @@ CENTRAL_SCENE_EVENT_NAME = {
 }
 
 
+# Maps the panel's decoded central_scene_supported strings to a key attribute.
+CENTRAL_SCENE_PANEL_KEY_ATTRIBUTE = {
+    "Key Pressed 1 time": CentralSceneKeyAttribute.KEY_PRESSED_1X,
+    "Key Released": CentralSceneKeyAttribute.KEY_RELEASED,
+    "Key Held Down": CentralSceneKeyAttribute.KEY_HELD_DOWN,
+    "Key Pressed 2 times": CentralSceneKeyAttribute.KEY_PRESSED_2X,
+    "Key Pressed 3 times": CentralSceneKeyAttribute.KEY_PRESSED_3X,
+    "Key Pressed 4 times": CentralSceneKeyAttribute.KEY_PRESSED_4X,
+    "Key Pressed 5 times": CentralSceneKeyAttribute.KEY_PRESSED_5X,
+}
+
+
 class ZwaveDeviceClass(Enum):
     Unknown = 0x00
     GenericController = 0x01

@@ -20,6 +20,7 @@ from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
 from qolsys_controller.enum_qolsys import AutomationDeviceProtocol, QolsysMeterType, map_to_qolsys_meter_scale
 from qolsys_controller.enum_zwave import (
     CENTRAL_SCENE_EVENT_NAME,
+    CENTRAL_SCENE_PANEL_KEY_ATTRIBUTE,
     CentralSceneKeyAttribute,
     ZwaveCommandClass,
     ZwaveDeviceClass,
@@ -79,6 +80,9 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
 
+        self._central_scene_supported: str = ""
+        self.central_scene_supported: str = zwave_dict.get("central_scene_supported", "")
+
         # Fix Meter multichannel endpoint
         self._FIX_MULTICHANNEL_METER_ENDPOINT: bool = False
 
@@ -108,6 +112,9 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
 
         if "multi_channel_details" in data:
             self.multi_channel_details = data.get("multi_channel_details", "")
+
+        if "central_scene_supported" in data:
+            self.central_scene_supported = data.get("central_scene_supported", "")
 
         self.end_batch_update()
 
@@ -147,48 +154,24 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             LOGGER.debug("update_raw: invalid payload:%s", payload)
 
     def parse_command_5b(self, payload: bytes, endpoint: int) -> None:
-        command = payload[1]
+        # Only Central Scene Notifications (0x03) arrive as raw frames; the supported key
+        # attributes come pre-decoded from the panel via the central_scene_supported field.
+        # Notification: [2]=sequence, [3]=properties (key attribute in bits 0-2), [4]=scene number
+        if payload[1] != 0x03:
+            return
 
         service = self.service_get(CentralSceneServiceZwave, endpoint)
         if not isinstance(service, CentralSceneServiceZwave):
-            LOGGER.debug("%s - CentralScene report on endpoint %s but no service", self.prefix, endpoint)
+            LOGGER.debug("%s - CentralScene notification on endpoint %s but no service", self.prefix, endpoint)
             return
 
-        if command == 0x02:  # Supported Report
-            self._parse_central_scene_supported(service, payload)
-        elif command == 0x03:  # Notification
-            self._parse_central_scene_notification(service, payload)
-
-    def _parse_central_scene_supported(self, service: CentralSceneServiceZwave, payload: bytes) -> None:
-        # Supported Report: [2]=supported scenes, [3]=properties, [4:]=per-scene key-attribute bitmasks.
-        # properties: bit0=Identical (single bitmask for all scenes), bits1-2=bitmask bytes per scene.
-        supported_scenes = payload[2]
-        properties = payload[3]
-        identical = bool(properties & 0x01)
-        num_bitmask_bytes = (properties >> 1) & 0x03
-        if num_bitmask_bytes == 0:
-            return
-
-        for scene in range(1, supported_scenes + 1):
-            start = 4 if identical else 4 + (scene - 1) * num_bitmask_bytes
-            bitmask = payload[start : start + num_bitmask_bytes]
-
-            supported: list[str] = []
-            for byte_index, byte in enumerate(bitmask):
-                for bit in range(8):
-                    if byte & (1 << bit):
-                        try:
-                            supported.append(CENTRAL_SCENE_EVENT_NAME[CentralSceneKeyAttribute(byte_index * 8 + bit)])
-                        except ValueError:
-                            continue
-
-            service.set_supported(scene, supported)
-
-    def _parse_central_scene_notification(self, service: CentralSceneServiceZwave, payload: bytes) -> None:
-        # Notification: [2]=sequence, [3]=properties (key attribute in bits 0-2), [4]=scene number
         sequence = payload[2]
         key_attribute = payload[3] & 0x07
         scene_number = payload[4]
+
+        if scene_number not in service.scenes:
+            LOGGER.debug("%s - CentralScene notification for unknown scene %s", self.prefix, scene_number)
+            return
 
         try:
             event = CENTRAL_SCENE_EVENT_NAME[CentralSceneKeyAttribute(key_attribute)]
@@ -412,11 +395,53 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             "endpoint": self._endpoint,
             "endpoint_details": self._endpoint_details,
             "meter_capabilities": self._meter_capabilities,
+            "central_scene_supported": self._central_scene_supported,
         }
 
     # -----------------------------
     # properties + setters
     # -----------------------------
+
+    @property
+    def central_scene_supported(self) -> str:
+        return self._central_scene_supported
+
+    @central_scene_supported.setter
+    def central_scene_supported(self, value: str) -> None:
+        if self._central_scene_supported != value:
+            self._central_scene_supported = value
+
+            # Panel-decoded Central Scene support, keyed by scene number:
+            # {"1":"Key Pressed 1 time,Key Released,Key Held Down,...", "2":"...", "3":"..."}
+            try:
+                scenes_dict = json.loads(value) if value else {}
+            except json.JSONDecodeError:
+                LOGGER.error("%s - Error parsing central_scene_supported: %s", self.prefix, value)
+                return
+
+            if not scenes_dict:
+                return
+
+            # Central Scene lives on the root device (endpoint 0); only one service per endpoint.
+            endpoint = 0
+            service = self.service_get(CentralSceneServiceZwave, endpoint)
+            if service is None:
+                self.service_add_central_scene_service(endpoint=endpoint)
+                service = self.service_get(CentralSceneServiceZwave, endpoint)
+
+            if isinstance(service, CentralSceneServiceZwave):
+                for scene, names in scenes_dict.items():
+                    service.set_supported(int(scene), self._central_scene_event_names(names))
+
+    @staticmethod
+    def _central_scene_event_names(names: str) -> list[str]:
+        # Map the panel's key-attribute strings to friendly event names, dropping unknowns.
+        events: list[str] = []
+        for name in names.split(","):
+            attribute = CENTRAL_SCENE_PANEL_KEY_ATTRIBUTE.get(name.strip())
+            if attribute is not None:
+                events.append(CENTRAL_SCENE_EVENT_NAME[attribute])
+        return events
 
     @property
     def generic_device_type(self) -> ZwaveDeviceClass:
@@ -442,14 +467,6 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     def command_class_list(self, value: str) -> None:
         if self._command_class_list != value:
             self._command_class_list = value
-
-            # Update services on root endpoint (0) based on command class list
-            endpoint = 0
-
-            # Add root central scene service
-            if ZwaveCommandClass.CentralScene in self.command_class_list:
-                if self.service_get(CentralSceneServiceZwave, endpoint) is None:
-                    self.service_add_central_scene_service(endpoint=endpoint)
 
     @property
     def secure_command_class_list(self) -> list[ZwaveCommandClass]:

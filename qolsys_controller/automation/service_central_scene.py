@@ -18,8 +18,8 @@ class CentralScene:
     """A single scene (button) on a Central Scene endpoint.
 
     ``supported`` is the list of event names the scene can emit (single_tap,
-    double_tap, hold, release, ...). For Z-Wave it is loaded from the Central
-    Scene Supported Report; it stays empty until that report is parsed.
+    double_tap, hold, release, ...). For Z-Wave it is loaded from the panel's
+    central_scene_supported field; it stays empty until that field is parsed.
     """
 
     def __init__(self, scene_number: int) -> None:
@@ -39,7 +39,7 @@ class CentralSceneService(AutomationService):
     def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "CentralSceneService"
-        # scene_number -> CentralScene, discovered from the reports themselves.
+        # scene_number -> CentralScene, discovered from the panel's central_scene_supported field.
         self._scenes: dict[int, CentralScene] = {}
         self._last_sequence: int | None = None
 
@@ -47,51 +47,33 @@ class CentralSceneService(AutomationService):
     def scenes(self) -> dict[int, CentralScene]:
         return self._scenes
 
-    def _discover_scene(self, scene: int) -> tuple[CentralScene, bool]:
-        existing = self._scenes.get(scene)
-        if existing is not None:
-            return existing, False
-        central_scene = CentralScene(scene)
-        self._scenes[scene] = central_scene
-        return central_scene, True
-
-    def _fire_scene_added(self, scene: int) -> None:
-        central_scene = self._scenes.get(scene)
-        supported = central_scene.supported if central_scene is not None else []
-        LOGGER.debug("%s - discovered scene %s (supported: %s)", self.prefix, scene, supported)
-        self.automation_device.notify(
-            Event(
-                QolsysNotification.AUTOMATION_CENTRAL_SCENE_ADD,
-                self.automation_device,
-                self.to_dict_scene_added(scene),
-            )
-        )
-
     def set_supported(self, scene: int, supported: list[str]) -> None:
-        """Set the key attributes a scene supports (loaded from the report)."""
-        central_scene, is_new = self._discover_scene(scene)
+        """Discover a scene and set the key attributes it supports (loaded from central_scene_supported)."""
+        central_scene = self._scenes.get(scene)
+        if central_scene is None:
+            central_scene = CentralScene(scene)
+            self._scenes[scene] = central_scene
+            LOGGER.debug("%s - discovered scene %s (supported: %s)", self.prefix, scene, supported)
         central_scene.supported = supported
-        if is_new:
-            self._fire_scene_added(scene)
 
     def emit_scene_event(self, scene: int, event: str, sequence: int | None = None) -> None:
         """Propagate a stateless scene event (single_tap, double_tap, hold, ...).
 
-        Edge triggered: fires AUTOMATION_CENTRAL_SCENE_EVENT on every report so
-        repeated identical presses each reach Home Assistant. The first report
-        for an unknown scene also discovers it (AUTOMATION_CENTRAL_SCENE_ADD).
+        Edge triggered: fires AUTOMATION_CENTRAL_SCENE_EVENT on every notification so
+        repeated identical presses each reach Home Assistant. The scene must have
+        been discovered first (via set_supported); unknown scenes are ignored.
         Duplicate RF retransmissions are dropped using the sequence number only.
         """
+        central_scene = self._scenes.get(scene)
+        if central_scene is None:
+            return
+
         if sequence is not None and sequence == self._last_sequence:
             LOGGER.debug("%s - dropping duplicate scene event (sequence %s)", self.prefix, sequence)
             return
         self._last_sequence = sequence
 
-        central_scene, is_new = self._discover_scene(scene)
         central_scene.last_event = event
-        if is_new:
-            self._fire_scene_added(scene)
-
         LOGGER.debug("%s - scene %s: %s", self.prefix, scene, event)
         self.automation_device.notify(
             Event(
@@ -105,18 +87,10 @@ class CentralSceneService(AutomationService):
         pass
 
     def info(self) -> list[str]:
-        return [f"{self.prefix} - scenes: {sorted(self._scenes)}"]
-
-    def to_dict_scene_added(self, scene: int) -> dict[str, Any]:
-        central_scene = self._scenes.get(scene)
-        return {
-            "service_type": self.service_name,
-            "virtual_node_id": self.automation_device.virtual_node_id,
-            "endpoint": self.endpoint,
-            "scene_number": scene,
-            "supported": central_scene.supported if central_scene is not None else [],
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        }
+        return [
+            f"{self.prefix} - scene {scene}: {central_scene.supported}"
+            for scene, central_scene in sorted(self._scenes.items())
+        ]
 
     def to_dict_scene_event(self, scene: int, event: str) -> dict[str, Any]:
         return {
