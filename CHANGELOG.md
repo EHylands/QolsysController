@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.11 (2026-09-23)
+
+### Bug Fixes
+
+- Central scene service
+  ([`36029f0`](https://github.com/EHylands/QolsysController/commit/36029f0cf7eea9e8ce3182d8f77d5429607a9c75))
+
+
 ## v1.8.10 (2026-09-22)
 
 ### Bug Fixes
