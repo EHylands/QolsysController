@@ -63,25 +63,21 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._is_device_sleeping: str = zwave_dict.get("is_device_sleeping", "")
         self._is_device_hidden: str = zwave_dict.get("is_device_hidden", "")
         self._last_updated_date: str = zwave_dict.get("last_updated_date", "")
+        self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
+        self._endpoint = zwave_dict.get("endpoint", "")
+
+        self._command_class_list: str = ""
         self._meter_capabilities: str = ""
         self._multisensor_capabilities: str = ""
-
-        self._notification_capabilities = zwave_dict.get("notification_capabilities", "")
+        self._multi_channel_details: str = ""
+        self._central_scene_supported: str = ""
 
         # Set protocol before running setters that add protocol-specific services
         self._protocol = AutomationDeviceProtocol.ZWAVE
 
-        self._command_class_list: str = ""
         self.command_class_list = zwave_dict.get("command_class_list", "")
-
-        self._multi_channel_details: str = ""
         self.multi_channel_details = zwave_dict.get("multi_channel_details", "")
-
-        self._endpoint = zwave_dict.get("endpoint", "")
         self._endpoint_details = zwave_dict.get("endpoint_details", "")
-
-        self._central_scene_supported: str = ""
-        self.central_scene_supported: str = zwave_dict.get("central_scene_supported", "")
 
         # Fix Meter multichannel endpoint
         self._FIX_MULTICHANNEL_METER_ENDPOINT: bool = False
@@ -92,6 +88,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self.service_add_battery_service(endpoint=endpoint)
         self.multisensor_capabilities: str = zwave_dict.get("multisensor_capabilities", "")
         self.meter_capabilities: str = zwave_dict.get("meter_capabilities", "")
+        self.central_scene_supported: str = zwave_dict.get("central_scene_supported", "")
 
         super().update_automation_services()
 
@@ -354,13 +351,6 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                             [ZwaveCommandClass.SwitchBinary, 0x02],
                         )
                         await zwave_command.send_command()
-
-                if isinstance(service, CentralSceneServiceZwave):
-                    if ZwaveCommandClass.CentralScene in self.command_class_list:
-                        LOGGER.debug("%s - endpoint%s - sending central_scene_supported_get", self.prefix, service.endpoint)
-                        await self._controller.commands.zwave.central_scene_supported_get(
-                            self.virtual_node_id, str(service.endpoint)
-                        )
 
     def to_dict_zwave(self) -> dict[str, str]:
         return {

@@ -53,7 +53,6 @@ class CentralSceneService(AutomationService):
         if central_scene is None:
             central_scene = CentralScene(scene)
             self._scenes[scene] = central_scene
-            LOGGER.debug("%s - discovered scene %s (supported: %s)", self.prefix, scene, supported)
         central_scene.supported = supported
 
     def emit_scene_event(self, scene: int, event: str, sequence: int | None = None) -> None:
