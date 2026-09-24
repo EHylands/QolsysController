@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.12 (2026-09-24)
+
+### Bug Fixes
+
+- Remove central scene double report
+  ([`baa8611`](https://github.com/EHylands/QolsysController/commit/baa861127a4de7785b7dd65f5cbe5e024f8babf7))
+
+
 ## v1.8.11 (2026-09-23)
 
 ### Bug Fixes
