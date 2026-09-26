@@ -367,7 +367,7 @@ class ThermostatService(AutomationService):
         zwave_hvac_mode = ThermostatMode(int_hvac_mode)
         self.hvac_mode = self.ZWAVE_TO_QOLSYS_HVAC_MODE.get(zwave_hvac_mode, None)
 
-    def _set_hvac_modes_from_bitmask(self, hvac_modes_bitmask: str | list) -> None:
+    def _set_hvac_modes_from_bitmask(self, hvac_modes_bitmask: str | list[int]) -> None:
         supported_hvac_modes: list[QolsysHvacMode] = []
 
         int_list = []
