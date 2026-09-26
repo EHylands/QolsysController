@@ -495,6 +495,10 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             self.notify(Event(QolsysNotification.AUTOMATION_UPDATE, self, self.to_dict_event()))
 
     @property
+    def node_battery_level_value(self) -> str:
+        return self._node_battery_level_value
+
+    @property
     def state(self) -> str:
         return self._state
 
