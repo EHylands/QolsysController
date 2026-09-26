@@ -231,7 +231,8 @@ class TestZwaveDevice:
 
 
 class TestCentralScene:
-    """CentralScene is discovered via multi_channel_details and queried in zwave_report."""
+    """CentralScene: the service is added from multi_channel_details; scenes are discovered
+    from the panel-pushed central_scene_supported field (no active query in zwave_report)."""
 
     _CS = int(ZwaveCommandClass.CentralScene)
 
@@ -326,20 +327,6 @@ class TestCentralScene:
         device, _ = self._make_zwave({1: [self._CS]})
         device.multi_channel_details = json.dumps({"1": [self._CS], "2": [self._CS]})
         assert len(device.services[1]) == 1
-
-    async def test_zwave_report_queries_each_endpoint(self) -> None:
-        device, controller = self._make_zwave({1: [self._CS], 2: [self._CS]})
-        await device.zwave_report()
-        assert controller.commands.zwave.central_scene_supported_get.await_count == 2
-        awaited = {c.args for c in controller.commands.zwave.central_scene_supported_get.await_args_list}
-        assert awaited == {("8", "1"), ("8", "2")}
-
-    async def test_zwave_report_skips_when_command_class_absent(self) -> None:
-        # Service is present (from multi_channel_details) but the node doesn't list CentralScene.
-        device, controller = self._make_zwave({1: [self._CS]}, command_class_list="[]")
-        assert device.service_get(CentralSceneService, 1) is not None
-        await device.zwave_report()
-        controller.commands.zwave.central_scene_supported_get.assert_not_awaited()
 
     def test_base_device_add_central_scene_zwave(self) -> None:
         device = _make_base_device(protocol="Z-Wave")

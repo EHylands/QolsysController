@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation.service_meter import MeterService
 from qolsys_controller.automation.service_sensor import SensorService
+from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_central_scene import CentralSceneServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
@@ -283,6 +284,15 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
     def update_automation_services(self) -> None:
         if len(self._services) > 1:
             LOGGER.debug("More than 1 one endpoint, failing back to raw zwave update")
+            # Per-endpoint services (lights/switches) rely on raw per-endpoint reports,
+            # so the aggregate extras parse is skipped for them. Device-level services
+            # read node-wide fields (thermostat -> extras, battery -> node_battery_level_value)
+            # and have no raw handler, so they must still be refreshed here or they freeze
+            # at their construction-time state. (Status has its own node_status setter path.)
+            for services_list in self._services.values():
+                for service in services_list:
+                    if isinstance(service, (ThermostatServiceZwave, BatteryServiceZwave)):
+                        service.update_automation_service()
             return
 
         for endpoint, services_list in self._services.items():
