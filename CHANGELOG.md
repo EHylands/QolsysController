@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.8.14 (2026-09-26)
+
+### Bug Fixes
+
+- Handle list values in HVAC mode bitmask parsing
+  ([`80e0e25`](https://github.com/EHylands/QolsysController/commit/80e0e25f048405d7e5234ae3610e173d15a12322))
+
+- Handle list values in HVAC mode bitmask parsing
+  ([`92ef8b1`](https://github.com/EHylands/QolsysController/commit/92ef8b18bc647aaef807bd26068d6b51c0d9e110))
+
+
 ## v1.8.13 (2026-09-26)
 
 ### Bug Fixes
