@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.15 (2026-09-26)
+
+### Bug Fixes
+
+- Thermostate stale issue
+  ([`b02c433`](https://github.com/EHylands/QolsysController/commit/b02c433658df82d15d6406af40b11a7d9fd0ead9))
+
+
 ## v1.8.14 (2026-09-26)
 
 ### Bug Fixes
