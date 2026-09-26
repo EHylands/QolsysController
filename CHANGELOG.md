@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.13 (2026-09-26)
+
+### Bug Fixes
+
+- Zwave device battery level value
+  ([`108f577`](https://github.com/EHylands/QolsysController/commit/108f577490575748d1a873f6c8574590066d497a))
+
+
 ## v1.8.12 (2026-09-24)
 
 ### Bug Fixes
