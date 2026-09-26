@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.0 (2026-09-26)
+
+### Features
+
+- Adc thermostat function name
+  ([`0f6ff95`](https://github.com/EHylands/QolsysController/commit/0f6ff95c2f4aaf22f0e33ebec2f8e5638b278b7d))
+
+
 ## v1.8.15 (2026-09-26)
 
 ### Bug Fixes
