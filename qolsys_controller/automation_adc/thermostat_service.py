@@ -5,12 +5,12 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_thermostat import ThermostatService
-from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
 from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
 
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
+    from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +33,10 @@ class ThermostatServiceADC(ThermostatService):
         # ThermostatServiceADC only containt thermostat mode
         # Have to read other values from ADC Device to populate ThermostatServiceADC
         # (temperature, humidity, fan mode, setpoints, etc)
+        # Imported lazily to avoid a circular import at module load time
+        # (automation.device -> automation_adc.thermostat_service -> automation_adc.device).
+        from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
+
         if not isinstance(self.automation_device, QolsysAutomationDeviceADC):
             LOGGER.error(
                 "%s[%s] ThermostatServiceADC - update_adc_service - automation_device is not QolsysAutomationDeviceADC",
