@@ -10,7 +10,6 @@ from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysT
 
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
-    from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 
 LOGGER = logging.getLogger(__name__)
 
