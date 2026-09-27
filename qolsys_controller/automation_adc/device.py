@@ -114,6 +114,12 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
             self.service_add_status_service(endpoint=id)
             self.notify(Event(QolsysNotification.AUTOMATION_UPDATE, self, self.to_dict_event()))
 
+        # Thermostat Service
+        # Only add Thermostat Mode Service (other service will update the Thermostat Mode Service)
+        if func_name == vdFuncName.THERMOSTAT_SYSTEM_MODE and func_type == vdFuncType.THERMOSTAT_MODE:
+            self.service_add_thermostat_service(endpoint=id)
+            self.notify(Event(QolsysNotification.AUTOMATION_UPDATE, self, self.to_dict_event()))
+
     # -----------------------------
     # properties + setters
     # -----------------------------

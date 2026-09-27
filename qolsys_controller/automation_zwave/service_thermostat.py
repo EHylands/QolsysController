@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__)
 class ThermostatServiceZwave(ThermostatService):
     def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
+        self._service_name = "ThermostatServiceZwave"
 
     async def turn_on(self) -> None:
         pass

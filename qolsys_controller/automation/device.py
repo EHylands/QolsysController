@@ -22,6 +22,7 @@ from qolsys_controller.automation.service_valve import ValveService
 from qolsys_controller.automation_adc.service_cover import CoverServiceADC
 from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
+from qolsys_controller.automation_adc.thermostat_service import ThermostatServiceADC
 from qolsys_controller.automation_powerg.service_battery import BatteryServicePowerG
 from qolsys_controller.automation_powerg.service_light import LightServicePowerG
 from qolsys_controller.automation_powerg.service_lock import LockServicePowerG
@@ -246,7 +247,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
 
         match self.protocol:
             case AutomationDeviceProtocol.ADC:
-                pass
+                thermostat_service = ThermostatServiceADC(automation_device=self, endpoint=endpoint)
 
             case AutomationDeviceProtocol.POWERG:
                 pass
