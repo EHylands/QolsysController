@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.9.2 (2026-09-27)
+
+### Bug Fixes
+
+- Circular adc automation device import
+  ([`0162dab`](https://github.com/EHylands/QolsysController/commit/0162dab65b331718fa5949b697e64e2d165cc467))
+
+- Circular import ADC automation device
+  ([`a1214a4`](https://github.com/EHylands/QolsysController/commit/a1214a4e4adc9f57a51dc2eb2b7f7517110514e9))
+
+### Chores
+
+- **deps**: Bump gitpython from 3.1.61 to 3.1.62
+  ([#71](https://github.com/EHylands/QolsysController/pull/71),
+  [`d2da2c0`](https://github.com/EHylands/QolsysController/commit/d2da2c054463362ffcb4776218796832512d3a1e))
+
+
 ## v1.9.1 (2026-09-27)
 
 ### Bug Fixes
