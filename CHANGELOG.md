@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.1 (2026-09-27)
+
+### Bug Fixes
+
+- Adc thermostat enum
+  ([`54f1696`](https://github.com/EHylands/QolsysController/commit/54f1696df01ce3c8f06abcc81d6f68977b5e6b8c))
+
+
 ## v1.9.0 (2026-09-26)
 
 ### Features
