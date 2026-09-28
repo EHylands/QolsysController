@@ -66,7 +66,7 @@ class CoverServiceADC(CoverService):
         local_control: vdFuncLocalControl,
         func_name: vdFuncName,
         func_type: vdFuncType,
-        func_state: vdFuncState,
+        func_state: int,
         timestamp: str,
     ) -> None:
         self.is_closed = func_state == vdFuncState.OFF

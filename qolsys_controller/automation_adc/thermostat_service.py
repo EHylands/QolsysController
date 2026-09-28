@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_thermostat import ThermostatService
-from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncType
 from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class ThermostatServiceADC(ThermostatService):
         local_control: vdFuncLocalControl,
         func_name: vdFuncName,
         func_type: vdFuncType,
-        func_state: vdFuncState,
+        func_state: int,
         timestamp: str,
     ) -> None:
         # ThermostatServiceADC only containt thermostat mode
@@ -50,7 +50,7 @@ class ThermostatServiceADC(ThermostatService):
             # First thing to do is to set device temperature unit:
             for function in json_func_list:
                 func_type = vdFuncType(function.get("vdFuncType"))
-                func_state = function.get("func_state")
+                func_state = function.get("vdFuncState")
 
                 if func_type == vdFuncType.TEMPERATURE_UNITS:
                     current_unit = QolsysTemperatureUnit.CELSIUS
@@ -61,15 +61,23 @@ class ThermostatServiceADC(ThermostatService):
             # Set other properties afterward
             for function in json_func_list:
                 func_type = vdFuncType(function.get("vdFuncType"))
-                func_state = function.get("func_state")
+                func_state = function.get("vdFuncState")
 
                 if func_type == vdFuncType.TEMPERATURE:
-                    self.current_temperature = int(func_state) / 10
+                    try:
+                        self.current_temperature = int(func_state) / 10
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - TEMPERATURE func_state is not an int: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
 
                 elif func_type == vdFuncType.THERMOSTAT_MODE:
                     current_thermostat_mode = QolsysHvacMode.OFF
                     if func_state == 1:
-                        current_thermostat_mode == QolsysHvacMode.COOL
+                        current_thermostat_mode = QolsysHvacMode.COOL
                     elif func_state == 2:
                         current_thermostat_mode = QolsysHvacMode.HEAT
                     elif func_state == 3:
@@ -78,7 +86,15 @@ class ThermostatServiceADC(ThermostatService):
                     self.hvac_mode = current_thermostat_mode
 
                 elif func_type == vdFuncType.HUMIDITY:
-                    self.current_humidity = float(func_state)
+                    try:
+                        self.current_humidity = float(func_state)
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
 
         except json.JSONDecodeError as e:
             LOGGER.error(

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation.service import AutomationService
-from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncState, vdFuncType
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncType
 from qolsys_controller.enum_qolsys import AutomationDeviceProtocol, QolsysNotification
 from qolsys_controller.observable import Event
 
@@ -96,7 +96,7 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
         local_control: vdFuncLocalControl,
         func_name: vdFuncName,
         func_type: vdFuncType,
-        func_state: vdFuncState,
+        func_state: int,
         timestamp: str,
     ) -> None:
         # Garage Door Service
@@ -145,7 +145,7 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
                         local_control = vdFuncLocalControl(function.get("vdFuncLocalControl"))
                         func_name = vdFuncName(function.get("vdFuncName"))
                         func_type = vdFuncType(function.get("vdFuncType"))
-                        func_state = vdFuncState(function.get("vdFuncState"))
+                        func_state = function.get("vdFuncState")
                         timestamp = function.get("vdFuncBackendTimestamp")
                         new_service_id.append(id)
 
