@@ -5,7 +5,14 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_thermostat import ThermostatService
-from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncName, vdFuncType
+from qolsys_controller.enum_adc import (
+    ADCT_TO_QOLSYS_THERMOSTAT_MODE,
+    QOLSYS_TO_ADC_THERMOSTAT_MODE,
+    AdcThermostatMode,
+    vdFuncLocalControl,
+    vdFuncName,
+    vdFuncType,
+)
 from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
 
 if TYPE_CHECKING:
@@ -97,15 +104,17 @@ class ThermostatServiceADC(ThermostatService):
                         self.endpoint,
                         func_state,
                     )
-                    current_thermostat_mode = QolsysHvacMode.OFF
-                    if func_state == 1:
-                        current_thermostat_mode = QolsysHvacMode.COOL
-                    elif func_state == 2:
-                        current_thermostat_mode = QolsysHvacMode.HEAT
-                    elif func_state == 3:
-                        current_thermostat_mode = QolsysHvacMode.HEAT_COOL
 
-                    self.hvac_mode = current_thermostat_mode
+                    try:
+                        adc_thermostat_mode = AdcThermostatMode(func_state)
+                        self.hvac_mode = ADCT_TO_QOLSYS_THERMOSTAT_MODE.get(adc_thermostat_mode, None)
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
 
                 elif func_type == vdFuncType.HUMIDITY:
                     try:
@@ -131,7 +140,9 @@ class ThermostatServiceADC(ThermostatService):
         pass
 
     async def turn_off(self) -> None:
-        pass
+        await self.automation_device.controller.commands.adc.virtual_device_action(
+            self.automation_device.virtual_node_id, self.endpoint, AdcThermostatMode.OFF
+        )
 
     async def set_temperature(self, temperature: float, mode: QolsysHvacMode) -> None:
         pass
@@ -154,7 +165,11 @@ class ThermostatServiceADC(ThermostatService):
             return
 
     async def set_hvac_mode(self, hvac_mode: QolsysHvacMode) -> None:
-        pass
+        adc_thermostat_mode = QOLSYS_TO_ADC_THERMOSTAT_MODE.get(hvac_mode, None)
+        if adc_thermostat_mode:
+            await self.automation_device.controller.commands.adc.virtual_device_action(
+                self.automation_device.virtual_node_id, self.endpoint, adc_thermostat_mode
+            )
 
     async def set_fan_mode(self, fan_mode: QolsysFanMode) -> None:
         pass

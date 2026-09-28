@@ -9,6 +9,7 @@ from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_adc.service_cover import CoverServiceADC
 from qolsys_controller.automation_adc.service_light import LightServiceADC
 from qolsys_controller.automation_adc.service_status import StatusServiceADC
+from qolsys_controller.automation_adc.service_thermostat import ThermostatServiceADC
 from qolsys_controller.enum_adc import vdFuncState
 from qolsys_controller.errors import InvalidVirtualNodeError, ServiceNotFoundError
 from qolsys_controller.mqtt_command import MQTTCommand_Panel
@@ -23,12 +24,12 @@ class AdcCommands:
     def __init__(self, controller: QolsysController) -> None:
         self._controller = controller
 
-    async def virtual_device_action(self, device_id: str, service_id: int, state: vdFuncState) -> dict[str, Any] | None:
+    async def virtual_device_action(self, device_id: str, service_id: int, state: vdFuncState | int) -> dict[str, Any] | None:
         LOGGER.debug(
             "MQTT Panel Client: Sending virtual_device_action device: %s, service: %s state: %s",
             device_id,
             service_id,
-            state.name,
+            state,
         )
 
         device = self._controller.state.automation_device(device_id)
@@ -36,8 +37,10 @@ class AdcCommands:
             raise InvalidVirtualNodeError(device_id)
 
         service = device.service_get_adc(service_id)
-        if not isinstance(service, (LightServiceADC, CoverServiceADC, StatusServiceADC)):
-            raise ServiceNotFoundError(device_id, str(service_id), "LightServiceADC, CoverServiceADC or StatusServiceADC")
+        if not isinstance(service, (LightServiceADC, CoverServiceADC, StatusServiceADC, ThermostatServiceADC)):
+            raise ServiceNotFoundError(
+                device_id, str(service_id), "LightServiceADC, CoverServiceADC or StatusServiceADC or ThermostatServiceADC"
+            )
 
         device_list = {
             "virtualDeviceList": [

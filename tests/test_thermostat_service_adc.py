@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
-from qolsys_controller.automation_adc.thermostat_service import ThermostatServiceADC
+from qolsys_controller.automation_adc.service_thermostat import ThermostatServiceADC
 from qolsys_controller.enum_qolsys import QolsysHvacMode, QolsysTemperatureUnit
 
 # Real func_list captured from an ADC thermostat, stored verbatim as the JSON

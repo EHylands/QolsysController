@@ -1,5 +1,7 @@
 from enum import Enum, IntEnum
 
+from enum_qolsys import QolsysHvacMode
+
 
 class vdFuncType(IntEnum):
     BINARY_ACTUATOR = 1
@@ -49,3 +51,30 @@ class vdFuncLocalControl(IntEnum):
 class vdFuncState(IntEnum):
     OFF = 0
     ON = 1
+
+
+class AdcThermostatMode(IntEnum):
+    OFF = 0
+    HEAT_COOL = 1
+    COOL = 2
+    HEAT = 3
+
+
+class AdcFanMode(IntEnum):
+    OFF = 0
+    AUTO = 5
+
+
+ADCT_TO_QOLSYS_THERMOSTAT_MODE: dict[AdcThermostatMode, QolsysHvacMode] = {
+    AdcThermostatMode.OFF: QolsysHvacMode.OFF,
+    AdcThermostatMode.HEAT_COOL: QolsysHvacMode.HEAT_COOL,
+    AdcThermostatMode.COOL: QolsysHvacMode.COOL,
+    AdcThermostatMode.HEAT: QolsysHvacMode.HEAT,
+}
+
+QOLSYS_TO_ADC_THERMOSTAT_MODE: dict[QolsysHvacMode, AdcThermostatMode] = {
+    QolsysHvacMode.OFF: AdcThermostatMode.OFF,
+    QolsysHvacMode.HEAT_COOL: AdcThermostatMode.HEAT_COOL,
+    QolsysHvacMode.COOL: AdcThermostatMode.COOL,
+    QolsysHvacMode.HEAT: AdcThermostatMode.HEAT,
+}
