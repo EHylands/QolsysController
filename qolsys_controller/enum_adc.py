@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-from enum_qolsys import QolsysHvacMode
+from qolsys_controller.enum_qolsys import QolsysHvacMode
 
 
 class vdFuncType(IntEnum):
