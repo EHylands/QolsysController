@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v1.9.3 (2026-09-28)
+
+### Bug Fixes
+
+- Adc thermostat service vdState
+  ([`ba6ee60`](https://github.com/EHylands/QolsysController/commit/ba6ee60efc917f2ab9cab0d54764bec3133382bb))
+
+### Chores
+
+- Tags.yaml
+  ([`588e982`](https://github.com/EHylands/QolsysController/commit/588e982b171b876243861f6031ac5bf66aa80f40))
+
+- Update tags.yaml
+  ([`76c4350`](https://github.com/EHylands/QolsysController/commit/76c4350e80b218338b76b92548a672fb110dcf84))
+
+- **deps**: Bump python-semantic-release from 10.6.2 to 10.7.0
+  ([#72](https://github.com/EHylands/QolsysController/pull/72),
+  [`41cfc96`](https://github.com/EHylands/QolsysController/commit/41cfc96269eff2fd587eed9686aa457d71749040))
+
+
 ## v1.9.2 (2026-09-27)
 
 ### Bug Fixes
