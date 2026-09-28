@@ -74,7 +74,29 @@ class ThermostatServiceADC(ThermostatService):
                             func_state,
                         )
 
+                elif func_type == vdFuncType.FAN_MODE:
+                    LOGGER.debug(
+                        "%s[%s] ThermostatServiceADC - adc fan mode: %r",
+                        self.automation_device.prefix,
+                        self.endpoint,
+                        func_state,
+                    )
+
+                elif func_type == vdFuncType.SUPPORTED_THERMOSTAT_MODES:
+                    LOGGER.debug(
+                        "%s[%s] ThermostatServiceADC - adc thermostat modes: %r",
+                        self.automation_device.prefix,
+                        self.endpoint,
+                        func_state,
+                    )
+
                 elif func_type == vdFuncType.THERMOSTAT_MODE:
+                    LOGGER.debug(
+                        "%s[%s] ThermostatServiceADC - adc thermostat mode: %r",
+                        self.automation_device.prefix,
+                        self.endpoint,
+                        func_state,
+                    )
                     current_thermostat_mode = QolsysHvacMode.OFF
                     if func_state == 1:
                         current_thermostat_mode = QolsysHvacMode.COOL
