@@ -36,12 +36,16 @@ jobs:
         run: pip install python-semantic-release
 
       # ------------------------------------------------------------
-      # Force evaluation against main branch (avoids detached HEAD issues)
+      # Evaluate the PR *as merged into main*, not main itself.
+      # On pull_request, actions/checkout checks out the simulated merge
+      # commit (PR + base) by default. Naming that HEAD 'main' satisfies
+      # semantic-release's branch matching, so it analyzes the PR's own
+      # commits and previews what merging this PR would actually release.
+      # (The previous `git checkout main` reset to base main and ignored
+      # the PR entirely, so every PR showed the same version.)
       # ------------------------------------------------------------
-      - name: Prepare main branch context
-        run: |
-          git fetch origin main:main
-          git checkout main
+      - name: Evaluate PR as merged into main
+        run: git checkout -B main
 
       # ------------------------------------------------------------
       # Get next version
