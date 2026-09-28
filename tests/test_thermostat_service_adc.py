@@ -47,8 +47,8 @@ class TestThermostatServiceADC:
         assert _get_thermostat(_make_device()).current_humidity == 57.0
 
     def test_hvac_mode_decoded(self) -> None:
-        # vdFuncState 1 -> COOL (regression: the "== instead of =" bug left it OFF)
-        assert _get_thermostat(_make_device()).hvac_mode == QolsysHvacMode.COOL
+        # vdFuncState 1 -> HEAT_COOL (AdcThermostatMode.HEAT_COOL == 1)
+        assert _get_thermostat(_make_device()).hvac_mode == QolsysHvacMode.HEAT_COOL
 
     def test_temperature_unit_decoded(self) -> None:
         # Temperature Units vdFuncState 0 -> Fahrenheit
