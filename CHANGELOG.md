@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.4 (2026-09-28)
+
+### Bug Fixes
+
+- Debug information for adc thermostat
+  ([`456b425`](https://github.com/EHylands/QolsysController/commit/456b425ccf5889579fe24e884e62ce290ed58d7f))
+
+
 ## v1.9.3 (2026-09-28)
 
 ### Bug Fixes
