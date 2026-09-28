@@ -31,7 +31,7 @@ class MeterServiceZwave(MeterService):
             rate_type: int = data.get("meter_ratetype_supported", -1)
             try:
                 self.rate_type = QolsysMeterRateType(rate_type)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 LOGGER.error("%s - MeterService ZWave - Unknown MeterRateType, Setting to UNSPECIFIED", self.prefix)
                 self.rate_type = QolsysMeterRateType.UNSPECIFIED
 

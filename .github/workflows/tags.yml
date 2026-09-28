@@ -8,6 +8,13 @@ on:
 permissions:
   contents: write
 
+# Serialize runs on the same ref: two quick pushes to main must not race two
+# releases onto the same version/tags. Queue rather than cancel — never abort
+# an in-flight release mid tag-push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   test:
     name: Mypy + Ruff
@@ -20,18 +27,25 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install mypy ruff pytest pytest-asyncio
+        # Install the package with its declared dependencies so CI resolves the
+        # same version ranges users get. Extras: dev = lint/type/test tooling,
+        # bridge = amqtt (needed to type-check qolsys_controller/mqtt_bridge).
+        run: pip install -e ".[dev,bridge]"
 
       - name: Ruff check
         run: ruff check .
 
+      - name: Ruff format check
+        run: ruff format --check .
+
       - name: MyPy check
         run: mypy .
+
+      - name: Pytest
+        run: pytest
 
 
   release:
@@ -46,11 +60,15 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install semantic-release
-        run: python -m pip install -r requirements_release.txt
+        run: python -m pip install python-semantic-release
 
+      # Intentional: a PAT is used instead of the default GITHUB_TOKEN. Pushes
+      # made with GITHUB_TOKEN do NOT trigger other workflows, so the tag push
+      # below would never fire publish.yml. The PAT lets the new tag trigger
+      # the PyPI publish workflow. Do not "simplify" this to GITHUB_TOKEN.
       - name: Run semantic-release (bump + tag)
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}

@@ -58,7 +58,7 @@ class LightServiceZwave(LightService):
             self.level = int(dict.get("LEVEL", "0"))
             self.is_on = self.automation_device.status.lower() == "on"
 
-        except (JSONDecodeError, ValueError, TypeError):
+        except JSONDecodeError, ValueError, TypeError:
             LOGGER.error(
                 "[%s] LightServiceZwave - update_automation_service - error parsing extras: %s",
                 self.automation_device.prefix,

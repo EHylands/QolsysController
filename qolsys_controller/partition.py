@@ -465,13 +465,13 @@ class QolsysPartition(QolsysObservable):
 
         try:
             partition_id = int(self.id)
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             LOGGER.debug("Partition%s (%s) - invalid id in event payload: %s", self._id, self._name, self.id)
 
         try:
             status_time_parts = self.system_status_changed_time.split(",")
             status_changed_time = int(status_time_parts[1] if len(status_time_parts) > 1 else status_time_parts[0])
-        except (ValueError, TypeError, IndexError):
+        except ValueError, TypeError, IndexError:
             LOGGER.debug(
                 "Partition%s (%s) - invalid SYSTEM_STATUS_CHANGED_TIME in event payload: %s",
                 self._id,

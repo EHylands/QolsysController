@@ -449,7 +449,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             dict = json.loads(self.extras)
             generic_type = int(dict.get("GENERIC_TYPE", "0"))
             return ZwaveDeviceClass(generic_type)
-        except (ValueError, TypeError, json.JSONDecodeError):
+        except ValueError, TypeError, json.JSONDecodeError:
             return ZwaveDeviceClass.Unknown
 
     @property
@@ -459,7 +459,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         for command in array:
             try:
                 commands.append(ZwaveCommandClass(int(command)))
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 continue
         return commands
 
@@ -475,7 +475,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         for command in array:
             try:
                 commands.append(ZwaveCommandClass(int(command)))
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 continue
         return commands
 

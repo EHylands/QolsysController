@@ -326,7 +326,7 @@ class ThermostatService(AutomationService):
             elif self.device_temperature_unit == QolsysTemperatureUnit.FAHRENHEIT:
                 self.target_temperature_step = 1.0
 
-        except (json.JSONDecodeError, ValueError, TypeError, KeyError):
+        except json.JSONDecodeError, ValueError, TypeError, KeyError:
             LOGGER.error(
                 "%s LightServiceZwave - update_automation_service - error parsing extras/status: %s / %s",
                 self.prefix,

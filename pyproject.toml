@@ -6,9 +6,9 @@ authors = [
 ]
 description = "A Python module that emulates a virtual IQ Remote device, enabling full local control of a Qolsys IQ Panel"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 classifiers = [
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Home Automation",
     "License :: OSI Approved :: MIT License",
 ]
@@ -26,6 +26,7 @@ bridge = [
     "amqtt>=0.10.0",
 ]
 dev = [
+    "mypy",
     "pytest>=9.0",
     "pytest-asyncio>=1.0",
     "ruff",
@@ -49,7 +50,7 @@ asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 127
-target-version = "py312"
+target-version = "py314"
 
 
 [tool.ruff.lint]
