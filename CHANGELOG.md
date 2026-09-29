@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.6 (2026-09-29)
+
+### Bug Fixes
+
+- Iq panel 2+ zwave thermostat command report
+  ([`827ac33`](https://github.com/EHylands/QolsysController/commit/827ac33f05cd092f56fe22b5364b17e9be22ddad))
+
+
 ## v1.9.5 (2026-09-28)
 
 ### Bug Fixes
