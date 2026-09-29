@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_thermostat import ThermostatService
-from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode
+from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysPanelType
 from qolsys_controller.enum_zwave import ThermostatMode, ThermostatSetpointMode
 
 if TYPE_CHECKING:
@@ -53,6 +53,12 @@ class ThermostatServiceZwave(ThermostatService):
             self.automation_device.virtual_node_id, str(self.endpoint), setpoint_mode, int(temperature)
         )
 
+        # Ask for report on IQ2+ panel
+        if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            await self.automation_device.controller.commands.zwave.thermostat_setpoint_get(
+                self.automation_device.virtual_node_id, str(self.endpoint), setpoint_mode
+            )
+
     async def set_hvac_mode(self, hvac_mode: QolsysHvacMode) -> None:
         zwave_thermostat_mode = self.QOLSYS_TO_ZWAVE_HVAC_MODE.get(hvac_mode, None)
         if zwave_thermostat_mode is None:
@@ -68,6 +74,12 @@ class ThermostatServiceZwave(ThermostatService):
             self.automation_device.virtual_node_id, str(self.endpoint), zwave_thermostat_mode
         )
 
+        # Ask for report on IQ2+ panel
+        if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            await self.automation_device.controller.commands.zwave.thermostat_mode_get(
+                self.automation_device.virtual_node_id, str(self.endpoint)
+            )
+
     async def set_fan_mode(self, fan_mode: QolsysFanMode) -> None:
         zwave_fan_mode = self.QOLSYS_TO_ZWAVE_FAN_MODE.get(fan_mode, None)
         if zwave_fan_mode is None:
@@ -81,6 +93,12 @@ class ThermostatServiceZwave(ThermostatService):
         await self.automation_device.controller.commands.zwave.thermostat_fan_mode_set(
             self.automation_device.virtual_node_id, str(self.endpoint), zwave_fan_mode
         )
+
+        # Ask for report on IQ2+ panel
+        if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            await self.automation_device.controller.commands.zwave.thermostat_fan_mode_get(
+                self.automation_device.virtual_node_id, str(self.endpoint)
+            )
 
     async def set_humidity(self, humidity: float) -> None:
         pass
