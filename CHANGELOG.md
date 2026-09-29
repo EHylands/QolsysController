@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.7 (2026-09-29)
+
+### Bug Fixes
+
+- Set the zwave thermostat value preemptively on iq2+ panels
+  ([`c526823`](https://github.com/EHylands/QolsysController/commit/c5268235091f5a9bf3f53f7e8de1cd2605a428b5))
+
+
 ## v1.9.6 (2026-09-29)
 
 ### Bug Fixes
