@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.8 (2026-09-30)
+
+### Bug Fixes
+
+- Add adc thermostat service default hvac_modes array
+  ([`b90d232`](https://github.com/EHylands/QolsysController/commit/b90d2329afce14e35d442c394ea0459c9665126c))
+
+
 ## v1.9.7 (2026-09-29)
 
 ### Bug Fixes
