@@ -25,8 +25,11 @@ class ThermostatServiceADC(ThermostatService):
     def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
         self._service_name = "ThermostatServiceADC"
-        # Outbound actions (set_hvac_mode / turn_off) send a thermostat mode change
         self._func_type: vdFuncType = vdFuncType.THERMOSTAT_MODE
+
+        # Set defautl hvac_modes
+        self.hvac_modes = [QolsysHvacMode.OFF, QolsysHvacMode.COOL, QolsysHvacMode.HEAT, QolsysHvacMode.HEAT_COOL]
+
         self.is_main_endpoint_service = True
 
     @property
