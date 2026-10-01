@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_adc.service_thermostat import ThermostatServiceADC
-from qolsys_controller.enum_qolsys import QolsysHvacMode, QolsysTemperatureUnit
+from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
 
 # Real func_list captured from an ADC thermostat, stored verbatim as the JSON
 # string the panel delivers. Values are encoded as ints under "vdFuncState"
@@ -53,3 +53,30 @@ class TestThermostatServiceADC:
     def test_temperature_unit_decoded(self) -> None:
         # Temperature Units vdFuncState 0 -> Fahrenheit
         assert _get_thermostat(_make_device()).device_temperature_unit == QolsysTemperatureUnit.FAHRENHEIT
+
+    def test_fan_mode_decoded(self) -> None:
+        # Fan Mode vdFuncState 5 -> AdcFanMode.AUTO -> QolsysFanMode.FAN_AUTO
+        assert _get_thermostat(_make_device()).fan_mode == QolsysFanMode.FAN_AUTO
+
+    def test_cool_setpoint_decoded(self) -> None:
+        # Cool Setpoint vdFuncState 800 is deci-degrees -> 80.0
+        assert _get_thermostat(_make_device()).target_cool_temp == 80.0
+
+    def test_negative_heat_setpoint_ignored(self) -> None:
+        # Heat Setpoint vdFuncState -4000 is a negative sentinel ("not set"):
+        # the >= 0 guard must drop it rather than report -400.0.
+        assert _get_thermostat(_make_device()).target_heat_temp is None
+
+    def test_setpoint_limits_decoded(self) -> None:
+        ts = _get_thermostat(_make_device())
+        # Deci-degrees -> degrees for each Min/Max Heat/Cool Setpoint Limit.
+        assert ts._min_heat_setpoint == 45.0
+        assert ts._max_heat_setpoint == 79.0
+        assert ts._min_cool_setpoint == 65.0
+        assert ts._max_cool_setpoint == 92.0
+
+    def test_min_max_temp_properties_in_heat_cool(self) -> None:
+        # System Mode is HEAT_COOL -> min/max span both heat and cool limits.
+        ts = _get_thermostat(_make_device())
+        assert ts.min_temp == 45.0
+        assert ts.max_temp == 92.0

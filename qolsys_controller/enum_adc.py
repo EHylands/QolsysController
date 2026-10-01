@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-from qolsys_controller.enum_qolsys import QolsysHvacMode
+from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode
 
 
 class vdFuncType(IntEnum):
@@ -65,7 +65,7 @@ class AdcFanMode(IntEnum):
     AUTO = 5
 
 
-ADCT_TO_QOLSYS_THERMOSTAT_MODE: dict[AdcThermostatMode, QolsysHvacMode] = {
+ADC_TO_QOLSYS_THERMOSTAT_MODE: dict[AdcThermostatMode, QolsysHvacMode] = {
     AdcThermostatMode.OFF: QolsysHvacMode.OFF,
     AdcThermostatMode.HEAT_COOL: QolsysHvacMode.HEAT_COOL,
     AdcThermostatMode.COOL: QolsysHvacMode.COOL,
@@ -77,4 +77,14 @@ QOLSYS_TO_ADC_THERMOSTAT_MODE: dict[QolsysHvacMode, AdcThermostatMode] = {
     QolsysHvacMode.HEAT_COOL: AdcThermostatMode.HEAT_COOL,
     QolsysHvacMode.COOL: AdcThermostatMode.COOL,
     QolsysHvacMode.HEAT: AdcThermostatMode.HEAT,
+}
+
+ADC_TO_QOLSYS_FAN_MODE: dict[AdcFanMode, QolsysFanMode] = {
+    AdcFanMode.OFF: QolsysFanMode.FAN_OFF,
+    AdcFanMode.AUTO: QolsysFanMode.FAN_AUTO,
+}
+
+QOLSYS_TO_ADC_FAN_MODE: dict[QolsysFanMode, AdcFanMode] = {
+    QolsysFanMode.FAN_OFF: AdcFanMode.OFF,
+    QolsysFanMode.FAN_AUTO: AdcFanMode.AUTO,
 }

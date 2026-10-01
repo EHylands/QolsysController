@@ -6,14 +6,18 @@ from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_thermostat import ThermostatService
 from qolsys_controller.enum_adc import (
-    ADCT_TO_QOLSYS_THERMOSTAT_MODE,
+    ADC_TO_QOLSYS_FAN_MODE,
+    ADC_TO_QOLSYS_THERMOSTAT_MODE,
+    QOLSYS_TO_ADC_FAN_MODE,
     QOLSYS_TO_ADC_THERMOSTAT_MODE,
+    AdcFanMode,
     AdcThermostatMode,
     vdFuncLocalControl,
     vdFuncName,
     vdFuncType,
 )
-from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
+from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysNotification, QolsysTemperatureUnit
+from qolsys_controller.observable import Event
 
 if TYPE_CHECKING:
     from qolsys_controller.automation.device import QolsysAutomationDevice
@@ -29,8 +33,14 @@ class ThermostatServiceADC(ThermostatService):
 
         # Set defautl hvac_modes
         self.hvac_modes = [QolsysHvacMode.OFF, QolsysHvacMode.COOL, QolsysHvacMode.HEAT, QolsysHvacMode.HEAT_COOL]
+        self.fan_modes = [QolsysFanMode.FAN_OFF, QolsysFanMode.FAN_AUTO]
 
         self.is_main_endpoint_service = True
+
+        self._min_heat_setpoint = 0.0
+        self._max_heat_setpoint = 0.0
+        self._min_cool_setpoint = 0.0
+        self._max_cool_setpoint = 0.0
 
     @property
     def func_type(self) -> vdFuncType:
@@ -97,6 +107,17 @@ class ThermostatServiceADC(ThermostatService):
                         func_state,
                     )
 
+                    try:
+                        adc_fan_mode = AdcFanMode(func_state)
+                        self.fan_mode = ADC_TO_QOLSYS_FAN_MODE.get(adc_fan_mode, None)
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - FAN_MODE func_state is invalid: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
                 elif func_type == vdFuncType.SUPPORTED_THERMOSTAT_MODES:
                     LOGGER.debug(
                         "%s[%s] ThermostatServiceADC - adc thermostat modes: %r",
@@ -115,7 +136,7 @@ class ThermostatServiceADC(ThermostatService):
 
                     try:
                         adc_thermostat_mode = AdcThermostatMode(func_state)
-                        self.hvac_mode = ADCT_TO_QOLSYS_THERMOSTAT_MODE.get(adc_thermostat_mode, None)
+                        self.hvac_mode = ADC_TO_QOLSYS_THERMOSTAT_MODE.get(adc_thermostat_mode, None)
                     except TypeError, ValueError:
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
@@ -126,10 +147,116 @@ class ThermostatServiceADC(ThermostatService):
 
                 elif func_type == vdFuncType.HUMIDITY:
                     try:
-                        self.current_humidity = float(func_state)
+                        self.current_humidity = int(func_state)
                     except TypeError, ValueError:
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.COOL_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self.target_cool_temp = temp
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - COOL_SETPOINT func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.HEAT_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self.target_heat_temp = temp
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - HEAT_SETPOINT func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.MAX_COOL_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self._max_cool_setpoint = temp
+                            self.automation_device.notify(
+                                Event(
+                                    QolsysNotification.AUTOMATION_UPDATE,
+                                    self.automation_device,
+                                    self.automation_device.to_dict_event(),
+                                )
+                            )
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - MAX_COOL_SETPOINT func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.MIN_COOL_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self._min_cool_setpoint = temp
+                            self.automation_device.notify(
+                                Event(
+                                    QolsysNotification.AUTOMATION_UPDATE,
+                                    self.automation_device,
+                                    self.automation_device.to_dict_event(),
+                                )
+                            )
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - MIN_COOL_SETPOINT func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.MAX_HEAT_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self._max_heat_setpoint = temp
+                            self.automation_device.notify(
+                                Event(
+                                    QolsysNotification.AUTOMATION_UPDATE,
+                                    self.automation_device,
+                                    self.automation_device.to_dict_event(),
+                                )
+                            )
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - MAX_HEAT_SETPOINT func_state is not a number: %r",
+                            self.automation_device.prefix,
+                            self.endpoint,
+                            func_state,
+                        )
+
+                elif func_type == vdFuncType.MIN_HEAT_SETPOINT:
+                    try:
+                        temp = int(func_state) / 10
+                        if temp >= 0:
+                            self._min_heat_setpoint = temp
+                            self.automation_device.notify(
+                                Event(
+                                    QolsysNotification.AUTOMATION_UPDATE,
+                                    self.automation_device,
+                                    self.automation_device.to_dict_event(),
+                                )
+                            )
+                    except TypeError, ValueError:
+                        LOGGER.error(
+                            "%s[%s] ThermostatServiceADC - MIN_HEAT_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
                             self.endpoint,
                             func_state,
@@ -148,6 +275,7 @@ class ThermostatServiceADC(ThermostatService):
         pass
 
     async def turn_off(self) -> None:
+        LOGGER.debug("%s[%s] ThermostatServiceADC - turn off", self.automation_device.prefix, self.endpoint)
         await self.automation_device.controller.commands.adc.virtual_device_action(
             self.automation_device.virtual_node_id, self.endpoint, AdcThermostatMode.OFF
         )
@@ -156,7 +284,7 @@ class ThermostatServiceADC(ThermostatService):
         pass
         if mode not in (QolsysHvacMode.HEAT, QolsysHvacMode.COOL):
             LOGGER.error(
-                "%s[%s] ThermostatServiceZwave - set_temperature - unsupported hvac_mode: %s",
+                "%s[%s] ThermostatServiceADC - set_temperature - unsupported hvac_mode: %s",
                 self.automation_device.prefix,
                 self.endpoint,
                 mode,
@@ -165,7 +293,7 @@ class ThermostatServiceADC(ThermostatService):
 
         if mode not in self.hvac_modes:
             LOGGER.error(
-                "%s[%s] ThermostatServiceZwave - set_temperature - hvac_mode not supported by device: %s",
+                "%s[%s] ThermostatServiceADC - set_temperature - hvac_mode not supported by device: %s",
                 self.automation_device.prefix,
                 self.endpoint,
                 mode,
@@ -180,10 +308,48 @@ class ThermostatServiceADC(ThermostatService):
             )
 
     async def set_fan_mode(self, fan_mode: QolsysFanMode) -> None:
-        pass
+        adc_fan_mode = QOLSYS_TO_ADC_FAN_MODE.get(fan_mode, None)
+        if adc_fan_mode:
+            await self.automation_device.controller.commands.adc.virtual_device_action(
+                self.automation_device.virtual_node_id, self.endpoint, adc_fan_mode
+            )
 
     async def set_humidity(self, humidity: float) -> None:
         pass
 
     def update_automation_service(self) -> None:
         pass
+
+    @property
+    def min_temp(self) -> float:
+        match self.hvac_mode:
+            case QolsysHvacMode.HEAT:
+                return self._min_heat_setpoint
+
+            case QolsysHvacMode.COOL:
+                return self._min_cool_setpoint
+
+            case QolsysHvacMode.HEAT_COOL:
+                return min(self._min_heat_setpoint, self._min_cool_setpoint)
+
+            case QolsysHvacMode.OFF:
+                return min(self._min_heat_setpoint, self._min_cool_setpoint)
+
+        return -1.0
+
+    @property
+    def max_temp(self) -> float:
+        match self.hvac_mode:
+            case QolsysHvacMode.HEAT:
+                return self._max_heat_setpoint
+
+            case QolsysHvacMode.COOL:
+                return self._max_cool_setpoint
+
+            case QolsysHvacMode.HEAT_COOL:
+                return max(self._max_heat_setpoint, self._max_cool_setpoint)
+
+            case QolsysHvacMode.OFF:
+                return max(self._max_heat_setpoint, self._max_cool_setpoint)
+
+        return -1.0
