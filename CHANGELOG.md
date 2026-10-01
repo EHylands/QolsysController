@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.9.9 (2026-10-01)
+
+### Bug Fixes
+
+- Adc thermostat service fan_mode, heat and cool setpoint
+  ([`70beb42`](https://github.com/EHylands/QolsysController/commit/70beb4257a727414823a78002c7b28a87de83248))
+
+### Chores
+
+- Ci-cd
+  ([`abd06fe`](https://github.com/EHylands/QolsysController/commit/abd06fe3793ba54add052320c71657a0dc3cfa85))
+
+- Ci-cd
+  ([`007dffb`](https://github.com/EHylands/QolsysController/commit/007dffbe6b6a32985eea9a9114bda463df602a93))
+
+
 ## v1.9.8 (2026-09-30)
 
 ### Bug Fixes
