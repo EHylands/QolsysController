@@ -33,7 +33,7 @@ class ThermostatServiceADC(ThermostatService):
 
         # Set defautl hvac_modes
         self.hvac_modes = [QolsysHvacMode.OFF, QolsysHvacMode.COOL, QolsysHvacMode.HEAT, QolsysHvacMode.HEAT_COOL]
-        self.fan_modes = [QolsysFanMode.FAN_OFF, QolsysFanMode.FAN_AUTO]
+        self.fan_modes = [QolsysFanMode.FAN_ON, QolsysFanMode.FAN_AUTO]
 
         self.is_main_endpoint_service = True
 
@@ -281,7 +281,7 @@ class ThermostatServiceADC(ThermostatService):
         )
 
     async def set_temperature(self, temperature: float, mode: QolsysHvacMode) -> None:
-        pass
+
         if mode not in (QolsysHvacMode.HEAT, QolsysHvacMode.COOL):
             LOGGER.error(
                 "%s[%s] ThermostatServiceADC - set_temperature - unsupported hvac_mode: %s",
@@ -299,6 +299,51 @@ class ThermostatServiceADC(ThermostatService):
                 mode,
             )
             return
+
+        if mode == QolsysHvacMode.HEAT:
+            if temperature < self._min_heat_setpoint or temperature > self._max_heat_setpoint:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_temperature - heat temperature out of range: %s",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                    temperature,
+                )
+                return
+
+            vd_func_id = self._get_func_name_id(vdFuncName.HEAT_SETPOINT)
+            if vd_func_id == -1:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_temperature - could not find HEAT_SETPOINT function ID",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                )
+                return
+
+            await self.automation_device.controller.commands.adc.virtual_device_action(
+                self.automation_device.virtual_node_id, vd_func_id, int(temperature * 10)
+            )
+        elif mode == QolsysHvacMode.COOL:
+            if temperature < self._min_cool_setpoint or temperature > self._max_cool_setpoint:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_temperature - cool temperature out of range: %s",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                    temperature,
+                )
+                return
+
+            vd_func_id = self._get_func_name_id(vdFuncName.COOL_SETPOINT)
+            if vd_func_id == -1:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_temperature - could not find COOL_SETPOINT function ID",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                )
+                return
+
+            await self.automation_device.controller.commands.adc.virtual_device_action(
+                self.automation_device.virtual_node_id, vd_func_id, int(temperature * 10)
+            )
 
     async def set_hvac_mode(self, hvac_mode: QolsysHvacMode) -> None:
         adc_thermostat_mode = QOLSYS_TO_ADC_THERMOSTAT_MODE.get(hvac_mode, None)
@@ -353,3 +398,37 @@ class ThermostatServiceADC(ThermostatService):
                 return max(self._max_heat_setpoint, self._max_cool_setpoint)
 
         return -1.0
+
+    def _get_func_name_id(self, func_name: vdFuncName) -> int:
+        # Imported lazily to avoid a circular import at module load time
+        # (automation.device -> automation_adc.thermostat_service -> automation_adc.device).
+        from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
+
+        func_id = -1
+
+        if not isinstance(self.automation_device, QolsysAutomationDeviceADC):
+            return func_id
+
+        try:
+            json_func_list = json.loads(self.automation_device.func_list)
+            for function in json_func_list:
+                if vdFuncName(function.get("vdFuncName")) == func_name:
+                    func_id = function.get("vdFuncId")
+                    break
+
+        except json.JSONDecodeError as e:
+            LOGGER.error(
+                "%s[%s] ThermostatServiceADC - _get_func_name_id - error decoding func_list: %s",
+                self.automation_device.prefix,
+                self.endpoint,
+                e,
+            )
+
+        except ValueError as e:
+            LOGGER.error(
+                "%s[%s] ThermostatServiceADC - _get_func_name_id - error parsing func_list: %s",
+                self.automation_device.prefix,
+                self.endpoint,
+                e,
+            )
+        return func_id

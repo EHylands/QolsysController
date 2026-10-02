@@ -61,7 +61,7 @@ class AdcThermostatMode(IntEnum):
 
 
 class AdcFanMode(IntEnum):
-    OFF = 0
+    ON = 0
     AUTO = 5
 
 
@@ -80,11 +80,11 @@ QOLSYS_TO_ADC_THERMOSTAT_MODE: dict[QolsysHvacMode, AdcThermostatMode] = {
 }
 
 ADC_TO_QOLSYS_FAN_MODE: dict[AdcFanMode, QolsysFanMode] = {
-    AdcFanMode.OFF: QolsysFanMode.FAN_OFF,
+    AdcFanMode.ON: QolsysFanMode.FAN_ON,
     AdcFanMode.AUTO: QolsysFanMode.FAN_AUTO,
 }
 
 QOLSYS_TO_ADC_FAN_MODE: dict[QolsysFanMode, AdcFanMode] = {
-    QolsysFanMode.FAN_OFF: AdcFanMode.OFF,
+    QolsysFanMode.FAN_ON: AdcFanMode.ON,
     QolsysFanMode.FAN_AUTO: AdcFanMode.AUTO,
 }
