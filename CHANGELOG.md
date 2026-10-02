@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.9.11 (2026-10-02)
+
+### Bug Fixes
+
+- Adc thermostat set temperature
+  ([`13abc9b`](https://github.com/EHylands/QolsysController/commit/13abc9b9f5817c526199c8b62b12e206111fce65))
+
+### Chores
+
+- Update status badge
+  ([`065e757`](https://github.com/EHylands/QolsysController/commit/065e7573a5326e1ac15d289986c7030b6dce1ce7))
+
+
 ## v1.9.10 (2026-10-01)
 
 ### Bug Fixes
