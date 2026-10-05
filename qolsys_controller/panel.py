@@ -493,7 +493,7 @@ class QolsysPanel:
                                                         extra_json = json.loads(extra)
                                                         delay = int(extra_json.get("delayPageTime", 0) or 0)
                                                         start_time = int(extra_json.get("stateChangeTime", 0) or 0)
-                                                    except ValueError, TypeError, json.JSONDecodeError:
+                                                    except (ValueError, TypeError, json.JSONDecodeError):
                                                         pass
                                                 try:
                                                     partition.quick_exit_state = PartitionQuickExitState(new_value)

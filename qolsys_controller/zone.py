@@ -111,7 +111,7 @@ class QolsysZone(QolsysObservable):
         # extra parameter overrules is_bypassable, intentional
         try:
             dict_extras = json.loads(self._extras) if self._extras else {}
-        except json.JSONDecodeError, TypeError:
+        except (json.JSONDecodeError, TypeError):
             dict_extras = {}
 
         if dict_extras:
@@ -411,7 +411,7 @@ class QolsysZone(QolsysObservable):
             n = int(self._latestdBm)
             if n >= 0 and n < 999:
                 return -1 * n
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
         return None
 
@@ -427,7 +427,7 @@ class QolsysZone(QolsysObservable):
             n = int(self._averagedBm)
             if n >= 0 and n < 999:
                 return -1 * n
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
         return None
 
@@ -497,7 +497,7 @@ class QolsysZone(QolsysObservable):
             data_dict = json.loads(value)
             self.powerg_battery_level = data_dict.get("BATTERY_LEVEL", "")
 
-        except TypeError, json.JSONDecodeError:
+        except (TypeError, json.JSONDecodeError):
             return
 
     @property
@@ -507,7 +507,7 @@ class QolsysZone(QolsysObservable):
             if voltage >= 0:
                 return voltage
             return None
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             return None
 
     @powerg_battery_voltage.setter
@@ -524,7 +524,7 @@ class QolsysZone(QolsysObservable):
             if 0 <= level <= 100:
                 return level
             return None
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             return None
 
     @powerg_battery_level.setter

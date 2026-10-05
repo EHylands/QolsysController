@@ -49,7 +49,7 @@ async def main() -> None:  # noqa: D103
     except* QolsysMqttError:
         LOGGER.debug("QolsysMqttError")
 
-    except* QolsysSslError, ssl.SSLError:
+    except* (QolsysSslError, ssl.SSLError):
         LOGGER.debug("QolsysSslError")
 
     except* QolsysSqlError:

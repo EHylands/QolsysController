@@ -390,7 +390,7 @@ class QolsysController:
             try:
                 data_str = message.payload.decode()
                 data_json = json.loads(data_str)
-            except json.JSONDecodeError, UnicodeDecodeError:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 LOGGER.warning("Invalid JSON payload on topic %s: %s", message.topic, message.payload)
                 continue
 
