@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation.service import AutomationService
@@ -88,6 +88,21 @@ class QolsysAutomationDeviceADC(QolsysAutomationDevice):
         service_list = self._services.get(endpoint, None)
         if service_list is not None and len(service_list) > 0:
             return service_list[0]
+        return None
+
+    def get_func_by_id(self, func_id: int) -> dict[str, Any] | None:
+        # Return the func_list entry whose vdFuncId matches func_id, or None if
+        # there is no such entry (or func_list is not valid JSON).
+        try:
+            json_func_list: list[dict[str, Any]] = json.loads(self._func_list)
+        except json.JSONDecodeError as e:
+            LOGGER.error("%s - get_func_by_id - error parsing func_list: %s", self.prefix, e)
+            return None
+
+        for function in json_func_list:
+            if function.get("vdFuncId") == func_id:
+                return function
+
         return None
 
     def service_add_adc(

@@ -6,11 +6,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
-from qolsys_controller.automation_adc.service_cover import CoverServiceADC
-from qolsys_controller.automation_adc.service_light import LightServiceADC
-from qolsys_controller.automation_adc.service_status import StatusServiceADC
-from qolsys_controller.automation_adc.service_thermostat import ThermostatServiceADC
-from qolsys_controller.enum_adc import vdFuncState
+from qolsys_controller.enum_adc import vdFuncLocalControl, vdFuncState
 from qolsys_controller.errors import InvalidVirtualNodeError, ServiceNotFoundError
 from qolsys_controller.mqtt_command import MQTTCommand_Panel
 
@@ -36,11 +32,14 @@ class AdcCommands:
         if not isinstance(device, QolsysAutomationDeviceADC):
             raise InvalidVirtualNodeError(device_id)
 
-        service = device.service_get_adc(service_id)
-        if not isinstance(service, (LightServiceADC, CoverServiceADC, StatusServiceADC, ThermostatServiceADC)):
-            raise ServiceNotFoundError(
-                device_id, str(service_id), "LightServiceADC, CoverServiceADC or StatusServiceADC or ThermostatServiceADC"
-            )
+        function_dict = device.get_func_by_id(service_id)
+        if function_dict is None:
+            raise ServiceNotFoundError(device_id, str(service_id), "function not found in func_list")
+
+        # Only funcs the panel exposes as locally controllable can be acted on;
+        # reject read-only funcs (e.g. Local Temperature, setpoint limits).
+        if function_dict.get("vdFuncLocalControl") != vdFuncLocalControl.FULL_CONTROL:
+            raise ServiceNotFoundError(device_id, str(service_id), "function is not controllable")
 
         device_list = {
             "virtualDeviceList": [
@@ -51,7 +50,7 @@ class AdcCommands:
                             "vdFuncId": service_id,
                             "vdFuncState": state,
                             "vdFuncBackendTimestamp": int(time.time() * 1000),
-                            "vdFuncType": service.func_type,
+                            "vdFuncType": function_dict.get("vdFuncType", 0),
                         }
                     ],
                 }
