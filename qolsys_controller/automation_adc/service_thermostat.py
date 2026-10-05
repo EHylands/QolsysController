@@ -347,16 +347,34 @@ class ThermostatServiceADC(ThermostatService):
 
     async def set_hvac_mode(self, hvac_mode: QolsysHvacMode) -> None:
         adc_thermostat_mode = QOLSYS_TO_ADC_THERMOSTAT_MODE.get(hvac_mode, None)
-        if adc_thermostat_mode:
+        if adc_thermostat_mode is not None:
+            vd_func_id = self._get_func_name_id(vdFuncName.THERMOSTAT_SYSTEM_MODE)
+            if vd_func_id == -1:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_hvac_mode - could not find THERMOSTAT_SYSTEM_MODE function ID",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                )
+                return
+
             await self.automation_device.controller.commands.adc.virtual_device_action(
-                self.automation_device.virtual_node_id, self.endpoint, adc_thermostat_mode
+                self.automation_device.virtual_node_id, vd_func_id, adc_thermostat_mode
             )
 
     async def set_fan_mode(self, fan_mode: QolsysFanMode) -> None:
         adc_fan_mode = QOLSYS_TO_ADC_FAN_MODE.get(fan_mode, None)
-        if adc_fan_mode:
+        if adc_fan_mode is not None:
+            vd_func_id = self._get_func_name_id(vdFuncName.FAN_MODE)
+            if vd_func_id == -1:
+                LOGGER.error(
+                    "%s[%s] ThermostatServiceADC - set_fan_mode - could not find FAN_MODE function ID",
+                    self.automation_device.prefix,
+                    self.endpoint,
+                )
+                return
+
             await self.automation_device.controller.commands.adc.virtual_device_action(
-                self.automation_device.virtual_node_id, self.endpoint, adc_fan_mode
+                self.automation_device.virtual_node_id, vd_func_id, adc_fan_mode
             )
 
     async def set_humidity(self, humidity: float) -> None:

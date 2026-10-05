@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_adc.service_thermostat import ThermostatServiceADC
+from qolsys_controller.enum_adc import AdcFanMode, AdcThermostatMode
 from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode, QolsysTemperatureUnit
 
 # Real func_list captured from an ADC thermostat, stored verbatim as the JSON
@@ -182,4 +183,49 @@ class TestThermostatServiceADCSetTemperature:
         dev = _make_device(FUNC_LIST_NO_SETPOINTS)
         action = _install_action(dev)
         await _get_thermostat(dev).set_temperature(75.0, QolsysHvacMode.COOL)
+        action.assert_not_awaited()
+
+
+class TestThermostatServiceADCSetMode:
+    async def test_set_hvac_mode_targets_system_mode_func(self) -> None:
+        # Thermostat System Mode is vdFuncId 10; COOL -> AdcThermostatMode.COOL.
+        dev = _make_device()
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_hvac_mode(QolsysHvacMode.COOL)
+        action.assert_awaited_once_with("42", 10, AdcThermostatMode.COOL)
+
+    async def test_set_hvac_mode_off_is_sent(self) -> None:
+        # Regression: AdcThermostatMode.OFF == 0, so a truthiness guard would
+        # have silently skipped the command.
+        dev = _make_device()
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_hvac_mode(QolsysHvacMode.OFF)
+        action.assert_awaited_once_with("42", 10, AdcThermostatMode.OFF)
+
+    async def test_set_fan_mode_targets_fan_func(self) -> None:
+        # Fan Mode is vdFuncId 11 (not the service endpoint 10); AUTO -> 5.
+        dev = _make_device()
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_fan_mode(QolsysFanMode.FAN_AUTO)
+        action.assert_awaited_once_with("42", 11, AdcFanMode.AUTO)
+
+    async def test_set_fan_mode_on_is_sent(self) -> None:
+        # Regression: AdcFanMode.ON == 0 would be dropped by a truthiness guard.
+        dev = _make_device()
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_fan_mode(QolsysFanMode.FAN_ON)
+        action.assert_awaited_once_with("42", 11, AdcFanMode.ON)
+
+    async def test_set_fan_mode_unmapped_mode_rejected(self) -> None:
+        # FAN_LOW has no ADC equivalent -> nothing is sent.
+        dev = _make_device()
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_fan_mode(QolsysFanMode.FAN_LOW)
+        action.assert_not_awaited()
+
+    async def test_set_fan_mode_missing_func_id_rejected(self) -> None:
+        # func_list without a Fan Mode entry -> func-ID guard bails.
+        dev = _make_device(FUNC_LIST_NO_SETPOINTS)
+        action = _install_action(dev)
+        await _get_thermostat(dev).set_fan_mode(QolsysFanMode.FAN_AUTO)
         action.assert_not_awaited()
