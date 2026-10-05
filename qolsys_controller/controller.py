@@ -100,6 +100,11 @@ class QolsysController:
     def mqtt_command_queue(self) -> QolsysMqttCommandQueue:
         return self._mqtt_command_queue
 
+    @property
+    def pki(self) -> QolsysPKI:
+        """The controller's pairing identity, shared with its native transport."""
+        return self._pki
+
     ###########################################################################
     # Controller Operations
     ###########################################################################
