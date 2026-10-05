@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.9.12 (2026-10-05)
+
+### Bug Fixes
+
+- Adc thermostat service
+  ([`cfaf5f2`](https://github.com/EHylands/QolsysController/commit/cfaf5f2d9b229a2ec36f0ec2f9c73f6fb61ed922))
+
+- Adc virtual device command
+  ([`29cbd85`](https://github.com/EHylands/QolsysController/commit/29cbd85d68ede8f69caf974b7a7d51ab954489d1))
+
+### Chores
+
+- **deps**: Update cryptography requirement
+  ([#73](https://github.com/EHylands/QolsysController/pull/73),
+  [`414e74a`](https://github.com/EHylands/QolsysController/commit/414e74a16b180c06bf1f703c0077a95f1ca96a98))
+
+
 ## v1.9.11 (2026-10-02)
 
 ### Bug Fixes
