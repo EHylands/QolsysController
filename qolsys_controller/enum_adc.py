@@ -61,7 +61,7 @@ class AdcThermostatMode(IntEnum):
 
 
 class AdcFanMode(IntEnum):
-    ON = 0
+    ON = 3
     AUTO = 5
 
 
