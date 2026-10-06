@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.13 (2026-10-06)
+
+### Bug Fixes
+
+- Adc_fan_mode on = 3
+  ([`17e69c1`](https://github.com/EHylands/QolsysController/commit/17e69c138ed3f59706d5ed278a2a50e54cc4aaa5))
+
+
 ## v1.9.12 (2026-10-05)
 
 ### Bug Fixes
