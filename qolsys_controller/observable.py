@@ -38,7 +38,7 @@ class QolsysObservable:
     def _call_callback(self, callback: Callback, event: Event) -> None:
         try:
             signature = inspect.signature(callback)
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             callback(event)
             return
 

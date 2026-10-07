@@ -91,7 +91,7 @@ class ThermostatServiceADC(ThermostatService):
                 if func_type == vdFuncType.TEMPERATURE:
                     try:
                         self.current_temperature = int(func_state) / 10
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - TEMPERATURE func_state is not an int: %r",
                             self.automation_device.prefix,
@@ -110,7 +110,7 @@ class ThermostatServiceADC(ThermostatService):
                     try:
                         adc_fan_mode = AdcFanMode(func_state)
                         self.fan_mode = ADC_TO_QOLSYS_FAN_MODE.get(adc_fan_mode, None)
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - FAN_MODE func_state is invalid: %r",
                             self.automation_device.prefix,
@@ -137,7 +137,7 @@ class ThermostatServiceADC(ThermostatService):
                     try:
                         adc_thermostat_mode = AdcThermostatMode(func_state)
                         self.hvac_mode = ADC_TO_QOLSYS_THERMOSTAT_MODE.get(adc_thermostat_mode, None)
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -148,7 +148,7 @@ class ThermostatServiceADC(ThermostatService):
                 elif func_type == vdFuncType.HUMIDITY:
                     try:
                         self.current_humidity = int(func_state)
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - HUMIDITY func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -161,7 +161,7 @@ class ThermostatServiceADC(ThermostatService):
                         temp = int(func_state) / 10
                         if temp >= 0:
                             self.target_cool_temp = temp
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - COOL_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -174,7 +174,7 @@ class ThermostatServiceADC(ThermostatService):
                         temp = int(func_state) / 10
                         if temp >= 0:
                             self.target_heat_temp = temp
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - HEAT_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -194,7 +194,7 @@ class ThermostatServiceADC(ThermostatService):
                                     self.automation_device.to_dict_event(),
                                 )
                             )
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - MAX_COOL_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -214,7 +214,7 @@ class ThermostatServiceADC(ThermostatService):
                                     self.automation_device.to_dict_event(),
                                 )
                             )
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - MIN_COOL_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -234,7 +234,7 @@ class ThermostatServiceADC(ThermostatService):
                                     self.automation_device.to_dict_event(),
                                 )
                             )
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - MAX_HEAT_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,
@@ -254,7 +254,7 @@ class ThermostatServiceADC(ThermostatService):
                                     self.automation_device.to_dict_event(),
                                 )
                             )
-                    except TypeError, ValueError:
+                    except (TypeError, ValueError):
                         LOGGER.error(
                             "%s[%s] ThermostatServiceADC - MIN_HEAT_SETPOINT func_state is not a number: %r",
                             self.automation_device.prefix,

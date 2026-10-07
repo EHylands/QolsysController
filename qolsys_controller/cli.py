@@ -131,7 +131,7 @@ class Controller:
         except* QolsysMqttError:
             raise RuntimeError("Failed to start qolsys-controller due to MQTT error. Check logs for details.")
 
-        except* QolsysSslError, ssl.SSLError:
+        except* (QolsysSslError, ssl.SSLError):
             raise RuntimeError("Failed to start qolsys-controller due to SSL error. Check logs for details.")
 
         except* QolsysSqlError:
