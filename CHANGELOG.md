@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.10.0 (2026-10-07)
+
+### Features
+
+- Support Python 3.12 and 3.13 ([#74](https://github.com/EHylands/QolsysController/pull/74),
+  [`5caba53`](https://github.com/EHylands/QolsysController/commit/5caba535bc19b52105b72a7b56983090b8120f69))
+
+
 ## v1.9.13 (2026-10-06)
 
 ### Bug Fixes
