@@ -51,7 +51,7 @@ qolsys-controller --verbose --config 'path_to_config_file'
 | Light            | ✅     | ✅     | ✅    | ✅    |
 | Smart Outlet     | 🛠️     | ❌     | ❌    | ❌    |
 | Thermometer      | ✅     | ❌     | ❌    | ❌    |
-| Thermostat       | ✅     | ❌     | ❌    | ❌    |
+| Thermostat       | ✅     | ❌     | ❌    | ✅    |
 | Water Valve      | 🛠️     | ❌     | ❌    | ❌    |
 
 🛠️ = partially supported or untested
