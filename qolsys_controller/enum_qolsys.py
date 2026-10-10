@@ -304,6 +304,17 @@ SafetyZoneSensorGroup: list[ZoneSensorGroup] = [
 ]
 
 
+class CameraServiceTransactionType(IntEnum):
+    CAPTURE_PIC = 3
+    DELETE_PIC = 7
+
+
+class PhotoDirectory(StrEnum):
+    DISARM = "DisarmPhotos"
+    ALARM = "Alarmphotos"
+    PEEK_IN = "PeekInPhotos"
+
+
 class ZWaveNodeStatus(StrEnum):
     NORMAL = "Normal"
     UNREACHABLE = "Unreachable"

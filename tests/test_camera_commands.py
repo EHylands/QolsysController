@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import json
 from collections.abc import Callable
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, cast
@@ -12,7 +11,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from qolsys_controller.commands.camera import CameraCommands, PhotoDirectory
+from qolsys_controller.commands.camera import CameraCommands
+from qolsys_controller.commands.panel import PanelCommands
+from qolsys_controller.enum_qolsys import PhotoDirectory
 from qolsys_controller.errors import QolsysOperationError, QolsysSnapshotError
 from qolsys_controller.mqtt_command import MQTTCommand
 
@@ -20,7 +21,14 @@ if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
 
 
-def make_camera(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[CameraCommands, list[MQTTCommand]]:
+@pytest.fixture(autouse=True)
+def _isolate_cwd(tmp_path: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    # capture_snapshot writes the image to the current directory; keep that in a
+    # throwaway tmp dir so tests never leave JPEGs in the repo.
+    monkeypatch.chdir(tmp_path)
+
+
+def _make_controller(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[Any, list[MQTTCommand]]:
     commands: list[MQTTCommand] = []
 
     async def respond(request_id: str, timeout: int) -> dict[str, Any]:
@@ -31,43 +39,60 @@ def make_camera(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[
         enqueue_mqtt_command=commands.append,
         mqtt_command_queue=SimpleNamespace(wait_for_response=AsyncMock(side_effect=respond)),
     )
+    # CameraCommands delegates every transport call to controller.commands.panel,
+    # so wire a real PanelCommands over the same mocked MQTT queue.
+    controller.commands = SimpleNamespace(panel=PanelCommands(cast("QolsysController", controller)))
+    return controller, commands
+
+
+def make_camera(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[CameraCommands, list[MQTTCommand]]:
+    controller, commands = _make_controller(responder)
     return CameraCommands(cast("QolsysController", controller)), commands
+
+
+def make_panel(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[PanelCommands, list[MQTTCommand]]:
+    controller, commands = _make_controller(responder)
+    return controller.commands.panel, commands
 
 
 async def test_download_accepts_android_line_wrapped_base64() -> None:
     jpeg = b"\xff\xd8sample\xff\xd9"
     encoded = base64.encodebytes(jpeg).decode()
-    camera, _ = make_camera(lambda payload: {"photoFrameImageString": encoded})
-    assert await camera.download_photo(PhotoDirectory.DISARM, "existing.jpg") == jpeg
+    panel, _ = make_panel(lambda payload: {"photoFrameImageString": encoded})
+    assert await panel.download_photo(PhotoDirectory.DISARM.value, "existing.jpg") == jpeg
 
 
 async def test_iq2_zero_padding_is_removed_after_jpeg_end_marker() -> None:
     jpeg = b"\xff\xd8snapshot\xff\xd9"
-    camera, _ = make_camera(lambda payload: {"photoFrameImageString": base64.b64encode(jpeg + b"\x00" * 4096).decode()})
-    assert await camera.download_photo(PhotoDirectory.PEEK_IN, "existing.jpg") == jpeg
+    panel, _ = make_panel(lambda payload: {"photoFrameImageString": base64.b64encode(jpeg + b"\x00" * 4096).decode()})
+    assert await panel.download_photo(PhotoDirectory.PEEK_IN.value, "existing.jpg") == jpeg
 
 
 @pytest.mark.parametrize("filename", ["../secret.jpg", "/secret.jpg", "nested/file.jpg", "nested\\file.jpg", "video.mp4"])
 async def test_path_rejection_never_sends_a_request(filename: str) -> None:
-    camera, commands = make_camera(lambda payload: {})
+    panel, commands = make_panel(lambda payload: {})
     with pytest.raises(ValueError):
-        await camera.download_photo(PhotoDirectory.PEEK_IN, filename)
+        await panel.download_photo(PhotoDirectory.PEEK_IN.value, filename)
     assert not commands
+
+
+async def test_undecodable_base64_download_raises() -> None:
+    panel, _ = make_panel(lambda payload: {"photoFrameImageString": "not base64!"})
+    with pytest.raises(QolsysOperationError):
+        await panel.download_photo(PhotoDirectory.ALARM.value, "saved.jpg")
 
 
 @pytest.mark.parametrize(
     "encoded",
     [
-        "not base64!",
         base64.b64encode(b"not a JPEG").decode(),
         "/9h0cnVuY2F0ZWQ=",
         base64.b64encode(b"\xff\xd8photo\xff\xd9junk").decode(),
     ],
 )
-async def test_invalid_download_is_not_returned_as_an_image(encoded: str) -> None:
-    camera, _ = make_camera(lambda payload: {"photoFrameImageString": encoded})
-    with pytest.raises(QolsysOperationError):
-        await camera.download_photo(PhotoDirectory.ALARM, "saved.jpg")
+async def test_decodable_non_jpeg_download_returns_none(encoded: str) -> None:
+    panel, _ = make_panel(lambda payload: {"photoFrameImageString": encoded})
+    assert await panel.download_photo(PhotoDirectory.ALARM.value, "saved.jpg") is None
 
 
 async def test_capture_uses_callback_filename_instead_of_local_clock() -> None:
@@ -82,22 +107,22 @@ async def test_capture_uses_callback_filename_instead_of_local_clock() -> None:
             assert payload["photoFrameImageName"] == request_id + "_1.jpg"
             return {"photoFrameImageString": base64.b64encode(jpeg).decode()}
         if payload["dbOperation"] == "insert":
-            metadata = json.loads(payload["contentValues"])
+            metadata = payload["contentValues"]
             request_id = metadata["request_id"]
             assert metadata["user_id"] == -2  # Firmware's local-only sentinel.
-            return {"longValue": "1"}
+            return {"responseStatus": "success", "longValue": "1"}
         return {"resultSet": [{"name": request_id + "_1.jpg"}]}
 
     camera, commands = make_camera(respond)
     snapshot = await camera.capture_snapshot(retain_on_panel=True)
-    assert snapshot.jpeg == jpeg
+    assert snapshot.data == jpeg
     assert snapshot.request_id == request_id
     assert snapshot.retained_on_panel
     assert all(c._payload["eventName"] in {"database", "ipcCall", "photoFrameImageDownloadRequest"} for c in commands)
 
 
 async def test_failed_insert_never_starts_camera() -> None:
-    camera, commands = make_camera(lambda payload: {"longValue": "-1"})
+    camera, commands = make_camera(lambda payload: {"responseStatus": "success", "longValue": "-1"})
     with pytest.raises(QolsysOperationError, match="metadata"):
         await camera.capture_snapshot()
     assert len(commands) == 1
@@ -109,8 +134,8 @@ async def test_capture_timeout_preserves_request_identity() -> None:
     def respond(payload: dict[str, Any]) -> dict[str, Any]:
         nonlocal inserted_id
         if payload.get("dbOperation") == "insert":
-            inserted_id = json.loads(payload["contentValues"])["request_id"]
-            return {"longValue": "1"}
+            inserted_id = payload["contentValues"]["request_id"]
+            return {"responseStatus": "success", "longValue": "1"}
         if payload["eventName"] == "ipcCall":
             return {"responseStatus": "success"}
         return {"resultSet": []}
@@ -124,7 +149,7 @@ async def test_capture_timeout_preserves_request_identity() -> None:
 async def test_malformed_capture_record_waits_instead_of_crashing() -> None:
     def respond(payload: dict[str, Any]) -> dict[str, Any]:
         if payload.get("dbOperation") == "insert":
-            return {"longValue": "1"}
+            return {"responseStatus": "success", "longValue": "1"}
         if payload["eventName"] == "ipcCall":
             return {"responseStatus": "success"}
         return {"resultSet": ["not a record"]}
@@ -154,8 +179,8 @@ async def test_default_capture_removes_only_its_generated_file_and_metadata() ->
                 else {"photoFrameImageString": base64.b64encode(jpeg).decode()}
             )
         if payload["dbOperation"] == "insert":
-            request_id = json.loads(payload["contentValues"])["request_id"]
-            return {"longValue": "1"}
+            request_id = payload["contentValues"]["request_id"]
+            return {"responseStatus": "success", "longValue": "1"}
         if payload["dbOperation"] == "delete":
             assert removed  # Never lose the record before confirming file removal.
             assert f"request_id='{request_id}'" in payload["selection"]
@@ -165,7 +190,7 @@ async def test_default_capture_removes_only_its_generated_file_and_metadata() ->
 
     camera, _ = make_camera(respond)
     snapshot = await camera.capture_snapshot()
-    assert snapshot.jpeg == jpeg
+    assert snapshot.data == jpeg
     assert not snapshot.retained_on_panel
     assert removed and deleted
 
@@ -181,14 +206,14 @@ async def test_failed_file_cleanup_returns_image_and_preserves_metadata() -> Non
         if payload["eventName"] == "photoFrameImageDownloadRequest":
             return {"photoFrameImageString": base64.b64encode(jpeg).decode()}
         if payload["dbOperation"] == "insert":
-            request_id = json.loads(payload["contentValues"])["request_id"]
-            return {"longValue": "1"}
+            request_id = payload["contentValues"]["request_id"]
+            return {"responseStatus": "success", "longValue": "1"}
         assert payload["dbOperation"] != "delete"
         return {"resultSet": [{"name": request_id + "_123.jpg"}]}
 
     camera, _ = make_camera(respond)
     snapshot = await camera.capture_snapshot()
-    assert snapshot.jpeg == jpeg
+    assert snapshot.data == jpeg
     assert snapshot.retained_on_panel
     assert snapshot.request_id == request_id
 
@@ -210,14 +235,14 @@ async def test_slow_cleanup_does_not_discard_downloaded_image() -> None:
         if payload["eventName"] == "photoFrameImageDownloadRequest":
             return {"photoFrameImageString": base64.b64encode(jpeg).decode()}
         if payload["dbOperation"] == "insert":
-            request_id = json.loads(payload["contentValues"])["request_id"]
-            return {"longValue": "1"}
+            request_id = payload["contentValues"]["request_id"]
+            return {"responseStatus": "success", "longValue": "1"}
         return {"resultSet": [{"name": request_id + "_123.jpg"}]}
 
     camera, _ = make_camera(respond)
-    camera._cleanup_capture = slow_cleanup  # type: ignore[method-assign]
+    camera._cleanup_capture = slow_cleanup  # type: ignore[method-assign, assignment]
     snapshot = await camera.capture_snapshot(timeout=0.02)
-    assert snapshot.jpeg == jpeg
+    assert snapshot.data == jpeg
     assert removed and not snapshot.retained_on_panel
 
 
@@ -251,7 +276,7 @@ async def test_cleanup_snapshot_leaves_an_incomplete_capture() -> None:
     assert [c._payload.get("dbOperation") for c in commands] == ["read"]
 
 
-async def test_cleanup_tolerates_eventually_consistent_readback(monkeypatch) -> None:
+async def test_cleanup_tolerates_eventually_consistent_readback(monkeypatch: pytest.MonkeyPatch) -> None:
     jpeg = b"\xff\xd8fresh\xff\xd9"
     request_id = ""
     removed = False
@@ -272,8 +297,8 @@ async def test_cleanup_tolerates_eventually_consistent_readback(monkeypatch) -> 
                 return {**payload, "photoFrameImageName": ""}
             return {"photoFrameImageString": base64.b64encode(jpeg).decode()}
         if payload["dbOperation"] == "insert":
-            request_id = json.loads(payload["contentValues"])["request_id"]
-            return {"longValue": "1"}
+            request_id = payload["contentValues"]["request_id"]
+            return {"responseStatus": "success", "longValue": "1"}
         if payload["dbOperation"] == "delete":
             deleted = True
             return {"booleanValue": "true"}
@@ -284,7 +309,7 @@ async def test_cleanup_tolerates_eventually_consistent_readback(monkeypatch) -> 
 
     camera, _ = make_camera(respond)
     snapshot = await camera.capture_snapshot()
-    assert snapshot.jpeg == jpeg
+    assert snapshot.data == jpeg
     assert not snapshot.retained_on_panel  # the retry confirmed cleanup, not a false failure
     assert removed and deleted and file_reads > 1 and row_reads > 1
 
