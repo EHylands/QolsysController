@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.11.0 (2026-10-10)
+
+### Documentation
+
+- Mark Alarm.com thermostat as supported in README
+  ([#76](https://github.com/EHylands/QolsysController/pull/76),
+  [`9dec41b`](https://github.com/EHylands/QolsysController/commit/9dec41bda587acdb1700611b67f9300d7cd4e025))
+
+### Features
+
+- Add camera picture snapshot from main panel
+  ([#77](https://github.com/EHylands/QolsysController/pull/77),
+  [`6bbdace`](https://github.com/EHylands/QolsysController/commit/6bbdace4e1a8c2755e7419e5c4af7cf29f32e1e1))
+
+- **camera**: Add local panel camera snapshots
+  ([#77](https://github.com/EHylands/QolsysController/pull/77),
+  [`6bbdace`](https://github.com/EHylands/QolsysController/commit/6bbdace4e1a8c2755e7419e5c4af7cf29f32e1e1))
+
+
 ## v1.10.0 (2026-10-07)
 
 ### Features
