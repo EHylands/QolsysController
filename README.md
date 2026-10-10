@@ -27,6 +27,7 @@ qolsys-controller --verbose --config 'path_to_config_file'
 | Category               | Feature                              | Status |
 |------------------------|--------------------------------------|--------|
 | **Panel**              | Diagnostic Sensors                   | ✅     |
+|                        | Main Panel Camera Snapshots          | ✅     |
 |                        | Panel Scenes                         | ✅     |
 |                        | Speak Command                        | ✅     |
 |                        | Weather Forecast                     | ✅     |
