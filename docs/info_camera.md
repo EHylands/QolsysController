@@ -6,7 +6,7 @@ firmware 2.8.1. Other panels and firmware versions still need hardware testing.
 
 ```python
 snapshot = await controller.commands.camera.capture_snapshot()
-jpeg_bytes = snapshot.jpeg
+jpeg_bytes = snapshot.data
 ```
 
 Run this against an already connected controller. Each call creates one Peek-In
