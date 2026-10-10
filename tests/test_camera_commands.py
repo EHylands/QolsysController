@@ -15,17 +15,11 @@ from qolsys_controller.commands.camera import CameraCommands
 from qolsys_controller.commands.panel import PanelCommands
 from qolsys_controller.enum_qolsys import PhotoDirectory
 from qolsys_controller.errors import QolsysOperationError, QolsysSnapshotError
+from qolsys_controller.media_picture import QolsysPicture
 from qolsys_controller.mqtt_command import MQTTCommand
 
 if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
-
-
-@pytest.fixture(autouse=True)
-def _isolate_cwd(tmp_path: Any, monkeypatch: pytest.MonkeyPatch) -> None:
-    # capture_snapshot writes the image to the current directory; keep that in a
-    # throwaway tmp dir so tests never leave JPEGs in the repo.
-    monkeypatch.chdir(tmp_path)
 
 
 def _make_controller(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> tuple[Any, list[MQTTCommand]]:
@@ -42,6 +36,8 @@ def _make_controller(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> t
     # CameraCommands delegates every transport call to controller.commands.panel,
     # so wire a real PanelCommands over the same mocked MQTT queue.
     controller.commands = SimpleNamespace(panel=PanelCommands(cast("QolsysController", controller)))
+    # capture_snapshot publishes the result into state.picture_peek_in (an observable).
+    controller.state = SimpleNamespace(picture_peek_in=QolsysPicture())
     return controller, commands
 
 

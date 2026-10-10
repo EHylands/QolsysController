@@ -182,6 +182,9 @@ class CameraCommands:
                     LOGGER.warning("Snapshot %s was downloaded, but its panel copy remains", request_id, exc_info=True)
                     snapshot = QolsysPicture(data=jpeg, request_id=request_id, filename=filename, retained_on_panel=True)
 
+            # Update internal copy of last peek in picture on main panel and send updates
+            self._controller.state.picture_peek_in.update(snapshot)
+
             return snapshot
 
     async def cleanup_snapshot(self, request_id: str) -> None:
