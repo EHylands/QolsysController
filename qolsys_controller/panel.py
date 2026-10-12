@@ -88,6 +88,7 @@ class QolsysPanel:
             "LAST_UPDATE_IQ_REMOTE_PATCH_CKECKSUM_N",
             "VOLUME_DOORBELL",
             "PANEL_VOLUME",
+            "IP_CAMERA_LIST",
         ]
 
         self._users: list[QolsysUser] = []
@@ -352,6 +353,10 @@ class QolsysPanel:
     def PANEL_SCENES_SETTING(self) -> str:
         self._PANEL_SCENES_SETTING = self.db.get_setting_panel("PANEL_SCENES_SETTING")
         return self.PANEL_SCENES_SETTING
+
+    @property
+    def IP_CAMERA_LIST(self) -> str:
+        return self.db.get_setting_panel("IP_CAMERA_LIST")
 
     async def load_database(self, database: Any | None) -> None:
         self.db.load_db(database)
@@ -1135,3 +1140,4 @@ class QolsysPanel:
 
         LOGGER.debug("Panel Volume: %s", self.PANEL_VOLUME)
         LOGGER.debug("Doorbell Volume Level: %s", self.VOLUME_DOORBELL)
+        LOGGER.debug("IP Camera List: %s", self.IP_CAMERA_LIST)

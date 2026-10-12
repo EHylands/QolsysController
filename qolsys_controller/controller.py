@@ -268,6 +268,12 @@ class QolsysController:
                         self._reconnect_attempt = 0
                         self.notify_panel_status_update()
 
+                        LOGGER.debug("IQ Camera List")
+                        iq_camera_list = await self.commands.panel.database_remote_read(
+                            "content://com.qolsys.qolsysprovider.IQCameraContentProvider/iqcamera"
+                        )
+                        LOGGER.debug(iq_camera_list)
+
                         await asyncio.Future()  # Run until cancelled or exception
 
             except* asyncio.CancelledError:
