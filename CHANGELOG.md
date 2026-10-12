@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.11.1 (2026-10-12)
+
+### Bug Fixes
+
+- Ip camera list
+  ([`a8567b0`](https://github.com/EHylands/QolsysController/commit/a8567b0f2ff428e1d2a05902bfac107213cb0a3a))
+
+### Documentation
+
+- Use .data in the snapshot example ([#78](https://github.com/EHylands/QolsysController/pull/78),
+  [`0c43b55`](https://github.com/EHylands/QolsysController/commit/0c43b55909105ce118e79d2c4c550695f0711df2))
+
+
 ## v1.11.0 (2026-10-10)
 
 ### Documentation
