@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.12.1 (2026-10-12)
+
+### Bug Fixes
+
+- Add ip camera log information
+  ([`aead461`](https://github.com/EHylands/QolsysController/commit/aead461d2e0e8ff9ba37cc479a90b37327ef542c))
+
+
 ## v1.12.0 (2026-10-12)
 
 ### Features
