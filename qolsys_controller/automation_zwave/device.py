@@ -327,6 +327,12 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         ZwaveCommandClass.ThermostatSetPoint,
                         ZwaveCommandClass.ThermostatOperatingState,
                     ]
+
+                    # Get thermostat suported thermostat mode
+                    await self.controller.commands.zwave.thermostat_mode_supported_get(
+                        self.virtual_node_id, str(service.endpoint)
+                    )
+
                     for command in thermostat_commands:
                         if command in self.command_class_list:
                             zwave_command = MQTTCommand_ZWave(

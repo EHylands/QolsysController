@@ -315,6 +315,30 @@ class ZWaveCommands:
         LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_mode_get command")
         return response
 
+    async def thermostat_mode_supported_get(self, node_id: str, endpoint: str) -> dict[str, Any]:
+        LOGGER.debug("MQTT Panel Client - Sending zwave_thermostat_mode_supported_get command - Node(%s)", node_id)
+        node = self._controller.state.automation_device(node_id)
+
+        if not isinstance(node, QolsysAutomationDeviceZwave):
+            raise InvalidVirtualNodeError(node_id)
+
+        service = node.service_get(ThermostatServiceZwave, int(endpoint))
+        if not isinstance(service, ThermostatServiceZwave):
+            raise ServiceNotFoundError(node_id, endpoint, "ThermostatServiceZwave")
+
+        # Thermostat Mode command ids: 0x04 = SUPPORTED_GET, 0x05 = SUPPORTED_REPORT
+        mode_command = [ZwaveCommandClass.ThermostatMode.value, 4]
+        command: MQTTCommand_ZWave | MQTTCommand_ZWave_Old
+        if self._controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            secure_level = 1
+            command = MQTTCommand_ZWave_Old(self._controller, node_id, int(endpoint), secure_level, [mode_command])
+        else:
+            command = MQTTCommand_ZWave(self._controller, node_id, endpoint, mode_command)
+
+        response = await command.send_command()
+        LOGGER.debug("MQTT Panel Client - Receiving zwave_thermostat_mode_supported_get command")
+        return response
+
     async def thermostat_setpoint_set(
         self, node_id: str, endpoint: str, mode: ThermostatSetpointMode, setpoint: int
     ) -> dict[str, Any]:
