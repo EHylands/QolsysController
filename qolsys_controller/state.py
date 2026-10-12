@@ -167,7 +167,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self.automation_devices.append(new_automation_device)
-        self.automation_devices.sort(key=lambda x: x.virtual_node_id, reverse=False)
+        self.automation_devices.sort(key=lambda x: int(x.virtual_node_id) if x.virtual_node_id.isdigit() else 0)
         self.notify(Event(QolsysNotification.AUTOMATION_ADD, self, new_automation_device.to_dict_event()))
 
     def automation_device_delete(self, virtual_node_id: str) -> None:
@@ -431,6 +431,9 @@ class QolsysState(QolsysObservable):
                 for service in services_list:
                     for line in service.info():
                         LOGGER.debug(line)
+
+        for camera in self.ip_cameras:
+            LOGGER.debug("[IpCamera][%s](%s)", camera.camera_id, camera.camera_name)
 
         for scene in self.scenes:
             sid = scene.scene_id
