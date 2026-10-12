@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.12.0 (2026-10-12)
+
+### Features
+
+- Add ip camera motion and press notifications
+  ([`d675c0a`](https://github.com/EHylands/QolsysController/commit/d675c0ac2a41c0e56bac18a708cc1fd790701fbc))
+
+
 ## v1.11.3 (2026-10-12)
 
 ### Bug Fixes
