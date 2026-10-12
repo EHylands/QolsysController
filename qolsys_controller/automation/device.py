@@ -594,6 +594,7 @@ class QolsysAutomationDevice(QolsysObservable, ABC):
             "created_date": self._created_date,
             "smart_energy_optimizer": self._smart_energy_optimizer,
             "linked_security_zone": self._linked_security_zone,
+            "extras": self.extras,
         }
 
     def to_dict_event(self) -> dict[str, Any]:
