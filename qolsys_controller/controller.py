@@ -268,20 +268,20 @@ class QolsysController:
                         self._reconnect_attempt = 0
                         self.notify_panel_status_update()
 
-                        LOGGER.debug("LOG THERMOSTAT TABLE")
-                        thermostat_table = self.panel.db.table_thermostat
-                        response = await self.commands.panel.database_remote_read(thermostat_table.uri)
-                        LOGGER.debug(response)
+                        # LOGGER.debug("LOG THERMOSTAT TABLE")
+                        # thermostat_table = self.panel.db.table_thermostat
+                        # response = await self.commands.panel.database_remote_read(thermostat_table.uri)
+                        # LOGGER.debug(response)
 
-                        LOGGER.debug("LOG ZWAVE DEVICE")
-                        zwave_table = self.panel.db.table_zwave_node
-                        response = await self.commands.panel.database_remote_read(zwave_table.uri)
-                        LOGGER.debug(response)
+                        # LOGGER.debug("LOG ZWAVE DEVICE")
+                        # zwave_table = self.panel.db.table_zwave_node
+                        # response = await self.commands.panel.database_remote_read(zwave_table.uri)
+                        # LOGGER.debug(response)
 
-                        LOGGER.debug("LOG AUTOMATION DEVICE")
-                        automation_table = self.panel.db.table_automation
-                        response = await self.commands.panel.database_remote_read(automation_table.uri)
-                        LOGGER.debug(response)
+                        # LOGGER.debug("LOG AUTOMATION DEVICE")
+                        # automation_table = self.panel.db.table_automation
+                        # response = await self.commands.panel.database_remote_read(automation_table.uri)
+                        # LOGGER.debug(response)
 
                         await asyncio.Future()  # Run until cancelled or exception
 

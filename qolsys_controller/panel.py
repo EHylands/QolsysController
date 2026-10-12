@@ -11,6 +11,7 @@ from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_powerg.device import QolsysAutomationDevicePowerG
 from qolsys_controller.automation_zigbee.device import QolsysAutomationDeviceZigbee
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.camera_ip import QolsysIpCamera
 from qolsys_controller.errors import QolsysConfigError
 from qolsys_controller.observable import Event
 
@@ -365,6 +366,7 @@ class QolsysPanel:
         self._controller.state.sync_automation_devices_data(self.get_automation_devices_from_db())
         self._controller.state.sync_scenes_data(self.get_scenes_from_db())
         self._controller.state.sync_weather_data(self.get_weather_from_db())
+        self._controller.state.sync_ip_cameras_data(self.get_ip_camera_list_from_settings())
 
         LOGGER.debug("sync_data - update automation devices z-wave devices states")
         for autdev in self._controller.state.automation_devices:
@@ -423,13 +425,18 @@ class QolsysPanel:
             case "primaryDisconnect":
                 LOGGER.info("Main Panel Disconnect")
 
+            case "chime":
+                LOGGER.debug("Chime Event: %s", json.dumps(data))
+                self._controller.state.notify(Event(QolsysNotification.PANEL_CHIME, self, data))
+
             case "eventNameDoorBell":
                 LOGGER.debug("Doorbell Event: %s", json.dumps(data))
                 self._controller.state.notify(Event(QolsysNotification.PANEL_DOORBELL, self, data))
 
-            case "chime":
-                LOGGER.debug("Chime Event: %s", json.dumps(data))
-                self._controller.state.notify(Event(QolsysNotification.PANEL_CHIME, self, data))
+                # Add individual IP Camera Notification
+                camera = self._controller.state.ip_camera(data.get("cameraId", ""))
+                if camera:
+                    camera.update_event(data)
 
             case "dbChanged":
                 match dbOperation:
@@ -993,6 +1000,36 @@ class QolsysPanel:
             scenes.append(QolsysScene(scene_info))
 
         return scenes
+
+    def get_ip_camera_list_from_settings(self) -> list[QolsysIpCamera]:
+        cameras: list[QolsysIpCamera] = []
+
+        raw = self.IP_CAMERA_LIST
+        if not raw:
+            return cameras
+
+        try:
+            camera_list = json.loads(raw)
+        except (ValueError, json.JSONDecodeError):
+            LOGGER.warning("Unable to parse IP_CAMERA_LIST setting: %s", raw)
+            return cameras
+
+        if not isinstance(camera_list, list):
+            return cameras
+
+        # Create IP camera array
+        for camera_info in camera_list:
+            if not isinstance(camera_info, dict):
+                continue
+
+            camera_id = str(camera_info.get("cameraId", ""))
+            camera_name = str(camera_info.get("name", ""))
+            if not camera_id:
+                continue
+
+            cameras.append(QolsysIpCamera(camera_id, camera_name))
+
+        return cameras
 
     def get_weather_from_db(self) -> QolsysWeather:
         weather = QolsysWeather()
