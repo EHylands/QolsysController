@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.11.3 (2026-10-12)
+
+### Bug Fixes
+
+- Add thermostat_mode_bitmask debug information
+  ([`ee77b71`](https://github.com/EHylands/QolsysController/commit/ee77b711eec9f59ffb18877965f53b97061b45d6))
+
+
 ## v1.11.2 (2026-10-12)
 
 ### Bug Fixes
