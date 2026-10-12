@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.11.2 (2026-10-12)
+
+### Bug Fixes
+
+- Add extras field to automation device dict
+  ([`9e8f986`](https://github.com/EHylands/QolsysController/commit/9e8f98648d907e380586f16b2144eff690fe0754))
+
+
 ## v1.11.1 (2026-10-12)
 
 ### Bug Fixes
