@@ -56,9 +56,9 @@ class ThermostatServiceZwave(ThermostatService):
         # Ask for report on IQ2+ panel
         if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
             # Set the value preemptively
-            #if mode == QolsysHvacMode.COOL:
+            # if mode == QolsysHvacMode.COOL:
             #    self.target_cool_temp = temperature
-            #elif mode == QolsysHvacMode.HEAT:
+            # elif mode == QolsysHvacMode.HEAT:
             #    self.target_heat_temp = temperature
 
             await self.automation_device.controller.commands.zwave.thermostat_setpoint_get(
@@ -83,7 +83,7 @@ class ThermostatServiceZwave(ThermostatService):
         # Ask for report on IQ2+ panel
         if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
             # Set the value preemptively
-            #self.hvac_mode = hvac_mode
+            # self.hvac_mode = hvac_mode
 
             await self.automation_device.controller.commands.zwave.thermostat_mode_get(
                 self.automation_device.virtual_node_id, str(self.endpoint)
@@ -106,7 +106,7 @@ class ThermostatServiceZwave(ThermostatService):
         # Ask for report on IQ2+ panel
         if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
             # Set the value preemptively
-            #self.fan_mode = fan_mode
+            # self.fan_mode = fan_mode
 
             await self.automation_device.controller.commands.zwave.thermostat_fan_mode_get(
                 self.automation_device.virtual_node_id, str(self.endpoint)
