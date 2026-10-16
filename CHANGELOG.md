@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.12.2 (2026-10-16)
+
+### Bug Fixes
+
+- Remove premature Z-Wave thermostat service values on IQ2+ panels
+  ([`a1f70ef`](https://github.com/EHylands/QolsysController/commit/a1f70ef27ad686fcb54beef37c28ce6b133412d9))
+
+- Remove premature Z-Wave thermostat service values on IQ2+ panels
+  ([`11bb92e`](https://github.com/EHylands/QolsysController/commit/11bb92e36b9ebe9e20dcb54e0ad74f4108ba3ae4))
+
+### Chores
+
+- Update test
+  ([`b5920f2`](https://github.com/EHylands/QolsysController/commit/b5920f28088a6b48358c45e9763a8699f189297a))
+
+
 ## v1.12.1 (2026-10-12)
 
 ### Bug Fixes
