@@ -77,10 +77,19 @@ class TestThermostatServiceZwave:
         )
 
     @pytest.mark.asyncio
-    async def test_set_temperature_heat_truncates_to_int(self) -> None:
+    async def test_set_temperature_heat_rounds_to_nearest_int(self) -> None:
         service, device = _make()
         service._hvac_modes = [QolsysHvacMode.HEAT]
         await service.set_temperature(68.9, QolsysHvacMode.HEAT)
+        device.controller.commands.zwave.thermostat_setpoint_set.assert_awaited_once_with(
+            "8", "0", ThermostatSetpointMode.HEATING, 69
+        )
+
+    @pytest.mark.asyncio
+    async def test_set_temperature_heat_rounds_down(self) -> None:
+        service, device = _make()
+        service._hvac_modes = [QolsysHvacMode.HEAT]
+        await service.set_temperature(68.4, QolsysHvacMode.HEAT)
         device.controller.commands.zwave.thermostat_setpoint_set.assert_awaited_once_with(
             "8", "0", ThermostatSetpointMode.HEATING, 68
         )
