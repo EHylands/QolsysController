@@ -9,6 +9,7 @@ from qolsys_controller.automation.service_meter import MeterService
 from qolsys_controller.automation.service_sensor import SensorService
 from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwave
 from qolsys_controller.automation_zwave.service_central_scene import CentralSceneServiceZwave
+from qolsys_controller.automation_zwave.service_cover import CoverServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_lock import LockServiceZwave
 from qolsys_controller.automation_zwave.service_meter import MeterServiceZwave
@@ -26,7 +27,6 @@ from qolsys_controller.enum_zwave import (
     ZwaveCommandClass,
     ZwaveDeviceClass,
 )
-from qolsys_controller.mqtt_command import MQTTCommand_ZWave
 
 if TYPE_CHECKING:
     from qolsys_controller.controller import QolsysController
@@ -48,7 +48,6 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         self._partition_id: str = zwave_dict.get("partition_id", "")
         self._node_secure_cmd_cls: str = zwave_dict.get("node_secure_cmd_cls", "")
         self._node_battery_level: str = zwave_dict.get("node_battery_level", "")
-        # self._node_battery_level_value: str = zwave_dict.get("node_battery_level_value", "")
         self._is_node_listening_node: str = zwave_dict.get("is_node_listening_node", "")
         self._basic_report_value: str = zwave_dict.get("basic_report_value", "")
         self._switch_multilevel_report_value: str = zwave_dict.get("switch_multilevel_report_value", "")
@@ -303,70 +302,54 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
         for endpoint, service_list in self.services.items():
             for service in service_list:
                 if isinstance(service, LightServiceZwave):
-                    light_commands = [ZwaveCommandClass.SwitchBinary, ZwaveCommandClass.SwitchMultilevel]
-                    for command in light_commands:
-                        if command in self.command_class_list:
-                            zwave_command = MQTTCommand_ZWave(
-                                self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
-                            )
-                            await zwave_command.send_command()
+                    if ZwaveCommandClass.SwitchBinary in self.command_class_list:
+                        await self._controller.commands.zwave.switch_binary_get(self.virtual_node_id, str(service.endpoint))
+
+                    if ZwaveCommandClass.SwitchMultilevel in self.command_class_list:
+                        await self._controller.commands.zwave.switch_multilevel_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
 
                 if isinstance(service, LockServiceZwave):
-                    lock_commands = [ZwaveCommandClass.DoorLock]
-                    for command in lock_commands:
-                        if command in self.command_class_list:
-                            zwave_command = MQTTCommand_ZWave(
-                                self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
-                            )
-                            await zwave_command.send_command()
+                    if ZwaveCommandClass.DoorLock in self.command_class_list:
+                        await self._controller.commands.zwave.doorlock_get(self.virtual_node_id, str(service.endpoint))
 
                 if isinstance(service, ThermostatServiceZwave):
-                    thermostat_commands = [
-                        ZwaveCommandClass.ThermostatFanMode,
-                        ZwaveCommandClass.ThermostatMode,
-                        ZwaveCommandClass.ThermostatSetPoint,
-                        ZwaveCommandClass.ThermostatOperatingState,
-                    ]
+                    if ZwaveCommandClass.ThermostatMode in self.command_class_list:
+                        await self.controller.commands.zwave.thermostat_mode_supported_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
+                        await self._controller.commands.zwave.thermostat_mode_get(self.virtual_node_id, str(service.endpoint))
 
-                    # Get thermostat suported thermostat mode
-                    await self.controller.commands.zwave.thermostat_mode_supported_get(
-                        self.virtual_node_id, str(service.endpoint)
-                    )
+                    if ZwaveCommandClass.ThermostatFanMode in self.command_class_list:
+                        await self._controller.commands.zwave.thermostat_fan_mode_supported_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
 
-                    for command in thermostat_commands:
-                        if command in self.command_class_list:
-                            zwave_command = MQTTCommand_ZWave(
-                                self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
-                            )
-                            await zwave_command.send_command()
+                        await self._controller.commands.zwave.thermostat_fan_mode_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
+
+                    if ZwaveCommandClass.ThermostatOperatingState in self.command_class_list:
+                        await self._controller.commands.zwave.thermostat_operating_state_get(
+                            self.virtual_node_id, str(service.endpoint)
+                        )
 
                 if isinstance(service, ValveServiceZwave):
-                    valve_commands = [ZwaveCommandClass.SwitchBinary]
-                    for command in valve_commands:
-                        if command in self.command_class_list:
-                            zwave_command = MQTTCommand_ZWave(
-                                self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
-                            )
-                            await zwave_command.send_command()
+                    if ZwaveCommandClass.SwitchBinary in self.command_class_list:
+                        await self._controller.commands.zwave.switch_binary_get(self.virtual_node_id, str(service.endpoint))
 
                 if isinstance(service, SirenServiceZwave):
-                    siren_commands = [ZwaveCommandClass.SwitchBinary]
-                    for command in siren_commands:
-                        if command in self.command_class_list:
-                            zwave_command = MQTTCommand_ZWave(
-                                self._controller, self.virtual_node_id, str(service.endpoint), [command, 0x02]
-                            )
-                            await zwave_command.send_command()
+                    if ZwaveCommandClass.SwitchBinary in self.command_class_list:
+                        await self._controller.commands.zwave.switch_binary_get(self.virtual_node_id, str(service.endpoint))
 
                 if isinstance(service, OutletServiceZwave):
                     if ZwaveCommandClass.SwitchBinary in self.command_class_list:
-                        zwave_command = MQTTCommand_ZWave(
-                            self._controller,
-                            self.virtual_node_id,
-                            str(service.endpoint),
-                            [ZwaveCommandClass.SwitchBinary, 0x02],
-                        )
-                        await zwave_command.send_command()
+                        await self._controller.commands.zwave.switch_binary_get(self.virtual_node_id, str(service.endpoint))
+
+                if isinstance(service, CoverServiceZwave):
+                    if ZwaveCommandClass.BarrierOperator in self.command_class_list:
+                        await self._controller.commands.zwave.barrier_operator_get(self.virtual_node_id, str(service.endpoint))
 
     def to_dict_zwave(self) -> dict[str, str]:
         return {
@@ -576,6 +559,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                         self.service_get(ValveServiceZwave, ep) is None
                         and self.service_get(LightServiceZwave, ep) is None
                         and self.service_get(SirenServiceZwave, ep) is None
+                        and self.service_get(OutletServiceZwave, ep) is None
                     ):
                         # Add new Binary switch
                         self.service_add_outlet_service(endpoint=ep)
