@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING
 from qolsys_controller.automation.device import QolsysAutomationDevice
 from qolsys_controller.automation_adc.device import QolsysAutomationDeviceADC
 from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
+from qolsys_controller.camera_ip import QolsysIpCamera
 from qolsys_controller.enum_qolsys import QolsysNotification
+from qolsys_controller.media_picture import QolsysPicture
 from qolsys_controller.observable import Event, QolsysObservable
 
 from .weather import QolsysWeather
@@ -29,7 +31,9 @@ class QolsysState(QolsysObservable):
         self._partitions: list[QolsysPartition] = []
         self._zones: list[QolsysZone] = []
         self._automation_devices: list[QolsysAutomationDevice] = []
+        self._ip_cameras: list[QolsysIpCamera] = []
         self._scenes: list[QolsysScene] = []
+        self._picture_peek_in: QolsysPicture = QolsysPicture()
 
     @property
     def partitions(self) -> list[QolsysPartition]:
@@ -50,6 +54,43 @@ class QolsysState(QolsysObservable):
     @property
     def weather(self) -> QolsysWeather:
         return self._weather
+
+    @property
+    def picture_peek_in(self) -> QolsysPicture:
+        return self._picture_peek_in
+
+    @property
+    def ip_cameras(self) -> list[QolsysIpCamera]:
+        return self._ip_cameras
+
+    def ip_camera_add(self, new_camera: QolsysIpCamera) -> None:
+        for camera in self.ip_cameras:
+            if new_camera.camera_id == camera.camera_id:
+                LOGGER.debug(
+                    "Adding Ip Camera to State, IpCamera-%s (%s) - Already in Ip Camera List",
+                    new_camera.camera_id,
+                    new_camera.camera_name,
+                )
+                return
+
+        self.ip_cameras.append(new_camera)
+        self.ip_cameras.sort(key=lambda x: x.camera_name, reverse=False)
+        self.notify(Event(QolsysNotification.CAMERA_ADD, self, new_camera.to_dict_event()))
+
+    def ip_camera_delete(self, camera_id: str) -> None:
+        camera = self.ip_camera(camera_id)
+        if camera is None:
+            LOGGER.debug("Deleting Ip Camer from State, Ip Camera%s not found", camera_id)
+            return
+
+        self.ip_cameras.remove(camera)
+        self.notify(Event(QolsysNotification.CAMERA_DELETE, self, camera.to_dict_event()))
+
+    def ip_camera(self, camera_id: str) -> QolsysIpCamera | None:
+        for camera in self.ip_cameras:
+            if camera.camera_id == camera_id:
+                return camera
+        return None
 
     def partition(self, partition_id: str) -> QolsysPartition | None:
         for partition in self.partitions:
@@ -126,7 +167,7 @@ class QolsysState(QolsysObservable):
                 return
 
         self.automation_devices.append(new_automation_device)
-        self.automation_devices.sort(key=lambda x: x.virtual_node_id, reverse=False)
+        self.automation_devices.sort(key=lambda x: int(x.virtual_node_id) if x.virtual_node_id.isdigit() else 0)
         self.notify(Event(QolsysNotification.AUTOMATION_ADD, self, new_automation_device.to_dict_event()))
 
     def automation_device_delete(self, virtual_node_id: str) -> None:
@@ -249,6 +290,36 @@ class QolsysState(QolsysObservable):
                 LOGGER.debug("sync_data - add Scene%s", db_scene.scene_id)
                 self.scene_add(db_scene)
 
+    def sync_ip_cameras_data(self, db_cameras: list[QolsysIpCamera]) -> None:
+        db_camera_list = []
+        for db_camera in db_cameras:
+            db_camera_list.append(db_camera.camera_id)
+
+        state_camera_list = []
+        for state_camera in self.ip_cameras:
+            state_camera_list.append(state_camera.camera_id)
+
+        # Update existing Ip Cameras
+        for state_camera in self.ip_cameras:
+            if state_camera.camera_id in db_camera_list:
+                for db_camera in db_cameras:
+                    if state_camera.camera_id == db_camera.camera_id:
+                        LOGGER.debug("sync_data - update IpCamera%s", state_camera.camera_id)
+                        state_camera.update_camera(db_camera.to_dict())
+                        break
+
+        # Delete Ip Cameras
+        for state_camera in list(self.ip_cameras):
+            if state_camera.camera_id not in db_camera_list:
+                LOGGER.debug("sync_data - delete IpCamera%s", state_camera.camera_id)
+                self.ip_camera_delete(state_camera.camera_id)
+
+        # Add new Ip Camera
+        for db_camera in db_cameras:
+            if db_camera.camera_id not in state_camera_list:
+                LOGGER.debug("sync_data - add IpCamera%s", db_camera.camera_id)
+                self.ip_camera_add(db_camera)
+
     def sync_zones_data(self, db_zones: list[QolsysZone]) -> None:
         db_zone_list = []
         for db_zone in db_zones:
@@ -360,6 +431,9 @@ class QolsysState(QolsysObservable):
                 for service in services_list:
                     for line in service.info():
                         LOGGER.debug(line)
+
+        for camera in self.ip_cameras:
+            LOGGER.debug("[IpCamera][%s](%s)", camera.camera_id, camera.camera_name)
 
         for scene in self.scenes:
             sid = scene.scene_id

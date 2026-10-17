@@ -55,8 +55,13 @@ class LightServiceZwave(LightService):
     def update_automation_service(self) -> None:
         try:
             dict = json.loads(self.automation_device.extras)
-            self.level = int(dict.get("LEVEL", "0"))
             self.is_on = self.automation_device.status.lower() == "on"
+            # extras["LEVEL"] holds the dimmer's last/return-to brightness, which the panel
+            # keeps even while the light is off. The live SwitchMultilevel/Basic reports
+            # (parse_command_26/parse_command_20) treat level as the instantaneous output
+            # (0 when off), so only trust extras while on; otherwise this refresh clobbers
+            # the reported 0 and the level visibly bounces (e.g. 60 -> 0 -> 60).
+            self.level = int(dict.get("LEVEL", "0")) if self.is_on else 0
 
         except (JSONDecodeError, ValueError, TypeError):
             LOGGER.error(

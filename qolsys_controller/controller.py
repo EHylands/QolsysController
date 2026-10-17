@@ -100,6 +100,11 @@ class QolsysController:
     def mqtt_command_queue(self) -> QolsysMqttCommandQueue:
         return self._mqtt_command_queue
 
+    @property
+    def pki(self) -> QolsysPKI:
+        """The controller's pairing identity, shared with its native transport."""
+        return self._pki
+
     ###########################################################################
     # Controller Operations
     ###########################################################################
@@ -262,6 +267,21 @@ class QolsysController:
                         await self.set_controller_state(ControllerState.CONNECTED)
                         self._reconnect_attempt = 0
                         self.notify_panel_status_update()
+
+                        # LOGGER.debug("LOG THERMOSTAT TABLE")
+                        # thermostat_table = self.panel.db.table_thermostat
+                        # response = await self.commands.panel.database_remote_read(thermostat_table.uri)
+                        # LOGGER.debug(response)
+
+                        # LOGGER.debug("LOG ZWAVE DEVICE")
+                        # zwave_table = self.panel.db.table_zwave_node
+                        # response = await self.commands.panel.database_remote_read(zwave_table.uri)
+                        # LOGGER.debug(response)
+
+                        # LOGGER.debug("LOG AUTOMATION DEVICE")
+                        # automation_table = self.panel.db.table_automation
+                        # response = await self.commands.panel.database_remote_read(automation_table.uri)
+                        # LOGGER.debug(response)
 
                         await asyncio.Future()  # Run until cancelled or exception
 

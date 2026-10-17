@@ -2,6 +2,86 @@
 
 <!-- version list -->
 
+## v1.12.2 (2026-10-16)
+
+### Bug Fixes
+
+- Remove premature Z-Wave thermostat service values on IQ2+ panels
+  ([`a1f70ef`](https://github.com/EHylands/QolsysController/commit/a1f70ef27ad686fcb54beef37c28ce6b133412d9))
+
+- Remove premature Z-Wave thermostat service values on IQ2+ panels
+  ([`11bb92e`](https://github.com/EHylands/QolsysController/commit/11bb92e36b9ebe9e20dcb54e0ad74f4108ba3ae4))
+
+### Chores
+
+- Update test
+  ([`b5920f2`](https://github.com/EHylands/QolsysController/commit/b5920f28088a6b48358c45e9763a8699f189297a))
+
+
+## v1.12.1 (2026-10-12)
+
+### Bug Fixes
+
+- Add ip camera log information
+  ([`aead461`](https://github.com/EHylands/QolsysController/commit/aead461d2e0e8ff9ba37cc479a90b37327ef542c))
+
+
+## v1.12.0 (2026-10-12)
+
+### Features
+
+- Add ip camera motion and press notifications
+  ([`d675c0a`](https://github.com/EHylands/QolsysController/commit/d675c0ac2a41c0e56bac18a708cc1fd790701fbc))
+
+
+## v1.11.3 (2026-10-12)
+
+### Bug Fixes
+
+- Add thermostat_mode_bitmask debug information
+  ([`ee77b71`](https://github.com/EHylands/QolsysController/commit/ee77b711eec9f59ffb18877965f53b97061b45d6))
+
+
+## v1.11.2 (2026-10-12)
+
+### Bug Fixes
+
+- Add extras field to automation device dict
+  ([`9e8f986`](https://github.com/EHylands/QolsysController/commit/9e8f98648d907e380586f16b2144eff690fe0754))
+
+
+## v1.11.1 (2026-10-12)
+
+### Bug Fixes
+
+- Ip camera list
+  ([`a8567b0`](https://github.com/EHylands/QolsysController/commit/a8567b0f2ff428e1d2a05902bfac107213cb0a3a))
+
+### Documentation
+
+- Use .data in the snapshot example ([#78](https://github.com/EHylands/QolsysController/pull/78),
+  [`0c43b55`](https://github.com/EHylands/QolsysController/commit/0c43b55909105ce118e79d2c4c550695f0711df2))
+
+
+## v1.11.0 (2026-10-10)
+
+### Documentation
+
+- Mark Alarm.com thermostat as supported in README
+  ([#76](https://github.com/EHylands/QolsysController/pull/76),
+  [`9dec41b`](https://github.com/EHylands/QolsysController/commit/9dec41bda587acdb1700611b67f9300d7cd4e025))
+
+### Features
+
+- Add camera picture snapshot from main panel
+  ([#77](https://github.com/EHylands/QolsysController/pull/77),
+  [`6bbdace`](https://github.com/EHylands/QolsysController/commit/6bbdace4e1a8c2755e7419e5c4af7cf29f32e1e1))
+
+- **camera**: Add local panel camera snapshots
+  ([#77](https://github.com/EHylands/QolsysController/pull/77),
+  [`6bbdace`](https://github.com/EHylands/QolsysController/commit/6bbdace4e1a8c2755e7419e5c4af7cf29f32e1e1))
+
+
 ## v1.10.0 (2026-10-07)
 
 ### Features

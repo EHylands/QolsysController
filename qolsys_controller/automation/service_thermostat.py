@@ -335,7 +335,6 @@ class ThermostatService(AutomationService):
             )
 
     def _set_hvac_mode(self, hvac_mode: str | int) -> None:
-        LOGGER.debug("%s - hvac_mode: %s (%s)", self.prefix, hvac_mode, type(hvac_mode).__name__)
 
         if isinstance(hvac_mode, str):
             if hvac_mode == "":
