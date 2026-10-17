@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from qolsys_controller.automation.service_lock import LockService
-from qolsys_controller.enum_qolsys import QolsysNotification
+from qolsys_controller.enum_qolsys import QolsysNotification, QolsysPanelType
 from qolsys_controller.observable import Event
 
 if TYPE_CHECKING:
@@ -25,17 +25,9 @@ class LockServiceZwave(LockService):
         return False
 
     def supports_jam(self) -> bool:
-        return False
+        return True
 
     async def lock(self) -> None:
-        if self.is_locked:
-            LOGGER.debug(
-                "%s[%s] LockServiceZwave - lock: already locked",
-                self.automation_device.prefix,
-                self.endpoint,
-            )
-            return
-
         self.is_locking = True
         self.is_unlocking = False
         self.automation_device.notify(
@@ -47,15 +39,13 @@ class LockServiceZwave(LockService):
             self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
-    async def unlock(self) -> None:
-        if not self.is_locked:
-            LOGGER.debug(
-                "%s[%s] LockServiceZwave - unlock already unlocked",
-                self.automation_device.prefix,
-                self.endpoint,
+        # Ask for report on IQ2+ panel
+        if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            await self.automation_device.controller.commands.zwave.doorlock_get(
+                self.automation_device.virtual_node_id, str(self.endpoint)
             )
-            return
 
+    async def unlock(self) -> None:
         self.is_locking = False
         self.is_unlocking = True
         self.automation_device.notify(
@@ -67,6 +57,12 @@ class LockServiceZwave(LockService):
             self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 
+        # Ask for report on IQ2+ panel
+        if self.automation_device.controller.panel.product_type == QolsysPanelType.IQ_PANEL_2_PLUS:
+            await self.automation_device.controller.commands.zwave.doorlock_get(
+                self.automation_device.virtual_node_id, str(self.endpoint)
+            )
+
     async def open(self) -> None:
         pass
 
@@ -75,3 +71,4 @@ class LockServiceZwave(LockService):
 
     def update_automation_service(self) -> None:
         self.is_locked = self.automation_device.status.lower() == "locked"
+        self.is_jammed = self.automation_device.status.lower() == "jammed"

@@ -32,7 +32,7 @@ class TestLockServiceZwave:
         service, _ = _make()
         assert service.supports_lock() is True
         assert service.supports_open() is False
-        assert service.supports_jam() is False
+        assert service.supports_jam() is True
 
     @pytest.mark.asyncio
     async def test_lock_when_unlocked_sends_doorlock_set_true(self) -> None:
@@ -49,16 +49,19 @@ class TestLockServiceZwave:
         device.controller.commands.zwave.doorlock_set.assert_awaited_once_with("6", "5", False)
 
     @pytest.mark.asyncio
-    async def test_lock_when_already_locked_is_noop(self) -> None:
+    async def test_lock_when_already_locked_still_sends(self) -> None:
+        # Issue #86: the IQ Panel 2 can report a stale lock state, so lock()
+        # must always dispatch — never drop the command as "already locked".
         service, device = _make(is_locked=True)
         await service.lock()
-        device.controller.commands.zwave.doorlock_set.assert_not_awaited()
+        device.controller.commands.zwave.doorlock_set.assert_awaited_once_with("6", "0", True)
 
     @pytest.mark.asyncio
-    async def test_unlock_when_already_unlocked_is_noop(self) -> None:
+    async def test_unlock_when_already_unlocked_still_sends(self) -> None:
+        # Issue #86: unlock() must always dispatch even when believed unlocked.
         service, device = _make(is_locked=False)
         await service.unlock()
-        device.controller.commands.zwave.doorlock_set.assert_not_awaited()
+        device.controller.commands.zwave.doorlock_set.assert_awaited_once_with("6", "0", False)
 
     def test_update_marks_locked_when_status_locked(self) -> None:
         service, _ = _make(is_locked=False, status="Locked")
@@ -68,4 +71,11 @@ class TestLockServiceZwave:
     def test_update_marks_unlocked_when_status_unlocked(self) -> None:
         service, _ = _make(is_locked=True, status="unlocked")
         service.update_automation_service()
+        assert service.is_locked is False
+
+    def test_update_marks_jammed_when_status_jammed(self) -> None:
+        # Issue #86: a jammed lock must now be decoded and reported.
+        service, _ = _make(status="Jammed")
+        service.update_automation_service()
+        assert service.is_jammed is True
         assert service.is_locked is False
