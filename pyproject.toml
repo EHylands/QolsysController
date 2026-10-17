@@ -68,12 +68,26 @@ qolsys-controller = "qolsys_controller.cli:main"
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 tag_format = "v{version}"
-branch = "main"
 commit_parser = "conventional"
+
+# Per-branch release behavior. The release workflow (publish.yml) is dispatched
+# from one of these branches; semantic-release picks stable vs beta from here.
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.branches.dev]
+match = "dev"
+prerelease = true
+prerelease_token = "beta"
 
 
 [tool.semantic_release.changelog]
 file = "CHANGELOG.md"
+# Use the vendored templates/ (copied from PSR's conventional/md set) so the
+# changelog AND GitHub release notes get emoji section headings. This REPLACES
+# PSR's bundled templates — re-sync templates/ when upgrading python-semantic-release.
+template_dir = "templates"
 
 [tool.semantic_release.remote]
 name = "origin"

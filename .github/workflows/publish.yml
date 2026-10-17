@@ -1,14 +1,18 @@
 name: Build
 
+# Manual release. The maintainer picks WHEN to release by dispatching this
+# workflow from the Actions tab and choosing the branch:
+#   - main  -> cuts a STABLE version   (e.g. 1.13.0)
+#   - dev   -> cuts a BETA pre-release (e.g. 1.13.0-beta.1 -> 1.13.0b1 on PyPI)
+# The stable-vs-beta choice is driven entirely by the per-branch config in
+# pyproject.toml ([tool.semantic_release.branches.*]) — not by logic here.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
 
-# Serialize runs on the same ref: two quick pushes to main must not race two
+# Serialize runs on the same ref: two quick dispatches must not race two
 # releases onto the same version/tags. Queue rather than cancel — never abort
 # an in-flight release mid tag-push.
 concurrency:
@@ -16,61 +20,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Stage 1 — static checks. Lint + types must pass before anything else runs.
-  lint:
-    name: Ruff + MyPy
+  # Stage 0 — guard. Releases are only valid from main (stable) or dev (beta).
+  # Any other branch has no release group in pyproject.toml, so fail fast with
+  # a clear message instead of a confusing semantic-release error.
+  guard:
+    name: Validate release branch
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+      - name: Only main or dev may release
+        run: |
+          if [ "${{ github.ref_name }}" != "main" ] && [ "${{ github.ref_name }}" != "dev" ]; then
+            echo "::error::Releases may only be dispatched from 'main' (stable) or 'dev' (beta). Got '${{ github.ref_name }}'."
+            exit 1
+          fi
+          echo "Releasing from '${{ github.ref_name }}'."
 
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
+  # Stage 1 — checks. Reuse the same lint + test pipeline that runs on every
+  # push/PR so a release can never ship code that would fail CI.
+  checks:
+    name: CI
+    needs: guard
+    uses: ./.github/workflows/ci.yml
 
-      - name: Install dependencies
-        # Install the package with its declared dependencies so CI resolves the
-        # same version ranges users get. Extras: dev = lint/type/test tooling,
-        # bridge = amqtt (needed to type-check qolsys_controller/mqtt_bridge).
-        run: pip install -e ".[dev,bridge]"
-
-      - name: Ruff check
-        run: ruff check .
-
-      - name: Ruff format check
-        run: ruff format --check .
-
-      - name: MyPy check
-        run: mypy .
-
-  # Stage 2 — tests. Only runs if Stage 1 passed.
-  test:
-    name: Pytest
-    runs-on: ubuntu-latest
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-
-      - name: Install dependencies
-        run: pip install -e ".[dev,bridge]"
-
-      - name: Pytest
-        run: pytest
-
-  # Stage 3 — release. Only runs if lint + tests passed.
+  # Stage 2 — release. Only runs if the branch is valid and checks passed.
   release:
     name: Semantic Version + Tag
     runs-on: ubuntu-latest
-    needs: test
+    needs: [guard, checks]
 
     # Surface whether a new version was cut (and which tag) so the publish job
     # can decide whether to run and what ref to build.
@@ -92,7 +68,7 @@ jobs:
 
       # Intentional: a PAT is used instead of the default GITHUB_TOKEN so
       # semantic-release can push the version-bump commit and tag back to a
-      # protected main. Do not "simplify" this to GITHUB_TOKEN.
+      # protected main/dev. Do not "simplify" this to GITHUB_TOKEN.
       - name: Run semantic-release (bump + tag)
         id: release
         env:
@@ -113,9 +89,10 @@ jobs:
             echo "released=false" >> "$GITHUB_OUTPUT"
           fi
 
-  # Stage 4 — publish. Only runs when release cut a new version. Builds from the
+  # Stage 3 — publish. Only runs when release cut a new version. Builds from the
   # freshly created tag (not the triggering commit, which predates the bump) and
-  # publishes to PyPI via trusted publishing (OIDC).
+  # publishes to PyPI via trusted publishing (OIDC). Beta pre-release wheels go
+  # to the same PyPI project; pip ignores them unless users pass --pre.
   publish:
     name: Build + Publish to PyPI
     runs-on: ubuntu-latest

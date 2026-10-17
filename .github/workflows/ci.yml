@@ -1,0 +1,67 @@
+name: CI
+
+# Static checks + tests. Runs on every push and PR to any branch, and is also
+# reusable (workflow_call) so the release workflow (publish.yml) can gate a
+# release on these exact same checks without duplicating the steps.
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+# Cancel superseded runs of the same event on the same ref. push and
+# pull_request are separate events, so a branch with an open PR still runs CI
+# once per event (standard GitHub behavior) — only re-runs of each are culled.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  # Stage 1 — static checks. Lint + types must pass before tests run.
+  lint:
+    name: Ruff + MyPy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        # Install the package with its declared dependencies so CI resolves the
+        # same version ranges users get. Extras: dev = lint/type/test tooling,
+        # bridge = amqtt (needed to type-check qolsys_controller/mqtt_bridge).
+        run: pip install -e ".[dev,bridge]"
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: MyPy check
+        run: mypy .
+
+  # Stage 2 — tests. Only runs if Stage 1 passed.
+  test:
+    name: Pytest
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,bridge]"
+
+      - name: Pytest
+        run: pytest
