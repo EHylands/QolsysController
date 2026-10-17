@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# Local CI mirror — runs the same checks as .github/workflows/ci.yml before a
+# push is sent to the remote. A failing check aborts the push.
+#
+# Enable (one-time, per clone):   git config core.hooksPath .githooks
+# Bypass once:                    git push --no-verify
+#
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Prefer the project venv so the tool versions match CI.
+if [ -f .venv/bin/activate ]; then
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+fi
+
+run() {
+  echo "▶ $*"
+  "$@"
+}
+
+echo "Running local CI checks before push…"
+run ruff check .
+run ruff format --check .
+run mypy .
+run pytest -q
+echo "✓ All checks passed — pushing."
