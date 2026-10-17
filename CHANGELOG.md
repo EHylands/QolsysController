@@ -2,6 +2,43 @@
 
 <!-- version list -->
 
+## v1.12.3-beta.1 (2026-10-17)
+
+### 🐛 Bug Fixes
+
+- 86 z wave door lock iq panel 2 commands silently dropped as already locked no lockingunlocking
+  state jammed never reported ([#87](https://github.com/EHylands/QolsysController/pull/87),
+  [`1001ba7`](https://github.com/EHylands/QolsysController/commit/1001ba724b2eb0c18828ea5751e2e1d56337470f))
+
+- Update z-wave thermostat service and outlet service
+  ([#87](https://github.com/EHylands/QolsysController/pull/87),
+  [`1001ba7`](https://github.com/EHylands/QolsysController/commit/1001ba724b2eb0c18828ea5751e2e1d56337470f))
+
+### 🤖 Continuous Integration
+
+- Add emoji section headings to changelog and release notes
+  ([#81](https://github.com/EHylands/QolsysController/pull/81),
+  [`5c3de13`](https://github.com/EHylands/QolsysController/commit/5c3de131c28c2e87e562a32be76cbae658a6a6b1))
+
+- Auto back-merge main into dev after a stable release
+  ([#85](https://github.com/EHylands/QolsysController/pull/85),
+  [`457543a`](https://github.com/EHylands/QolsysController/commit/457543ac770ddd7066b14569fc90decc67ed7683))
+
+- Auto back-merge main into dev after a stable release
+  ([#84](https://github.com/EHylands/QolsysController/pull/84),
+  [`1cde269`](https://github.com/EHylands/QolsysController/commit/1cde269f58497a48fdd17b0ad7d2ef507daae193))
+
+- Split CI from release and add dev beta track
+  ([#81](https://github.com/EHylands/QolsysController/pull/81),
+  [`5c3de13`](https://github.com/EHylands/QolsysController/commit/5c3de131c28c2e87e562a32be76cbae658a6a6b1))
+
+### 📝 Documentation
+
+- Mark Alarm.com thermostat as supported in README
+  ([#82](https://github.com/EHylands/QolsysController/pull/82),
+  [`a3b7bb1`](https://github.com/EHylands/QolsysController/commit/a3b7bb1e0da1640ac11a14b669e7ceb91b5434e7))
+
+
 ## v1.12.2 (2026-10-16)
 
 ### Bug Fixes
