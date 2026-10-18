@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.12.3-beta.2 (2026-10-18)
+
+### 🐛 Bug Fixes
+
+- Add partition force arm command
+  ([`320e402`](https://github.com/EHylands/QolsysController/commit/320e4028bf75d762befb6597537eca147bae008f))
+
+### 🤖 Continuous Integration
+
+- Add local pre-push hook mirroring CI checks
+  ([#88](https://github.com/EHylands/QolsysController/pull/88),
+  [`76644d6`](https://github.com/EHylands/QolsysController/commit/76644d6fa143c6034e62b9b6a14a0a07fdaa06d5))
+
+- Auto back-merge main into dev after a stable release
+  ([#83](https://github.com/EHylands/QolsysController/pull/83),
+  [`4cbc91c`](https://github.com/EHylands/QolsysController/commit/4cbc91c4c8b375c95219dfec3bcb6f45af003a2b))
+
+
 ## v1.12.3-beta.1 (2026-10-17)
 
 ### 🐛 Bug Fixes
