@@ -35,6 +35,7 @@ qolsys-controller --verbose --config 'path_to_config_file'
 |                        | Home Instant Arming                  | ✅     |
 |                        | Home Silent Disarming (Firmware 4.6.1)| ✅     |
 |                        | Set Exit Sounds and Entry Delay      | ✅     |
+|                        | Force Arm (bypass open zones)        | ✅     |
 | **Zones**              | Sensor Status                        | ✅     |
 |                        | Tamper State                         | ✅     |
 |                        | Battery Level                        | ✅     |

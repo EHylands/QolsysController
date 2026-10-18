@@ -74,6 +74,7 @@ class QolsysPartition(QolsysObservable):
         self._command_arm_stay_instant: bool = True
         self._command_arm_stay_silent_disarming: bool = False
         self._command_arm_entry_delay: bool = True
+        self._command_force_arm: bool = False
 
     def update_partition(self, data: dict[str, str]) -> None:
         # Check if we are updating same partition_id
@@ -152,7 +153,11 @@ class QolsysPartition(QolsysObservable):
                 self.command_exit_sounds,
                 self.command_arm_stay_instant,
                 self.command_arm_entry_delay,
+                self.command_force_arm,
             )
+
+            # force_arm is a one-shot flag: reset it after a successful arm
+            self.command_force_arm = False
 
         except QolsysUserCodeError as err:
             LOGGER.debug("MQTT: arm command error - user_code error")
@@ -385,6 +390,16 @@ class QolsysPartition(QolsysObservable):
     def command_arm_entry_delay(self, value: bool) -> None:
         self._command_arm_entry_delay = value
         LOGGER.debug("Partition%s (%s) - command_arm_entry_delay: %s", self._id, self._name, value)
+        self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
+
+    @property
+    def command_force_arm(self) -> bool:
+        return self._command_force_arm
+
+    @command_force_arm.setter
+    def command_force_arm(self, value: bool) -> None:
+        self._command_force_arm = value
+        LOGGER.debug("Partition%s (%s) - command_force_arm: %s", self._id, self._name, value)
         self.notify(Event(QolsysNotification.PARTITION_UPDATE, self, self.to_dict_event()))
 
     @property
