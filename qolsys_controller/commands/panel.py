@@ -78,14 +78,16 @@ class PanelCommands:
         exit_sounds: bool = False,
         instant_arm: bool = False,
         entry_delay: bool = True,
+        force_arm: bool = False,
     ) -> dict[str, str]:
         LOGGER.debug(
-            "MQTT Panel Client - Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s",
+            "MQTT Panel Client - Sending arm command: partition%s, arming_type:%s, exit_sounds:%s, instant_arm: %s, entry_delay:%s, force_arm:%s",
             partition_id,
             arming_type,
             exit_sounds,
             instant_arm,
             entry_delay,
+            force_arm,
         )
 
         user_id = 0
@@ -131,12 +133,19 @@ class PanelCommands:
         #    raise QolsysZoneBypassError(open_safety_zones)
 
         # Cannot bypass open zones if auto_bypass is disabled - return error
+        # unless force_arm is requested, in which case we bypass the open zones anyway
         if bypass_open_zone_list and self._controller.panel.AUTO_BYPASS == "false":
-            LOGGER.debug(
-                "MQTT Panel Client - Cannot arm: Open Zones that can be bypassed but AUTO_BYPASS is disabled: %s",
-                bypass_open_zone_list,
-            )
-            raise QolsysZoneBypassError(bypass_open_zone_list)
+            if force_arm:
+                LOGGER.debug(
+                    "MQTT Panel Client - force_arm: bypassing Open Zones despite AUTO_BYPASS being disabled: %s",
+                    bypass_open_zone_list,
+                )
+            else:
+                LOGGER.debug(
+                    "MQTT Panel Client - Cannot arm: Open Zones that can be bypassed but AUTO_BYPASS is disabled: %s",
+                    bypass_open_zone_list,
+                )
+                raise QolsysZoneBypassError(bypass_open_zone_list)
 
         bypass_zone_str = "[" + ",".join(map(str, bypass_open_zone_list)) + "]"
 
