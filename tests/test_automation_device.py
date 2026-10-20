@@ -448,9 +448,7 @@ class TestThermostatOperatingState:
     _TOS = int(ZwaveCommandClass.ThermostatOperatingState)
 
     def _make_zwave_with_thermostat(self) -> QolsysAutomationDeviceZwave:
-        device = QolsysAutomationDeviceZwave(
-            MagicMock(), {"node_id": "8"}, {"virtual_node_id": "8", "end_point": "0"}
-        )
+        device = QolsysAutomationDeviceZwave(MagicMock(), {"node_id": "8"}, {"virtual_node_id": "8", "end_point": "0"})
         device.service_add_thermostat_service(endpoint=0)
         return device
 
