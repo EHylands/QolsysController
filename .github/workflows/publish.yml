@@ -127,18 +127,21 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
-  # Stage 5 — reset dev. In this model `dev` is a THROWAWAY beta sandbox, never
+  # Stage 5 — rebuild dev. In this model `dev` is a THROWAWAY beta sandbox, never
   # promoted: features ship via feature → main, and beta builds are assembled by
   # merging `beta`-labeled PRs into dev (see beta-to-dev.yml). After a STABLE
-  # release on main, dev is discarded and reset to the new stable baseline so the
-  # NEXT beta computes the right version. Only runs for releases dispatched from
-  # main. The reset logic lives in reset-dev.yml so it is ALSO runnable manually
-  # from the Actions tab (workflow_dispatch); here we invoke it via workflow_call.
-  reset-dev:
-    name: Reset dev → main
+  # release on main, dev is reset to the new stable baseline and the still-open
+  # `beta` PRs are re-merged so the beta track continues on top of the new stable
+  # tag (and the NEXT beta computes the right version). Only runs for releases
+  # dispatched from main. The logic lives in rebuild-dev.yml so it is ALSO runnable
+  # manually from the Actions tab; here we invoke it via workflow_call. (For a
+  # clean main-only dev with no betas, run reset-dev.yml manually instead.)
+  rebuild-dev:
+    name: Rebuild dev (reset + re-merge betas)
     needs: release
     if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
     permissions:
       contents: write
-    uses: ./.github/workflows/reset-dev.yml
+      pull-requests: write
+    uses: ./.github/workflows/rebuild-dev.yml
     secrets: inherit
