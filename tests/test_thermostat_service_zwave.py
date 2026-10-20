@@ -7,8 +7,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
-from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacMode
-from qolsys_controller.enum_zwave import ThermostatFanMode, ThermostatMode, ThermostatSetpointMode
+from qolsys_controller.enum_qolsys import QolsysFanMode, QolsysHvacAction, QolsysHvacMode
+from qolsys_controller.enum_zwave import (
+    ThermostatFanMode,
+    ThermostatMode,
+    ThermostatOperatingState,
+    ThermostatSetpointMode,
+)
 
 
 def _make_mock_device() -> MagicMock:
@@ -115,3 +120,45 @@ class TestThermostatServiceZwave:
         result = service.to_dict_event()
         assert result["service_type"] == "ThermostatServiceZwave"
         assert result["state"]["hvac_mode"] == "COOL"
+
+    def test_reported_hvac_action_overrides_inferred(self) -> None:
+        # With HEAT mode and current < target, the inferred action would be HEATING;
+        # a device-reported operating state must take precedence.
+        service, _ = _make()
+        service._hvac_mode = QolsysHvacMode.HEAT
+        service._current_temperature = 60.0
+        service._target_heat_temp = 70.0
+        assert service.hvac_action == QolsysHvacAction.HEATING  # inferred fallback
+
+        service.hvac_action = QolsysHvacAction.IDLE
+        assert service.hvac_action == QolsysHvacAction.IDLE
+        assert service.to_dict_event()["state"]["hvac_action"] == "IDLE"
+
+    def test_hvac_action_setter_notifies_once_per_change(self) -> None:
+        service, device = _make()
+        device.notify.reset_mock()
+
+        service.hvac_action = QolsysHvacAction.COOLING
+        service.hvac_action = QolsysHvacAction.COOLING  # unchanged -> no extra notify
+        assert device.notify.call_count == 1
+
+    def test_operating_state_mapping_is_complete(self) -> None:
+        # Every Z-Wave operating state must map to a QolsysHvacAction.
+        mapping = ThermostatServiceZwave.ZWAVE_OPERATING_STATE_TO_QOLSYS_HVAC_ACTION
+        for state in ThermostatOperatingState:
+            assert mapping[state] is not None
+
+    def test_operating_state_mapping_values(self) -> None:
+        mapping = ThermostatServiceZwave.ZWAVE_OPERATING_STATE_TO_QOLSYS_HVAC_ACTION
+        assert mapping[ThermostatOperatingState.IDLE] == QolsysHvacAction.IDLE
+        assert mapping[ThermostatOperatingState.HEATING] == QolsysHvacAction.HEATING
+        assert mapping[ThermostatOperatingState.COOLING] == QolsysHvacAction.COOLING
+        assert mapping[ThermostatOperatingState.FAN_ONLY] == QolsysHvacAction.FAN
+        assert mapping[ThermostatOperatingState.PENDING_HEAT] == QolsysHvacAction.PREHEATING
+        assert mapping[ThermostatOperatingState.PENDING_COOL] == QolsysHvacAction.IDLE
+        assert mapping[ThermostatOperatingState.VENT_ECONOMIZER] == QolsysHvacAction.FAN
+        assert mapping[ThermostatOperatingState.AUXILIARY_HEATING] == QolsysHvacAction.HEATING
+        assert mapping[ThermostatOperatingState.SECOND_STAGE_HEATING] == QolsysHvacAction.HEATING
+        assert mapping[ThermostatOperatingState.SECOND_STAGE_COOLING] == QolsysHvacAction.COOLING
+        assert mapping[ThermostatOperatingState.SECOND_STAGE_AUXILIARY_HEATING] == QolsysHvacAction.HEATING
+        assert mapping[ThermostatOperatingState.THIRD_STAGE_HEATING] == QolsysHvacAction.HEATING
