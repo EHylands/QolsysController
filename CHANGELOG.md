@@ -2,6 +2,52 @@
 
 <!-- version list -->
 
+## v1.12.3 (2026-10-20)
+
+### 🐛 Bug Fixes
+
+- 86 z wave door lock iq panel 2 commands silently dropped as already locked no lockingunlocking
+  state jammed never reported ([#87](https://github.com/EHylands/QolsysController/pull/87),
+  [`b7cd0df`](https://github.com/EHylands/QolsysController/commit/b7cd0dfb4a74f45424a6e29b7bd072ac95537c71))
+
+- Add partition force arm command
+  ([`7b12776`](https://github.com/EHylands/QolsysController/commit/7b127761f6a00aeee433eb2fcef5b4e8930aecb5))
+
+- Update z-wave thermostat service and outlet service
+  ([#87](https://github.com/EHylands/QolsysController/pull/87),
+  [`b7cd0df`](https://github.com/EHylands/QolsysController/commit/b7cd0dfb4a74f45424a6e29b7bd072ac95537c71))
+
+### 🤖 Continuous Integration
+
+- Add emoji section headings to changelog and release notes
+  ([#81](https://github.com/EHylands/QolsysController/pull/81),
+  [`5c3de13`](https://github.com/EHylands/QolsysController/commit/5c3de131c28c2e87e562a32be76cbae658a6a6b1))
+
+- Add label-driven PR workflows, drop sync-dev back-merge
+  ([#91](https://github.com/EHylands/QolsysController/pull/91),
+  [`c2f7cef`](https://github.com/EHylands/QolsysController/commit/c2f7cefb29f429ce8ad76850b288225dc13d1fe3))
+
+- Add local pre-push hook mirroring CI checks
+  ([#88](https://github.com/EHylands/QolsysController/pull/88),
+  [`76644d6`](https://github.com/EHylands/QolsysController/commit/76644d6fa143c6034e62b9b6a14a0a07fdaa06d5))
+
+- Auto back-merge main into dev after a stable release
+  ([#83](https://github.com/EHylands/QolsysController/pull/83),
+  [`4cbc91c`](https://github.com/EHylands/QolsysController/commit/4cbc91c4c8b375c95219dfec3bcb6f45af003a2b))
+
+- Revert release process to feature → dev → main
+  ([#93](https://github.com/EHylands/QolsysController/pull/93),
+  [`1374fe8`](https://github.com/EHylands/QolsysController/commit/1374fe873ca998a6cf8ad09b12de22b513add77b))
+
+- Split CI from release and add dev beta track
+  ([#81](https://github.com/EHylands/QolsysController/pull/81),
+  [`5c3de13`](https://github.com/EHylands/QolsysController/commit/5c3de131c28c2e87e562a32be76cbae658a6a6b1))
+
+- Switch to feature->main model (block dev->main, drop sync-dev)
+  ([#90](https://github.com/EHylands/QolsysController/pull/90),
+  [`ef3e38b`](https://github.com/EHylands/QolsysController/commit/ef3e38b98c620f1e19c288962425720cb9e03b7e))
+
+
 ## v1.12.3-beta.2 (2026-10-18)
 
 ### 🐛 Bug Fixes
