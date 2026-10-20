@@ -18,6 +18,7 @@ from qolsys_controller.enum_zwave import (
     BITMASK_SUPPORTED_THERMOSTAT_MODE,
     ThermostatFanMode,
     ThermostatMode,
+    ThermostatOperatingState,
 )
 from qolsys_controller.observable import Event
 
@@ -91,6 +92,11 @@ class ThermostatService(AutomationService):
 
     @property
     def hvac_action(self) -> QolsysHvacAction | None:
+        # Prefer the device-reported operating state when available (set from the
+        # Z-Wave Thermostat Operating State report); otherwise infer it below.
+        if self._hvac_action is not None:
+            return self._hvac_action
+
         if self.hvac_mode == QolsysHvacMode.OFF:
             return QolsysHvacAction.OFF
 
@@ -114,6 +120,15 @@ class ThermostatService(AutomationService):
             return QolsysHvacAction.FAN
 
         return QolsysHvacAction.IDLE
+
+    @hvac_action.setter
+    def hvac_action(self, value: QolsysHvacAction | None) -> None:
+        if self._hvac_action != value:
+            self._hvac_action = value
+            self.automation_device.notify(
+                Event(QolsysNotification.AUTOMATION_UPDATE, self.automation_device, self.automation_device.to_dict_event())
+            )
+            LOGGER.debug("%s - hvac_action: %s", self.prefix, value.name if value else None)
 
     @property
     def fan_mode(self) -> QolsysFanMode | None:
@@ -466,6 +481,23 @@ class ThermostatService(AutomationService):
         QolsysFanMode.FAN_MEDIUM: ThermostatFanMode.MEDIUM,
         QolsysFanMode.FAN_ON: ThermostatFanMode.LOW,
         QolsysFanMode.FAN_CIRCULATE: ThermostatFanMode.CIRCULATION,
+    }
+
+    # QolsysHvacAction has no distinct "pre-cooling" state, so PENDING_COOL maps to IDLE
+    # (the system is waiting to cool, not yet actively cooling).
+    ZWAVE_OPERATING_STATE_TO_QOLSYS_HVAC_ACTION: dict[ThermostatOperatingState, QolsysHvacAction] = {
+        ThermostatOperatingState.IDLE: QolsysHvacAction.IDLE,
+        ThermostatOperatingState.HEATING: QolsysHvacAction.HEATING,
+        ThermostatOperatingState.COOLING: QolsysHvacAction.COOLING,
+        ThermostatOperatingState.FAN_ONLY: QolsysHvacAction.FAN,
+        ThermostatOperatingState.PENDING_HEAT: QolsysHvacAction.PREHEATING,
+        ThermostatOperatingState.PENDING_COOL: QolsysHvacAction.IDLE,
+        ThermostatOperatingState.VENT_ECONOMIZER: QolsysHvacAction.FAN,
+        ThermostatOperatingState.AUXILIARY_HEATING: QolsysHvacAction.HEATING,
+        ThermostatOperatingState.SECOND_STAGE_HEATING: QolsysHvacAction.HEATING,
+        ThermostatOperatingState.SECOND_STAGE_COOLING: QolsysHvacAction.COOLING,
+        ThermostatOperatingState.SECOND_STAGE_AUXILIARY_HEATING: QolsysHvacAction.HEATING,
+        ThermostatOperatingState.THIRD_STAGE_HEATING: QolsysHvacAction.HEATING,
     }
 
     def to_dict_event(self) -> dict[str, Any]:

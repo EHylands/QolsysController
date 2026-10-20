@@ -29,8 +29,9 @@ from qolsys_controller.automation_zwave.service_battery import BatteryServiceZwa
 from qolsys_controller.automation_zwave.service_central_scene import CentralSceneServiceZwave
 from qolsys_controller.automation_zwave.service_light import LightServiceZwave
 from qolsys_controller.automation_zwave.service_status import StatusServiceZwave
-from qolsys_controller.enum_qolsys import AutomationDeviceProtocol, QolsysNotification
-from qolsys_controller.enum_zwave import ZwaveCommandClass
+from qolsys_controller.automation_zwave.service_thermostat import ThermostatServiceZwave
+from qolsys_controller.enum_qolsys import AutomationDeviceProtocol, QolsysHvacAction, QolsysNotification
+from qolsys_controller.enum_zwave import ThermostatOperatingState, ZwaveCommandClass
 
 
 class _Device(QolsysAutomationDevice):
@@ -439,3 +440,62 @@ class TestCentralSceneEvents:
         device, events = self._make_zwave_with_service()
         device.update_raw(self._report(sequence=1, key_attribute=0x07, scene=1), endpoint=0)
         assert events == []
+
+
+class TestThermostatOperatingState:
+    """Thermostat Operating State (0x42) report -> hvac_action on the thermostat service."""
+
+    _TOS = int(ZwaveCommandClass.ThermostatOperatingState)
+
+    def _make_zwave_with_thermostat(self) -> QolsysAutomationDeviceZwave:
+        device = QolsysAutomationDeviceZwave(
+            MagicMock(), {"node_id": "8"}, {"virtual_node_id": "8", "end_point": "0"}
+        )
+        device.service_add_thermostat_service(endpoint=0)
+        return device
+
+    def _report(self, operating_state: int) -> bytes:
+        # [command class, REPORT (0x03), operating state]
+        return bytes([self._TOS, 0x03, operating_state])
+
+    def test_report_sets_hvac_action(self) -> None:
+        device = self._make_zwave_with_thermostat()
+        device.update_raw(self._report(ThermostatOperatingState.COOLING), endpoint=0)
+        service = device.service_get(ThermostatServiceZwave, 0)
+        assert service is not None
+        assert service.hvac_action == QolsysHvacAction.COOLING
+
+    def test_report_idle(self) -> None:
+        device = self._make_zwave_with_thermostat()
+        device.update_raw(self._report(ThermostatOperatingState.IDLE), endpoint=0)
+        service = device.service_get(ThermostatServiceZwave, 0)
+        assert service is not None
+        assert service.hvac_action == QolsysHvacAction.IDLE
+
+    def test_report_ignores_reserved_bits(self) -> None:
+        # Operating state lives in bits 0-3; upper bits are reserved and must be masked off.
+        device = self._make_zwave_with_thermostat()
+        device.update_raw(self._report(0xF0 | ThermostatOperatingState.HEATING), endpoint=0)
+        service = device.service_get(ThermostatServiceZwave, 0)
+        assert service is not None
+        assert service.hvac_action == QolsysHvacAction.HEATING
+
+    def test_non_report_command_ignored(self) -> None:
+        # A GET (0x02) echo must not change state.
+        device = self._make_zwave_with_thermostat()
+        device.update_raw(bytes([self._TOS, 0x02]), endpoint=0)
+        service = device.service_get(ThermostatServiceZwave, 0)
+        assert service is not None
+        assert service._hvac_action is None
+
+    def test_unknown_operating_state_dropped(self) -> None:
+        device = self._make_zwave_with_thermostat()
+        device.update_raw(self._report(0x0C), endpoint=0)  # 0x0C has no enum member
+        service = device.service_get(ThermostatServiceZwave, 0)
+        assert service is not None
+        assert service._hvac_action is None
+
+    def test_report_without_service_does_not_raise(self) -> None:
+        device = self._make_zwave_with_thermostat()
+        # endpoint 5 has no thermostat service -> handled gracefully
+        device.update_raw(self._report(ThermostatOperatingState.HEATING), endpoint=5)

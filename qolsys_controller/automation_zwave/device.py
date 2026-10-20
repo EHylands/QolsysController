@@ -24,6 +24,7 @@ from qolsys_controller.enum_zwave import (
     CENTRAL_SCENE_EVENT_NAME,
     CENTRAL_SCENE_PANEL_KEY_ATTRIBUTE,
     CentralSceneKeyAttribute,
+    ThermostatOperatingState,
     ZwaveCommandClass,
     ZwaveDeviceClass,
 )
@@ -145,7 +146,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
                     self.parse_command_5b(payload, endpoint)
 
                 case ZwaveCommandClass.ThermostatOperatingState:
-                    LOGGER.debug("%s - Received ThermostatOperatingState report %s", self.prefix, payload.hex())
+                    self.parse_command_42(payload, endpoint)
 
         except IndexError:
             LOGGER.debug("update_raw: invalid payload:%s", payload)
@@ -177,6 +178,31 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             return
 
         service.emit_scene_event(scene_number, event, sequence)
+
+    def parse_command_42(self, payload: bytes, endpoint: int) -> None:
+        # Thermostat Operating State: [1]=command (0x03 REPORT), [2]=operating state (bits 0-3).
+        if payload[1] != 0x03:
+            return
+
+        service = self.service_get(ThermostatServiceZwave, endpoint)
+        if not isinstance(service, ThermostatServiceZwave):
+            LOGGER.debug("%s - ThermostatOperatingState report on endpoint %s but no service", self.prefix, endpoint)
+            return
+
+        try:
+            operating_state = ThermostatOperatingState(payload[2] & 0x0F)
+        except ValueError:
+            LOGGER.debug("%s - Unknown ThermostatOperatingState value: 0x%02X", self.prefix, payload[2])
+            return
+
+        hvac_action = service.ZWAVE_OPERATING_STATE_TO_QOLSYS_HVAC_ACTION.get(operating_state)
+        LOGGER.debug(
+            "%s - ThermostatOperatingState: %s -> %s",
+            self.prefix,
+            operating_state.name,
+            hvac_action.name if hvac_action else None,
+        )
+        service.hvac_action = hvac_action
 
     def parse_command_20(self, payload: bytes, endpoint: int) -> None:
         command = payload[1]
