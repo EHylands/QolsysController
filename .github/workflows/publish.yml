@@ -134,8 +134,7 @@ jobs:
   # `beta` PRs are re-merged so the beta track continues on top of the new stable
   # tag (and the NEXT beta computes the right version). Only runs for releases
   # dispatched from main. The logic lives in rebuild-dev.yml so it is ALSO runnable
-  # manually from the Actions tab; here we invoke it via workflow_call. (For a
-  # clean main-only dev with no betas, run reset-dev.yml manually instead.)
+  # manually from the Actions tab; here we invoke it via workflow_call.
   rebuild-dev:
     name: Rebuild dev (reset + re-merge betas)
     needs: release
