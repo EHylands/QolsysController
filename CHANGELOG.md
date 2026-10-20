@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.12.4-beta.1 (2026-10-20)
+
+### 🐛 Bug Fixes
+
+- Add thermostate operating state when available
+  ([`653273f`](https://github.com/EHylands/QolsysController/commit/653273fa08b6b1ac0aeb64364a7999859e73c6bc))
+
+- Add z-wave thermostat operating state when available
+  ([`2795013`](https://github.com/EHylands/QolsysController/commit/27950133b59630da96114788a2ef614021a1b9f8))
+
+### 🧹 Chores
+
+- Switch to feature main ([#96](https://github.com/EHylands/QolsysController/pull/96),
+  [`03d21d6`](https://github.com/EHylands/QolsysController/commit/03d21d6f3b0e6e7d3b7048ef301f270e040d2245))
+
+
 ## v1.12.3 (2026-10-20)
 
 ### 🐛 Bug Fixes
