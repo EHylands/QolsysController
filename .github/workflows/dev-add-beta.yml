@@ -1,4 +1,4 @@
-name: DEV - Add Beta Label
+name: DEV - Beta Label - Add
 
 # Label-driven beta track: apply the `beta` label to a PR and its head branch is
 # merged into `dev` (the throwaway beta sandbox), so the next Build dispatched
