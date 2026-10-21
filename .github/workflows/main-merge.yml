@@ -1,4 +1,4 @@
-name: On merge to main
+name: MAIN - On Merge
 
 # One place for everything that must happen when a feature PR is MERGED into main
 # (feature → main is how features ship in this model). On that event:

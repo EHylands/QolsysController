@@ -1,4 +1,4 @@
-name: Rebuild dev (reset + re-merge betas)
+name: DEV - Rebuild (reset + re-merge betas)
 
 # Rebuilds the throwaway `dev` beta sandbox from scratch: resets it to `main`,
 # then re-merges EVERY open PR still labeled `beta` so the next beta Build from

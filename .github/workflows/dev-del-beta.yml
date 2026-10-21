@@ -1,4 +1,4 @@
-name: Beta label removed → rebuild dev
+name: DEV - Delete Beta Label
 
 # Inverse of dev-add-beta.yml. When the `beta` label is REMOVED from a still-open
 # PR, that feature should leave the `dev` beta sandbox. You can't surgically

@@ -1,4 +1,4 @@
-name: Block PRs into dev
+name: DEV - Block PRs
 
 # `dev` is a throwaway beta sandbox that the machinery resets and force-pushes
 # (dev-rebuild.yml). Nobody should ever open a PR *into* `dev`: a rebuild would
