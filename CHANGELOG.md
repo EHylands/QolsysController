@@ -2,6 +2,52 @@
 
 <!-- version list -->
 
+## v1.12.4 (2026-10-21)
+
+### 🐛 Bug Fixes
+
+- Add z-wave thermostat operating state when supported by device and panel
+  ([#100](https://github.com/EHylands/QolsysController/pull/100),
+  [`4921fad`](https://github.com/EHylands/QolsysController/commit/4921fad707ec0ca4bac13827135f414b31eb0fb4))
+
+### 🧹 Chores
+
+- Switch to feature main ([#96](https://github.com/EHylands/QolsysController/pull/96),
+  [`03d21d6`](https://github.com/EHylands/QolsysController/commit/03d21d6f3b0e6e7d3b7048ef301f270e040d2245))
+
+### 🤖 Continuous Integration
+
+- Add beta-del-dev (label removed → rebuild dev), rename beta-to-dev → beta-add-dev
+  ([`2c7e169`](https://github.com/EHylands/QolsysController/commit/2c7e169c85ae70b3af01d43206a25e67459350b2))
+
+- Add dev rebuild (reset + re-merge betas) and beta-label cleanup
+  ([`405ce94`](https://github.com/EHylands/QolsysController/commit/405ce94adead4f3ff5cc1e10cc9d6e9a52c058b2))
+
+- Drop redundant reset-dev.yml (rebuild-dev covers the reset)
+  ([`3b26525`](https://github.com/EHylands/QolsysController/commit/3b2652549b52c363e7271b8c92add10324a45803))
+
+- Lint PR titles into main as conventional commits
+  ([`5a9e604`](https://github.com/EHylands/QolsysController/commit/5a9e604f5d17d87663bd9b55c52c9db3fb013b0c))
+
+- Rebuild dev on merge-to-main + guard PRs into/out of dev
+  ([`c8f950e`](https://github.com/EHylands/QolsysController/commit/c8f950e4f92397db1ffe0abdf5c036124d51446c))
+
+- Rename workflows to <branch>-<action> convention
+  ([`ec12dc2`](https://github.com/EHylands/QolsysController/commit/ec12dc2d8be74dbe3a37b00786b7f34e948df194))
+
+- Render pytest results as a summary table on the Actions run page
+  ([`344f7bc`](https://github.com/EHylands/QolsysController/commit/344f7bc9c96b58f51c2d4d2992cc172b4c3385d6))
+
+- Ruff inline annotations + release summary on the run page
+  ([`d3d552d`](https://github.com/EHylands/QolsysController/commit/d3d552da41d5828d1fd6a94f5d151f4e73dd546d))
+
+- Standardize workflow display names to DEV -/MAIN - prefixes
+  ([`04c69a7`](https://github.com/EHylands/QolsysController/commit/04c69a740f9f7b60d69bdc4fe5a0ac220a777eba))
+
+- Tweak DEV beta-label workflow display names
+  ([`018f7cc`](https://github.com/EHylands/QolsysController/commit/018f7cc666127a20d841db36247b1ca18b126d0a))
+
+
 ## v1.12.3 (2026-10-20)
 
 ### 🐛 Bug Fixes
