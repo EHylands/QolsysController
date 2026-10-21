@@ -129,7 +129,7 @@ jobs:
 
   # Stage 5 — rebuild dev. In this model `dev` is a THROWAWAY beta sandbox, never
   # promoted: features ship via feature → main, and beta builds are assembled by
-  # merging `beta`-labeled PRs into dev (see beta-to-dev.yml). After a STABLE
+  # merging `beta`-labeled PRs into dev (see beta-add-dev.yml). After a STABLE
   # release on main, dev is reset to the new stable baseline and the still-open
   # `beta` PRs are re-merged so the beta track continues on top of the new stable
   # tag (and the NEXT beta computes the right version). Only runs for releases
