@@ -87,6 +87,8 @@ jobs:
           else
             echo "No new release; skipping tag push and publish."
             echo "released=false" >> "$GITHUB_OUTPUT"
+            echo "## ℹ️ No release — nothing to publish" >> "$GITHUB_STEP_SUMMARY"
+            echo "No conventional-commit changes since the last tag on \`${{ github.ref_name }}\`, so semantic-release cut no new version." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   # Stage 3 — publish. Only runs when release cut a new version. Builds from the
@@ -126,6 +128,37 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      # Self-documenting release: show what shipped (version, PyPI + GitHub
+      # release links, install line) on the run's Summary page. Only reached
+      # after a successful publish. PyPI normalizes `-beta.N` -> `bN`, so derive
+      # the PyPI version/link from the git tag (tag_format is `v{version}`).
+      - name: Release summary
+        env:
+          TAG: ${{ needs.release.outputs.tag }}
+          REF: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          SERVER: ${{ github.server_url }}
+        run: |
+          VERSION="${TAG#v}"
+          PYPI_VER="$(printf '%s' "$VERSION" | sed -E 's/-beta\.([0-9]+)/b\1/')"
+          if [ "$REF" = "dev" ]; then
+            KIND="🧪 Beta pre-release"
+            INSTALL="pip install --pre qolsys-controller==${PYPI_VER}"
+          else
+            KIND="✅ Stable release"
+            INSTALL="pip install qolsys-controller==${PYPI_VER}"
+          fi
+          {
+            echo "## ${KIND}: \`${TAG}\`"
+            echo
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| **Version** | \`${VERSION}\` |"
+            echo "| **PyPI** | <https://pypi.org/project/qolsys-controller/${PYPI_VER}/> |"
+            echo "| **GitHub release** | ${SERVER}/${REPO}/releases/tag/${TAG} |"
+            echo "| **Install** | \`${INSTALL}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # Stage 5 — rebuild dev. In this model `dev` is a THROWAWAY beta sandbox, never
   # promoted: features ship via feature → main, and beta builds are assembled by

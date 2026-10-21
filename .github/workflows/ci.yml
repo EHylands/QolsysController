@@ -36,8 +36,11 @@ jobs:
         # bridge = amqtt (needed to type-check qolsys_controller/mqtt_bridge).
         run: pip install -e ".[dev,bridge]"
 
+      # `--output-format=github` emits ::error workflow commands, so lint
+      # violations show as inline annotations on the PR diff (and the run), not
+      # just buried in the step log. Silent on success.
       - name: Ruff check
-        run: ruff check .
+        run: ruff check --output-format=github .
 
       - name: Ruff format check
         run: ruff format --check .
