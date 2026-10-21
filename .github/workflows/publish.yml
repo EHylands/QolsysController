@@ -129,18 +129,18 @@ jobs:
 
   # Stage 5 — rebuild dev. In this model `dev` is a THROWAWAY beta sandbox, never
   # promoted: features ship via feature → main, and beta builds are assembled by
-  # merging `beta`-labeled PRs into dev (see beta-add-dev.yml). After a STABLE
+  # merging `beta`-labeled PRs into dev (see dev-add-beta.yml). After a STABLE
   # release on main, dev is reset to the new stable baseline and the still-open
   # `beta` PRs are re-merged so the beta track continues on top of the new stable
   # tag (and the NEXT beta computes the right version). Only runs for releases
-  # dispatched from main. The logic lives in rebuild-dev.yml so it is ALSO runnable
+  # dispatched from main. The logic lives in dev-rebuild.yml so it is ALSO runnable
   # manually from the Actions tab; here we invoke it via workflow_call.
-  rebuild-dev:
+  dev-rebuild:
     name: Rebuild dev (reset + re-merge betas)
     needs: release
     if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
     permissions:
       contents: write
       pull-requests: write
-    uses: ./.github/workflows/rebuild-dev.yml
+    uses: ./.github/workflows/dev-rebuild.yml
     secrets: inherit

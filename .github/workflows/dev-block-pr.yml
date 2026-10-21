@@ -1,10 +1,10 @@
 name: Block PRs into dev
 
 # `dev` is a throwaway beta sandbox that the machinery resets and force-pushes
-# (rebuild-dev.yml). Nobody should ever open a PR *into* `dev`: a rebuild would
+# (dev-rebuild.yml). Nobody should ever open a PR *into* `dev`: a rebuild would
 # reset the branch out from under it, producing bogus diffs/conflicts. Features
 # ship via `feature → main`; to test a feature as a beta, label its main PR
-# `beta` (beta-add-dev.yml merges it into dev for you). So any PR whose BASE is
+# `beta` (dev-add-beta.yml merges it into dev for you). So any PR whose BASE is
 # `dev` is closed automatically with an explanatory comment.
 #
 # pull_request_target (base-repo context, write-capable token) so fork PRs can be
