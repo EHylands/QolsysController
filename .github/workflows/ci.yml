@@ -63,5 +63,31 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev,bridge]"
 
+      # Run the suite and, via pytest-md-report, emit a plain-markdown per-file
+      # results table to a file (color=never → no LaTeX, verbose=0 → one row per
+      # test file + a TOTAL). The table goes to the file only; normal pytest
+      # output still streams to the step log.
       - name: Pytest
-        run: pytest
+        run: >
+          pytest
+          --md-report
+          --md-report-flavor github
+          --md-report-color never
+          --md-report-verbose 0
+          --md-report-output pytest-md-report.md
+
+      # Surface that table on the run's Summary page. `always()` so it shows even
+      # when the suite fails (the report is written regardless, with failure
+      # counts); the guard avoids erroring if a hard collection crash wrote none.
+      - name: Publish test summary
+        if: always()
+        run: |
+          {
+            echo "## 🧪 Pytest results"
+            echo
+            if [ -f pytest-md-report.md ]; then
+              cat pytest-md-report.md
+            else
+              echo "_No report produced — pytest failed before the run finished._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -13,3 +13,6 @@ __pycache__
 *.qolsys
 .DS_Store
 
+
+# pytest-md-report CI artifact
+pytest-md-report.md

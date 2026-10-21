@@ -31,6 +31,7 @@ dev = [
     "mypy",
     "pytest>=9.0",
     "pytest-asyncio>=1.0",
+    "pytest-md-report>=0.7",
     "ruff",
     "types-aiofiles",
 ]
