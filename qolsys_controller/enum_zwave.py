@@ -107,6 +107,15 @@ class ThermostatOperatingState(IntEnum):
     IDLE = 0x00
     HEATING = 0x01
     COOLING = 0x02
+    FAN_ONLY = 0x03
+    PENDING_HEAT = 0x04
+    PENDING_COOL = 0x05
+    VENT_ECONOMIZER = 0x06
+    AUXILIARY_HEATING = 0x07
+    SECOND_STAGE_HEATING = 0x08
+    SECOND_STAGE_COOLING = 0x09
+    SECOND_STAGE_AUXILIARY_HEATING = 0x0A
+    THIRD_STAGE_HEATING = 0x0B
 
 
 class ThermostatSetpointMode(IntEnum):
