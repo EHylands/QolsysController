@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   dev-add-beta:
-    name: Merge labeled PR into dev
+    name: Merge beta labeled PR into dev
     runs-on: ubuntu-latest
     # Act only when the label that was just added is `beta`.
     if: github.event.label.name == 'beta'
