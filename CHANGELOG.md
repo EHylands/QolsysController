@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.12.5 (2026-10-22)
+
+### 🐛 Bug Fixes
+
+- Add garageTilt2 to zone sensor groups
+  ([#102](https://github.com/EHylands/QolsysController/pull/102),
+  [`23e4d02`](https://github.com/EHylands/QolsysController/commit/23e4d02e6f233a57f00d654638d9dfdba49d49d3))
+
+### 🤖 Continuous Integration
+
+- Clarify DEV beta-add job name
+  ([`619fcee`](https://github.com/EHylands/QolsysController/commit/619fcee92e7e395237a6bf81e22f39166a26f56d))
+
+- Trim redundant sentence from dev-block-pr comment
+  ([`d948f00`](https://github.com/EHylands/QolsysController/commit/d948f00fcdabe2ad2543250c39a1903e014bf4a7))
+
+
 ## v1.12.4 (2026-10-21)
 
 ### 🐛 Bug Fixes
