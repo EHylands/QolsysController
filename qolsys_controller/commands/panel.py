@@ -127,11 +127,6 @@ class PanelCommands:
             else:
                 open_zone_list.append(zone.zone_id)
 
-        # Cannot bypass open safety zones, return error
-        # if open_safety_zones:
-        #    LOGGER.debug("MQTT Panel Client - Cannot arm: Open Safety Zones: %s", open_safety_zones)
-        #    raise QolsysZoneBypassError(open_safety_zones)
-
         # Cannot bypass open zones if auto_bypass is disabled - return error
         # unless force_arm is requested, in which case we bypass the open zones anyway
         if bypass_open_zone_list and self._controller.panel.AUTO_BYPASS == "false":

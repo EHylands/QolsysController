@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from qolsys_controller.enum_qolsys import ZoneSensorType
 from qolsys_controller.zone import QolsysZone
 
@@ -75,3 +77,23 @@ class TestUnknownSensorType:
     def test_unknown_type_defaults(self) -> None:
         zone = _make_zone({"sensortype": "SomeNewType"})
         assert zone.sensortype == ZoneSensorType.UNKNOWN
+
+
+class TestIsOn:
+    @pytest.mark.parametrize("status", ["Open", "Alarmed", "Activated", "Active", "Occupied"])
+    def test_on_statuses(self, status: str) -> None:
+        assert _make_zone({"sensorstatus": status}).is_on() is True
+
+    @pytest.mark.parametrize("status", ["Closed", "Idle", "Unreachable", "Synchronizing", "Tampered"])
+    def test_off_statuses(self, status: str) -> None:
+        assert _make_zone({"sensorstatus": status}).is_on() is False
+
+
+class TestIsTrouble:
+    @pytest.mark.parametrize("status", ["Unreachable", "Failure", "Not Networked", "Trouble", "Synchronizing", "disconnected"])
+    def test_trouble_statuses(self, status: str) -> None:
+        assert _make_zone({"sensorstatus": status}).is_trouble() is True
+
+    @pytest.mark.parametrize("status", ["Open", "Closed", "Active", "Idle", "Tampered"])
+    def test_non_trouble_statuses(self, status: str) -> None:
+        assert _make_zone({"sensorstatus": status}).is_trouble() is False

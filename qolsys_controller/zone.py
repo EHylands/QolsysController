@@ -132,6 +132,31 @@ class QolsysZone(QolsysObservable):
     def is_safety(self) -> bool:
         return self.sensorgroup in SafetyZoneSensorGroup
 
+    def is_on(self) -> bool:
+        if self.sensorstatus in {
+            ZoneStatus.OPEN,
+            ZoneStatus.ALARMED,
+            ZoneStatus.ACTIVATED,
+            ZoneStatus.ACTIVE,
+            ZoneStatus.OCCUPIED,
+        }:
+            return True
+
+        return False
+
+    def is_trouble(self) -> bool:
+        if self.sensorstatus in {
+            ZoneStatus.UNREACHABLE,
+            ZoneStatus.FAILURE,
+            ZoneStatus.NOT_NETWORKED,
+            ZoneStatus.TROUBLE,
+            ZoneStatus.SYNCHRONIZING,
+            ZoneStatus.DISCONNECTED,
+        }:
+            return True
+
+        return False
+
     def supports_averagedbm(self) -> bool:
         return self.averagedBm is not None
 
