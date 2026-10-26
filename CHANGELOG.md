@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.12.6-beta.1 (2026-10-26)
+
+### 🐛 Bug Fixes
+
+- Add zone is_on and is_trouble properties based on zone status
+  ([`896bd6f`](https://github.com/EHylands/QolsysController/commit/896bd6f754e4368625443a7f8337cb56427b36b0))
+
+
 ## v1.12.5 (2026-10-22)
 
 ### 🐛 Bug Fixes
