@@ -137,8 +137,14 @@ class QolsysZone(QolsysObservable):
             ZoneStatus.OPEN,
             ZoneStatus.ALARMED,
             ZoneStatus.ACTIVATED,
-            ZoneStatus.ACTIVE,
+            ZoneStatus.INACTIVE,
             ZoneStatus.OCCUPIED,
+            ZoneStatus.AUXILIARY_EMERGENCY,
+            ZoneStatus.FIRE_EMERGENCY,
+            ZoneStatus.POLICE_EMERGENCY,
+            ZoneStatus.SILENT_AUXILIARY_EMERGENCY,
+            ZoneStatus.SILENT_POLICE_EMERGENCY,
+            ZoneStatus.HIGH_TEMP_ALERT,
         }:
             return True
 
