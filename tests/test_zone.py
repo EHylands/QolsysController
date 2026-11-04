@@ -80,11 +80,26 @@ class TestUnknownSensorType:
 
 
 class TestIsOn:
-    @pytest.mark.parametrize("status", ["Open", "Alarmed", "Activated", "Active", "Occupied"])
+    @pytest.mark.parametrize(
+        "status",
+        [
+            "Open",
+            "Alarmed",
+            "Activated",
+            "Inactive",
+            "Occupied",
+            "Auxiliary Emergency",
+            "Fire Emergency",
+            "Police Emergency",
+            "Silent Auxiliary Emergency",
+            "Silent Police Emergency",
+            "High Temp Alert",
+        ],
+    )
     def test_on_statuses(self, status: str) -> None:
         assert _make_zone({"sensorstatus": status}).is_on() is True
 
-    @pytest.mark.parametrize("status", ["Closed", "Idle", "Unreachable", "Synchronizing", "Tampered"])
+    @pytest.mark.parametrize("status", ["Closed", "Active", "Idle", "Unreachable", "Synchronizing", "Tampered"])
     def test_off_statuses(self, status: str) -> None:
         assert _make_zone({"sensorstatus": status}).is_on() is False
 
