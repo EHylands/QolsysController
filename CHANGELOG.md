@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.12.7-beta.1 (2026-11-04)
+
+### 🐛 Bug Fixes
+
+- Correct zone is_on status mapping
+  ([`dc947a6`](https://github.com/EHylands/QolsysController/commit/dc947a6d5b5baaac0efb58de3cb39f379d6eb81e))
+
+
 ## v1.12.6 (2026-10-29)
 
 ### 🐛 Bug Fixes
