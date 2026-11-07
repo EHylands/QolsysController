@@ -274,6 +274,14 @@ class QolsysSettings:
         self._mqtt_ping = value
 
     @property
+    def mqtt_command_timeout(self) -> int:
+        return self._mqtt_command_timeout
+
+    @mqtt_command_timeout.setter
+    def mqtt_command_timeout(self, value: int) -> None:
+        self._mqtt_command_timeout = value
+
+    @property
     def motion_sensor_delay(self) -> bool:
         return self._motion_sensor_delay
 

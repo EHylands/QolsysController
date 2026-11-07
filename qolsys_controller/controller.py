@@ -303,7 +303,14 @@ class QolsysController:
                 )
                 raise exc from None
 
-            except* aiomqtt.exceptions.MqttError as err:
+            except* (aiomqtt.exceptions.MqttError, QolsysMqttError) as err:
+                # A disconnect can surface as a mix of both types in the same
+                # ExceptionGroup: the listen/publish task raises aiomqtt.MqttError,
+                # while any command in flight is failed with QolsysMqttError
+                # (fail_waiter / fail_all_pending) and re-raised by the task that
+                # awaited it. QolsysMqttError is not an aiomqtt.MqttError, so without
+                # handling it here its half of the group escapes to except* Exception
+                # and permanently stops the supervisor instead of reconnecting.
                 for exc in err.exceptions:
                     LOGGER.debug("MQTT Panel Client - Supervisor detected MQTT Error: %r", exc)
 
