@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.12.8-beta.1 (2026-11-07)
+
+### 🐛 Bug Fixes
+
+- Reconnect when an in-flight command fails during MQTT disconnect
+  ([`eb73d88`](https://github.com/EHylands/QolsysController/commit/eb73d887775fd51d771f4b6c48b25e85cee2170e))
+
+
 ## v1.12.7 (2026-11-05)
 
 ### 🐛 Bug Fixes
