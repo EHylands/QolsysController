@@ -38,7 +38,7 @@ class MQTTCommand:
     async def send_command(self) -> dict[str, Any]:
         self._controller.enqueue_mqtt_command(self)
         return await self._controller.mqtt_command_queue.wait_for_response(
-            self._requestID, timeout=self._controller.settings._mqtt_command_timeout
+            self._requestID, timeout=self._controller.settings.mqtt_command_timeout
         )
 
 
