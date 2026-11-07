@@ -29,7 +29,7 @@ def _make_controller(responder: Callable[[dict[str, Any]], dict[str, Any]]) -> t
         return responder(commands[-1]._payload)
 
     controller = SimpleNamespace(
-        settings=SimpleNamespace(mqtt_qos=0, random_mac="02:00:00:00:00:01", _mqtt_command_timeout=30),
+        settings=SimpleNamespace(mqtt_qos=0, random_mac="02:00:00:00:00:01", mqtt_command_timeout=30),
         enqueue_mqtt_command=commands.append,
         mqtt_command_queue=SimpleNamespace(wait_for_response=AsyncMock(side_effect=respond)),
     )
