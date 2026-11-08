@@ -266,22 +266,6 @@ class QolsysController:
 
                         await self.set_controller_state(ControllerState.CONNECTED)
                         self._reconnect_attempt = 0
-                        self.notify_panel_status_update()
-
-                        # LOGGER.debug("LOG THERMOSTAT TABLE")
-                        # thermostat_table = self.panel.db.table_thermostat
-                        # response = await self.commands.panel.database_remote_read(thermostat_table.uri)
-                        # LOGGER.debug(response)
-
-                        # LOGGER.debug("LOG ZWAVE DEVICE")
-                        # zwave_table = self.panel.db.table_zwave_node
-                        # response = await self.commands.panel.database_remote_read(zwave_table.uri)
-                        # LOGGER.debug(response)
-
-                        # LOGGER.debug("LOG AUTOMATION DEVICE")
-                        # automation_table = self.panel.db.table_automation
-                        # response = await self.commands.panel.database_remote_read(automation_table.uri)
-                        # LOGGER.debug(response)
 
                         await asyncio.Future()  # Run until cancelled or exception
 
@@ -334,9 +318,8 @@ class QolsysController:
 
             finally:
                 self.mqtt_command_queue.fail_all_pending(QolsysMqttError("MQTT Command failed due to disconnection"))
-                self.notify_panel_status_update()
 
-            # Only reached on MqttError with reconnect=True; all other paths raise.
+            # Only reached on MqttError and QolsysMqttError with reconnect=True; all other paths raise.
             MAX_RECONNECT_DELAY = 300
             delay = min(1 * (2**self._reconnect_attempt), MAX_RECONNECT_DELAY)
             self._reconnect_attempt += 1
@@ -562,6 +545,13 @@ class QolsysController:
 
             self._controller_state = new_state
             self._controller_state_condition.notify_all()
+
+        # Notify observers of the new panel status after releasing the condition
+        # so observer callbacks never run while holding the state lock. Only
+        # reached on a real transition (the no-op case returns above), which makes
+        # entity availability a deterministic function of the committed state
+        # (e.g. the CONNECTED -> RECONNECTING flip now reliably emits connected=False).
+        self.notify_panel_status_update()
 
     async def wait_until_connected(self) -> None:
         async with self._controller_state_condition:

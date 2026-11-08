@@ -1,7 +1,10 @@
 import inspect
+import logging
 from typing import Any, Protocol
 
 from qolsys_controller.enum_qolsys import QolsysNotification
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Callback(Protocol):
@@ -36,28 +39,36 @@ class QolsysObservable:
             self._observers[notification].remove(callback)
 
     def _call_callback(self, callback: Callback, event: Event) -> None:
+        # Deliver to each observer in isolation: an observer that raises must
+        # neither propagate back into the publisher (e.g. set_controller_state,
+        # whose reconnect path only guards CancelledError) nor starve the
+        # remaining observers. CancelledError/KeyboardInterrupt still pass
+        # through so cancellation and shutdown behave normally.
         try:
-            signature = inspect.signature(callback)
-        except (TypeError, ValueError):
-            callback(event)
-            return
+            try:
+                signature = inspect.signature(callback)
+            except (TypeError, ValueError):
+                callback(event)
+                return
 
-        has_varargs = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in signature.parameters.values())
+            has_varargs = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in signature.parameters.values())
 
-        positional_parameters = [
-            p
-            for p in signature.parameters.values()
-            if p.kind
-            in (
-                inspect.Parameter.POSITIONAL_ONLY,
-                inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            )
-        ]
+            positional_parameters = [
+                p
+                for p in signature.parameters.values()
+                if p.kind
+                in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+            ]
 
-        if has_varargs or positional_parameters:
-            callback(event)
-        else:
-            callback()
+            if has_varargs or positional_parameters:
+                callback(event)
+            else:
+                callback()
+        except Exception:
+            LOGGER.exception("Observer callback failed for %s", event.type)
 
     def notify(self, event: Event) -> None:
         notification = event.type

@@ -393,36 +393,36 @@ class QolsysState(QolsysObservable):
         for partition in self.partitions:
             pid = partition.id
             name = partition.name
-            LOGGER.debug("Partition%s (%s) - system_status: %s", pid, name, partition.system_status)
-            LOGGER.debug("Partition%s (%s) - alarm_state: %s", pid, name, partition.alarm_state)
+            LOGGER.debug("[Partition][%s](%s) - system_status: %s", pid, name, partition.system_status)
+            LOGGER.debug("[Partition][%s](%s) - alarm_state: %s", pid, name, partition.alarm_state)
 
             if partition.alarm_type_array == []:
-                LOGGER.debug("Partition%s (%s) - alarm_type: %s", pid, name, "None")
+                LOGGER.debug("[Partition][%s](%s) - alarm_type: %s", pid, name, "None")
             else:
                 for alarm_type in partition.alarm_type_array:
-                    LOGGER.debug("Partition%s (%s) - alarm_type: %s", pid, name, alarm_type)
+                    LOGGER.debug("[Partition][%s](%s) - alarm_type: %s", pid, name, alarm_type)
 
-            LOGGER.debug("Partition%s (%s) - exit_sounds: %s", pid, name, partition.exit_sounds)
-            LOGGER.debug("Partition%s (%s) - entry_delays: %s", pid, name, partition.entry_delays)
-            LOGGER.debug("Partition%s (%s) - quick_exit_state: %s", pid, name, partition.quick_exit_state)
+            LOGGER.debug("[Partition][%s](%s) - exit_sounds: %s", pid, name, partition.exit_sounds)
+            LOGGER.debug("[Partition][%s](%s) - entry_delays: %s", pid, name, partition.entry_delays)
+            LOGGER.debug("[Partition][%s](%s) - quick_exit_state: %s", pid, name, partition.quick_exit_state)
 
         for zone in self.zones:
             zid = zone.zone_id
             name = zone.sensorname
-            LOGGER.debug("Zone%s (%s) - status: %s", zid, name, zone.sensorstatus)
-            LOGGER.debug("Zone%s (%s) - battery_status: %s", zid, name, zone.battery_status)
+            LOGGER.debug("[Zone][%s](%s) - status: %s", zid, name, zone.sensorstatus)
+            LOGGER.debug("[Zone][%s](%s) - battery_status: %s", zid, name, zone.battery_status)
 
             if zone.latestdBm is not None:
-                LOGGER.debug("Zone%s (%s) - latestdBm: %s", zid, name, zone.latestdBm)
+                LOGGER.debug("[Zone][%s](%s) - latestdBm: %s", zid, name, zone.latestdBm)
 
             if zone.averagedBm is not None:
-                LOGGER.debug("Zone%s (%s) - averagedBm: %s", zid, name, zone.averagedBm)
+                LOGGER.debug("[Zone][%s](%s) - averagedBm: %s", zid, name, zone.averagedBm)
 
             if zone.is_powerg_temperature_enabled():
-                LOGGER.debug("Zone%s (%s) - powerg_temperature: %s", zid, name, zone.powerg_temperature)
+                LOGGER.debug("[Zone][%s](%s) - powerg_temperature: %s", zid, name, zone.powerg_temperature)
 
             if zone.is_powerg_light_enabled():
-                LOGGER.debug("Zone%s (%s) - powerg_light: %s", zid, name, zone.powerg_light)
+                LOGGER.debug("[Zone][%s](%s) - powerg_light: %s", zid, name, zone.powerg_light)
 
         for automation_device in self.automation_devices:
             LOGGER.debug("%s - %s", automation_device.prefix, automation_device.device_type)
@@ -438,7 +438,7 @@ class QolsysState(QolsysObservable):
         for scene in self.scenes:
             sid = scene.scene_id
             name = scene.name
-            LOGGER.debug("Scene%s (%s)", sid, name)
+            LOGGER.debug("[Scene][%s](%s)", sid, name)
 
         for forecast in self.weather.forecasts:
             LOGGER.debug(
