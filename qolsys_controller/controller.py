@@ -486,7 +486,19 @@ class QolsysController:
 
                     for service in autdev.service_get_protocol(MeterServiceZwave):
                         if isinstance(service, MeterServiceZwave):
-                            await service.refresh_meter_zwave()
+                            try:
+                                await service.refresh_meter_zwave()
+                            except Exception as err:
+                                # A slow or unreachable metered device must not tear down the
+                                # whole connection: an uncaught command timeout here fails the
+                                # TaskGroup and forces a reconnect. Log and move on. CancelledError
+                                # is not an Exception, so shutdown/reconnect cancellation still
+                                # propagates normally.
+                                LOGGER.warning(
+                                    "MQTT Panel Client - Z-Wave meter refresh failed for %s: %s",
+                                    autdev.prefix,
+                                    err,
+                                )
                             await asyncio.sleep(5)
 
             await asyncio.sleep(300)
