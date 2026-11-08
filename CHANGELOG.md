@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.13.0 (2026-11-08)
+
+### 🐛 Bug Fixes
+
+- Don't reconnect when a Z-Wave meter refresh times out
+  ([#110](https://github.com/EHylands/QolsysController/pull/110),
+  [`8055a4f`](https://github.com/EHylands/QolsysController/commit/8055a4f8860ae4c2306c91e1143a65eb0f57468d))
+
+### 🧹 Chores
+
+- Make panel unavailability deterministic on reconnect
+  ([#109](https://github.com/EHylands/QolsysController/pull/109),
+  [`84f9752`](https://github.com/EHylands/QolsysController/commit/84f97520a33d09cb954c7d9fc506d263496535ff))
+
+### ✨ Features
+
+- Make MQTT QoS configurable and default to QoS 1
+  ([#111](https://github.com/EHylands/QolsysController/pull/111),
+  [`5af7ff5`](https://github.com/EHylands/QolsysController/commit/5af7ff504f08160216501df773bf63752e6b747e))
+
+
 ## v1.12.8 (2026-11-07)
 
 ### 🐛 Bug Fixes
