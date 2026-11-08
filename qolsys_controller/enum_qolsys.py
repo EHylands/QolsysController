@@ -305,8 +305,10 @@ SafetyZoneSensorGroup: list[ZoneSensorGroup] = [
     ZoneSensorGroup.SAFETY_MOTION,
     ZoneSensorGroup.LOCAL_SAFETY_SENSOR,
     ZoneSensorGroup.REPORTING_SAFETY_SENSOR,
+    ZoneSensorGroup.WATER,
     ZoneSensorGroup.WATER_NON_REPORTING,
     ZoneSensorGroup.HIGH_TEMPERATURE_NON_REPORTING,
+    ZoneSensorGroup.SMOKE_HEAT,
 ]
 
 

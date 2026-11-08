@@ -1138,7 +1138,6 @@ class QolsysPanel:
         LOGGER.debug("Panel Tamper State: %s", self.PANEL_TAMPER_STATE)
         LOGGER.debug("AC Status: %s", self.AC_STATUS)
         LOGGER.debug("Battery Status: %s", self.BATTERY_STATUS)
-        LOGGER.debug("Fail To Communicate: %s", self.FAIL_TO_COMMUNICATE)
         LOGGER.debug("Country: %s", self.COUNTRY)
         LOGGER.debug("Language: %s", self.LANGUAGE)
         LOGGER.debug("Temp Format: %s", self.TEMPFORMAT)
@@ -1177,4 +1176,3 @@ class QolsysPanel:
 
         LOGGER.debug("Panel Volume: %s", self.PANEL_VOLUME)
         LOGGER.debug("Doorbell Volume Level: %s", self.VOLUME_DOORBELL)
-        LOGGER.debug("IP Camera List: %s", self.IP_CAMERA_LIST)
