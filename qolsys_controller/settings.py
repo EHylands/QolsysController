@@ -45,7 +45,7 @@ class QolsysSettings:
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 300
-        self._mqtt_qos: int = 0
+        self._mqtt_qos: int = 1
         self._mqtt_remote_client_id: str = ""
         self._log_mqtt_messages: bool = False
         self._mqtt_command_timeout: int = 30
@@ -328,6 +328,10 @@ class QolsysSettings:
     @property
     def mqtt_qos(self) -> int:
         return self._mqtt_qos
+
+    @mqtt_qos.setter
+    def mqtt_qos(self, value: int) -> None:
+        self._mqtt_qos = value
 
     @property
     def mqtt_remote_client_id(self) -> str:
