@@ -156,11 +156,14 @@ class QolsysController:
                 self._pairing_server = None
 
             try:
-                await self.set_controller_state(ControllerState.STOPPED)
-            except InvalidControllerStateTransitionError:
-                pass
-
-            self._shutdown_complete.set()
+                # STOPPED is only reachable from SHUTTING_DOWN, and a fatal error can
+                # land here from any running state. Without this the controller stays
+                # stuck in that state and observers are never told connected=False.
+                if self.controller_state != ControllerState.STOPPED:
+                    await self.set_controller_state(ControllerState.SHUTTING_DOWN)
+                    await self.set_controller_state(ControllerState.STOPPED)
+            finally:
+                self._shutdown_complete.set()
 
     async def stop(self) -> None:
         if self._supervisor_task is None:
@@ -555,15 +558,26 @@ class QolsysController:
 
             LOGGER.debug("Controller State - %s -> %s", self._controller_state.name, new_state.name)
 
+            was_connected = self._controller_state == ControllerState.CONNECTED
             self._controller_state = new_state
             self._controller_state_condition.notify_all()
 
+        if was_connected == (new_state == ControllerState.CONNECTED):
+            return
+
         # Notify observers of the new panel status after releasing the condition
         # so observer callbacks never run while holding the state lock. Only
-        # reached on a real transition (the no-op case returns above), which makes
-        # entity availability a deterministic function of the committed state
-        # (e.g. the CONNECTED -> RECONNECTING flip now reliably emits connected=False).
-        self.notify_panel_status_update()
+        # reached when `connected` flips, which makes entity availability a
+        # deterministic function of the committed state (e.g. the CONNECTED ->
+        # RECONNECTING flip now reliably emits connected=False) without duplicate
+        # events during backoff or events sent before the panel database has loaded.
+        # Building the event queries the panel database outside observer isolation,
+        # and the transition is already committed, so a failure here must not escape
+        # into the shutdown or reconnect path. CancelledError still passes through.
+        try:
+            self.notify_panel_status_update()
+        except Exception:
+            LOGGER.exception("Controller - Failed to notify panel status for state %s", new_state.name)
 
     async def wait_until_connected(self) -> None:
         async with self._controller_state_condition:
