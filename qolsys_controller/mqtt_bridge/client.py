@@ -27,6 +27,8 @@ from qolsys_controller.partition import QolsysPartition
 
 LOGGER = logging.getLogger(__name__)
 
+OFFLINE_STATUS_TIMEOUT = 2
+
 if TYPE_CHECKING:
     from qolsys_controller.mqtt_bridge.bridge import MqttBridge
 
@@ -101,12 +103,16 @@ class MqttBridgeClient:
                             self._ready_event.set()
 
                         # Run listener + publisher concurrently
-                        async with asyncio.TaskGroup() as tg:
-                            tg.create_task(self._listener(self._client))
-                            tg.create_task(self._publisher(self._client))
-                            LOGGER.info("MQTT Bridge Client - Running")
+                        try:
+                            async with asyncio.TaskGroup() as tg:
+                                tg.create_task(self._listener(self._client))
+                                tg.create_task(self._publisher(self._client))
+                                LOGGER.info("MQTT Bridge Client - Running")
 
-                            await asyncio.Future()  # Run until cancelled
+                                await asyncio.Future()  # Run until cancelled
+                        except asyncio.CancelledError:
+                            await self._publish_offline_status(self._client)
+                            raise
 
                 except* asyncio.CancelledError:
                     LOGGER.debug("MQTT Bridge Client - Shutting down ...")
@@ -137,6 +143,23 @@ class MqttBridgeClient:
                         LOGGER.info("MQTT Bridge Client - Shutdown completed")
         finally:
             self._is_running = False
+
+    async def _publish_offline_status(self, client: aiomqtt.Client) -> None:
+        # The bridge is cancelled before the controller finishes shutting down, so
+        # queued status events never reach the broker and controller_state can still
+        # read CONNECTED. Force connected=False or the retained status stays stale.
+        # Best effort: a failure here must not replace the cancellation in progress.
+        try:
+            status = {**self._bridge._controller._to_event_dict(), "connected": False}
+            await client.publish(
+                self._bridge.status_topic,
+                json.dumps(status),
+                qos=self._bridge.mqtt_qos,
+                retain=True,
+                timeout=OFFLINE_STATUS_TIMEOUT,
+            )
+        except Exception as err:
+            LOGGER.debug("MQTT Bridge Client - Could not publish offline status: %r", err)
 
     async def _listener(self, client: aiomqtt.Client) -> None:
         async for message in client.messages:
