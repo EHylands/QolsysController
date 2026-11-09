@@ -66,6 +66,28 @@ jobs:
       - name: Install semantic-release
         run: python -m pip install python-semantic-release
 
+      # A dev rebuild drops the previous beta's tag from dev's history, and
+      # semantic-release only counts tags reachable from HEAD, so it recomputes
+      # the same beta version and stops with "already been released". Merge the
+      # newest unshipped beta tag with -s ours (history only, no file changes) so
+      # numbering continues from it.
+      - name: Keep beta numbering across dev rebuilds
+        if: github.ref_name == 'dev'
+        run: |
+          stable="$(git tag --merged HEAD --list 'v*' | grep -v -- '-beta' | sort -V | tail -1)"
+          beta="$(git tag --list 'v*-beta.*' | sort -V | tail -1)"
+          base="${beta%-beta.*}"
+
+          # Only for a beta of a version newer than the last stable release
+          if [ -n "$beta" ] && [ "$base" != "$stable" ] \
+            && [ "$(printf '%s\n' "$base" "$stable" | sort -V | tail -1)" = "$base" ] \
+            && ! git merge-base --is-ancestor "$beta" HEAD; then
+            echo "Merging $beta into dev's history."
+            git -c user.name="github-actions[bot]" \
+              -c user.email="github-actions[bot]@users.noreply.github.com" \
+              merge -s ours --no-edit "$beta"
+          fi
+
       # Intentional: a PAT is used instead of the default GITHUB_TOKEN so
       # semantic-release can push the version-bump commit and tag back to a
       # protected main/dev. Do not "simplify" this to GITHUB_TOKEN.
