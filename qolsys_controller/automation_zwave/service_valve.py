@@ -78,8 +78,9 @@ class ValveServiceZwave(ValveService):
         return False
 
     def update_switch_binary_report(self, value: int) -> None:
+        # Switch Binary reports 0x00 (off) while the valve is open
         self._has_switch_binary_report = True
-        self.is_closed = value == 0x00
+        self.is_closed = value != 0x00
 
     def update_automation_service(self) -> None:
         LOGGER.debug(
@@ -92,7 +93,7 @@ class ValveServiceZwave(ValveService):
 
         # The panel's status can disagree with the live Switch Binary report, and this
         # refresh runs on every automation row update, so it would clobber the reported
-        # state (is_closed bounces True -> False). Only use status until the first report.
+        # state. Only use status until the first report.
         if self._has_switch_binary_report:
             return
 

@@ -79,7 +79,7 @@ class TestValveServiceZwave:
         service.update_automation_service()
         assert service.is_closed is False
 
-    @pytest.mark.parametrize(("value", "expected"), [(0x00, True), (0xFF, False)])
+    @pytest.mark.parametrize(("value", "expected"), [(0x00, False), (0xFF, True)])
     def test_switch_binary_report_sets_state(self, value: int, expected: bool) -> None:
         service, device = _make(is_closed=not expected)
         device.service_get.return_value = service
@@ -89,6 +89,6 @@ class TestValveServiceZwave:
     def test_status_refresh_does_not_clobber_switch_binary_report(self) -> None:
         service, device = _make(is_closed=False, status="open")
         device.service_get.return_value = service
-        QolsysAutomationDeviceZwave.parse_command_25(device, bytes.fromhex("2503000000"), 0)
+        QolsysAutomationDeviceZwave.parse_command_25(device, bytes.fromhex("2503FFFF00"), 0)
         service.update_automation_service()
         assert service.is_closed is True
