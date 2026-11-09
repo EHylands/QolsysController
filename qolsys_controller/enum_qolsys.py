@@ -309,6 +309,9 @@ SafetyZoneSensorGroup: list[ZoneSensorGroup] = [
     ZoneSensorGroup.WATER_NON_REPORTING,
     ZoneSensorGroup.HIGH_TEMPERATURE_NON_REPORTING,
     ZoneSensorGroup.SMOKE_HEAT,
+    ZoneSensorGroup.CO,
+    ZoneSensorGroup.FREEZE,
+    ZoneSensorGroup.FREEZE_NON_REPORTING,
 ]
 
 
