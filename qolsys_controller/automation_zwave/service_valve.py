@@ -36,7 +36,7 @@ class ValveServiceZwave(ValveService):
         self._is_opening = False
 
         await self.automation_device.controller.commands.zwave.switch_binary_set(
-            self.automation_device.virtual_node_id, str(self.endpoint), True
+            self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 
     async def close(self) -> None:
@@ -56,7 +56,7 @@ class ValveServiceZwave(ValveService):
         self._is_closing = False
 
         await self.automation_device.controller.commands.zwave.switch_binary_set(
-            self.automation_device.virtual_node_id, str(self.endpoint), False
+            self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
     async def stop(self) -> None:

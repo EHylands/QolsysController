@@ -40,16 +40,16 @@ class TestValveServiceZwave:
         assert service.supports_position() is False
 
     @pytest.mark.asyncio
-    async def test_open_when_closed_sends_binary_set_true(self) -> None:
+    async def test_open_when_closed_sends_binary_set_false(self) -> None:
         service, device = _make(is_closed=True, endpoint=4)
         await service.open()
-        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", True)
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", False)
 
     @pytest.mark.asyncio
-    async def test_close_when_open_sends_binary_set_false(self) -> None:
+    async def test_close_when_open_sends_binary_set_true(self) -> None:
         service, device = _make(is_closed=False, endpoint=4)
         await service.close()
-        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", False)
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", True)
 
     @pytest.mark.asyncio
     async def test_open_when_already_open_is_noop(self) -> None:
