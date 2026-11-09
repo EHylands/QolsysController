@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from qolsys_controller.automation_zwave.device import QolsysAutomationDeviceZwave
 from qolsys_controller.automation_zwave.service_valve import ValveServiceZwave
 from qolsys_controller.enum_zwave import ZwaveCommandClass
 
@@ -39,16 +40,16 @@ class TestValveServiceZwave:
         assert service.supports_position() is False
 
     @pytest.mark.asyncio
-    async def test_open_when_closed_sends_binary_set_true(self) -> None:
+    async def test_open_when_closed_sends_binary_set_false(self) -> None:
         service, device = _make(is_closed=True, endpoint=4)
         await service.open()
-        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", True)
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", False)
 
     @pytest.mark.asyncio
-    async def test_close_when_open_sends_binary_set_false(self) -> None:
+    async def test_close_when_open_sends_binary_set_true(self) -> None:
         service, device = _make(is_closed=False, endpoint=4)
         await service.close()
-        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", False)
+        device.controller.commands.zwave.switch_binary_set.assert_awaited_once_with("6", "4", True)
 
     @pytest.mark.asyncio
     async def test_open_when_already_open_is_noop(self) -> None:
@@ -77,3 +78,17 @@ class TestValveServiceZwave:
         service, _ = _make(is_closed=True, status="open")
         service.update_automation_service()
         assert service.is_closed is False
+
+    @pytest.mark.parametrize(("value", "expected"), [(0x00, False), (0xFF, True)])
+    def test_switch_binary_report_sets_state(self, value: int, expected: bool) -> None:
+        service, device = _make(is_closed=not expected)
+        device.service_get.return_value = service
+        QolsysAutomationDeviceZwave.parse_command_25(device, bytes([0x25, 0x03, value, value, 0x00]), 0)
+        assert service.is_closed is expected
+
+    def test_status_refresh_does_not_clobber_switch_binary_report(self) -> None:
+        service, device = _make(is_closed=False, status="open")
+        device.service_get.return_value = service
+        QolsysAutomationDeviceZwave.parse_command_25(device, bytes.fromhex("2503FFFF00"), 0)
+        service.update_automation_service()
+        assert service.is_closed is True
