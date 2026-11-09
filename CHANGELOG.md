@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.13.1 (2026-11-09)
+
+### 🐛 Bug Fixes
+
+- Default MQTT QoS back to 0 and harden the setting
+  ([#113](https://github.com/EHylands/QolsysController/pull/113),
+  [`d62715e`](https://github.com/EHylands/QolsysController/commit/d62715e2cb0da58ff9536f41a107e3cf55f5082a))
+
+- Harden the Z-Wave meter refresh loop
+  ([#114](https://github.com/EHylands/QolsysController/pull/114),
+  [`b7c47fe`](https://github.com/EHylands/QolsysController/commit/b7c47fe286a544940d8f923dd6cb60a8418cfc04))
+
+- Report panel offline and stop cleanly after fatal errors
+  ([#112](https://github.com/EHylands/QolsysController/pull/112),
+  [`de85c44`](https://github.com/EHylands/QolsysController/commit/de85c44600557f19cd804283132a9d13298e87a6))
+
+- Treat CO and freeze zones as safety zones
+  ([#115](https://github.com/EHylands/QolsysController/pull/115),
+  [`b2b2ce2`](https://github.com/EHylands/QolsysController/commit/b2b2ce2648503fc75f98a334331f4c653e823122))
+
+
 ## v1.13.0 (2026-11-08)
 
 ### 🐛 Bug Fixes
