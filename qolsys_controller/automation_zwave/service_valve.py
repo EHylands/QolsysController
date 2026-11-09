@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__)
 class ValveServiceZwave(ValveService):
     def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
+        self._has_switch_binary_report: bool = False
 
     async def open(self) -> None:
         if not self.is_closed:
@@ -76,5 +77,23 @@ class ValveServiceZwave(ValveService):
     def supports_position(self) -> bool:
         return False
 
+    def update_switch_binary_report(self, value: int) -> None:
+        self._has_switch_binary_report = True
+        self.is_closed = value == 0x00
+
     def update_automation_service(self) -> None:
+        LOGGER.debug(
+            "%s - panel status: %r (has_switch_binary_report: %s, is_closed: %s)",
+            self.prefix,
+            self.automation_device.status,
+            self._has_switch_binary_report,
+            self.is_closed,
+        )
+
+        # The panel's status can disagree with the live Switch Binary report, and this
+        # refresh runs on every automation row update, so it would clobber the reported
+        # state (is_closed bounces True -> False). Only use status until the first report.
+        if self._has_switch_binary_report:
+            return
+
         self.is_closed = self.automation_device.status.lower() == "closed"
