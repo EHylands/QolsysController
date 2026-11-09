@@ -112,3 +112,21 @@ class TestIsTrouble:
     @pytest.mark.parametrize("status", ["Open", "Closed", "Active", "Idle", "Tampered"])
     def test_non_trouble_statuses(self, status: str) -> None:
         assert _make_zone({"sensorstatus": status}).is_trouble() is False
+
+
+class TestSafetyZones:
+    @pytest.mark.parametrize("group", ["co", "freeze", "Freeze_Non_Reporting"])
+    def test_life_safety_groups_cannot_be_bypassed(self, group: str) -> None:
+        zone = _make_zone({"sensorgroup": group})
+        assert zone.is_safety() is True
+        assert zone.is_bypassable() is False
+
+    def test_extras_bypass_enabled_overrules_safety(self) -> None:
+        zone = _make_zone({"sensorgroup": "co"})
+        zone._extras = '{"BYPASS": "Enabled"}'
+        assert zone.is_bypassable() is True
+
+    def test_regular_group_stays_bypassable(self) -> None:
+        zone = _make_zone()
+        assert zone.is_safety() is False
+        assert zone.is_bypassable() is True
