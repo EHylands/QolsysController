@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.13.2-beta.1 (2026-11-09)
+
+### 🐛 Bug Fixes
+
+- Stop panel status overriding Z-Wave valve reports
+  ([`86868c4`](https://github.com/EHylands/QolsysController/commit/86868c4d57e7d1de7e0ff4ccf267be6f86cd60df))
+
+
 ## v1.13.1 (2026-11-09)
 
 ### 🐛 Bug Fixes
