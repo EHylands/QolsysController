@@ -322,7 +322,7 @@ class QolsysController:
             finally:
                 self.mqtt_command_queue.fail_all_pending(QolsysMqttError("MQTT Command failed due to disconnection"))
 
-            # Only reached on MqttError and QolsysMqttError with reconnect=True; all other paths raise.
+            # Only reached on MqttError, QolsysMqttError and QolsysOperationTimeoutError with reconnect=True; all other paths raise.
             MAX_RECONNECT_DELAY = 300
             delay = min(1 * (2**self._reconnect_attempt), MAX_RECONNECT_DELAY)
             self._reconnect_attempt += 1
@@ -463,7 +463,8 @@ class QolsysController:
         LOGGER.debug("MQTT Panel Client - Z-Wave meter update task started")
         while True:
             if self.controller_state == ControllerState.CONNECTED:
-                for autdev in self.state.automation_devices:
+                # Snapshot: panel sync can add or remove devices during the awaits below.
+                for autdev in list(self.state.automation_devices):
                     if not isinstance(autdev, QolsysAutomationDeviceZwave):
                         continue
 
@@ -474,17 +475,21 @@ class QolsysController:
                         if isinstance(service, MeterServiceZwave):
                             try:
                                 await service.refresh_meter_zwave()
-                            except Exception as err:
-                                # A slow or unreachable metered device must not tear down the
-                                # whole connection: an uncaught command timeout here fails the
-                                # TaskGroup and forces a reconnect. Log and move on. CancelledError
-                                # is not an Exception, so shutdown/reconnect cancellation still
-                                # propagates normally.
+                            except QolsysOperationTimeoutError as err:
+                                # A panel that is slow to answer a meter refresh must not tear
+                                # down the whole connection: an uncaught command timeout here
+                                # fails the TaskGroup and forces a reconnect. Log and move on.
+                                # CancelledError is not an Exception, so shutdown/reconnect
+                                # cancellation still propagates normally.
                                 LOGGER.warning(
-                                    "MQTT Panel Client - Z-Wave meter refresh failed for %s: %s",
+                                    "MQTT Panel Client - Z-Wave meter refresh timed out for %s: %s",
                                     autdev.prefix,
                                     err,
                                 )
+                            except Exception:
+                                # Anything else is unexpected, and would permanently stop the
+                                # supervisor if it escaped. Keep the traceback so it stays visible.
+                                LOGGER.exception("MQTT Panel Client - Z-Wave meter refresh failed for %s", autdev.prefix)
                             await asyncio.sleep(5)
 
             await asyncio.sleep(300)
