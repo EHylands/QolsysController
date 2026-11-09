@@ -244,7 +244,7 @@ class QolsysController:
                 mqtt_panel_client: aiomqtt.Client = await self.mqtt_open_transport_task()
 
                 async with mqtt_panel_client:
-                    await mqtt_panel_client.subscribe("iq2meid")
+                    await mqtt_panel_client.subscribe("iq2meid", qos=self.settings.mqtt_qos)
                     await mqtt_panel_client.subscribe("response_" + self.settings.random_mac, qos=self.settings.mqtt_qos)
                     await mqtt_panel_client.subscribe("ZWAVE_RESPONSE", qos=self.settings.mqtt_qos)
 
@@ -377,7 +377,7 @@ class QolsysController:
             try:
                 command = await self._mqtt_publish_queue.get()
                 payload = json.dumps(command._payload)
-                await client.publish(command._topic, payload, command._qos)
+                await client.publish(command._topic, payload, command._qos, timeout=self.settings.mqtt_command_timeout)
 
             except asyncio.CancelledError:
                 raise

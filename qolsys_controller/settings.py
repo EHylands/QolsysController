@@ -45,7 +45,7 @@ class QolsysSettings:
         # MQTT Panel CLIENT - Used to connect to main IQ Panel
         self._mqtt_timeout: int = 30
         self._mqtt_ping: int = 300
-        self._mqtt_qos: int = 1
+        self._mqtt_qos: int = 0
         self._mqtt_remote_client_id: str = ""
         self._log_mqtt_messages: bool = False
         self._mqtt_command_timeout: int = 30
@@ -331,6 +331,10 @@ class QolsysSettings:
 
     @mqtt_qos.setter
     def mqtt_qos(self, value: int) -> None:
+        # Reject here: paho's ValueError would otherwise surface at connect time
+        # and permanently stop the supervisor, far from the bad assignment.
+        if type(value) is not int or value not in (0, 1, 2):
+            raise QolsysConfigError(f"mqtt_qos must be 0, 1 or 2, got: {value!r}")
         self._mqtt_qos = value
 
     @property
