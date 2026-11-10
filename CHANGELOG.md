@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v1.13.2 (2026-11-10)
+
+### 🐛 Bug Fixes
+
+- Use panel status for Z-Wave valve state and correct command polarity
+  ([#117](https://github.com/EHylands/QolsysController/pull/117),
+  [`1c03f36`](https://github.com/EHylands/QolsysController/commit/1c03f3632ce44a4989b5908913a56fe0db69d1c4))
+
+### 🤖 Continuous Integration
+
+- Keep beta numbering across dev rebuilds
+  ([#118](https://github.com/EHylands/QolsysController/pull/118),
+  [`cb201da`](https://github.com/EHylands/QolsysController/commit/cb201da8323f755d4c37a11e6cf46ad75ebe9c29))
+
+- Rebuild dev at the start of every beta build
+  ([#119](https://github.com/EHylands/QolsysController/pull/119),
+  [`26976ec`](https://github.com/EHylands/QolsysController/commit/26976ecd3b17e26aa82082265bded2d5d6211196))
+
+- Shorten rebuild job names ([#120](https://github.com/EHylands/QolsysController/pull/120),
+  [`50666d6`](https://github.com/EHylands/QolsysController/commit/50666d6abcb66271625275e297f81a2b1ad9c53b))
+
+
 ## v1.13.1 (2026-11-09)
 
 ### 🐛 Bug Fixes
