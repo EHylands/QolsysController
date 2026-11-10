@@ -19,9 +19,6 @@ class ValveServiceZwave(ValveService):
         super().__init__(automation_device=automation_device, endpoint=endpoint)
 
     async def open(self) -> None:
-        if not self.is_closed:
-            LOGGER.debug("%s - Valve is already open", self.prefix)
-            return
 
         if ZwaveCommandClass.SwitchBinary not in self.automation_device.command_class_list:  # type: ignore[attr-defined]
             LOGGER.error("%s - Valve does not support SwitchBinary command class", self.prefix)
@@ -35,13 +32,10 @@ class ValveServiceZwave(ValveService):
         self._is_opening = False
 
         await self.automation_device.controller.commands.zwave.switch_binary_set(
-            self.automation_device.virtual_node_id, str(self.endpoint), True
+            self.automation_device.virtual_node_id, str(self.endpoint), False
         )
 
     async def close(self) -> None:
-        if self.is_closed:
-            LOGGER.debug("%s - Valve is already closed", self.prefix)
-            return
 
         if ZwaveCommandClass.SwitchBinary not in self.automation_device.command_class_list:  # type: ignore[attr-defined]
             LOGGER.error("%s - Valve does not support SwitchBinary command class", self.prefix)
@@ -55,7 +49,7 @@ class ValveServiceZwave(ValveService):
         self._is_closing = False
 
         await self.automation_device.controller.commands.zwave.switch_binary_set(
-            self.automation_device.virtual_node_id, str(self.endpoint), False
+            self.automation_device.virtual_node_id, str(self.endpoint), True
         )
 
     async def stop(self) -> None:
@@ -77,4 +71,18 @@ class ValveServiceZwave(ValveService):
         return False
 
     def update_automation_service(self) -> None:
-        self.is_closed = self.automation_device.status.lower() == "closed"
+        LOGGER.debug(
+            "%s - panel status: %r",
+            self.prefix,
+            self.automation_device.status,
+        )
+
+        status = self.automation_device.status.lower()
+        if status in ("open", "close"):
+            self.is_closed = status == "close"
+        else:
+            LOGGER.warning(
+                "%s - Unexpected valve status %r, please report it at https://github.com/EHylands/QolsysController/issues",
+                self.prefix,
+                self.automation_device.status,
+            )
