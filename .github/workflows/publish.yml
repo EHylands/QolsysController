@@ -39,7 +39,7 @@ jobs:
   # every open `beta` PR. Runs as a no-op on main rather than being skipped: a
   # skipped job would also skip every later job, including the PyPI publish.
   rebuild:
-    name: Rebuild dev for beta
+    name: Beta
     needs: guard
     permissions:
       contents: write
@@ -210,7 +210,7 @@ jobs:
   # dispatched from main. The logic lives in dev-rebuild.yml so it is ALSO runnable
   # manually from the Actions tab; here we invoke it via workflow_call.
   dev-rebuild:
-    name: Rebuild dev (reset + re-merge betas)
+    name: Dev
     needs: release
     if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
     permissions:

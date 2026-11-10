@@ -38,7 +38,7 @@ concurrency:
 
 jobs:
   dev-rebuild:
-    name: Reset dev to main + re-merge beta PRs
+    name: Rebuild dev
     runs-on: ubuntu-latest
     steps:
       # PAT (admin) so the force-push to the protected dev branch bypasses branch
