@@ -35,12 +35,30 @@ jobs:
           fi
           echo "Releasing from '${{ github.ref_name }}'."
 
+  # Stage 0.5 — refresh dev. A beta Build always contains the latest commit of
+  # every open `beta` PR. Runs as a no-op on main rather than being skipped: a
+  # skipped job would also skip every later job, including the PyPI publish.
+  rebuild:
+    name: Rebuild dev for beta
+    needs: guard
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/dev-rebuild.yml
+    with:
+      skip: ${{ github.ref_name != 'dev' }}
+      fail_on_conflict: true
+    secrets: inherit
+
   # Stage 1 — checks. Reuse the same lint + test pipeline that runs on every
-  # push/PR so a release can never ship code that would fail CI.
+  # push/PR so a release can never ship code that would fail CI. On dev, test
+  # the branch tip: the dispatched commit predates the rebuild.
   checks:
     name: CI
-    needs: guard
+    needs: [guard, rebuild]
     uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ github.ref_name == 'dev' && 'dev' || '' }}
 
   # Stage 2 — release. Only runs if the branch is valid and checks passed.
   release:
@@ -57,6 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.ref_name == 'dev' && 'dev' || '' }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v7
