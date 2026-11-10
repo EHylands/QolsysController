@@ -17,12 +17,8 @@ LOGGER = logging.getLogger(__name__)
 class ValveServiceZwave(ValveService):
     def __init__(self, automation_device: QolsysAutomationDevice, endpoint: int = 0) -> None:
         super().__init__(automation_device=automation_device, endpoint=endpoint)
-        self._has_switch_binary_report: bool = False
 
     async def open(self) -> None:
-        if not self.is_closed:
-            LOGGER.debug("%s - Valve is already open", self.prefix)
-            return
 
         if ZwaveCommandClass.SwitchBinary not in self.automation_device.command_class_list:  # type: ignore[attr-defined]
             LOGGER.error("%s - Valve does not support SwitchBinary command class", self.prefix)
@@ -40,9 +36,6 @@ class ValveServiceZwave(ValveService):
         )
 
     async def close(self) -> None:
-        if self.is_closed:
-            LOGGER.debug("%s - Valve is already closed", self.prefix)
-            return
 
         if ZwaveCommandClass.SwitchBinary not in self.automation_device.command_class_list:  # type: ignore[attr-defined]
             LOGGER.error("%s - Valve does not support SwitchBinary command class", self.prefix)
@@ -77,24 +70,19 @@ class ValveServiceZwave(ValveService):
     def supports_position(self) -> bool:
         return False
 
-    def update_switch_binary_report(self, value: int) -> None:
-        # Switch Binary reports 0x00 (off) while the valve is open
-        self._has_switch_binary_report = True
-        self.is_closed = value != 0x00
-
     def update_automation_service(self) -> None:
         LOGGER.debug(
-            "%s - panel status: %r (has_switch_binary_report: %s, is_closed: %s)",
+            "%s - panel status: %r",
             self.prefix,
             self.automation_device.status,
-            self._has_switch_binary_report,
-            self.is_closed,
         )
 
-        # The panel's status can disagree with the live Switch Binary report, and this
-        # refresh runs on every automation row update, so it would clobber the reported
-        # state. Only use status until the first report.
-        if self._has_switch_binary_report:
-            return
-
-        self.is_closed = self.automation_device.status.lower() == "closed"
+        status = self.automation_device.status.lower()
+        if status in ("open", "close"):
+            self.is_closed = status == "close"
+        else:
+            LOGGER.warning(
+                "%s - Unexpected valve status %r, please report it at https://github.com/EHylands/QolsysController/issues",
+                self.prefix,
+                self.automation_device.status,
+            )

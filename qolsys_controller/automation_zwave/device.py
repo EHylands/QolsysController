@@ -230,10 +230,10 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             # Update Valve Service at specified endpoint
             valve_service = self.service_get(ValveServiceZwave, endpoint)
             if isinstance(valve_service, ValveServiceZwave):
-                if payload[2] not in (0x00, 0xFF):
+                if payload[2] in (0x00, 0xFF):
+                    valve_service.is_closed = payload[2] == 0xFF
+                else:
                     LOGGER.warning("Unexpected Binary Switch value 0x%02X for node %s", payload[2], self.virtual_node_id)
-
-                valve_service.update_switch_binary_report(payload[2])
                 return
 
             # Update Siren Service at specified endpoint
@@ -312,7 +312,7 @@ class QolsysAutomationDeviceZwave(QolsysAutomationDevice):
             # at their construction-time state. (Status has its own node_status setter path.)
             for services_list in self._services.values():
                 for service in services_list:
-                    if isinstance(service, (ThermostatServiceZwave, BatteryServiceZwave)):
+                    if isinstance(service, (ThermostatServiceZwave, BatteryServiceZwave, ValveServiceZwave)):
                         service.update_automation_service()
             return
 
