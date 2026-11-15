@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.13.3-beta.1 (2026-11-15)
+
+### 🐛 Bug Fixes
+
+- Report zones unavailable instead of misleading open/closed states
+  ([`7c0ab81`](https://github.com/EHylands/QolsysController/commit/7c0ab818a6922a37100264bc9cb2e5ab34269d16))
+
+
 ## v1.13.2 (2026-11-10)
 
 ### 🐛 Bug Fixes
