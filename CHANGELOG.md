@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.13.3 (2026-11-17)
+
+### 🐛 Bug Fixes
+
+- Report zones unavailable instead of misleading open/closed states
+  ([#122](https://github.com/EHylands/QolsysController/pull/122),
+  [`e829f1d`](https://github.com/EHylands/QolsysController/commit/e829f1d6fd21f3a5c44d9b346373a372993ae88e))
+
+### 🤖 Continuous Integration
+
+- List beta PR titles in beta release notes
+  ([#123](https://github.com/EHylands/QolsysController/pull/123),
+  [`e777ba1`](https://github.com/EHylands/QolsysController/commit/e777ba14a1b699c0e36bc727f1aaa289d31ae82a))
+
+
 ## v1.13.2 (2026-11-10)
 
 ### 🐛 Bug Fixes
