@@ -6,8 +6,23 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from qolsys_controller.enum_qolsys import ZoneSensorType
+from qolsys_controller.enum_qolsys import QolsysNotification, ZoneSensorType, ZoneStatus
+from qolsys_controller.observable import Event
 from qolsys_controller.zone import QolsysZone
+
+TROUBLE_STATUSES = {
+    ZoneStatus.UNREACHABLE,
+    ZoneStatus.FAILURE,
+    ZoneStatus.NOT_NETWORKED,
+    ZoneStatus.TROUBLE,
+    ZoneStatus.SYNCHRONIZING,
+    ZoneStatus.DISCONNECTED,
+}
+
+UNAVAILABLE_STATUSES = TROUBLE_STATUSES | {
+    ZoneStatus.TAMPERED,
+    ZoneStatus.UNKNOWN,
+}
 
 
 def _make_settings(**overrides: object) -> MagicMock:
@@ -112,6 +127,105 @@ class TestIsTrouble:
     @pytest.mark.parametrize("status", ["Open", "Closed", "Active", "Idle", "Tampered"])
     def test_non_trouble_statuses(self, status: str) -> None:
         assert _make_zone({"sensorstatus": status}).is_trouble() is False
+
+
+class TestIsTampered:
+    def test_tampered_status(self) -> None:
+        assert _make_zone({"sensorstatus": "Tampered"}).is_tampered() is True
+
+    @pytest.mark.parametrize("status", ["Open", "Closed", "Idle", "Unreachable", "Trouble", "Failure"])
+    def test_non_tampered_statuses(self, status: str) -> None:
+        assert _make_zone({"sensorstatus": status}).is_tampered() is False
+
+    def test_unparseable_status_is_not_tampered(self) -> None:
+        zone = _make_zone({"sensorstatus": "SomeNewStatus"})
+        assert zone.sensorstatus == ZoneStatus.UNKNOWN
+        assert zone.is_tampered() is False
+
+
+class TestIsAvailableStatus:
+    @pytest.mark.parametrize("status", list(ZoneStatus), ids=lambda s: s.name)
+    def test_availability_for_every_status(self, status: ZoneStatus) -> None:
+        zone = _make_zone({"sensorstatus": status.value})
+        assert zone.is_available_status() is (status not in UNAVAILABLE_STATUSES)
+
+    def test_unparseable_status_is_unavailable(self) -> None:
+        zone = _make_zone({"sensorstatus": "SomeNewStatus"})
+        assert zone.sensorstatus == ZoneStatus.UNKNOWN
+        assert zone.is_trouble() is False
+        assert zone.is_available_status() is False
+
+    def test_recovers_from_unknown_on_update(self) -> None:
+        zone = _make_zone({"sensorstatus": "SomeNewStatus"})
+        zone.update({"zoneid": "1", "sensorstatus": "Closed"})
+        assert zone.is_available_status() is True
+
+    def test_tampered_is_unavailable_but_not_trouble(self) -> None:
+        zone = _make_zone({"sensorstatus": "Tampered"})
+        assert zone.is_trouble() is False
+        assert zone.is_available_status() is False
+
+    def test_becomes_unavailable_then_recovers_on_update(self) -> None:
+        zone = _make_zone()
+        assert zone.is_available_status() is True
+
+        zone.update({"zoneid": "1", "sensorstatus": "Unreachable"})
+        assert zone.is_available_status() is False
+
+        zone.update({"zoneid": "1", "sensorstatus": "Closed"})
+        assert zone.is_available_status() is True
+
+    def test_recovers_from_tamper_on_update(self) -> None:
+        zone = _make_zone({"sensorstatus": "Tampered"})
+        zone.update({"zoneid": "1", "sensorstatus": "Open"})
+        assert zone.is_available_status() is True
+        assert zone.is_on() is True
+
+    def test_unknown_status_update_keeps_previous_availability(self) -> None:
+        zone = _make_zone({"sensorstatus": "Unreachable"})
+        zone.update({"zoneid": "1", "sensorstatus": "SomeNewStatus"})
+        assert zone.sensorstatus == ZoneStatus.UNREACHABLE
+        assert zone.is_available_status() is False
+
+    def test_availability_change_notifies_observers(self) -> None:
+        zone = _make_zone()
+        events: list[Event] = []
+        zone.register(QolsysNotification.ZONE_UPDATE, events.append)
+
+        zone.update({"zoneid": "1", "sensorstatus": "Tampered"})
+
+        assert len(events) == 1
+        assert events[0].data["state"]["status"] == "tampered"
+        assert events[0].source is zone
+        assert zone.is_available_status() is False
+
+
+class TestIsAvailableReading:
+    @pytest.mark.parametrize("status", list(ZoneStatus), ids=lambda s: s.name)
+    def test_availability_for_every_status(self, status: ZoneStatus) -> None:
+        zone = _make_zone({"sensorstatus": status.value})
+        assert zone.is_available_reading() is (status not in TROUBLE_STATUSES)
+
+    def test_tampered_reading_stays_available(self) -> None:
+        zone = _make_zone({"sensorstatus": "Tampered"})
+        assert zone.is_available_status() is False
+        assert zone.is_available_reading() is True
+
+    def test_unparseable_status_reading_stays_available(self) -> None:
+        zone = _make_zone({"sensorstatus": "SomeNewStatus"})
+        assert zone.sensorstatus == ZoneStatus.UNKNOWN
+        assert zone.is_available_status() is False
+        assert zone.is_available_reading() is True
+
+    def test_becomes_unavailable_then_recovers_on_update(self) -> None:
+        zone = _make_zone()
+        assert zone.is_available_reading() is True
+
+        zone.update({"zoneid": "1", "sensorstatus": "Unreachable"})
+        assert zone.is_available_reading() is False
+
+        zone.update({"zoneid": "1", "sensorstatus": "Closed"})
+        assert zone.is_available_reading() is True
 
 
 class TestSafetyZones:
