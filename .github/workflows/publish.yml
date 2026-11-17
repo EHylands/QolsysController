@@ -132,6 +132,44 @@ jobs:
             echo "No conventional-commit changes since the last tag on \`${{ github.ref_name }}\`, so semantic-release cut no new version." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      # semantic-release only lists commits made since the previous beta tag, and
+      # the -s ours merge above makes it credit new commits to that older beta,
+      # so later betas ship with empty notes. List the title of every beta PR
+      # merged into this dev build so each beta's notes are complete.
+      # Non-fatal: the tag is already pushed, so failing here would skip the PyPI
+      # publish and leave a half-done release over a cosmetic step.
+      - name: Add beta PRs to release notes
+        if: github.ref_name == 'dev' && steps.release.outputs.released == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          section="$(mktemp)"
+          # The rebuild leaves one "Merge commit 'refs/pull/<n>/head'" per beta PR
+          # on dev's first-parent chain.
+          git log --first-parent --merges --reverse --format='%s' origin/main..HEAD |
+            sed -nE "s|.*'refs/pull/([0-9]+)/head'.*|\1|p" |
+            while read -r pr; do
+              echo "- $(gh pr view "$pr" --json title --jq .title) (#${pr})"
+            done > "$section"
+
+          if [ ! -s "$section" ]; then
+            echo "No beta PRs in this build."
+            exit 0
+          fi
+
+          # Insert before the "Detailed Changes" footer, or append if there is none.
+          notes="$(mktemp)"
+          gh release view "$TAG" --json body --jq .body |
+            awk -v section="$section" '
+              function add() { print "### 🧪 Included in this beta\n"; while ((getline line < section) > 0) print line; print ""; added = 1 }
+              /^---$/ && !added { add() }
+              { print }
+              END { if (!added) { print ""; add() } }
+            ' > "$notes"
+          gh release edit "$TAG" --notes-file "$notes"
+
   # Stage 3 — publish. Only runs when release cut a new version. Builds from the
   # freshly created tag (not the triggering commit, which predates the bump) and
   # publishes to PyPI via trusted publishing (OIDC). Beta pre-release wheels go
