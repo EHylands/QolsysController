@@ -172,6 +172,9 @@ class QolsysZone(QolsysObservable):
     def is_available_status(self) -> bool:
         return not self.is_trouble() and not self.is_tampered() and self.sensorstatus != ZoneStatus.UNKNOWN
 
+    def is_available_tamper(self) -> bool:
+        return self.is_tampered() or self.is_available_status()
+
     def supports_averagedbm(self) -> bool:
         return self.averagedBm is not None
 

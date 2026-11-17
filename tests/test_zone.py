@@ -228,6 +228,36 @@ class TestIsAvailableReading:
         assert zone.is_available_reading() is True
 
 
+class TestIsAvailableTamper:
+    @pytest.mark.parametrize("status", list(ZoneStatus), ids=lambda s: s.name)
+    def test_availability_for_every_status(self, status: ZoneStatus) -> None:
+        zone = _make_zone({"sensorstatus": status.value})
+        expected = status == ZoneStatus.TAMPERED or status not in UNAVAILABLE_STATUSES
+        assert zone.is_available_tamper() is expected
+
+    def test_tampered_is_available(self) -> None:
+        zone = _make_zone({"sensorstatus": "Tampered"})
+        assert zone.is_available_status() is False
+        assert zone.is_available_tamper() is True
+
+    def test_unparseable_status_is_unavailable(self) -> None:
+        zone = _make_zone({"sensorstatus": "SomeNewStatus"})
+        assert zone.sensorstatus == ZoneStatus.UNKNOWN
+        assert zone.is_available_tamper() is False
+
+    def test_trouble_hides_tamper_then_recovers_on_update(self) -> None:
+        zone = _make_zone({"sensorstatus": "Tampered"})
+        assert zone.is_available_tamper() is True
+
+        zone.update({"zoneid": "1", "sensorstatus": "Unreachable"})
+        assert zone.is_tampered() is False
+        assert zone.is_available_tamper() is False
+
+        zone.update({"zoneid": "1", "sensorstatus": "Tampered"})
+        assert zone.is_available_tamper() is True
+        assert zone.is_tampered() is True
+
+
 class TestSafetyZones:
     @pytest.mark.parametrize("group", ["co", "freeze", "Freeze_Non_Reporting"])
     def test_life_safety_groups_cannot_be_bypassed(self, group: str) -> None:
