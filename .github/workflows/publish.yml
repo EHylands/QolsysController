@@ -134,28 +134,24 @@ jobs:
 
       # semantic-release only lists commits made since the previous beta tag, and
       # the -s ours merge above makes it credit new commits to that older beta,
-      # so later betas ship with empty notes. List every beta PR merged into this
-      # dev build, with all of its commits, so each beta's notes are complete.
+      # so later betas ship with empty notes. List the title of every beta PR
+      # merged into this dev build so each beta's notes are complete.
       # Non-fatal: the tag is already pushed, so failing here would skip the PyPI
       # publish and leave a half-done release over a cosmetic step.
-      - name: Add beta PR commits to release notes
+      - name: Add beta PRs to release notes
         if: github.ref_name == 'dev' && steps.release.outputs.released == 'true'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           TAG: ${{ steps.release.outputs.tag }}
-          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           section="$(mktemp)"
           # The rebuild leaves one "Merge commit 'refs/pull/<n>/head'" per beta PR
-          # on dev's first-parent chain; its second parent is that PR's tip.
-          git log --first-parent --merges --reverse --format='%H %s' origin/main..HEAD |
-            sed -nE "s|^([0-9a-f]+) .*'refs/pull/([0-9]+)/head'.*|\1 \2|p" |
-            while read -r merge pr; do
-              echo "**#${pr}** $(gh pr view "$pr" --json title --jq .title)"
-              echo
-              git log --no-merges --reverse --format="- %s ([\`%h\`](${REPO_URL}/commit/%H))" "origin/main..${merge}^2"
-              echo
+          # on dev's first-parent chain.
+          git log --first-parent --merges --reverse --format='%s' origin/main..HEAD |
+            sed -nE "s|.*'refs/pull/([0-9]+)/head'.*|\1|p" |
+            while read -r pr; do
+              echo "- $(gh pr view "$pr" --json title --jq .title) (#${pr})"
             done > "$section"
 
           if [ ! -s "$section" ]; then
@@ -167,7 +163,7 @@ jobs:
           notes="$(mktemp)"
           gh release view "$TAG" --json body --jq .body |
             awk -v section="$section" '
-              function add() { print "### 🧪 Included in this beta\n"; while ((getline line < section) > 0) print line; added = 1 }
+              function add() { print "### 🧪 Included in this beta\n"; while ((getline line < section) > 0) print line; print ""; added = 1 }
               /^---$/ && !added { add() }
               { print }
               END { if (!added) { print ""; add() } }
