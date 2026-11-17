@@ -163,19 +163,25 @@ class QolsysZone(QolsysObservable):
 
         return False
 
+    def is_tampered(self) -> bool:
+        return self.sensorstatus == ZoneStatus.TAMPERED
+
+    def is_available_reading(self) -> bool:
+        return not self.is_trouble()
+
+    def is_available_status(self) -> bool:
+        return not self.is_trouble() and not self.is_tampered() and self.sensorstatus != ZoneStatus.UNKNOWN
+
+    def is_available_tamper(self) -> bool:
+        return self.is_tampered() or self.is_available_status()
+
     def supports_averagedbm(self) -> bool:
         return self.averagedBm is not None
 
     def is_latest_dbm_enabled(self) -> bool:
         return self.latestdBm is not None
 
-    def supports_latestdbm(self) -> bool:
-        return self.latestdBm is not None
-
     def is_battery_enabled(self) -> bool:
-        return self.battery_status != ""
-
-    def supports_battery(self) -> bool:
         return self.battery_status != ""
 
     def is_ac_enabled(self) -> bool:
@@ -643,7 +649,7 @@ class QolsysZone(QolsysObservable):
                 "ac": self.is_ac_enabled(),
                 "battery": self.is_battery_enabled(),
                 "average_dbm": self.supports_averagedbm(),
-                "latest_dbm": self.supports_latestdbm(),
+                "latest_dbm": self.is_latest_dbm_enabled(),
                 "powerg": self.is_powerg_enabled(),
                 "powerg_temperature": self.is_powerg_temperature_enabled(),
                 "powerg_light": self.is_powerg_light_enabled(),
